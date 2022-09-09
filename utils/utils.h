@@ -1,6 +1,6 @@
 #include <stdint.h>
 #include <string>
-#include "cnn_functions_v1.h"
+#include "../glue.h"
 
 using namespace std;
 const int image_depth = 32;
