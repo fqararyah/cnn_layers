@@ -13,9 +13,9 @@ layers_weights = utils.read_layers_weights(layers_types)
 
 current_index = 0
 with open(dw_weights_h_file, 'w') as f:
-
-    f.write("#ifndef DW_WEIGHTS\n \
-    #define DW_WEIGHTS\n")
+    f.write('#include "../basic_defs/basic_defs_glue.h"\n')
+    f.write("#ifndef DW_WEIGHTS\n")
+    f.write("#define DW_WEIGHTS\n")
 
     for ii in range(len(layers_weights)):
         if layers_types[ii] != 'dw':

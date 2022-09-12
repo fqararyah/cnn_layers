@@ -87,8 +87,9 @@ target_block = ''
 current_block_indx = 0
 cumulative_pw_weights = 0
 with open(out_file, 'w') as f:
-    f.write("#ifndef LAYERS_SPECS\n \
-    #define LAYERS_SPECS\n")
+    f.write('#include "../basic_defs/basic_defs_glue.h"\n')
+    f.write("#ifndef LAYERS_SPECS\n")
+    f.write("#define LAYERS_SPECS\n")
     for i in range(len(layers_types)):
         replacement_dic = {}
         if layers_types[i] == 'pw':
