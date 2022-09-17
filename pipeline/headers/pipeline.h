@@ -11,7 +11,7 @@ void _5_layer_0_3x3_conv(
 		fms_dt channels_buffer[layer_0_depth][3 + _5_stages_layer_1_rows_at_once
 				- 1][layer_0_ifm_width],
 		layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][3][3],
-		fms_dt result[layer_1_dw_depth][layer_1_pw_ifm_width]);
+		fms_dt result[layer_2_dw_depth][layer_1_pw_ifm_width]);
 
 void _7_layer_0_3x3_conv(
 		fms_dt channels_buffer[input_image_depth][layer_0_filter_size
@@ -19,32 +19,32 @@ void _7_layer_0_3x3_conv(
 		layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
 		fms_dt result[layer_1_pw_depth][_7_stages_layer_1_rows_at_once][layer_1_pw_ifm_width]);
 
-void _4_layer_2_pw(
-		fms_dt channels_buffer[layer_2_pw_depth][layer_2_pw_ifm_width],
-		weights_dt weights[layer_2_pw_num_fils][layer_2_pw_depth],
+void _4_layer_3_pw(
+		fms_dt channels_buffer[layer_3_pw_depth][layer_3_pw_ifm_width],
+		weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
 		fms_dt result[max_fms_size], int starting_h);
-
-void _5_layer_2_pw(
-		fms_dt channels_buffer[layer_2_pw_depth][layer_2_pw_ifm_width],
-		weights_dt weights[layer_2_pw_num_fils][layer_2_pw_depth],
-		fms_dt result[layer_3_pw_num_fils][layer_3_dw_ifm_width]);
-
-void _7_layer_2_pw(
-		fms_dt channels_buffer[layer_2_pw_depth][_7_stages_layer_1_rows_at_once][layer_2_pw_ifm_width],
-		weights_dt weights[layer_2_pw_num_fils][layer_2_pw_depth],
-		fms_dt result[layer_3_pw_depth][_7_stages_layer_1_rows_at_once][layer_3_dw_ifm_width]);
 
 void _5_layer_3_pw(
-		fms_dt channels_buffer[layer_3_pw_depth][layer_3_dw_ifm_width],
+		fms_dt channels_buffer[layer_3_pw_depth][layer_3_pw_ifm_width],
+		weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
+		fms_dt result[layer_3_pw_num_fils][layer_5_dw_ifm_width]);
+
+void _7_layer_3_pw(
+		fms_dt channels_buffer[layer_3_pw_depth][_7_stages_layer_1_rows_at_once][layer_3_pw_ifm_width],
+		weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
+		fms_dt result[layer_3_pw_num_fils][_7_stages_layer_1_rows_at_once][layer_5_dw_ifm_width]);
+
+void _5_layer_3_pw(
+		fms_dt channels_buffer[layer_3_pw_depth][layer_3_pw_ifm_width],
 		weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
 		fms_dt result[max_fms_size], int starting_h);
 
-void _7_layer_3_pw_dw(
-		fms_dt channels_buffer[layer_3_pw_depth][layer_3_dw_strides][layer_3_dw_ifm_width],
+void _7_layer_3_pw_5_dw(
+		fms_dt channels_buffer[layer_3_pw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
 		weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
-		dw_weights_dt dw_weights[layer_3_dw_depth][layer_3_dw_filter_size][layer_3_dw_filter_size],
-		fms_dt upper[layer_3_dw_depth][layer_3_dw_ifm_width],
-		fms_dt lower[layer_3_dw_depth][layer_3_dw_strides][layer_3_dw_ifm_width],
+		dw_weights_dt dw_weights[layer_5_dw_depth][layer_5_dw_filter_size][layer_5_dw_filter_size],
+		fms_dt upper[layer_5_dw_depth][layer_5_dw_ifm_width],
+		fms_dt lower[layer_5_dw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
 		fms_dt result[layer_4_pw_depth][layer_4_pw_ifm_width], int active_row);
 
 void _5_stages_fill_channels_buffer(
@@ -62,20 +62,20 @@ void _7_stages_fill_channels_buffer(
 void _5_layer_1_pw_dw(
 		fms_dt channels_buffer[layer_1_pw_depth][layer_1_pw_ifm_width],
 		weights_dt weights[layer_1_pw_num_fils][layer_1_pw_depth],
-		dw_weights_dt dw_weights[layer_1_dw_depth][layer_1_dw_filter_size][layer_1_dw_filter_size],
-		fms_dt upper[layer_1_dw_depth][layer_1_dw_filter_size
-				- layer_1_dw_strides][layer_1_dw_ifm_width],
-		fms_dt lower[layer_1_dw_depth][layer_1_dw_strides][layer_1_dw_ifm_width],
-		fms_dt result[layer_2_pw_depth][layer_2_pw_ifm_width], int active_row);
+		dw_weights_dt dw_weights[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
+		fms_dt upper[layer_2_dw_depth][layer_2_dw_filter_size
+				- layer_2_dw_strides][layer_2_dw_ifm_width],
+		fms_dt lower[layer_2_dw_depth][layer_2_dw_strides][layer_2_dw_ifm_width],
+		fms_dt result[layer_3_pw_depth][layer_3_pw_ifm_width], int active_row);
 
 void _7_layer_1_pw_dw(
 		fms_dt channels_buffer[layer_1_pw_depth][_7_stages_layer_1_rows_at_once][layer_1_pw_ifm_width],
 		weights_dt weights[layer_1_pw_num_fils][layer_1_pw_depth],
-		dw_weights_dt dw_weights[layer_1_dw_depth][layer_1_dw_filter_size][layer_1_dw_filter_size],
-		fms_dt upper[layer_1_dw_depth][layer_1_dw_filter_size
-				- layer_1_dw_strides][layer_1_dw_ifm_width],
-		fms_dt lower[layer_1_dw_depth][_7_stages_layer_1_rows_at_once][layer_1_dw_ifm_width],
-		fms_dt result[layer_2_pw_depth][_7_stages_layer_1_rows_at_once][layer_2_pw_ifm_width],
+		dw_weights_dt dw_weights[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
+		fms_dt upper[layer_2_dw_depth][layer_2_dw_filter_size
+				- layer_2_dw_strides][layer_2_dw_ifm_width],
+		fms_dt lower[layer_2_dw_depth][_7_stages_layer_1_rows_at_once][layer_2_dw_ifm_width],
+		fms_dt result[layer_3_pw_depth][_7_stages_layer_1_rows_at_once][layer_3_pw_ifm_width],
 		int active_row);
 
 void _7_layer_0_3x3_conv(
@@ -90,11 +90,11 @@ void _7_layer_4_pw(
 		fms_dt result[max_fms_size], int starting_h);
 
 void _6_layer_3_pw_dw(
-		fms_dt channels_buffer[layer_3_pw_depth][layer_3_dw_strides][layer_3_dw_ifm_width],
+		fms_dt channels_buffer[layer_3_pw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
 		weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
-		dw_weights_dt dw_weights[layer_3_dw_depth][layer_3_dw_filter_size][layer_3_dw_filter_size],
-		fms_dt upper[layer_3_dw_depth][layer_3_dw_ifm_width],
-		fms_dt lower[layer_3_dw_depth][layer_3_dw_strides][layer_3_dw_ifm_width],
+		dw_weights_dt dw_weights[layer_5_dw_depth][layer_5_dw_filter_size][layer_5_dw_filter_size],
+		fms_dt upper[layer_5_dw_depth][layer_5_dw_ifm_width],
+		fms_dt lower[layer_5_dw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
 		fms_dt result[max_fms_size], int starting_h, int active_row);
 
 void mobilenet_v2_pipeline_4(
