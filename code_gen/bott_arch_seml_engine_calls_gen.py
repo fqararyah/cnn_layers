@@ -7,7 +7,7 @@ in_out_file = '../client/seml.hpp'
 expansion_block= 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
-    layer_*i*_pw_num_of_tiles_w, tmp_channels, read_write,\n\
+    layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
     layer_*i*_pw_num_of_weight_groups_in_depth,\n\
     layer_*i*_pw_normalization, *DIRECTION*, layer_*i*_pw_weights_offset);\n'
 
@@ -21,7 +21,7 @@ dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_d
 projection_block ='pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
-    layer_*i*_pw_num_of_tiles_w, tmp_channels, read_write,\n\
+    layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
     layer_*i*_pw_num_of_weight_groups_in_depth,\n\
     layer_*i*_pw_normalization, *DIRECTION*, layer_*i*_pw_weights_offset);\n'
 
@@ -62,16 +62,22 @@ for  layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict = {}
     replacement_dict['*i*'] = layer_indx
     replacement_dict['*DIRECTION*'] = direction
+    read_write = 0
     if expansion_projection:
         direction = 1 - direction
 
     if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
         target_block = expansion_block
+        if layer_indx + 1 < len(layers_strides) and layers_strides[layer_indx + 1] == 1:
+            read_write = 2
     elif layer_indx % 3 == 2:
         target_block = dw_block
     elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
         target_block = projection_block
+        if layers_strides[layer_indx - 1] == 1:
+            read_write = 1
     
+    replacement_dict['*RW*'] = read_write
     code_to_insert += replace(replacement_dict, target_block)
 
 file_replacement = file_replacement[:insert_index] + code_to_insert + file_replacement[insert_index:]

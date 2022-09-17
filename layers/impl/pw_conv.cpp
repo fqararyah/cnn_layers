@@ -59,14 +59,14 @@ void pw_write_results_tile(
 							results[current_tile_indx + t_d * pw_tile_hw
 									+ t_h * pw_tile_w + t_w] = scaled_val;
 						}
-						if (read_write == 1) {
+						else if (read_write == 1) {//1: projection
 							results[current_tile_indx + t_d * pw_tile_hw
 									+ t_h * pw_tile_w + t_w] = scaled_val
 									+ tmp_channels[current_tile_indx
 											+ t_d * pw_tile_hw + t_h * pw_tile_w
 											+ t_w];
 						}
-						if (read_write == 2) {
+						if (read_write == 2) {//2: expansion
 							tmp_channels[current_tile_indx + t_d * pw_tile_hw
 									+ t_h * pw_tile_w + t_w] = scaled_val;
 						}

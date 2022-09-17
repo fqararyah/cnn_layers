@@ -21,7 +21,6 @@ const int avgpool_input_width = 7;
 //testing vars
 const int DF = 1;
 const int start_with_pw = 1;
-const int perf_test_run = 0;
 
 //maxs for buffers
 const int max_conv_d = 1024 / alpha;
