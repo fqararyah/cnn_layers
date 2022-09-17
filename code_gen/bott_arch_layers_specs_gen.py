@@ -76,6 +76,7 @@ layers_weights = utils.read_layers_weights(layers_types)
 layers_inputs = utils.read_layers_inputs()
 layers_outputs = utils.read_layers_outputs()
 layers_strides = utils.read_layers_strides()
+expansion_projection = utils.read_expansion_projection()
 
 def replace(replacement_dic, block):
     for key, val in replacement_dic.items():
@@ -94,7 +95,8 @@ with open(out_file, 'w') as f:
         replacement_dic = {}
         if layers_types[i] == 'pw':
             replacement_dic['*LWOF*'] = cumulative_pw_weights
-            cumulative_pw_weights += layers_weights[i].get_size()
+            if expansion_projection[i] != 0:
+                cumulative_pw_weights += layers_weights[i].get_size()
         if layers_types[i] in ['pw', 'c']:
             replacement_dic['*LNF*'] = layers_weights[i].num_of_filters 
         if layers_types[i] in ['dw', 'c']:

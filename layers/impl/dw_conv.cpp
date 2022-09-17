@@ -1,4 +1,5 @@
 #include "../headers/dw_conv.h"
+#include "../headers/norm_act.h"
 
 void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[dw_tile_d][3][max_dw_input_width], int tile_indx,
@@ -151,12 +152,12 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 			int tile_index = t_in_d * num_of_tiles_hw
 					+ (t_in_h / dw_tile_h) * num_of_tiles_w;
 			if (direction) {
-				dw_fill_channels_buffer_3x3_g(result, channels_tile_1,
+				dw_fill_channels_buffer_3x3(result, channels_tile_1,
 						tile_index, h_offset, strides, num_of_tiles_w,
 						num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
 						layer_width, 1);
 			} else {
-				dw_fill_channels_buffer_3x3_g(channels, channels_tile_1,
+				dw_fill_channels_buffer_3x3(channels, channels_tile_1,
 						tile_index, h_offset, strides, num_of_tiles_w,
 						num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
 						layer_width, 1);
@@ -166,40 +167,40 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 					+ (t_in_h / dw_tile_h) * num_of_tiles_w;
 			if (odd_even) {
 				if (direction) {
-					dw_conv_eng3x3_g(channels_tile_2, weights, channels,
+					dw_conv_eng3x3(channels_tile_2, weights, channels,
 							tile_index, h_offset, t_in_d * dw_tile_d,
 							layer_conv_d, num_of_tiles_w, layer_width, strides,
 							padding_left, normalization);
-					dw_fill_channels_buffer_3x3_g(result, channels_tile_1,
+					dw_fill_channels_buffer_3x3(result, channels_tile_1,
 							tile_index, h_offset, strides, num_of_tiles_w,
 							num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
 							layer_width, 0);
 				} else {
-					dw_conv_eng3x3_g(channels_tile_2, weights, result,
+					dw_conv_eng3x3(channels_tile_2, weights, result,
 							tile_index, h_offset, t_in_d * dw_tile_d,
 							layer_conv_d, num_of_tiles_w, layer_width, strides,
 							padding_left, normalization);
-					dw_fill_channels_buffer_3x3_g(channels, channels_tile_1,
+					dw_fill_channels_buffer_3x3(channels, channels_tile_1,
 							tile_index, h_offset, strides, num_of_tiles_w,
 							num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
 							layer_width, 0);
 				}
 			} else {
 				if (direction) {
-					dw_conv_eng3x3_g(channels_tile_1, weights, channels,
+					dw_conv_eng3x3(channels_tile_1, weights, channels,
 							tile_index, h_offset, t_in_d * dw_tile_d,
 							layer_conv_d, num_of_tiles_w, layer_width, strides,
 							padding_left, normalization);
-					dw_fill_channels_buffer_3x3_g(result, channels_tile_2,
+					dw_fill_channels_buffer_3x3(result, channels_tile_2,
 							tile_index, h_offset, strides, num_of_tiles_w,
 							num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
 							layer_width, 0);
 				} else {
-					dw_conv_eng3x3_g(channels_tile_1, weights, result,
+					dw_conv_eng3x3(channels_tile_1, weights, result,
 							tile_index, h_offset, t_in_d * dw_tile_d,
 							layer_conv_d, num_of_tiles_w, layer_width, strides,
 							padding_left, normalization);
-					dw_fill_channels_buffer_3x3_g(channels, channels_tile_2,
+					dw_fill_channels_buffer_3x3(channels, channels_tile_2,
 							tile_index, h_offset, strides, num_of_tiles_w,
 							num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
 							layer_width, 0);

@@ -1,4 +1,8 @@
+#include "../../basic_defs/basic_defs_glue.h"
+#include "../../model/model_glue.h"
 
+#ifndef CONV
+#define CONV
 
 void layer_0_using_pw(
 		weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3],
@@ -7,3 +11,5 @@ void layer_0_using_pw(
 		const int layer_num_fils, const int num_of_tiles_d_in,
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
 		const int num_of_tiles_w, const normalization_scheme normalization);
+
+#endif

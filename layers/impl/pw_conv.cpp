@@ -1,4 +1,6 @@
 #include "../headers/pw_conv.h"
+#include "../headers/norm_act.h"
+#include "../../utils/utils.h"
 
 void pw_fill_channels_buffer(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w], int tile_indx,

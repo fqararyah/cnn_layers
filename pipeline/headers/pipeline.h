@@ -1,4 +1,7 @@
+#include "../../basic_defs/basic_defs_glue.h"
 
+#ifndef PIPELINE
+#define PIPELINE
 
 void mobilenetv1_pipeline_6(
 		fms_dt channels[input_image_depth][input_image_height][input_image_width],
@@ -116,3 +119,5 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 		const int layer_num_fils, const int layer_conv_d,
 		const int num_of_tiles_hw, const int num_of_tiles_w, int td_o,
 		int td_i_o, int t_in_h, int t_in_w);
+
+#endif

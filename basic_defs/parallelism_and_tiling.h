@@ -9,7 +9,7 @@ const int pw_tile_w_offset = 8;
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;
 const int pw_conv_parallelism_in = pw_tile_d;
-const int pw_conv_parallelism_out = 2; //>= tile_d: 16, 32, 64
+const int pw_conv_parallelism_out = 16; //>= tile_d: 16, 32, 64
 
 const int dw_tile_d = pw_tile_d;
 const int dw_tile_h = pw_tile_h;

@@ -1,6 +1,9 @@
 #include <stdint.h>
 #include <string>
-#include "../glue.h"
+#include "../basic_defs/basic_defs_glue.h"
+
+#include "../model/model_glue.h"
+#include "../cnn_functions_v1.h"
 
 using namespace std;
 const int image_depth = 32;
@@ -43,6 +46,12 @@ void fill_layer_0_weights(layer_0_weights_dt weights_0[layer_0_num_fils][layer_0
 void fill_dw_layer_weights(const dw_weights_dt src[max_conv_d][max_conv_h][max_conv_w],
                             dw_weights_dt dst[max_conv_d][max_conv_h][max_conv_w], const int conv_d, const int conv_h, const int conv_w);
 
+void fill_weights_tile_off_chip(weights_grp_dt *weights,
+		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
+		int starting_filter, const int layer, const int layer_num_fils,
+		const int layer_depth, const int num_of_weight_groups,
+		const int layer_weights_offset);
+        
 // void read_image(string file_name, uint8_t *image);
 // void read_image(string file_name, float *image);
 // void read_image_m(string file_name, float image[image_depth][image_height][image_width], bool dummy);

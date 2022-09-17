@@ -1,6 +1,7 @@
+
 #include "../headers/conv.h"
 #include "../headers/pw_conv.h"
-
+#include "../headers/norm_act.h"
 
 void fill_channels_buffer_0(
 		fms_dt channels[input_image_depth][input_image_height][input_image_width],

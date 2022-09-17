@@ -1,4 +1,5 @@
 *.o
 *.out
 *.pyc
+*weights.h
 code_gen/out/**
