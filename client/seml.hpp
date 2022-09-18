@@ -33,19 +33,19 @@ void seml(
 	//to generate layers within a range, rather than all layers, add, .e.g. [1:20]
 	//where 1 is the first and 20 is the last layer to be generated
 	//to the end of the previous layer
-	//begin_code_generation[38:40]
-fill_dw_layer_weights(dw_weights_38, dw_weights_buffer, layer_38_dw_depth, layer_38_dw_filter_size, layer_38_dw_filter_size);
-    dw_conv_3x3(dw_weights_buffer, channels, result2, 38, layer_38_dw_depth,
-    layer_38_dw_ifm_width, layer_38_dw_ifm_height, layer_38_dw_num_of_tiles_in_d,
-    layer_38_dw_num_of_tiles_h, layer_38_dw_num_of_tiles_w,
-    layer_38_dw_strides, layer_38_dw_padding_left,
-    layer_38_dw_normalization, 1);
-pw_conv(off_chip_weights, channels, result2, 39, layer_39_pw_depth,
-    layer_39_pw_num_fils, layer_39_pw_num_of_tiles_in_d,
-    layer_39_pw_num_of_tiles_out_d, layer_39_pw_num_of_tiles_h,
-    layer_39_pw_num_of_tiles_w, tmp_channels, 1,
-    layer_39_pw_num_of_weight_groups_in_depth,
-    layer_39_pw_normalization, 0, layer_39_pw_weights_offset);
+	//begin_code_generation[43:45]
+pw_conv(off_chip_weights, channels, result2, 43, layer_43_pw_depth,
+    layer_43_pw_num_fils, layer_43_pw_num_of_tiles_in_d,
+    layer_43_pw_num_of_tiles_out_d, layer_43_pw_num_of_tiles_h,
+    layer_43_pw_num_of_tiles_w, tmp_channels, 2,
+    layer_43_pw_num_of_weight_groups_in_depth,
+    layer_43_pw_normalization, 1, layer_43_pw_weights_offset);
+fill_dw_layer_weights(dw_weights_44, dw_weights_buffer, layer_44_dw_depth, layer_44_dw_filter_size, layer_44_dw_filter_size);
+    dw_conv_3x3(dw_weights_buffer, channels, result2, 44, layer_44_dw_depth,
+    layer_44_dw_ifm_width, layer_44_dw_ifm_height, layer_44_dw_num_of_tiles_in_d,
+    layer_44_dw_num_of_tiles_h, layer_44_dw_num_of_tiles_w,
+    layer_44_dw_strides, layer_44_dw_padding_left,
+    layer_44_dw_normalization, 0);
 	//end_code_generation
 	avgpool(result2, fc_input);
 	//fc_layer(fc_weights, fc_input, fc_output);

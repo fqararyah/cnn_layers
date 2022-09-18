@@ -2,24 +2,6 @@
 #ifndef SESL_SPECS
 #define SESL_SPECS
 
-// l1 (second and third layers)
-const int _4_stages_layer_1_rows_at_once = 1;
-const int _5_stages_layer_1_rows_at_once = 1;
-const int _7_stages_layer_2_rows_at_once = 2;
-
-// l2 (third and forth layers)
-const int _5_stages_layer_2_rows_at_once = 1;
-const int _4_stages_layer_2_rows_at_once = 1;
-const int _7_stages_layer_3_rows_at_once = 2;
-
-// l3 (fifth layer)
-const int _5_stages_layer_3_rows_at_once = 1;
-const int _4_stages_layer_3_rows_at_once = 1;
-const int _7_stages_layer_4_rows_at_once = 2;
-
-// l4 (sixth and seventh layers)
-const int _7_stages_layer_4_rows_at_once = 2;
-
 //*****variable based on experiment*****
 const int layer_0_parallelism_ofms = 1;
 
