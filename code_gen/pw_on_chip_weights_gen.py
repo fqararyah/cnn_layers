@@ -7,7 +7,7 @@ utils.set_globals('mob_v2', 'mobilenetv2')
 
 bit_width = 8
 on_chip_layers = 7
-pw_weights_h_file = '../client/pw_weights.h' #'./out/pw_weights.h'
+pw_weights_h_file = '../client/sesl_pw_weights.h' #'./out/pw_weights.h'
 
 pw_weights_declaration_string = 'const static weights_dt pw_weights_*i*[layer_*i*_pw_num_fils][layer_*i*_pw_depth]'
 
