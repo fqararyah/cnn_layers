@@ -26,6 +26,9 @@ const int max_tile_d = pw_tile_d > dw_tile_d ? pw_tile_d : dw_tile_d;
 const int fc_layer_parallelism = 128;
 const int fc_layer_weights_partitioning_factor = fc_layer_parallelism/2;
 
+const int num_of_weights_in_the_same_filter_and_group = weights_group_items / pw_conv_parallelism_out;
+const int pw_weights_tile_partitioning_factor = num_of_weights_in_the_same_filter_and_group;
+
 const int main_buffers_partitining_factor = max_tile_d * pw_tile_w * pw_tile_h;
 
 //const int median_number_of_tiles_in_depth = (median_depth / pw_tile_d);

@@ -16,6 +16,7 @@ const int layer_0_weights_dt_width = 8;
 const int layer_0_weights_dt_offset = layer_0_weights_dt_width - 1;
 const int dw_weights_dt_width = 8;
 const int dw_weights_dt_offset = dw_weights_dt_width - 1;
+const int weights_group_items = 512 / weights_dt_width;//TODO double check that 512 is the max that can be loaded at once
 
 //fms
 const int fms_dt_width = 8;
@@ -45,7 +46,7 @@ typedef ap_int<first_conv_pss_width> first_conv_pss_dt;
 typedef ap_uint<weights_group_items * weights_dt_width> weights_grp_dt;
 typedef ap_uint<11> counters_dt;
 typedef ap_uint<input_image_dt_width> input_image_dt;
-typedef ap_uint<input_image_dt_width * input_image_group_items> input_image_grp_dt;
+//typedef ap_uint<input_image_dt_width * input_image_group_items> input_image_grp_dt;
 typedef ap_int<input_image_pss_dt_width> input_image_pss_dt;
 typedef ap_int<fc_weights_dt_width> fc_weights_dt;
 typedef ap_int<fc_out_dt_width> fc_out_dt;

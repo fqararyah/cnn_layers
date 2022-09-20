@@ -144,8 +144,8 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
 
-#pragma HLS ARRAY_PARTITION variable = weights_tile cyclic factor = pw_conv_parallelism_out/2 dim = 1
-#pragma HLS ARRAY_PARTITION variable = weights_tile cyclic factor = weights_group_items dim = 2
+#pragma HLS ARRAY_PARTITION variable = weights_tile complete
+#pragma HLS ARRAY_PARTITION variable = weights_tile cyclic factor = pw_weights_tile_partitioning_factor dim = 2
 
 	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 

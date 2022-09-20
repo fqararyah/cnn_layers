@@ -34,7 +34,6 @@ const int median_depth = 96;
 const int median_width = 14;
 
 //weights
-const int weights_group_items = 4;
 const int all_pw_weights = 2125696/weights_group_items;
 const int max_num_of_weight_groups_in_depth = max_conv_d / weights_group_items;
 

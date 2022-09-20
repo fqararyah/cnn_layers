@@ -1,6 +1,6 @@
-#include "../layers/headers/layers_glue.h"
 
-using namespace std;
+#include "../utils/utils.h"
+#include "../layers/headers/layers_glue.h"
 
 #include "../model/model_glue.h"
 
@@ -8,10 +8,11 @@ using namespace std;
 
 #include "../cnn_functions_v1.h"
 
-#include "../utils/utils.h"
 #include "dw_weights.h"
 #include <iostream>
 #include <math.h>
+
+using namespace std;
 
 #ifndef SEML
 #define SEML
