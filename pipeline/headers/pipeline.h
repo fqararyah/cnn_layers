@@ -1,5 +1,5 @@
 #include "../../basic_defs/basic_defs_glue.h"
-#include "../client/pw_weights.h"
+#include "../../client/sesl_pw_weights.h"
 
 #ifndef PIPELINE
 #define PIPELINE
