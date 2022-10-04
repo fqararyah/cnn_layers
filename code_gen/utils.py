@@ -20,10 +20,11 @@ LAYERS_WEIGHTS_FILE = input_folder + 'layers_weights.txt'
 LAYERS_STRIDES_FILE = input_folder + 'layers_strides.txt'
 EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
 LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
+LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
 
 def set_globals(prefix, full_name):
     global NET_PREFIX, NET_FULL_NAME, input_folder, IFMS_FILE, OFMS_FILE, LAYERS_TYPES_FILE, LAYERS_WEIGHTS_FILE, LAYERS_STRIDES_FILE\
-        ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE
+        ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE, LAYERS_SKIP_CONNECTIONS_FILE
     NET_PREFIX = prefix
     NET_FULL_NAME = full_name
     input_folder = './models/' + NET_FULL_NAME + '/'
@@ -34,7 +35,7 @@ def set_globals(prefix, full_name):
     LAYERS_STRIDES_FILE = input_folder + 'layers_strides.txt'
     EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
     LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
-
+    LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
 
 def clean_line(line):
     return line.replace(' ', '').replace('\n', '')
@@ -126,13 +127,12 @@ def read_layers_relus():
 
     return layers_relus
 
-def get_skip_connections_indices():
+def read_skip_connections_indices():
     skip_connections_indices = {}
-    layers_types = read_layers_types()
-    layers_strides = read_layers_strides()
-    expansion_projection = read_expansion_projection()
-    for i in range(len(layers_types)):
-        if layers_types[i] == 'dw' and layers_strides[i] == 1 and expansion_projection[i-1] == 1 and i + 2 < len(layers_types):
-            skip_connections_indices[i + 2] = 1
+    with open(LAYERS_SKIP_CONNECTIONS_FILE, 'r') as f:
+        for line in f:
+            line = clean_line(line)
+            line = clean_line(line)
+            skip_connections_indices[int(line)] = 1
     
     return skip_connections_indices

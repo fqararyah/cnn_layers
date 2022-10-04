@@ -1,3 +1,4 @@
+from code_gen.utils import read_skip_connections_indices
 import utils
 
 utils.set_globals('mob_v2', 'mobilenetv2')
@@ -57,6 +58,8 @@ with open(in_out_file, 'r') as f:
 
 direction = 1
 code_to_insert = ''
+
+skip_connections_indices = utils.read_skip_connections_indices()
 for  layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     target_block = ''
     replacement_dict = {}
@@ -68,13 +71,13 @@ for  layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
 
     if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
         target_block = expansion_block
-        if layer_indx + 1 < len(layers_strides) and layers_strides[layer_indx + 1] == 1:
+        if layer_indx + 3 in skip_connections_indices:
             read_write = 2
     elif layer_indx % 3 == 2:
         target_block = dw_block
     elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
         target_block = projection_block
-        if layers_strides[layer_indx - 1] == 1:
+        if layer_indx + 1 in skip_connections_indices:
             read_write = 1
     
     replacement_dict['*RW*'] = read_write

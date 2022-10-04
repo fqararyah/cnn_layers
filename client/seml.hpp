@@ -9,6 +9,7 @@
 #include "../cnn_functions_v1.h"
 
 #include "dw_weights.h"
+#include "quantization_and_biases.h"
 #include <iostream>
 #include <math.h>
 
