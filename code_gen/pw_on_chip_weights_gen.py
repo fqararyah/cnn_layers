@@ -13,7 +13,7 @@ pw_weights_declaration_string = 'const static weights_dt pw_weights_*i*[layer_*i
 
 layers_types = utils.read_layers_types()
 expansion_projection = utils.read_expansion_projection()
-layers_weights = utils.read_layers_weights(layers_types)
+layers_weights = utils.read_layers_weight_shapes(layers_types)
 
 current_index = 0
 with open(pw_weights_h_file, 'w') as f:

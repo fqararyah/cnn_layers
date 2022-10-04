@@ -16,7 +16,7 @@ const int layer_0_filter_size = 3;
  const int layer_0_num_of_tiles_w = layer_0_ofm_width / pw_tile_w; 
  const int layer_0_num_of_tiles_h = layer_0_ofm_height / pw_tile_h; 
  const int layer_0_num_of_tiles_d_in = layer_0_depth / pw_tile_d; 
- const normalization_scheme layers_0_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layers_0_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_1_pw_num_fils = 32 / alpha;
@@ -31,7 +31,7 @@ const int layer_0_filter_size = 3;
  const int layer_1_pw_num_of_tiles_h = (int)(0.99 + (float)layer_1_pw_ofm_height / pw_tile_h); 
  const int layer_1_pw_num_of_weight_groups_in_depth = layer_1_pw_depth / weights_group_items; 
  const int layer_1_pw_weights_offset = 0; 
- const normalization_scheme layer_1_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_1_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_2_dw_num_fils = layer_1_pw_num_fils / alpha;
  const int layer_2_dw_depth = layer_2_dw_num_fils;
@@ -46,7 +46,7 @@ const int layer_2_dw_num_fils = layer_1_pw_num_fils / alpha;
  const int layer_2_dw_num_of_tiles_in_d = (int)(((float)layer_2_dw_depth / dw_tile_d) + 0.5);
  const int layer_2_dw_num_of_tiles_w = layer_2_dw_ofm_width / dw_tile_w; 
  const int layer_2_dw_num_of_tiles_h = layer_2_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_2_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_2_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_3_pw_num_fils = 16 / alpha;
@@ -60,7 +60,7 @@ const int layer_2_dw_num_fils = layer_1_pw_num_fils / alpha;
  const int layer_3_pw_num_of_tiles_w = (int)(0.99 + (float)layer_3_pw_ofm_width / pw_tile_w); 
  const int layer_3_pw_num_of_tiles_h = (int)(0.99 + (float)layer_3_pw_ofm_height / pw_tile_h); 
  const int layer_3_pw_num_of_weight_groups_in_depth = layer_3_pw_depth / weights_group_items; 
- const normalization_scheme layer_3_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_3_pw_normalization = {0.0, 1.0}; 
  const int layer_3_pw_weights_offset = 0; 
  //****************************
 //****************************
@@ -76,7 +76,7 @@ const int layer_2_dw_num_fils = layer_1_pw_num_fils / alpha;
  const int layer_4_pw_num_of_tiles_h = (int)(0.99 + (float)layer_4_pw_ofm_height / pw_tile_h); 
  const int layer_4_pw_num_of_weight_groups_in_depth = layer_4_pw_depth / weights_group_items; 
  const int layer_4_pw_weights_offset = 512; 
- const normalization_scheme layer_4_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_4_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_5_dw_num_fils = layer_4_pw_num_fils / alpha;
  const int layer_5_dw_depth = layer_5_dw_num_fils;
@@ -91,7 +91,7 @@ const int layer_5_dw_num_fils = layer_4_pw_num_fils / alpha;
  const int layer_5_dw_num_of_tiles_in_d = (int)(((float)layer_5_dw_depth / dw_tile_d) + 0.5);
  const int layer_5_dw_num_of_tiles_w = layer_5_dw_ofm_width / dw_tile_w; 
  const int layer_5_dw_num_of_tiles_h = layer_5_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_5_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_5_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_6_pw_num_fils = 24 / alpha;
@@ -105,7 +105,7 @@ const int layer_5_dw_num_fils = layer_4_pw_num_fils / alpha;
  const int layer_6_pw_num_of_tiles_w = (int)(0.99 + (float)layer_6_pw_ofm_width / pw_tile_w); 
  const int layer_6_pw_num_of_tiles_h = (int)(0.99 + (float)layer_6_pw_ofm_height / pw_tile_h); 
  const int layer_6_pw_num_of_weight_groups_in_depth = layer_6_pw_depth / weights_group_items; 
- const normalization_scheme layer_6_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_6_pw_normalization = {0.0, 1.0}; 
  const int layer_6_pw_weights_offset = 2048; 
  //****************************
 //****************************
@@ -121,7 +121,7 @@ const int layer_5_dw_num_fils = layer_4_pw_num_fils / alpha;
  const int layer_7_pw_num_of_tiles_h = (int)(0.99 + (float)layer_7_pw_ofm_height / pw_tile_h); 
  const int layer_7_pw_num_of_weight_groups_in_depth = layer_7_pw_depth / weights_group_items; 
  const int layer_7_pw_weights_offset = 4352; 
- const normalization_scheme layer_7_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_7_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_8_dw_num_fils = layer_7_pw_num_fils / alpha;
  const int layer_8_dw_depth = layer_8_dw_num_fils;
@@ -136,7 +136,7 @@ const int layer_8_dw_num_fils = layer_7_pw_num_fils / alpha;
  const int layer_8_dw_num_of_tiles_in_d = (int)(((float)layer_8_dw_depth / dw_tile_d) + 0.5);
  const int layer_8_dw_num_of_tiles_w = layer_8_dw_ofm_width / dw_tile_w; 
  const int layer_8_dw_num_of_tiles_h = layer_8_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_8_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_8_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_9_pw_num_fils = 24 / alpha;
@@ -150,7 +150,7 @@ const int layer_8_dw_num_fils = layer_7_pw_num_fils / alpha;
  const int layer_9_pw_num_of_tiles_w = (int)(0.99 + (float)layer_9_pw_ofm_width / pw_tile_w); 
  const int layer_9_pw_num_of_tiles_h = (int)(0.99 + (float)layer_9_pw_ofm_height / pw_tile_h); 
  const int layer_9_pw_num_of_weight_groups_in_depth = layer_9_pw_depth / weights_group_items; 
- const normalization_scheme layer_9_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_9_pw_normalization = {0.0, 1.0}; 
  const int layer_9_pw_weights_offset = 7808; 
  //****************************
 //****************************
@@ -166,7 +166,7 @@ const int layer_8_dw_num_fils = layer_7_pw_num_fils / alpha;
  const int layer_10_pw_num_of_tiles_h = (int)(0.99 + (float)layer_10_pw_ofm_height / pw_tile_h); 
  const int layer_10_pw_num_of_weight_groups_in_depth = layer_10_pw_depth / weights_group_items; 
  const int layer_10_pw_weights_offset = 11264; 
- const normalization_scheme layer_10_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_10_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_11_dw_num_fils = layer_10_pw_num_fils / alpha;
  const int layer_11_dw_depth = layer_11_dw_num_fils;
@@ -181,7 +181,7 @@ const int layer_11_dw_num_fils = layer_10_pw_num_fils / alpha;
  const int layer_11_dw_num_of_tiles_in_d = (int)(((float)layer_11_dw_depth / dw_tile_d) + 0.5);
  const int layer_11_dw_num_of_tiles_w = layer_11_dw_ofm_width / dw_tile_w; 
  const int layer_11_dw_num_of_tiles_h = layer_11_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_11_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_11_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_12_pw_num_fils = 32 / alpha;
@@ -195,7 +195,7 @@ const int layer_11_dw_num_fils = layer_10_pw_num_fils / alpha;
  const int layer_12_pw_num_of_tiles_w = (int)(0.99 + (float)layer_12_pw_ofm_width / pw_tile_w); 
  const int layer_12_pw_num_of_tiles_h = (int)(0.99 + (float)layer_12_pw_ofm_height / pw_tile_h); 
  const int layer_12_pw_num_of_weight_groups_in_depth = layer_12_pw_depth / weights_group_items; 
- const normalization_scheme layer_12_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_12_pw_normalization = {0.0, 1.0}; 
  const int layer_12_pw_weights_offset = 14720; 
  //****************************
 //****************************
@@ -211,7 +211,7 @@ const int layer_11_dw_num_fils = layer_10_pw_num_fils / alpha;
  const int layer_13_pw_num_of_tiles_h = (int)(0.99 + (float)layer_13_pw_ofm_height / pw_tile_h); 
  const int layer_13_pw_num_of_weight_groups_in_depth = layer_13_pw_depth / weights_group_items; 
  const int layer_13_pw_weights_offset = 19328; 
- const normalization_scheme layer_13_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_13_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_14_dw_num_fils = layer_13_pw_num_fils / alpha;
  const int layer_14_dw_depth = layer_14_dw_num_fils;
@@ -226,7 +226,7 @@ const int layer_14_dw_num_fils = layer_13_pw_num_fils / alpha;
  const int layer_14_dw_num_of_tiles_in_d = (int)(((float)layer_14_dw_depth / dw_tile_d) + 0.5);
  const int layer_14_dw_num_of_tiles_w = layer_14_dw_ofm_width / dw_tile_w; 
  const int layer_14_dw_num_of_tiles_h = layer_14_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_14_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_14_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_15_pw_num_fils = 32 / alpha;
@@ -240,7 +240,7 @@ const int layer_14_dw_num_fils = layer_13_pw_num_fils / alpha;
  const int layer_15_pw_num_of_tiles_w = (int)(0.99 + (float)layer_15_pw_ofm_width / pw_tile_w); 
  const int layer_15_pw_num_of_tiles_h = (int)(0.99 + (float)layer_15_pw_ofm_height / pw_tile_h); 
  const int layer_15_pw_num_of_weight_groups_in_depth = layer_15_pw_depth / weights_group_items; 
- const normalization_scheme layer_15_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_15_pw_normalization = {0.0, 1.0}; 
  const int layer_15_pw_weights_offset = 25472; 
  //****************************
 //****************************
@@ -256,7 +256,7 @@ const int layer_14_dw_num_fils = layer_13_pw_num_fils / alpha;
  const int layer_16_pw_num_of_tiles_h = (int)(0.99 + (float)layer_16_pw_ofm_height / pw_tile_h); 
  const int layer_16_pw_num_of_weight_groups_in_depth = layer_16_pw_depth / weights_group_items; 
  const int layer_16_pw_weights_offset = 31616; 
- const normalization_scheme layer_16_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_16_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_17_dw_num_fils = layer_16_pw_num_fils / alpha;
  const int layer_17_dw_depth = layer_17_dw_num_fils;
@@ -271,7 +271,7 @@ const int layer_17_dw_num_fils = layer_16_pw_num_fils / alpha;
  const int layer_17_dw_num_of_tiles_in_d = (int)(((float)layer_17_dw_depth / dw_tile_d) + 0.5);
  const int layer_17_dw_num_of_tiles_w = layer_17_dw_ofm_width / dw_tile_w; 
  const int layer_17_dw_num_of_tiles_h = layer_17_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_17_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_17_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_18_pw_num_fils = 32 / alpha;
@@ -285,7 +285,7 @@ const int layer_17_dw_num_fils = layer_16_pw_num_fils / alpha;
  const int layer_18_pw_num_of_tiles_w = (int)(0.99 + (float)layer_18_pw_ofm_width / pw_tile_w); 
  const int layer_18_pw_num_of_tiles_h = (int)(0.99 + (float)layer_18_pw_ofm_height / pw_tile_h); 
  const int layer_18_pw_num_of_weight_groups_in_depth = layer_18_pw_depth / weights_group_items; 
- const normalization_scheme layer_18_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_18_pw_normalization = {0.0, 1.0}; 
  const int layer_18_pw_weights_offset = 37760; 
  //****************************
 //****************************
@@ -301,7 +301,7 @@ const int layer_17_dw_num_fils = layer_16_pw_num_fils / alpha;
  const int layer_19_pw_num_of_tiles_h = (int)(0.99 + (float)layer_19_pw_ofm_height / pw_tile_h); 
  const int layer_19_pw_num_of_weight_groups_in_depth = layer_19_pw_depth / weights_group_items; 
  const int layer_19_pw_weights_offset = 43904; 
- const normalization_scheme layer_19_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_19_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_20_dw_num_fils = layer_19_pw_num_fils / alpha;
  const int layer_20_dw_depth = layer_20_dw_num_fils;
@@ -316,7 +316,7 @@ const int layer_20_dw_num_fils = layer_19_pw_num_fils / alpha;
  const int layer_20_dw_num_of_tiles_in_d = (int)(((float)layer_20_dw_depth / dw_tile_d) + 0.5);
  const int layer_20_dw_num_of_tiles_w = layer_20_dw_ofm_width / dw_tile_w; 
  const int layer_20_dw_num_of_tiles_h = layer_20_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_20_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_20_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_21_pw_num_fils = 64 / alpha;
@@ -330,7 +330,7 @@ const int layer_20_dw_num_fils = layer_19_pw_num_fils / alpha;
  const int layer_21_pw_num_of_tiles_w = (int)(0.99 + (float)layer_21_pw_ofm_width / pw_tile_w); 
  const int layer_21_pw_num_of_tiles_h = (int)(0.99 + (float)layer_21_pw_ofm_height / pw_tile_h); 
  const int layer_21_pw_num_of_weight_groups_in_depth = layer_21_pw_depth / weights_group_items; 
- const normalization_scheme layer_21_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_21_pw_normalization = {0.0, 1.0}; 
  const int layer_21_pw_weights_offset = 50048; 
  //****************************
 //****************************
@@ -346,7 +346,7 @@ const int layer_20_dw_num_fils = layer_19_pw_num_fils / alpha;
  const int layer_22_pw_num_of_tiles_h = (int)(0.99 + (float)layer_22_pw_ofm_height / pw_tile_h); 
  const int layer_22_pw_num_of_weight_groups_in_depth = layer_22_pw_depth / weights_group_items; 
  const int layer_22_pw_weights_offset = 62336; 
- const normalization_scheme layer_22_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_22_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_23_dw_num_fils = layer_22_pw_num_fils / alpha;
  const int layer_23_dw_depth = layer_23_dw_num_fils;
@@ -361,7 +361,7 @@ const int layer_23_dw_num_fils = layer_22_pw_num_fils / alpha;
  const int layer_23_dw_num_of_tiles_in_d = (int)(((float)layer_23_dw_depth / dw_tile_d) + 0.5);
  const int layer_23_dw_num_of_tiles_w = layer_23_dw_ofm_width / dw_tile_w; 
  const int layer_23_dw_num_of_tiles_h = layer_23_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_23_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_23_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_24_pw_num_fils = 64 / alpha;
@@ -375,7 +375,7 @@ const int layer_23_dw_num_fils = layer_22_pw_num_fils / alpha;
  const int layer_24_pw_num_of_tiles_w = (int)(0.99 + (float)layer_24_pw_ofm_width / pw_tile_w); 
  const int layer_24_pw_num_of_tiles_h = (int)(0.99 + (float)layer_24_pw_ofm_height / pw_tile_h); 
  const int layer_24_pw_num_of_weight_groups_in_depth = layer_24_pw_depth / weights_group_items; 
- const normalization_scheme layer_24_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_24_pw_normalization = {0.0, 1.0}; 
  const int layer_24_pw_weights_offset = 86912; 
  //****************************
 //****************************
@@ -391,7 +391,7 @@ const int layer_23_dw_num_fils = layer_22_pw_num_fils / alpha;
  const int layer_25_pw_num_of_tiles_h = (int)(0.99 + (float)layer_25_pw_ofm_height / pw_tile_h); 
  const int layer_25_pw_num_of_weight_groups_in_depth = layer_25_pw_depth / weights_group_items; 
  const int layer_25_pw_weights_offset = 111488; 
- const normalization_scheme layer_25_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_25_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_26_dw_num_fils = layer_25_pw_num_fils / alpha;
  const int layer_26_dw_depth = layer_26_dw_num_fils;
@@ -406,7 +406,7 @@ const int layer_26_dw_num_fils = layer_25_pw_num_fils / alpha;
  const int layer_26_dw_num_of_tiles_in_d = (int)(((float)layer_26_dw_depth / dw_tile_d) + 0.5);
  const int layer_26_dw_num_of_tiles_w = layer_26_dw_ofm_width / dw_tile_w; 
  const int layer_26_dw_num_of_tiles_h = layer_26_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_26_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_26_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_27_pw_num_fils = 64 / alpha;
@@ -420,7 +420,7 @@ const int layer_26_dw_num_fils = layer_25_pw_num_fils / alpha;
  const int layer_27_pw_num_of_tiles_w = (int)(0.99 + (float)layer_27_pw_ofm_width / pw_tile_w); 
  const int layer_27_pw_num_of_tiles_h = (int)(0.99 + (float)layer_27_pw_ofm_height / pw_tile_h); 
  const int layer_27_pw_num_of_weight_groups_in_depth = layer_27_pw_depth / weights_group_items; 
- const normalization_scheme layer_27_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_27_pw_normalization = {0.0, 1.0}; 
  const int layer_27_pw_weights_offset = 136064; 
  //****************************
 //****************************
@@ -436,7 +436,7 @@ const int layer_26_dw_num_fils = layer_25_pw_num_fils / alpha;
  const int layer_28_pw_num_of_tiles_h = (int)(0.99 + (float)layer_28_pw_ofm_height / pw_tile_h); 
  const int layer_28_pw_num_of_weight_groups_in_depth = layer_28_pw_depth / weights_group_items; 
  const int layer_28_pw_weights_offset = 160640; 
- const normalization_scheme layer_28_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_28_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_29_dw_num_fils = layer_28_pw_num_fils / alpha;
  const int layer_29_dw_depth = layer_29_dw_num_fils;
@@ -451,7 +451,7 @@ const int layer_29_dw_num_fils = layer_28_pw_num_fils / alpha;
  const int layer_29_dw_num_of_tiles_in_d = (int)(((float)layer_29_dw_depth / dw_tile_d) + 0.5);
  const int layer_29_dw_num_of_tiles_w = layer_29_dw_ofm_width / dw_tile_w; 
  const int layer_29_dw_num_of_tiles_h = layer_29_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_29_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_29_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_30_pw_num_fils = 64 / alpha;
@@ -465,7 +465,7 @@ const int layer_29_dw_num_fils = layer_28_pw_num_fils / alpha;
  const int layer_30_pw_num_of_tiles_w = (int)(0.99 + (float)layer_30_pw_ofm_width / pw_tile_w); 
  const int layer_30_pw_num_of_tiles_h = (int)(0.99 + (float)layer_30_pw_ofm_height / pw_tile_h); 
  const int layer_30_pw_num_of_weight_groups_in_depth = layer_30_pw_depth / weights_group_items; 
- const normalization_scheme layer_30_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_30_pw_normalization = {0.0, 1.0}; 
  const int layer_30_pw_weights_offset = 185216; 
  //****************************
 //****************************
@@ -481,7 +481,7 @@ const int layer_29_dw_num_fils = layer_28_pw_num_fils / alpha;
  const int layer_31_pw_num_of_tiles_h = (int)(0.99 + (float)layer_31_pw_ofm_height / pw_tile_h); 
  const int layer_31_pw_num_of_weight_groups_in_depth = layer_31_pw_depth / weights_group_items; 
  const int layer_31_pw_weights_offset = 209792; 
- const normalization_scheme layer_31_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_31_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_32_dw_num_fils = layer_31_pw_num_fils / alpha;
  const int layer_32_dw_depth = layer_32_dw_num_fils;
@@ -496,7 +496,7 @@ const int layer_32_dw_num_fils = layer_31_pw_num_fils / alpha;
  const int layer_32_dw_num_of_tiles_in_d = (int)(((float)layer_32_dw_depth / dw_tile_d) + 0.5);
  const int layer_32_dw_num_of_tiles_w = layer_32_dw_ofm_width / dw_tile_w; 
  const int layer_32_dw_num_of_tiles_h = layer_32_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_32_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_32_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_33_pw_num_fils = 96 / alpha;
@@ -510,7 +510,7 @@ const int layer_32_dw_num_fils = layer_31_pw_num_fils / alpha;
  const int layer_33_pw_num_of_tiles_w = (int)(0.99 + (float)layer_33_pw_ofm_width / pw_tile_w); 
  const int layer_33_pw_num_of_tiles_h = (int)(0.99 + (float)layer_33_pw_ofm_height / pw_tile_h); 
  const int layer_33_pw_num_of_weight_groups_in_depth = layer_33_pw_depth / weights_group_items; 
- const normalization_scheme layer_33_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_33_pw_normalization = {0.0, 1.0}; 
  const int layer_33_pw_weights_offset = 234368; 
  //****************************
 //****************************
@@ -526,7 +526,7 @@ const int layer_32_dw_num_fils = layer_31_pw_num_fils / alpha;
  const int layer_34_pw_num_of_tiles_h = (int)(0.99 + (float)layer_34_pw_ofm_height / pw_tile_h); 
  const int layer_34_pw_num_of_weight_groups_in_depth = layer_34_pw_depth / weights_group_items; 
  const int layer_34_pw_weights_offset = 271232; 
- const normalization_scheme layer_34_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_34_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_35_dw_num_fils = layer_34_pw_num_fils / alpha;
  const int layer_35_dw_depth = layer_35_dw_num_fils;
@@ -541,7 +541,7 @@ const int layer_35_dw_num_fils = layer_34_pw_num_fils / alpha;
  const int layer_35_dw_num_of_tiles_in_d = (int)(((float)layer_35_dw_depth / dw_tile_d) + 0.5);
  const int layer_35_dw_num_of_tiles_w = layer_35_dw_ofm_width / dw_tile_w; 
  const int layer_35_dw_num_of_tiles_h = layer_35_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_35_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_35_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_36_pw_num_fils = 96 / alpha;
@@ -555,7 +555,7 @@ const int layer_35_dw_num_fils = layer_34_pw_num_fils / alpha;
  const int layer_36_pw_num_of_tiles_w = (int)(0.99 + (float)layer_36_pw_ofm_width / pw_tile_w); 
  const int layer_36_pw_num_of_tiles_h = (int)(0.99 + (float)layer_36_pw_ofm_height / pw_tile_h); 
  const int layer_36_pw_num_of_weight_groups_in_depth = layer_36_pw_depth / weights_group_items; 
- const normalization_scheme layer_36_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_36_pw_normalization = {0.0, 1.0}; 
  const int layer_36_pw_weights_offset = 326528; 
  //****************************
 //****************************
@@ -571,7 +571,7 @@ const int layer_35_dw_num_fils = layer_34_pw_num_fils / alpha;
  const int layer_37_pw_num_of_tiles_h = (int)(0.99 + (float)layer_37_pw_ofm_height / pw_tile_h); 
  const int layer_37_pw_num_of_weight_groups_in_depth = layer_37_pw_depth / weights_group_items; 
  const int layer_37_pw_weights_offset = 381824; 
- const normalization_scheme layer_37_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_37_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_38_dw_num_fils = layer_37_pw_num_fils / alpha;
  const int layer_38_dw_depth = layer_38_dw_num_fils;
@@ -586,7 +586,7 @@ const int layer_38_dw_num_fils = layer_37_pw_num_fils / alpha;
  const int layer_38_dw_num_of_tiles_in_d = (int)(((float)layer_38_dw_depth / dw_tile_d) + 0.5);
  const int layer_38_dw_num_of_tiles_w = layer_38_dw_ofm_width / dw_tile_w; 
  const int layer_38_dw_num_of_tiles_h = layer_38_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_38_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_38_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_39_pw_num_fils = 96 / alpha;
@@ -600,7 +600,7 @@ const int layer_38_dw_num_fils = layer_37_pw_num_fils / alpha;
  const int layer_39_pw_num_of_tiles_w = (int)(0.99 + (float)layer_39_pw_ofm_width / pw_tile_w); 
  const int layer_39_pw_num_of_tiles_h = (int)(0.99 + (float)layer_39_pw_ofm_height / pw_tile_h); 
  const int layer_39_pw_num_of_weight_groups_in_depth = layer_39_pw_depth / weights_group_items; 
- const normalization_scheme layer_39_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_39_pw_normalization = {0.0, 1.0}; 
  const int layer_39_pw_weights_offset = 437120; 
  //****************************
 //****************************
@@ -616,7 +616,7 @@ const int layer_38_dw_num_fils = layer_37_pw_num_fils / alpha;
  const int layer_40_pw_num_of_tiles_h = (int)(0.99 + (float)layer_40_pw_ofm_height / pw_tile_h); 
  const int layer_40_pw_num_of_weight_groups_in_depth = layer_40_pw_depth / weights_group_items; 
  const int layer_40_pw_weights_offset = 492416; 
- const normalization_scheme layer_40_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_40_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_41_dw_num_fils = layer_40_pw_num_fils / alpha;
  const int layer_41_dw_depth = layer_41_dw_num_fils;
@@ -631,7 +631,7 @@ const int layer_41_dw_num_fils = layer_40_pw_num_fils / alpha;
  const int layer_41_dw_num_of_tiles_in_d = (int)(((float)layer_41_dw_depth / dw_tile_d) + 0.5);
  const int layer_41_dw_num_of_tiles_w = layer_41_dw_ofm_width / dw_tile_w; 
  const int layer_41_dw_num_of_tiles_h = layer_41_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_41_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_41_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_42_pw_num_fils = 160 / alpha;
@@ -645,7 +645,7 @@ const int layer_41_dw_num_fils = layer_40_pw_num_fils / alpha;
  const int layer_42_pw_num_of_tiles_w = (int)(0.99 + (float)layer_42_pw_ofm_width / pw_tile_w); 
  const int layer_42_pw_num_of_tiles_h = (int)(0.99 + (float)layer_42_pw_ofm_height / pw_tile_h); 
  const int layer_42_pw_num_of_weight_groups_in_depth = layer_42_pw_depth / weights_group_items; 
- const normalization_scheme layer_42_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_42_pw_normalization = {0.0, 1.0}; 
  const int layer_42_pw_weights_offset = 547712; 
  //****************************
 //****************************
@@ -661,7 +661,7 @@ const int layer_41_dw_num_fils = layer_40_pw_num_fils / alpha;
  const int layer_43_pw_num_of_tiles_h = (int)(0.99 + (float)layer_43_pw_ofm_height / pw_tile_h); 
  const int layer_43_pw_num_of_weight_groups_in_depth = layer_43_pw_depth / weights_group_items; 
  const int layer_43_pw_weights_offset = 639872; 
- const normalization_scheme layer_43_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_43_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_44_dw_num_fils = layer_43_pw_num_fils / alpha;
  const int layer_44_dw_depth = layer_44_dw_num_fils;
@@ -676,7 +676,7 @@ const int layer_44_dw_num_fils = layer_43_pw_num_fils / alpha;
  const int layer_44_dw_num_of_tiles_in_d = (int)(((float)layer_44_dw_depth / dw_tile_d) + 0.5);
  const int layer_44_dw_num_of_tiles_w = layer_44_dw_ofm_width / dw_tile_w; 
  const int layer_44_dw_num_of_tiles_h = layer_44_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_44_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_44_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_45_pw_num_fils = 160 / alpha;
@@ -690,7 +690,7 @@ const int layer_44_dw_num_fils = layer_43_pw_num_fils / alpha;
  const int layer_45_pw_num_of_tiles_w = (int)(0.99 + (float)layer_45_pw_ofm_width / pw_tile_w); 
  const int layer_45_pw_num_of_tiles_h = (int)(0.99 + (float)layer_45_pw_ofm_height / pw_tile_h); 
  const int layer_45_pw_num_of_weight_groups_in_depth = layer_45_pw_depth / weights_group_items; 
- const normalization_scheme layer_45_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_45_pw_normalization = {0.0, 1.0}; 
  const int layer_45_pw_weights_offset = 793472; 
  //****************************
 //****************************
@@ -706,7 +706,7 @@ const int layer_44_dw_num_fils = layer_43_pw_num_fils / alpha;
  const int layer_46_pw_num_of_tiles_h = (int)(0.99 + (float)layer_46_pw_ofm_height / pw_tile_h); 
  const int layer_46_pw_num_of_weight_groups_in_depth = layer_46_pw_depth / weights_group_items; 
  const int layer_46_pw_weights_offset = 947072; 
- const normalization_scheme layer_46_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_46_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_47_dw_num_fils = layer_46_pw_num_fils / alpha;
  const int layer_47_dw_depth = layer_47_dw_num_fils;
@@ -721,7 +721,7 @@ const int layer_47_dw_num_fils = layer_46_pw_num_fils / alpha;
  const int layer_47_dw_num_of_tiles_in_d = (int)(((float)layer_47_dw_depth / dw_tile_d) + 0.5);
  const int layer_47_dw_num_of_tiles_w = layer_47_dw_ofm_width / dw_tile_w; 
  const int layer_47_dw_num_of_tiles_h = layer_47_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_47_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_47_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_48_pw_num_fils = 160 / alpha;
@@ -735,7 +735,7 @@ const int layer_47_dw_num_fils = layer_46_pw_num_fils / alpha;
  const int layer_48_pw_num_of_tiles_w = (int)(0.99 + (float)layer_48_pw_ofm_width / pw_tile_w); 
  const int layer_48_pw_num_of_tiles_h = (int)(0.99 + (float)layer_48_pw_ofm_height / pw_tile_h); 
  const int layer_48_pw_num_of_weight_groups_in_depth = layer_48_pw_depth / weights_group_items; 
- const normalization_scheme layer_48_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_48_pw_normalization = {0.0, 1.0}; 
  const int layer_48_pw_weights_offset = 1100672; 
  //****************************
 //****************************
@@ -751,7 +751,7 @@ const int layer_47_dw_num_fils = layer_46_pw_num_fils / alpha;
  const int layer_49_pw_num_of_tiles_h = (int)(0.99 + (float)layer_49_pw_ofm_height / pw_tile_h); 
  const int layer_49_pw_num_of_weight_groups_in_depth = layer_49_pw_depth / weights_group_items; 
  const int layer_49_pw_weights_offset = 1254272; 
- const normalization_scheme layer_49_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_49_pw_normalization = {0.0, 1.0}; 
 //****************************
 const int layer_50_dw_num_fils = layer_49_pw_num_fils / alpha;
  const int layer_50_dw_depth = layer_50_dw_num_fils;
@@ -766,7 +766,7 @@ const int layer_50_dw_num_fils = layer_49_pw_num_fils / alpha;
  const int layer_50_dw_num_of_tiles_in_d = (int)(((float)layer_50_dw_depth / dw_tile_d) + 0.5);
  const int layer_50_dw_num_of_tiles_w = layer_50_dw_ofm_width / dw_tile_w; 
  const int layer_50_dw_num_of_tiles_h = layer_50_dw_ofm_height / dw_tile_h; 
- const normalization_scheme layer_50_dw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_50_dw_normalization = {0.0, 1.0}; 
  //****************************
 //****************************
  const int layer_51_pw_num_fils = 320 / alpha;
@@ -780,7 +780,7 @@ const int layer_50_dw_num_fils = layer_49_pw_num_fils / alpha;
  const int layer_51_pw_num_of_tiles_w = (int)(0.99 + (float)layer_51_pw_ofm_width / pw_tile_w); 
  const int layer_51_pw_num_of_tiles_h = (int)(0.99 + (float)layer_51_pw_ofm_height / pw_tile_h); 
  const int layer_51_pw_num_of_weight_groups_in_depth = layer_51_pw_depth / weights_group_items; 
- const normalization_scheme layer_51_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_51_pw_normalization = {0.0, 1.0}; 
  const int layer_51_pw_weights_offset = 1407872; 
  //****************************
 //****************************
@@ -796,6 +796,6 @@ const int layer_50_dw_num_fils = layer_49_pw_num_fils / alpha;
  const int layer_52_pw_num_of_tiles_h = (int)(0.99 + (float)layer_52_pw_ofm_height / pw_tile_h); 
  const int layer_52_pw_num_of_weight_groups_in_depth = layer_52_pw_depth / weights_group_items; 
  const int layer_52_pw_weights_offset = 1715072; 
- const normalization_scheme layer_52_pw_normalization = {0.0, 1.0}; 
+ const fms_quantization_scheme layer_52_pw_normalization = {0.0, 1.0}; 
 //****************************
 #endif

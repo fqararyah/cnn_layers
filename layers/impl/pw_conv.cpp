@@ -28,7 +28,7 @@ void pw_write_results_tile(
 		fms_dt results[max_fms_size], int tile_indx,
 		fms_dt tmp_channels[max_tmp_fms_size], int starting_d,
 		const int layer_conv_d, int read_write,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 	// read_write = 1 when the current layer is the one that is directly connected to the OFMs that have a residual connection to a previous layer
 	// read_write = 2 when the current layer has a residual connection
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
@@ -138,7 +138,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
 		int read_write, const int num_of_weight_groups,
-		const normalization_scheme normalization, const int direction,
+		const fms_quantization_scheme normalization, const int direction,
 		const int layer_weights_offset) {
 #pragma HLS INLINE off
 

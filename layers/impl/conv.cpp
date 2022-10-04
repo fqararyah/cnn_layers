@@ -25,7 +25,7 @@ void fill_channels_buffer_0(
 void write_results_tile_0(
 		pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		fms_dt results[max_fms_size], int tile_indx, const int layer_conv_d,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 	for (int tile_offset = 0; tile_offset < pw_conv_parallelism_out / pw_tile_d;
 			tile_offset++) {
 #pragma HLS PIPELINE
@@ -56,7 +56,7 @@ void layer_0_using_pw(
 		fms_dt result[max_fms_size], const int layer, const int layer_conv_d,
 		const int layer_num_fils, const int num_of_tiles_d_in,
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
-		const int num_of_tiles_w, const normalization_scheme normalization) {
+		const int num_of_tiles_w, const fms_quantization_scheme normalization) {
 #pragma HLS INLINE off
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];

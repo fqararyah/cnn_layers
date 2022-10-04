@@ -17,7 +17,7 @@ dw_weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i
         ,'pw': 'const static weights_dt weights_*i*_pw[layer_*i*_num_fils][layer_*i*_depth]'}
 
 layers_types = utils.read_layers_types()
-layers_weights = utils.read_layers_weights(layers_types)
+layers_weights = utils.read_layers_weight_shapes(layers_types)
 
 num_of_generated_layers = 0
 with open(dw_weights_h_file, 'w') as f:

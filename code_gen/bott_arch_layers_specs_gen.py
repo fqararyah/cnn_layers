@@ -21,7 +21,7 @@ const int layer_0_filter_size = *LFS*;\n \
 const int layer_0_num_of_tiles_w = layer_0_ofm_width / pw_tile_w; \n \
 const int layer_0_num_of_tiles_h = layer_0_ofm_height / pw_tile_h; \n \
 const int layer_0_num_of_tiles_d_in = layer_0_depth / pw_tile_d; \n \
-const normalization_scheme layers_0_normalization = {0.0, 1.0}; \n \
+const fms_quantization_scheme layers_0_normalization = {0.0, 1.0}; \n \
 //****************************\n"
 
 
@@ -38,7 +38,7 @@ const int layer_*i*_pw_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_pw_ofm_wid
 const int layer_*i*_pw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_pw_ofm_height / pw_tile_h); \n \
 const int layer_*i*_pw_num_of_weight_groups_in_depth = layer_*i*_pw_depth / weights_group_items; \n \
 const int layer_*i*_pw_weights_offset = *LWOF*; \n \
-const normalization_scheme layer_*i*_pw_normalization = {0.0, 1.0}; \n\
+const fms_quantization_scheme layer_*i*_pw_normalization = {0.0, 1.0}; \n\
 //****************************\n"
 
 dw_block = "const int layer_*i*_dw_num_fils = layer_*i-1*_pw_num_fils / alpha;\n \
@@ -54,7 +54,7 @@ const int layer_*i*_dw_filter_size = *LFS*;\n \
 const int layer_*i*_dw_num_of_tiles_in_d = (int)(((float)layer_*i*_dw_depth / dw_tile_d) + 0.5);\n \
 const int layer_*i*_dw_num_of_tiles_w = layer_*i*_dw_ofm_width / dw_tile_w; \n \
 const int layer_*i*_dw_num_of_tiles_h = layer_*i*_dw_ofm_height / dw_tile_h; \n \
-const normalization_scheme layer_*i*_dw_normalization = {0.0, 1.0}; \n \
+const fms_quantization_scheme layer_*i*_dw_normalization = {0.0, 1.0}; \n \
 //****************************\n"
 
 projection_block = "//****************************\n \
@@ -69,13 +69,13 @@ const int layer_*i*_pw_num_of_tiles_out_d = (int)(0.99 + (float)layer_*i*_pw_num
 const int layer_*i*_pw_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_pw_ofm_width / pw_tile_w); \n \
 const int layer_*i*_pw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_pw_ofm_height / pw_tile_h); \n \
 const int layer_*i*_pw_num_of_weight_groups_in_depth = layer_*i*_pw_depth / weights_group_items; \n \
-const normalization_scheme layer_*i*_pw_normalization = {0.0, 1.0}; \n \
+const fms_quantization_scheme layer_*i*_pw_normalization = {0.0, 1.0}; \n \
 const int layer_*i*_pw_weights_offset = *LWOF*; \n \
 //****************************\n"
 
 
 layers_types = utils.read_layers_types()
-layers_weights = utils.read_layers_weights(layers_types)
+layers_weights = utils.read_layers_weight_shapes(layers_types)
 layers_inputs = utils.read_layers_inputs()
 layers_outputs = utils.read_layers_outputs()
 layers_strides = utils.read_layers_strides()

@@ -1,6 +1,6 @@
 #include "../headers/norm_act.h"
 
-fms_dt pw_relu_norm(pss_dt pss, normalization_scheme normalization) {
+fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization) {
 #pragma HLS INLINE
 	fms_dt scaled_val = (fms_dt) ((((ap_fixed<17, 12> ) pss)
 			- normalization.zero_point) * normalization.ratio_pss_to_fms);
@@ -10,7 +10,7 @@ fms_dt pw_relu_norm(pss_dt pss, normalization_scheme normalization) {
 	return scaled_val;
 }
 
-fms_dt dw_relu_norm(dw_pss_dt pss, normalization_scheme normalization) {
+fms_dt dw_relu_norm(dw_pss_dt pss, fms_quantization_scheme normalization) {
 #pragma HLS INLINE
 	fms_dt scaled_val = (fms_dt) ((((ap_fixed<17, 12> ) pss)
 			- normalization.zero_point) * normalization.ratio_pss_to_fms);
@@ -21,7 +21,7 @@ fms_dt dw_relu_norm(dw_pss_dt pss, normalization_scheme normalization) {
 }
 
 fms_dt conv_relu_norm(first_conv_pss_dt pss,
-		normalization_scheme normalization) {
+		fms_quantization_scheme normalization) {
 #pragma HLS INLINE
 	fms_dt scaled_val = (fms_dt) ((((ap_fixed<17, 12> ) pss)
 			- normalization.zero_point) * normalization.ratio_pss_to_fms);

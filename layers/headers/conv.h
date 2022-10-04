@@ -10,6 +10,6 @@ void layer_0_using_pw(
 		fms_dt result[max_fms_size], const int layer, const int layer_conv_d,
 		const int layer_num_fils, const int num_of_tiles_d_in,
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
-		const int num_of_tiles_w, const normalization_scheme normalization);
+		const int num_of_tiles_w, const fms_quantization_scheme normalization);
 
 #endif

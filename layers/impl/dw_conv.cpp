@@ -75,7 +75,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		fms_dt result[max_fms_size], int tile_index, const int h_offset,
 		int conv_depth, const int num_of_tiles_w,
 		const int layer_width, const int strides, const int padding_left,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 #pragma HLS INLINE off
 
 	const int result_base_index = tile_index * dw_tile_size
@@ -130,7 +130,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 		const int layer, const int layer_conv_d, const int layer_width,
 		const int layer_height, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
-		const int padding_left, const normalization_scheme normalization,
+		const int padding_left, const fms_quantization_scheme normalization,
 		const int direction) {
 #pragma HLS INLINE off
 	fms_dt channels_tile_1[dw_tile_d][3][max_dw_input_width];
@@ -274,7 +274,7 @@ void dw_conv_eng5x5(fms_dt channels_tile[dw_tile_d][5][dw_tile_w],
 		dw_weights_dt weights[max_conv_d][5][5], fms_dt result[max_fms_size],
 		int tile_index, int conv_depth, const int layer_conv_d,
 		const int strides, int starting_w,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 #pragma HLS INLINE off
 
 	const int result_base_index = tile_index * dw_tile_size;
@@ -320,7 +320,7 @@ void dw_conv_5x5(dw_weights_dt weights[max_conv_d][5][5],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 		const int layer, const int layer_conv_d, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 #pragma HLS INLINE off
 	fms_dt channels_tile_1[dw_tile_d][5][dw_tile_w];
 	fms_dt channels_tile_2[dw_tile_d][5][dw_tile_w];
@@ -427,7 +427,7 @@ void dw_conv_eng7x7(fms_dt channels_tile[dw_tile_d][7][dw_tile_w],
 		dw_weights_dt weights[max_conv_d][7][7], fms_dt result[max_fms_size],
 		int tile_index, int conv_depth, const int layer_conv_d,
 		const int strides, int starting_w,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 #pragma HLS INLINE off
 
 	const int result_base_index = tile_index * dw_tile_size;
@@ -473,7 +473,7 @@ void dw_conv_7x7(dw_weights_dt weights[max_conv_d][7][7],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 		const int layer, const int layer_conv_d, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
-		const normalization_scheme normalization) {
+		const fms_quantization_scheme normalization) {
 #pragma HLS INLINE off
 	fms_dt channels_tile_1[dw_tile_d][7][dw_tile_w];
 	fms_dt channels_tile_2[dw_tile_d][7][dw_tile_w];
