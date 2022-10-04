@@ -1,6 +1,7 @@
 
 import utils
 from os.path import exists
+import numpy as np
 
 utils.set_globals('mob_v2', 'mobilenetv2')
 
@@ -41,26 +42,28 @@ with open(dw_weights_h_file, 'w') as f:
             '*i*', str(ii)) + '= {\n')
         
         if from_files:
-            with open(weights_file, 'r') as f2:
-                for i in range(layers_weights[ii].num_of_filters):
-                    f.write('{\n')
-                    for j in range(layers_weights[ii].depth):
-                        if layers_weights[ii].height > 1:
-                            f.write('{\n')
-                        for k in range(layers_weights[ii].height):
-                            if layers_weights[ii].width > 1:
-                                f.write('{')
-                            for l in range(layers_weights[ii].width):
-                                f.write(f2.readline().replace(' ','').replace('\n', ''))
-                                if(l < layers_weights[ii].width - 1) or \
-                                    (layers_types[ii] == 'pw'  and j < layers_weights[ii].depth -1):
-                                    f.write(', ')
-                            if layers_weights[ii].width > 1:
-                                f.write('},\n')
-                        if layers_weights[ii].height > 1:
+            weights = np.loadtxt(weights_file).astype(np.int8)
+            weights = np.reshape(weights, \
+                (layers_weights[ii].num_of_filters, layers_weights[ii].depth, layers_weights[ii].height, layers_weights[ii].width))
+            for i in range(layers_weights[ii].num_of_filters):
+                f.write('{\n')
+                for j in range(layers_weights[ii].depth):
+                    if layers_weights[ii].height > 1:
+                        f.write('{\n')
+                    for k in range(layers_weights[ii].height):
+                        if layers_weights[ii].width > 1:
+                            f.write('{')
+                        for l in range(layers_weights[ii].width):
+                            f.write(str(weights[i][j][k][l]))
+                            if(l < layers_weights[ii].width - 1) or \
+                                (layers_types[ii] == 'pw'  and j < layers_weights[ii].depth -1):
+                                f.write(', ')
+                        if layers_weights[ii].width > 1:
                             f.write('},\n')
-                    f.write('},\n')
-                f.write('};\n')
+                    if layers_weights[ii].height > 1:
+                        f.write('},\n')
+                f.write('},\n')
+            f.write('};\n')
         else:
             for i in range(layers_weights[ii].num_of_filters):
                 f.write('{')
