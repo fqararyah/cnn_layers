@@ -39,6 +39,7 @@ const int layer_*i*_pw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_pw_ofm_hei
 const int layer_*i*_pw_num_of_weight_groups_in_depth = layer_*i*_pw_depth / weights_group_items; \n \
 const int layer_*i*_pw_weights_offset = *LWOF*; \n \
 const fms_quantization_scheme layer_*i*_pw_normalization = {0.0, 1.0}; \n\
+const int layer_*i*_relu = 6;\n\
 //****************************\n"
 
 dw_block = "const int layer_*i*_dw_num_fils = layer_*i-1*_pw_num_fils / alpha;\n \
@@ -71,13 +72,14 @@ const int layer_*i*_pw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_pw_ofm_hei
 const int layer_*i*_pw_num_of_weight_groups_in_depth = layer_*i*_pw_depth / weights_group_items; \n \
 const fms_quantization_scheme layer_*i*_pw_normalization = {0.0, 1.0}; \n \
 const int layer_*i*_pw_weights_offset = *LWOF*; \n \
+const int layer_*i*_relu = 0;\n\
 //****************************\n"
 
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
-layers_inputs = utils.read_layers_inputs()
-layers_outputs = utils.read_layers_outputs()
+layers_inputs = utils.read_layers_input_shapes()
+layers_outputs = utils.read_layers_output_shapes()
 layers_strides = utils.read_layers_strides()
 expansion_projection = utils.read_expansion_projection()
 

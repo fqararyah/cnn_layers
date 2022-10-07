@@ -23,8 +23,8 @@ const int fms_dt_width = 8;
 const int fms_dt_offset = fms_dt_width - 1;
 
 //scales, zero points, and biases
-const int scales_bit_width = 18;
-const int scales_integer_part_width = 0;
+const int scales_bit_width = 22;
+const int scales_integer_part_width = 3;
 const int biases_bit_width = 32;
 
 //pss
@@ -55,6 +55,9 @@ typedef ap_fixed<scales_bit_width, scales_integer_part_width> scales_dt;
 typedef int biases_dt;
 struct fms_quantization_scheme {
 	const fms_dt zero_point;
-	const scales_dt ratio_pss_to_fms; // pow(2, fms_dt_width) / pow(2, dw_pss_dt_width);
+	const scales_dt ifm_scale;
+	const scales_dt ofm_scale;
+	const scales_dt weight_scale;
+	const biases_dt bias;
 };
 #endif

@@ -41,7 +41,7 @@ pw_conv(off_chip_weights, channels, result2, 43, layer_43_pw_depth,
     layer_43_pw_num_of_tiles_out_d, layer_43_pw_num_of_tiles_h,
     layer_43_pw_num_of_tiles_w, tmp_channels, 2,
     layer_43_pw_num_of_weight_groups_in_depth,
-    layer_43_pw_normalization, 1, layer_43_pw_weights_offset);
+    layer_43_pw_normalization, 1, layer_43_pw_weights_offset, layer_43_relu);
 fill_dw_layer_weights(dw_weights_44, dw_weights_buffer, layer_44_dw_depth, layer_44_dw_filter_size, layer_44_dw_filter_size);
     dw_conv_3x3(dw_weights_buffer, channels, result2, 44, layer_44_dw_depth,
     layer_44_dw_ifm_width, layer_44_dw_ifm_height, layer_44_dw_num_of_tiles_in_d,

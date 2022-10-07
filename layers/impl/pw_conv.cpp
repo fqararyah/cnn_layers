@@ -28,7 +28,8 @@ void pw_write_results_tile(
 		fms_dt results[max_fms_size], int tile_indx,
 		fms_dt tmp_channels[max_tmp_fms_size], int starting_d,
 		const int layer_conv_d, int read_write,
-		const fms_quantization_scheme normalization) {
+		const fms_quantization_scheme normalization,
+		const int layer_relu) {
 	// read_write = 1 when the current layer is the one that is directly connected to the OFMs that have a residual connection to a previous layer
 	// read_write = 2 when the current layer has a residual connection
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
@@ -54,7 +55,7 @@ void pw_write_results_tile(
 #pragma HLS UNROLL
 					if (t_d + starting_d < layer_conv_d) {
 						fms_dt scaled_val = pw_relu_norm(
-								results_tile[t_d][t_h][t_w], normalization);
+								results_tile[t_d][t_h][t_w], normalization, layer_relu);
 						if (read_write == 0 || read_write == 2) {
 							results[current_tile_indx + t_d * pw_tile_hw
 									+ t_h * pw_tile_w + t_w] = scaled_val;
@@ -139,7 +140,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
 		int read_write, const int num_of_weight_groups,
 		const fms_quantization_scheme normalization, const int direction,
-		const int layer_weights_offset) {
+		const int layer_weights_offset, const int layer_relu) {
 #pragma HLS INLINE off
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
@@ -175,14 +176,14 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 									* num_of_tiles_hw + t_in_h * num_of_tiles_w
 									+ t_in_w, tmp_channels,
 							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, normalization);
+							read_write, normalization, layer_relu);
 				} else {
 					pw_write_results_tile(results_tile, result,
 							td_o * (pw_conv_parallelism_out / pw_tile_d)
 									* num_of_tiles_hw + t_in_h * num_of_tiles_w
 									+ t_in_w, tmp_channels,
 							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, normalization);
+							read_write, normalization, layer_relu);
 				}
 			}
 		}
