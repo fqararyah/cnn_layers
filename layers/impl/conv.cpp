@@ -26,6 +26,12 @@ void write_results_tile_0(
 		pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		fms_dt results[max_fms_size], int tile_indx, const int layer_conv_d,
 		const fms_quantization_scheme normalization) {
+
+	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
+	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
+	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer, starting_d, layer);
+	fill_fused_scales(fused_scales, starting_d, layer);
+
 	for (int tile_offset = 0; tile_offset < pw_conv_parallelism_out / pw_tile_d;
 			tile_offset++) {
 #pragma HLS PIPELINE
@@ -39,6 +45,10 @@ void write_results_tile_0(
 				for (int t_d = 0; t_d < pw_tile_d; t_d++) {
 #pragma HLS UNROLL
 					if (t_d < layer_conv_d) {
+						const int in_tile_index = tile_offset * pw_tile_d + t_d;
+						normalization.fused_zero_points = fused_zero_points_buffer[in_tile_index];
+						normalization.fused_scales = fused_scales_buffer[in_tile_index];
+						normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 						fms_dt scaled_val = conv_relu_norm(
 								results_tile[t_d][t_h][t_w], normalization);
 						results[current_tile_indx + t_d * pw_tile_hw
