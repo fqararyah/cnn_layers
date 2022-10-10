@@ -29,7 +29,7 @@ void pw_write_results_tile(
 		fms_dt tmp_channels[max_tmp_fms_size], int starting_d,
 		const int layer_conv_d, int read_write,
 		const fms_quantization_scheme normalization,
-		const int layer_relu) {
+		const int layer_relu, int layer) {
 	// read_write = 1 when the current layer is the one that is directly connected to the OFMs that have a residual connection to a previous layer
 	// read_write = 2 when the current layer has a residual connection
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
@@ -40,6 +40,11 @@ void pw_write_results_tile(
 		num_of_tiles_processed_in_parallel = 1
 				+ pw_conv_parallelism_out / pw_tile_d;
 	}
+
+	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
+	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
+	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer, starting_d, layer);
+	fill_fused_scales(fused_scales, starting_d, layer);
 
 	for (int tile_offset = 0; tile_offset < num_of_tiles_processed_in_parallel;
 			tile_offset++) {
@@ -54,6 +59,10 @@ void pw_write_results_tile(
 				for (int t_d = 0; t_d < pw_tile_d; t_d++) {
 #pragma HLS UNROLL
 					if (t_d + starting_d < layer_conv_d) {
+						const int in_tile_index = tile_offset * pw_tile_d + t_d;
+						normalization.fused_zero_points = fused_zero_points_buffer[in_tile_index];
+						normalization.fused_scales = fused_scales_buffer[in_tile_index];
+						normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 						fms_dt scaled_val = pw_relu_norm(
 								results_tile[t_d][t_h][t_w], normalization, layer_relu);
 						if (read_write == 0 || read_write == 2) {
@@ -176,14 +185,14 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 									* num_of_tiles_hw + t_in_h * num_of_tiles_w
 									+ t_in_w, tmp_channels,
 							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, normalization, layer_relu);
+							read_write, normalization, layer_relu, layer);
 				} else {
 					pw_write_results_tile(results_tile, result,
 							td_o * (pw_conv_parallelism_out / pw_tile_d)
 									* num_of_tiles_hw + t_in_h * num_of_tiles_w
 									+ t_in_w, tmp_channels,
 							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, normalization, layer_relu);
+							read_write, normalization, layer_relu, layer);
 				}
 			}
 		}
