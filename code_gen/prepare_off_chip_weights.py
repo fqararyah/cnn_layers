@@ -11,7 +11,7 @@ weights_file_format = weights_files_location + 'weights_{}_pw.txt'
 parallelism_file = '/media/SSD2TB/wd/cnn_layers/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
-off_chip_weights_file = '/media/SSD2TB/wd/cnn_layers/off_chip_weights.txt'
+off_chip_weights_file = '/media/SSD2TB/wd/cnn_layers/off_chip_weights/off_chip_weights.txt'
 
 first_off_chip_layer = 2
 last_off_chip_layer = 10 # len(layer_types)
