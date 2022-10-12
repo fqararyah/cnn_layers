@@ -68,20 +68,20 @@ void fill_dw_layer_weights(
 	}
 }
 
-void fill_fused_zero_points(const static biases_dt fused_zero_points[],
+void fill_fused_zero_points(const biases_dt fused_zero_points[],
   biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
  int starting_d, int layer){
 	 const int starting_index = layers_fused_parameters_offsets[layer];
-	for(int i =0;i<pw_conv_parallelism_out){
+	for(int i =0;i<pw_conv_parallelism_out; i++){
 		fused_zero_points_buffer[i] = fused_zero_points[starting_index + starting_d + i];
 	}
 }
 
-void fill_fused_scales(const static scales_dt fused_scales[],
+void fill_fused_scales(const scales_dt fused_scales[],
   scales_dt fused_scales_buffer[pw_conv_parallelism_out],
  int starting_d, int layer){
 	 const int starting_index = layers_fused_parameters_offsets[layer];
-	for(int i =0;i<pw_conv_parallelism_out){
+	for(int i =0;i<pw_conv_parallelism_out; i++){
 		fused_scales_buffer[i] = fused_scales[starting_index + starting_d + i];
 	}
 }

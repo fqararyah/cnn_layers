@@ -2,6 +2,8 @@
 #include "../headers/conv.h"
 #include "../headers/pw_conv.h"
 #include "../headers/norm_act.h"
+#include "../../utils/utils.h"
+#include "../../client/quantization_and_biases.h"
 
 void fill_channels_buffer_0(
 		fms_dt channels[input_image_depth][input_image_height][input_image_width],
@@ -25,12 +27,14 @@ void fill_channels_buffer_0(
 void write_results_tile_0(
 		pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		fms_dt results[max_fms_size], int tile_indx, const int layer_conv_d,
-		const fms_quantization_scheme normalization) {
+		int starting_d, int layer) {
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
 	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer, starting_d, layer);
-	fill_fused_scales(fused_scales, starting_d, layer);
+	fill_fused_scales(fused_scales, fused_scales_buffer, starting_d, layer);
+
+	fms_quantization_scheme normalization = {0,0,0,0};
 
 	for (int tile_offset = 0; tile_offset < pw_conv_parallelism_out / pw_tile_d;
 			tile_offset++) {
@@ -46,7 +50,7 @@ void write_results_tile_0(
 #pragma HLS UNROLL
 					if (t_d < layer_conv_d) {
 						const int in_tile_index = tile_offset * pw_tile_d + t_d;
-						normalization.fused_zero_points = fused_zero_points_buffer[in_tile_index];
+						normalization.fused_zero_point = fused_zero_points_buffer[in_tile_index];
 						normalization.fused_scales = fused_scales_buffer[in_tile_index];
 						normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 						fms_dt scaled_val = conv_relu_norm(
@@ -66,9 +70,10 @@ void layer_0_using_pw(
 		fms_dt result[max_fms_size], const int layer, const int layer_conv_d,
 		const int layer_num_fils, const int num_of_tiles_d_in,
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
-		const int num_of_tiles_w, const fms_quantization_scheme normalization) {
+		const int num_of_tiles_w) {
 #pragma HLS INLINE off
 
+	fms_quantization_scheme normalization = {0,0,0,0};
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
 
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
@@ -109,7 +114,7 @@ void layer_0_using_pw(
 										+ t_in_h / layer_0_strides
 												* num_of_tiles_w
 										+ t_in_w / layer_0_strides,
-								layer_num_fils, normalization);
+								layer_num_fils, td_o * pw_conv_parallelism_out, layer);
 					}
 				}
 			}

@@ -54,11 +54,11 @@ typedef ap_int<fc_out_dt_width> fc_out_dt;
 typedef ap_fixed<scales_bit_width, scales_integer_part_width> scales_dt;
 typedef int biases_dt;
 struct fms_quantization_scheme {
-	const fms_dt ofm_zero_point;
-	const scales_dt ifm_scale;
-	const scales_dt ofm_scale;
-	const biases_dt fused_zero_points;
-	const scales_dt fused_scales;
+	 fms_dt ofm_zero_point;
+	 scales_dt ifm_scale;
+	 scales_dt ofm_scale;
+	 biases_dt fused_zero_point;
+	 scales_dt fused_scales;
 	//const biases_dt bias;
 };
 #endif

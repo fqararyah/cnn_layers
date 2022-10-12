@@ -1,6 +1,7 @@
 #include "../headers/pw_conv.h"
 #include "../headers/norm_act.h"
 #include "../../utils/utils.h"
+#include "../../client/quantization_and_biases.h"
 
 void pw_fill_channels_buffer(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w], int tile_indx,
@@ -28,10 +29,10 @@ void pw_write_results_tile(
 		fms_dt results[max_fms_size], int tile_indx,
 		fms_dt tmp_channels[max_tmp_fms_size], int starting_d,
 		const int layer_conv_d, int read_write,
-		const fms_quantization_scheme normalization,
 		const int layer_relu, int layer) {
 	// read_write = 1 when the current layer is the one that is directly connected to the OFMs that have a residual connection to a previous layer
 	// read_write = 2 when the current layer has a residual connection
+	fms_quantization_scheme normalization = {0,0,0,0};
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
 			/ pw_tile_d;
 	if (pw_conv_parallelism_out < pw_tile_d) {
@@ -44,7 +45,7 @@ void pw_write_results_tile(
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
 	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer, starting_d, layer);
-	fill_fused_scales(fused_scales, starting_d, layer);
+	fill_fused_scales(fused_scales, fused_scales_buffer, starting_d, layer);
 
 	for (int tile_offset = 0; tile_offset < num_of_tiles_processed_in_parallel;
 			tile_offset++) {
@@ -60,7 +61,7 @@ void pw_write_results_tile(
 #pragma HLS UNROLL
 					if (t_d + starting_d < layer_conv_d) {
 						const int in_tile_index = tile_offset * pw_tile_d + t_d;
-						normalization.fused_zero_points = fused_zero_points_buffer[in_tile_index];
+						normalization.fused_zero_point = fused_zero_points_buffer[in_tile_index];
 						normalization.fused_scales = fused_scales_buffer[in_tile_index];
 						normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 						fms_dt scaled_val = pw_relu_norm(
@@ -147,12 +148,12 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int layer_num_fils, const int num_of_tiles_d_in,
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
-		int read_write, const int num_of_weight_groups,
-		const fms_quantization_scheme normalization, const int direction,
+		int read_write, const int num_of_weight_groups, const int direction,
 		const int layer_weights_offset, const int layer_relu) {
 #pragma HLS INLINE off
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
+	fms_quantization_scheme normalization = {0,0,0,0};
 
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic factor = pw_weights_tile_partitioning_factor dim = 2
@@ -185,14 +186,14 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 									* num_of_tiles_hw + t_in_h * num_of_tiles_w
 									+ t_in_w, tmp_channels,
 							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, normalization, layer_relu, layer);
+							read_write, layer_relu, layer);
 				} else {
 					pw_write_results_tile(results_tile, result,
 							td_o * (pw_conv_parallelism_out / pw_tile_d)
 									* num_of_tiles_hw + t_in_h * num_of_tiles_w
 									+ t_in_w, tmp_channels,
 							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, normalization, layer_relu, layer);
+							read_write, layer_relu, layer);
 				}
 			}
 		}

@@ -1,6 +1,7 @@
 #include <stdint.h>
 #include <string>
 #include "../basic_defs/basic_defs_glue.h"
+#include "../client/quantization_and_biases.h"
 
 #include "../model/model_glue.h"
 #include "../cnn_functions_v1.h"
@@ -51,7 +52,16 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		int starting_filter, const int layer, const int layer_num_fils,
 		const int layer_depth, const int num_of_weight_groups,
 		const int layer_weights_offset);
-        
+
+
+void fill_fused_zero_points(const biases_dt fused_zero_points[],
+  biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
+ int starting_d, int layer);
+
+void fill_fused_scales(const scales_dt fused_scales[],
+  scales_dt fused_scales_buffer[pw_conv_parallelism_out],
+ int starting_d, int layer);
+
 // void read_image(string file_name, uint8_t *image);
 // void read_image(string file_name, float *image);
 // void read_image_m(string file_name, float image[image_depth][image_height][image_width], bool dummy);

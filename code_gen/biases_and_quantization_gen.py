@@ -27,14 +27,14 @@ h_file = '../client/quantization_and_biases.h' #'./out/dw_weights.h'
 skip_connections_indices = utils.read_skip_connections_indices()
 
 conv_fms_scales = []
-conv_fms_scales_declaration_string = 'const static scales_dt conv_fms_scales[{}] = '.format(len(layers_weights_shapes)) + '{'
-add_fms_scales_declaration_string = 'const static scales_dt add_fms_scales[{}] = '.format(len(skip_connections_indices)) + '{'
+conv_fms_scales_declaration_string = 'const static scales_dt conv_fms_scales[] = {'
+add_fms_scales_declaration_string = 'const static scales_dt add_fms_scales[] = {'
 conv_fms_zero_points = []
 fused_zero_points = []
 biases = []
 layers_fused_parameters_offsets = []
-conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[{}] = '.format(len(layers_weights_shapes)) + '{'
-add_fms_zero_points_declaration_string = 'const static fms_dt add_fms_zero_points[{}] = '.format(len(skip_connections_indices)) + '{'
+conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[] = {'
+add_fms_zero_points_declaration_string = 'const static fms_dt add_fms_zero_points[] = {'
 fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = {\n' 
 layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = {\n' 
 
@@ -111,10 +111,8 @@ with open(h_file, 'w') as wf:
             (layers_weights_shapes[layer_index].num_of_filters, layers_weights_shapes[layer_index].depth, \
                 layers_weights_shapes[layer_index].height, layers_weights_shapes[layer_index].width))
         for i in range(layers_weights_shapes[layer_index].num_of_filters):
-            fused_zero_points.append(np.sum(weights[i,:,:,:]) * conv_fms_zero_points[layer_index] + biases[i])
-            
-        fused_zero_points_declaration_string += str(fused_zero_points).replace('[', '').replace(']', '') + ';\n'
-        
+            fused_zero_points.append(np.sum(weights[i,:,:,:]) * -conv_fms_zero_points[layer_index] + biases[i])
+                    
         layers_fused_parameters_offsets.append(layers_weights_shapes[layer_index].num_of_filters)
 
         #print(len(conv_fms_scales))
@@ -134,7 +132,7 @@ with open(h_file, 'w') as wf:
                 weights_zero_points_declaration_string += line.replace(' ', '').replace('\n', '') + ', '
         weights_zero_points_declaration_string += '\n'
 
-    fused_zero_points_declaration_string += '};\n'
+    fused_zero_points_declaration_string += str(fused_zero_points).replace('[', '').replace(']', '') +'};\n'
     fused_scales_declaration_string += '};\n'
     weights_zero_points_declaration_string += '};\n'
     biases_declaration_string += '};\n'

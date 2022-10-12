@@ -1,3 +1,6 @@
+#include "quantization_and_biases.h"
+#include "../utils/utils.h"
+
 #include "../layers/headers/layers_glue.h"
 
 using namespace std;
@@ -8,8 +11,8 @@ using namespace std;
 
 #include "../cnn_functions_v1.h"
 
-#include "../utils/utils.h"
 #include "dw_weights.h"
+#include "quantization_and_biases.h"
 #include <iostream>
 #include <math.h>
 

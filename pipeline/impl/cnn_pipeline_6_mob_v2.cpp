@@ -1,6 +1,6 @@
+#include "quantization_and_biases.h"
+#include "../utils/utils.h"
 #include "../layers/headers/layers_glue.h"
-
-using namespace std;
 
 #include "../model/model_glue.h"
 
@@ -8,10 +8,11 @@ using namespace std;
 
 #include "../cnn_functions_v1.h"
 
-#include "../utils/utils.h"
 #include "dw_weights.h"
+#include "quantization_and_biases.h"
 #include <iostream>
 #include <math.h>
+using namespace std;
 
 void _6_layer_0_3x3_conv(
     fms_dt channels_buffer[input_image_depth][layer_0_filter_size + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
