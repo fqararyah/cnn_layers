@@ -1,11 +1,12 @@
-from ctypes import util
 import numpy as np
 import utils
+
+utils.set_globals('mob_v2', 'mobilenetv2')
 
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/'+ \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
 
-weights_file_format = weights_files_location + 'weights_{}.txt'
+weights_file_format = weights_files_location + 'weights_{}_pw.txt'
 
 parallelism_file = '/media/SSD2TB/wd/cnn_layers/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
@@ -19,9 +20,9 @@ def get_ofms_parallelism(parallelism_file):
     ofms_parallelism = 1
     with open(parallelism_file, 'r') as f:
         for line in f:
-            line = line.replace(' ', '').replace(';','').replace('\n', '').replace('\t', '')
+            line = line.replace(' ', '').replace('\n', '').replace('\t', '')
             if (ofms_parallelism_key + '=') in line:
-                ofms_parallelism = int(line.split('=')[-1])
+                ofms_parallelism = int( ( line.split(';')[0] ).split('=')[-1] )
     
     return ofms_parallelism
 
@@ -30,7 +31,7 @@ layer_types = utils.read_layers_types()
 layers_weights_shapes = utils.read_layers_weight_shapes(layer_types)
 expansion_projection = utils.read_expansion_projection()
 
-formated_weights_all_layers = np.array()
+formated_weights_all_layers = []
 for i in range(first_off_chip_layer, last_off_chip_layer):
     if layer_types[i] == 'dw' or (layer_types[i] == 'pw' and expansion_projection[i] == 0):
         continue
@@ -46,10 +47,10 @@ for i in range(first_off_chip_layer, last_off_chip_layer):
         weights = np.append(weights, np.zeros(( int(ofms_parallelism - (num_filters % ofms_parallelism) ), \
              weights.shape[1], weights.shape[2], weights.shape[3])), 0).astype(np.int8)
 
-    splitted_weights = np.split(weights, int(weights.shape[0] / 3), 0)
+    splitted_weights = np.split(weights, int(weights.shape[0] / ofms_parallelism), 0)
     splitted_weights = [np.transpose(splitted_weights[i], (1,2,3,0)) for i in range(len(splitted_weights))]
     combined_weights = np.concatenate(splitted_weights, 0)
     combined_weights = combined_weights.reshape(combined_weights.size) 
-    formated_weights_all_layers = np.append(formated_weights_all_layers, combined_weights)
+    formated_weights_all_layers.append(combined_weights)
 
-np.savetxt()
+np.savetxt(off_chip_weights_file, np.concatenate(formated_weights_all_layers, 0), fmt='%i')
