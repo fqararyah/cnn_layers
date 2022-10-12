@@ -3,3 +3,4 @@
 *.pyc
 *weights.h
 code_gen/out/**
+off_chip_weights/*
