@@ -103,8 +103,13 @@ with open(out_file, 'w') as f:
             replacement_dic['*LNF*'] = layers_weights[i].num_of_filters 
         if layers_types[i] in ['dw', 'c']:
             replacement_dic['*LST*'] = layers_strides[i]
-            replacement_dic['*LPL*'] = (layers_weights[i].width - 1) /2
-            replacement_dic['*LPR*'] = (layers_weights[i].width - 1) /2 if layers_strides[i] == 1 else 0
+            padding = layers_weights[i].width - layers_strides[i]
+            if padding % 2 == 0:
+                replacement_dic['*LPL*'] = padding / 2
+                replacement_dic['*LPR*'] = padding / 2
+            else:
+                replacement_dic['*LPL*'] = 0
+                replacement_dic['*LPR*'] = padding
             replacement_dic['*LFS*'] = layers_weights[i].width
         
         replacement_dic['*i*'] = i

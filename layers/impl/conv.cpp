@@ -54,7 +54,7 @@ void write_results_tile_0(
 						normalization.fused_scales = fused_scales_buffer[in_tile_index];
 						normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 						fms_dt scaled_val = conv_relu_norm(
-								results_tile[t_d][t_h][t_w], normalization);
+								results_tile[t_d][t_h][t_w], normalization, 6);
 						results[current_tile_indx + t_d * pw_tile_hw
 								+ t_h * pw_tile_w + t_w] = scaled_val;
 					}

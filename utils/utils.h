@@ -7,9 +7,6 @@
 #include "../cnn_functions_v1.h"
 
 using namespace std;
-const int image_depth = 32;
-const int image_height = 112;
-const int image_width = 112;
 
 void _5_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
                             dw_weights_dt dw_weights_1[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
