@@ -8,36 +8,34 @@ utils.set_globals('mob_v2', 'mobilenetv2')
 bit_width = 8
 from_files = True
 on_chip_conv_and_layers = 2
-weights_files_location = '/media/fareed/D/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
+weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
 weights_file_format = {'c':'weights_{}_c.txt', 'pw': 'weights_{}_pw.txt'}
-dw_weights_h_file = '../client/conv_pw_weights.h' #'./out/dw_weights.h'
+conv_pw_weights_h_file = '../client/conv_pw_weights.h' #'./out/dw_weights.h'
 
 dw_weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i*[layer_*i*_num_fils][layer_*i*_depth]\
     [layer_*i*_filter_size][layer_*i*_filter_size]' \
-        ,'pw': 'const static weights_dt weights_*i*_pw[layer_*i*_num_fils][layer_*i*_depth]'}
+        ,'pw': 'const static weights_dt weights_*i*_pw[layer_*i*_pw_num_fils][layer_*i*_pw_depth]'}
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
+expansion_projection = utils.read_expansion_projection()
 
 num_of_generated_layers = 0
-with open(dw_weights_h_file, 'w') as f:
+with open(conv_pw_weights_h_file, 'w') as f:
     f.write('#include "../basic_defs/basic_defs_glue.h"\n')
-    f.write("#ifndef DW_WEIGHTS\n")
-    f.write("#define DW_WEIGHTS\n")
+    f.write("#ifndef CONV_PW_WEIGHTS\n")
+    f.write("#define CONV_PW_WEIGHTS\n")
 
     for ii in range(len(layers_weights)):
-        if layers_types[ii] == 'dw':
+        if layers_types[ii] == 'dw' or layers_types[ii] == 'pw' and expansion_projection[ii] == 0:
             continue
 
         if num_of_generated_layers > on_chip_conv_and_layers:
             break
-
+        
         num_of_generated_layers += 1
         weights_file = weights_files_location +  weights_file_format[layers_types[ii]].format(str(ii))
 
-        if not exists(weights_file):
-            continue
-            
         f.write(dw_weights_declaration_string[layers_types[ii]].replace(
             '*i*', str(ii)) + '= {\n')
         
