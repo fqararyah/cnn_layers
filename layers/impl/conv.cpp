@@ -4,6 +4,7 @@
 #include "../headers/norm_act.h"
 #include "../../utils/utils.h"
 #include "../../client/quantization_and_biases.h"
+#include "../../tests/test_utils.h"
 
 void fill_channels_buffer_0(
 		fms_dt channels[input_image_depth][input_image_height][input_image_width],
@@ -65,7 +66,7 @@ void write_results_tile_0(
 }
 
 void layer_0_using_pw(
-		weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3],
+		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3],
 		fms_dt channels[input_image_depth][input_image_height][input_image_width],
 		fms_dt result[max_fms_size], const int layer, const int layer_conv_d,
 		const int layer_num_fils, const int num_of_tiles_d_in,
@@ -87,7 +88,7 @@ void layer_0_using_pw(
 				for (int fil = td_o * pw_conv_parallelism_out;
 						fil < (td_o + 1) * pw_conv_parallelism_out; fil++) {
 					for (int d = 0; d < 3; d++) {
-						weights_tile[fil][d] = weights_0[fil][d][c_h][c_w];
+						weights_tile[fil][d] = (weights_dt)weights_0[fil][d][c_h][c_w];
 					}
 				}
 				conv2_ith_loop: for (int t_in_h = 0; t_in_h < num_of_tiles_h;
@@ -108,6 +109,9 @@ void layer_0_using_pw(
 						pw_conv_eng(channels_buffer, weights_tile, results_tile,
 								0, td_o * pw_conv_parallelism_out, layer_conv_d,
 								layer_num_fils);
+						dumb_pw_channels_tile("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch0.txt", channels_buffer);
+						dumb_pw_weights_tile("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w0.txt", weights_tile, layer_conv_d);
+						dumb_pw_pss_tile("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss0.txt", results_tile);
 						write_results_tile_0(results_tile, result,
 								td_o * (pw_conv_parallelism_out / pw_tile_d)
 										* num_of_tiles_hw

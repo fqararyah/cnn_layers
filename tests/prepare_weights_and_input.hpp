@@ -62,6 +62,7 @@ void fill_input_image(string file_name, fms_dt input_image[input_image_depth][in
 		int channel_index = line_num/input_image_hw;
 		int channel_row = (line_num % input_image_hw) / input_image_width;
 		int channel_col = line_num % input_image_height;
+		line_num++;
 		input_image[channel_index][channel_row][channel_col] = (fms_dt)a;
 	}
 }
