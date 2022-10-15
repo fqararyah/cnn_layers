@@ -1,3 +1,6 @@
+#ifndef UTILS
+#define UTILS
+
 #include <stdint.h>
 #include <string>
 #include "../basic_defs/basic_defs_glue.h"
@@ -68,3 +71,5 @@ void fill_fused_scales(const scales_dt fused_scales[],
 //
 // void read_weights(string file_name, weights_dt weights[32][9]);
 // void read_weights_m(string file_name, weights_dt weights[num_fils][conv_d], bool dummy);
+
+#endif

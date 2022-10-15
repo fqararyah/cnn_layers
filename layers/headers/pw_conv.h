@@ -1,7 +1,7 @@
-#include "../../basic_defs/basic_defs_glue.h"
-
 #ifndef PW_CONV
 #define PW_CONV
+
+#include "../../basic_defs/basic_defs_glue.h"
 
 void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		fms_dt result[max_fms_size], int layer, const int layer_conv_d,

@@ -1,8 +1,8 @@
-#include "ap_int.h"
-#include "ap_fixed.h"
-
 #ifndef Q_DATA_TYPES
 #define Q_DATA_TYPES
+
+#include "ap_int.h"
+#include "ap_fixed.h"
 
 //input_image
 const int input_image_dt_width = 8;

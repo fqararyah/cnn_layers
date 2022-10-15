@@ -2,7 +2,13 @@ import utils
 
 utils.set_globals('mob_v2', 'mobilenetv2')
 
-in_out_file = '../client/seml.hpp'
+DEBUGGING = True
+
+in_out_file = '../client/seml.cpp'
+in_out_header_file = '../client/seml.h'
+ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
+
+debugging_includes_block = '#include "../tests/test_utils.h"\n'
 
 expansion_block= 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
@@ -25,10 +31,14 @@ projection_block ='pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_p
     layer_*i*_pw_num_of_weight_groups_in_depth,\n\
     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
 
+debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {});\n'
+
+layers_to_debug = [0]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
 expansion_projection = utils.read_expansion_projection()
+layers_output_shapes = utils.read_layers_output_shapes()
 
 def replace(replacement_dic, block):
     for key, val in replacement_dic.items():
@@ -37,9 +47,22 @@ def replace(replacement_dic, block):
     return block
 
 file_replacement = ''
+if DEBUGGING:
+    file_replacement += debugging_includes_block
+with open(in_out_header_file, 'r') as f:
+    for line in f:
+        if len(line.replace(' ', '').replace('\t', '').replace('\n', '')) > 1 and line in debugging_includes_block:
+            continue
+        file_replacement += line
+
+with open(in_out_header_file, 'w') as f:
+    f.write(file_replacement)
+
+file_replacement = ''
 in_a_code_gen_area = False
 insert_index = -1
 layers_to_generate = [1, len(layers_types)]
+
 with open(in_out_file, 'r') as f:
     for line in f:
         if not in_a_code_gen_area:
@@ -65,22 +88,28 @@ for  layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict['*i*'] = layer_indx
     replacement_dict['*DIRECTION*'] = direction
     read_write = 0
-    if expansion_projection:
-        direction = 1 - direction
+    if layer_indx > 0:
+        if expansion_projection[layer_indx]:
+            direction = 1 - direction
 
-    if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
-        target_block = expansion_block
-        if layer_indx + 3 in skip_connections_indices:
-            read_write = 2
-    elif layer_indx % 3 == 2:
-        target_block = dw_block
-    elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
-        target_block = projection_block
-        if layer_indx + 1 in skip_connections_indices:
-            read_write = 1
-    
-    replacement_dict['*RW*'] = read_write
-    code_to_insert += replace(replacement_dict, target_block)
+        if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
+            target_block = expansion_block
+            if layer_indx + 3 in skip_connections_indices:
+                read_write = 2
+        elif layer_indx % 3 == 2:
+            target_block = dw_block
+        elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
+            target_block = projection_block
+            if layer_indx + 1 in skip_connections_indices:
+                read_write = 1
+        
+        replacement_dict['*RW*'] = read_write
+        code_to_insert += replace(replacement_dict, target_block)
+    if DEBUGGING and layer_indx in layers_to_debug:
+        code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_indx)+'.txt', \
+            'result2' if direction == 1 else 'channels', \
+            layers_output_shapes[layer_indx].depth * layers_output_shapes[layer_indx].height * \
+                 layers_output_shapes[layer_indx].width)
 
 file_replacement = file_replacement[:insert_index] + code_to_insert + file_replacement[insert_index:]
 

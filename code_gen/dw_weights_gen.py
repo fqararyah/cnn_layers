@@ -5,7 +5,7 @@ utils.set_globals('mob_v2', 'mobilenetv2')
 
 bit_width = 8
 from_files = True
-weights_files_location = '/media/fareed/D/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
+weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
 weights_file_format = 'weights_{}_dw.txt'
 dw_weights_h_file = '../client/dw_weights.h' #'./out/dw_weights.h'
 
@@ -13,6 +13,7 @@ dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
+last_gen_layer = 10 # len(layers_weights)
 
 current_index = 0
 with open(dw_weights_h_file, 'w') as f:
@@ -20,7 +21,7 @@ with open(dw_weights_h_file, 'w') as f:
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
-    for ii in range(len(layers_weights)):
+    for ii in range(last_gen_layer):
         if layers_types[ii] != 'dw':
             continue
         weights_file = weights_files_location +  weights_file_format.format(str(ii))
