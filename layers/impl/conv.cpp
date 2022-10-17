@@ -79,7 +79,7 @@ void write_results_tile_0(
 //									cout<<fused_scales[i]<<", ";
 //								}
 //								cout<<"\n";
-							}
+//							}
 //							cout
 //									<<in_tile_index <<": "<< results_tile[tile_offset * pw_tile_d
 //											+ t_d][t_h][t_w] << " > "
