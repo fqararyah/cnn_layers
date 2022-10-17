@@ -31,6 +31,7 @@ conv_fms_scales_declaration_string = 'const static scales_dt conv_fms_scales[] =
 add_fms_scales_declaration_string = 'const static scales_dt add_fms_scales[] = {'
 conv_fms_zero_points = []
 fused_zero_points = []
+fused_scales = []
 biases = []
 layers_fused_parameters_offsets = []
 conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[] = {'
@@ -121,8 +122,7 @@ with open(h_file, 'w') as wf:
                 if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
                     continue
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
-                fused_scales_declaration_string += str( weight_scale \
-                    * conv_fms_scales[layer_index]) + ', '
+                fused_scales.append( weight_scale * conv_fms_scales[layer_index])
 
                 # if len(fused_scales_declaration_string) < 100:
                 #     print(fused_scales_declaration_string)
@@ -130,16 +130,13 @@ with open(h_file, 'w') as wf:
                 #     , conv_fms_scales[layer_index], (conv_fms_scales[layer_index + 1] if conv_fms_scales[layer_index + 1] != 0 else \
                 #        conv_fms_scales[layer_index + 2] )) 
 
-
-        fused_scales_declaration_string += '\n'
-
         with open(weights_zero_points_file_format.format(layer_index), 'r') as f:
             for line in f:
                 weights_zero_points_declaration_string += line.replace(' ', '').replace('\n', '') + ', '
         weights_zero_points_declaration_string += '\n'
 
     fused_zero_points_declaration_string += str(fused_zero_points).replace('[', '').replace(']', '') +'};\n'
-    fused_scales_declaration_string += '};\n'
+    fused_scales_declaration_string += str(fused_scales).replace('[', '').replace(']', '') + '};\n'
     weights_zero_points_declaration_string += '};\n'
     biases_declaration_string += '};\n'
 

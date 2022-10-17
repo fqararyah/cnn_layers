@@ -10,7 +10,6 @@ void fill_channels_buffer_0(
 		fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w], int starting_d,
 		int starting_h, int starting_w) {
 #pragma HLS INLINE
-	//cout<<starting_d<<" "<<starting_w<<" "<<starting_w<<"\n";
 	for (int t_d = 0; t_d < pw_tile_d; t_d++) {
 		for (int t_h = 0; t_h < pw_tile_h; t_h++) {
 			for (int t_w = 0; t_w < pw_tile_w; t_w++) {
@@ -43,7 +42,7 @@ void write_results_tile_0(
 //#pragma HLS dependence variable = results intra false
 		const int current_fms_indx = (tile_indx + tile_offset * num_of_tiles_hw)
 				* pw_tile_size;
-		cout << current_fms_indx << "\n";
+		//cout << current_fms_indx << "\n";
 		for (int t_h = 0; t_h < pw_tile_h; t_h++) {
 #pragma HLS UNROLL
 			for (int t_w = 0; t_w < pw_tile_w; t_w++) {
@@ -57,7 +56,7 @@ void write_results_tile_0(
 						normalization.fused_scales =
 								fused_scales_buffer[in_tile_index];
 						normalization.ofm_zero_point =
-								conv_fms_zero_points[layer + 1];
+								conv_fms_zero_points[layer + 2];
 						normalization.ofm_scale = conv_fms_scales[layer + 2];
 						fms_dt scaled_val =
 								conv_relu_norm(
@@ -65,11 +64,27 @@ void write_results_tile_0(
 												+ t_d][t_h][t_w], normalization,
 										6);
 						if (current_fms_indx == 0) {
-							cout
-									<<in_tile_index <<": "<< results_tile[tile_offset * pw_tile_d
-											+ t_d][t_h][t_w] << " > "
-									<< scaled_val << " using " << normalization.fused_zero_point <<" "<<
-									normalization.fused_scales << " " << normalization.ofm_zero_point << "\n";
+							pss_f_dt scaled_pss =
+									(pss_f_dt) (normalization.fused_scales
+											* (results_tile[tile_offset
+													* pw_tile_d + t_d][t_h][t_w]
+													+ normalization.fused_zero_point));
+//							cout << normalization.fused_scales << "*" << "("
+//									<< results_tile[tile_offset * pw_tile_d
+//											+ t_d][t_h][t_w] << "+"
+//									<< normalization.fused_zero_point << ") = "
+//									<< scaled_pss<<"\n";
+//							if(t_d == 0){
+//								for(int i=0;i<4;i++){
+//									cout<<fused_scales[i]<<", ";
+//								}
+//								cout<<"\n";
+							}
+//							cout
+//									<<in_tile_index <<": "<< results_tile[tile_offset * pw_tile_d
+//											+ t_d][t_h][t_w] << " > "
+//									<< scaled_val << " using " << normalization.fused_zero_point <<" "<<
+//									normalization.fused_scales << " " << normalization.ofm_zero_point << "\n";
 						}
 						results[current_fms_indx + t_d * pw_tile_hw
 								+ t_h * pw_tile_w + t_w] = scaled_val;
