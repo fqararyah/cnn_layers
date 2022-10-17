@@ -5,3 +5,4 @@
 code_gen/out/**
 off_chip_weights/*
 ign*
+quantization_and_biases.h

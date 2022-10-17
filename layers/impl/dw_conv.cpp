@@ -98,6 +98,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 			normalization.fused_scales = fused_zero_points[current_layer_fused_parameters_offsets + conv_depth + d];
 			normalization.fused_zero_point = fused_scales[current_layer_fused_parameters_offsets + conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
+			normalization.ofm_scale = conv_fms_scales[layer + 1];
 			fms_dt scaled_val = dw_relu_norm(tmp, normalization, 6);
 			result[result_base_index + d * dw_tile_hw] = scaled_val;
 		}
@@ -125,6 +126,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 				normalization.fused_scales = fused_zero_points[current_layer_fused_parameters_offsets + conv_depth + d];
 				normalization.fused_zero_point = fused_scales[current_layer_fused_parameters_offsets + conv_depth + d];
 				normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
+				normalization.ofm_scale = conv_fms_scales[layer + 1];
 				fms_dt scaled_val = dw_relu_norm(tmp, normalization, 6);
 				result[result_base_index + w * dw_tile_size + d * dw_tile_hw
 						+ (i_w + padding_left) / strides] = scaled_val;

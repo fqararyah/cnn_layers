@@ -28,10 +28,10 @@ const int scales_integer_part_width = 3;
 const int biases_bit_width = 32;
 
 //pss
-const int pss_dt_width = weights_dt_width + fms_dt_width + 10; // 10 is log(1024, 2) since 1024 is the depth of the deepest filter
+const int pss_dt_width = 32;//weights_dt_width + fms_dt_width + 10; // 10 is log(1024, 2) since 1024 is the depth of the deepest filter
 const int pss_dt_offset = pss_dt_width - 1;
 const int first_conv_pss_width = fms_dt_width + layer_0_weights_dt_width + 4;
-const int dw_pss_dt_width = dw_weights_dt_width + fms_dt_width + 4; // 4 is ceil(log(9, 2))
+const int dw_pss_dt_width = 32;//dw_weights_dt_width + fms_dt_width + 4; // 4 is ceil(log(9, 2))
 const int dw_pss_dt_offset = dw_pss_dt_width - 1;					// 11;
 const int fc_weights_dt_width = 8;
 const int fc_out_dt_width = fms_dt_width + fc_weights_dt_width + 11; //11 is ceil(log(fc_layer_input_size))
@@ -41,7 +41,9 @@ typedef ap_int<weights_dt_width> weights_dt;
 typedef ap_int<dw_weights_dt_width> dw_weights_dt;
 typedef ap_int<fms_dt_width> fms_dt;
 typedef ap_int<pss_dt_width> pss_dt;	   // partial sums
+//typedef ap_fixed<pss_dt_width + 1, pss_dt_width> pss_f_dt;
 typedef ap_int<dw_pss_dt_width> dw_pss_dt; // partial sums
+//typedef ap_fixed<dw_pss_dt_width + 1, dw_pss_dt_width> dw_pss_f_dt;
 typedef ap_int<first_conv_pss_width> first_conv_pss_dt;
 typedef ap_uint<weights_group_items * weights_dt_width> weights_grp_dt;
 typedef ap_uint<11> counters_dt;

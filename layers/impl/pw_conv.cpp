@@ -64,6 +64,7 @@ void pw_write_results_tile(
 						normalization.fused_zero_point = fused_zero_points_buffer[in_tile_index];
 						normalization.fused_scales = fused_scales_buffer[in_tile_index];
 						normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
+						normalization.ofm_scale = conv_fms_scales[layer + 1];
 						fms_dt scaled_val = pw_relu_norm(
 								results_tile[t_d][t_h][t_w], normalization, layer_relu);
 						if (read_write == 0 || read_write == 2) {

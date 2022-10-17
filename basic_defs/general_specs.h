@@ -19,7 +19,7 @@ const int avgpool_input_height = 7;
 const int avgpool_input_width = 7;
 
 //testing vars
-const int DF = 1;
+const int DF = 0;
 const int start_with_pw = 1;
 
 //maxs for buffers
