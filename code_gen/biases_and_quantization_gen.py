@@ -36,7 +36,7 @@ layers_fused_parameters_offsets = []
 conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[] = {'
 add_fms_zero_points_declaration_string = 'const static fms_dt add_fms_zero_points[] = {'
 fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = {\n' 
-layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = {\n' 
+layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = {0, \n' 
 
 fused_scales_declaration_string ='const static scales_dt fused_scales[] = {'
 weights_zero_points_declaration_string ='const static fms_dt weights_zero_points[] = {'
@@ -122,8 +122,14 @@ with open(h_file, 'w') as wf:
                     continue
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
                 fused_scales_declaration_string += str( weight_scale \
-                    * conv_fms_scales[layer_index] / (conv_fms_scales[layer_index + 1] if conv_fms_scales[layer_index + 1] != 0 else \
-                       conv_fms_scales[layer_index + 2] )) + ', '
+                    * conv_fms_scales[layer_index]) + ', '
+
+                # if len(fused_scales_declaration_string) < 100:
+                #     print(fused_scales_declaration_string)
+                #     print( weight_scale \
+                #     , conv_fms_scales[layer_index], (conv_fms_scales[layer_index + 1] if conv_fms_scales[layer_index + 1] != 0 else \
+                #        conv_fms_scales[layer_index + 2] )) 
+
 
         fused_scales_declaration_string += '\n'
 
