@@ -63,4 +63,7 @@ struct fms_quantization_scheme {
 	 scales_dt fused_scales;
 	//const biases_dt bias;
 };
+
+const pss_f_dt quant_half = (pss_f_dt) 0.5;
+const dw_pss_f_dt quant_dw_half = (dw_pss_f_dt) 0.5;
 #endif

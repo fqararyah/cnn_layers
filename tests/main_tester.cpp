@@ -1,4 +1,4 @@
-#include "prepare_weights_and_input.hpp"
+#include "prepare_weights_and_inputs.h"
 #include "../client/main_file.h"
 #include <iostream>
 //#include "ap_int.h"

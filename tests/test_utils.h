@@ -10,7 +10,7 @@ using namespace std;
 
 void fill_layer_input_from_file(string file_name, int input_size);
 
-void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size], int ofms_size);
+void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size], int ofms_size, const int ofms_h, const int ofms_w);
 
 void dumb_pw_pss_tile(string file_name, pss_dt tile [pw_tile_d][pw_tile_h][pw_tile_w]);
 void dumb_pw_channels_tile(string file_name, fms_dt tile[pw_tile_d][pw_tile_h][pw_tile_w]);

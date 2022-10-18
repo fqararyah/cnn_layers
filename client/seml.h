@@ -1,7 +1,7 @@
-#include "../tests/test_utils.h"
 #ifndef SEML
 #define SEML
-
+#include "../tests/test_utils.h"
+#include "../tests/prepare_weights_and_inputs.h"
 #include "quantization_and_biases.h"
 #include "../utils/utils.h"
 #include "../layers/headers/layers_glue.h"
