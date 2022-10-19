@@ -38,7 +38,7 @@ debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [3]
+layers_to_debug = [2]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()

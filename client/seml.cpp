@@ -17,15 +17,17 @@ void seml(
 	//where 1 is the first and 20 is the last layer to be generated
 	//to the end of the previous layer
 	//begin_code_generation[0:4]
-//fill_dw_layer_weights(dw_weights_2, dw_weights_buffer, layer_2_dw_depth, layer_2_dw_filter_size, layer_2_dw_filter_size);
-//    dw_conv_3x3(dw_weights_buffer, channels, result2, 2, layer_2_dw_depth,
-//    layer_2_dw_ifm_width, layer_2_dw_ifm_height, layer_2_dw_num_of_tiles_in_d,
-//    layer_2_dw_num_of_tiles_h, layer_2_dw_num_of_tiles_w,
-//    layer_2_dw_strides, layer_2_dw_padding_left,
-//    1);
-fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fms/fms_3_32_112_112.txt",
- result2, 112, 112);
-verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_3.txt",
+fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fms/fms_2_32_112_112.txt",
+ channels, 112, 112);
+verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_2.txt",
+ channels, 401408, 112, 112);
+fill_dw_layer_weights(dw_weights_2, dw_weights_buffer, layer_2_dw_depth, layer_2_dw_filter_size, layer_2_dw_filter_size);
+    dw_conv_3x3(dw_weights_buffer, channels, result2, 2, layer_2_dw_depth,
+    layer_2_dw_ifm_width, layer_2_dw_ifm_height, layer_2_dw_num_of_tiles_in_d,
+    layer_2_dw_num_of_tiles_h, layer_2_dw_num_of_tiles_w,
+    layer_2_dw_strides, layer_2_dw_padding_left,
+    1);
+dumb_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_2.txt",
  result2, 401408, 112, 112);
 pw_conv(off_chip_weights, channels, result2, 3, layer_3_pw_depth,
     layer_3_pw_num_fils, layer_3_pw_num_of_tiles_in_d,
@@ -33,8 +35,6 @@ pw_conv(off_chip_weights, channels, result2, 3, layer_3_pw_depth,
     layer_3_pw_num_of_tiles_w, tmp_channels, 0,
     layer_3_pw_num_of_weight_groups_for_one_pass,
     1, layer_3_pw_weights_offset, layer_3_relu);
-dumb_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_3.txt",
- channels, 200704, 112, 112);
 // 	//end_code_generation
 // 	avgpool(result2, fc_input);
 	//fc_layer(fc_weights, fc_input, fc_output);
