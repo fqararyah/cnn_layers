@@ -121,12 +121,11 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 //			cout << "\n******actual_index******\n" << actual_index
 //					<< "\n*************\n";
 //		}
-		if (line == 832 || line == 904 || line == 909
-				|| line ==  888 || line == 896) {
-			cout << "\n" << line << "*****" << actual_index << "\n";
-		}
+//		if (line == 832 || line == 904 || line == 909
+//				|| line ==  888 || line == 896) {
+//			cout << "\n" << line << "*****" << actual_index << "\n";
+//		}
 		line++;
-
 	}
 }
 

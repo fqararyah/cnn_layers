@@ -31,7 +31,7 @@ pw_conv(off_chip_weights, channels, result2, 3, layer_3_pw_depth,
     layer_3_pw_num_fils, layer_3_pw_num_of_tiles_in_d,
     layer_3_pw_num_of_tiles_out_d, layer_3_pw_num_of_tiles_h,
     layer_3_pw_num_of_tiles_w, tmp_channels, 0,
-    layer_3_pw_num_of_weight_groups_in_depth,
+    layer_3_pw_num_of_weight_groups_for_one_pass,
     1, layer_3_pw_weights_offset, layer_3_relu);
 dumb_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_3.txt",
  channels, 200704, 112, 112);

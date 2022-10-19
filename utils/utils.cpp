@@ -12,6 +12,7 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		int starting_filter, const int layer, const int layer_num_fils,
 		const int layer_depth, const int num_of_weight_groups,
 		const int layer_weights_offset) {
+
 	const int current_fill_offset = layer_weights_offset
 			+ starting_filter * layer_depth / weights_group_items;
 

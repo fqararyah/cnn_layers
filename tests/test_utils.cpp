@@ -33,7 +33,7 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 
 	myfile.open(file_name);
 	for (int i = 0; i < ofms_size; i++) {
-		myfile << ofms[i] << "\n";
+		myfile << to_print_ofms[i] << "\n";
 	}
 	myfile.close();
 }

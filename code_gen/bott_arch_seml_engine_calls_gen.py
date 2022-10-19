@@ -17,7 +17,7 @@ expansion_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_p
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
-    layer_*i*_pw_num_of_weight_groups_in_depth,\n\
+    layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
 
 dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
@@ -31,7 +31,7 @@ projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
-    layer_*i*_pw_num_of_weight_groups_in_depth,\n\
+    layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
 
 debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
