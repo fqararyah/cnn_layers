@@ -71,18 +71,18 @@ void pw_write_results_tile(
 						normalization.ofm_zero_point =
 								conv_fms_zero_points[layer + 1];
 						normalization.ofm_scale = conv_fms_scales[layer + 1];
-						if(tile_indx == 0 && t_h == 0 && t_w == 0){
-							cout<<"\n************\n";
-							cout<<results_tile[t_d][t_h][t_w]<<"***results_tile[t_d][t_h][t_w]***\n";
-							cout<<normalization.fused_zero_point<<" ***fused_zero_point***\n";
-							cout<<normalization.fused_scales<<" ****fused_scales**\n";
-							cout<<normalization.ofm_zero_point<<" ***ofm_zero_point***\n";
-							cout<<normalization.ofm_scale<<" ***ofm_scale***\n";
-							cout<<pw_relu_norm(
-									results_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], normalization,
-									layer_relu)<<"****scaled_val***\n";
-							cout<<"\n************\n";
-						}
+//						if(tile_indx == 0 && t_h == 0 && t_w == 0){
+//							cout<<"\n************\n";
+//							cout<<results_tile[t_d][t_h][t_w]<<"***results_tile[t_d][t_h][t_w]***\n";
+//							cout<<normalization.fused_zero_point<<" ***fused_zero_point***\n";
+//							cout<<normalization.fused_scales<<" ****fused_scales**\n";
+//							cout<<normalization.ofm_zero_point<<" ***ofm_zero_point***\n";
+//							cout<<normalization.ofm_scale<<" ***ofm_scale***\n";
+//							cout<<pw_relu_norm(
+//									results_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], normalization,
+//									layer_relu)<<"****scaled_val***\n";
+//							cout<<"\n************\n";
+//						}
 						fms_dt scaled_val = pw_relu_norm(
 								results_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], normalization,
 								layer_relu);

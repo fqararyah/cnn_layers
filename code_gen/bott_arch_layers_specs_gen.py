@@ -17,6 +17,8 @@ const int layer_0_ofm_width = layer_0_ifm_width / layer_0_strides;\n\
 const int layer_0_num_of_tiles_out_d = int(0.99 + ((float) layer_0_num_fils) / pw_conv_parallelism_out);\n\
 const int layer_0_padding_left = *LPL*;\n\
 const int layer_0_padding_right = *LPR*;\n\
+const int layer_0_dw_padding_top = *LPT*;\n \
+const int layer_0_dw_padding_bottom = *LPB*;\n \
 const int layer_0_filter_size = *LFS*;\n \
 const int layer_0_num_of_tiles_w = layer_0_ofm_width / pw_tile_w; \n \
 const int layer_0_num_of_tiles_h = layer_0_ofm_height / pw_tile_h; \n \
@@ -49,6 +51,8 @@ const int layer_*i*_dw_ofm_height = layer_*i*_dw_ifm_height / layer_*i*_dw_strid
 const int layer_*i*_dw_ofm_width = layer_*i*_dw_ifm_width / layer_*i*_dw_strides;\n \
 const int layer_*i*_dw_padding_left = *LPL*;\n \
 const int layer_*i*_dw_padding_right = *LPR*;\n \
+const int layer_*i*_dw_padding_top = *LPT*;\n \
+const int layer_*i*_dw_padding_bottom = *LPB*;\n \
 const int layer_*i*_dw_filter_size = *LFS*;\n \
 const int layer_*i*_dw_num_of_tiles_in_d = (int)(((float)layer_*i*_dw_depth / dw_tile_d) + 0.5);\n \
 const int layer_*i*_dw_num_of_tiles_w = layer_*i*_dw_ofm_width / dw_tile_w; \n \
@@ -103,13 +107,17 @@ with open(out_file, 'w') as f:
             replacement_dic['*LNF*'] = layers_weights[i].num_of_filters 
         if layers_types[i] in ['dw', 'c']:
             replacement_dic['*LST*'] = layers_strides[i]
-            padding = layers_weights[i].width - layers_strides[i]
+            padding = int(layers_weights[i].width - layers_strides[i])
             if padding % 2 == 0:
-                replacement_dic['*LPL*'] = padding / 2
-                replacement_dic['*LPR*'] = padding / 2
+                replacement_dic['*LPL*'] = int(padding / 2)
+                replacement_dic['*LPR*'] = int(padding / 2)
+                replacement_dic['*LPT*'] = int(padding / 2)
+                replacement_dic['*LPB*'] = int(padding / 2)
             else:
                 replacement_dic['*LPL*'] = 0
                 replacement_dic['*LPR*'] = padding
+                replacement_dic['*LPT*'] = 0
+                replacement_dic['*LPB*'] = padding
             replacement_dic['*LFS*'] = layers_weights[i].width
         
         replacement_dic['*i*'] = i

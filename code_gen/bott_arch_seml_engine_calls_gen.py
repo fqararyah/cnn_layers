@@ -24,7 +24,7 @@ dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_d
     dw_conv_3x3(dw_weights_buffer, channels, result2, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
-    layer_*i*_dw_strides, layer_*i*_dw_padding_left,\n\
+    layer_*i*_dw_strides, layer_*i*_dw_padding_left,layer_*i*_dw_padding_top,\n\
     *DIRECTION*);\n'
 
 projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
@@ -101,7 +101,7 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict['*DIRECTION*'] = direction
     read_write = 0
     if layer_indx > 0:
-        if expansion_projection[layer_indx]:
+        if expansion_projection[layer_indx] or layers_types[layer_indx] != 'pw':
             direction = 1 - direction
 
         if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
@@ -122,12 +122,12 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
                                                 layers_inputs_shapes[layer_indx].height, layers_inputs_shapes[layer_indx].width)
             # insert func call
             code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
-                                                                      'channels' if direction == 1 else 'result2',
+                                                                      'channels' if direction == 0 else 'result2',
                                                                       str(
                                                                           layers_inputs_shapes[layer_indx + 1].height),
                                                                       str(layers_inputs_shapes[layer_indx + 1].width))
             code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_indx)+'.txt',
-                                                           'channels' if direction == 1 else 'result2',
+                                                           'channels' if direction == 0 else 'result2',
                                                            layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *
                                                            layers_inputs_shapes[layer_indx].width, str(
                                                                layers_inputs_shapes[layer_indx].height),
@@ -137,7 +137,7 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
 
     if DEBUGGING and layer_indx in layers_to_debug:
         code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_indx)+'.txt',
-                                                           'result2' if direction == 1 else 'channels',
+                                                           'result2' if direction == 0 else 'channels',
                                                            layers_output_shapes[layer_indx].depth * layers_output_shapes[layer_indx].height *
                                                            layers_output_shapes[layer_indx].width, str(
                                                                layers_output_shapes[layer_indx].height),
