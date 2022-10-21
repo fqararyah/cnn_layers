@@ -12,14 +12,13 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		int starting_filter, const int layer, const int layer_num_fils,
 		const int layer_depth, const int num_of_weight_groups,
 		const int layer_weights_offset) {
-
+//assumes pw_parallelism_out * filter depth is divisable by weight group number
 	const int current_fill_offset = layer_weights_offset
 			+ starting_filter * layer_depth / weights_group_items;
 
 	fill_weights_loop: for (int weight_grp_index = 0;
 			weight_grp_index < num_of_weight_groups; weight_grp_index++) {
 		weights_grp_dt chunck = weights[current_fill_offset + weight_grp_index];
-
 		for (int within_filter_index = 0;
 				within_filter_index
 						< num_of_weights_in_the_same_filter_and_group;
@@ -28,11 +27,31 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 			for (int filter_index = 0; filter_index < pw_conv_parallelism_out;
 					filter_index++) {
 #pragma HLS UNROLL
-					weights_tile[filter_index][weight_grp_index * num_of_weights_in_the_same_filter_and_group + within_filter_index] =
-							chunck((within_filter_index*pw_conv_parallelism_out+filter_index) * weights_dt_width + weights_dt_offset,
-									(within_filter_index*pw_conv_parallelism_out+filter_index) * weights_dt_width);
+				if (layer == 3) {
+					cout << (within_filter_index * pw_conv_parallelism_out
+							+ filter_index) * weights_dt_width
+							+ weights_dt_offset <<" " << weights_dt_offset << "****c**" << "\n";
+					cout<<(weights_dt)chunck(
+							(within_filter_index * pw_conv_parallelism_out
+									+ filter_index) * weights_dt_width
+									+ weights_dt_offset,
+							(within_filter_index * pw_conv_parallelism_out
+									+ filter_index) * weights_dt_width)<<"\n";
+				}
+				weights_tile[filter_index][weight_grp_index
+						* num_of_weights_in_the_same_filter_and_group
+						+ within_filter_index] = (weights_dt)chunck(
+						(within_filter_index * pw_conv_parallelism_out
+								+ filter_index) * weights_dt_width
+								+ weights_dt_offset,
+						(within_filter_index * pw_conv_parallelism_out
+								+ filter_index) * weights_dt_width);
 			}
 		}
+	}
+	if (layer == 3) {
+	cout<<(weights_dt)weights[0](7, 0)<<" @zero\n";
+	cout<<(weights_dt)weights[0](8, 15)<<" @one\n";
 	}
 }
 
@@ -70,19 +89,20 @@ void fill_dw_layer_weights(
 }
 
 void fill_fused_zero_points(const biases_dt fused_zero_points[],
-  biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
- int starting_d, int layer){
-	 const int starting_index = layers_fused_parameters_offsets[layer];
-	for(int i =0;i<pw_conv_parallelism_out; i++){
-		fused_zero_points_buffer[i] = fused_zero_points[starting_index + starting_d + i];
+		biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
+		int starting_d, int layer) {
+	const int starting_index = layers_fused_parameters_offsets[layer];
+	for (int i = 0; i < pw_conv_parallelism_out; i++) {
+		fused_zero_points_buffer[i] = fused_zero_points[starting_index
+				+ starting_d + i];
 	}
 }
 
 void fill_fused_scales(const scales_dt fused_scales[],
-  scales_dt fused_scales_buffer[pw_conv_parallelism_out],
- int starting_d, int layer){
-	 const int starting_index = layers_fused_parameters_offsets[layer];
-	for(int i =0;i<pw_conv_parallelism_out; i++){
+		scales_dt fused_scales_buffer[pw_conv_parallelism_out], int starting_d,
+		int layer) {
+	const int starting_index = layers_fused_parameters_offsets[layer];
+	for (int i = 0; i < pw_conv_parallelism_out; i++) {
 		fused_scales_buffer[i] = fused_scales[starting_index + starting_d + i];
 	}
 }

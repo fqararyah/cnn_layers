@@ -38,7 +38,7 @@ debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [2]
+layers_to_debug = [2, 3, 4, 5, 6, 7]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
@@ -100,40 +100,37 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict['*i*'] = layer_indx
     replacement_dict['*DIRECTION*'] = direction
     read_write = 0
-    if layer_indx > 0:
-        if expansion_projection[layer_indx] or layers_types[layer_indx] != 'pw':
-            direction = 1 - direction
 
-        if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
-            target_block = expansion_block
-            if layer_indx + 3 in skip_connections_indices:
-                read_write = 2
-        elif layer_indx % 3 == 2:
-            target_block = dw_block
-        elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
-            target_block = projection_block
-            if layer_indx + 1 in skip_connections_indices:
-                read_write = 1
+    if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
+        target_block = expansion_block
+        if layer_indx + 3 in skip_connections_indices:
+            read_write = 2
+    elif layer_indx % 3 == 2:
+        target_block = dw_block
+    elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
+        target_block = projection_block
+        if layer_indx + 1 in skip_connections_indices:
+            read_write = 1
 
-        replacement_dict['*RW*'] = read_write
-        if DEBUGGING and layer_indx == layers_to_debug[0]:
-            # file_name
-            ifms_file = ifms_file_format.format(layer_indx if layer_indx > 0 else 1, layers_inputs_shapes[layer_indx].depth,
-                                                layers_inputs_shapes[layer_indx].height, layers_inputs_shapes[layer_indx].width)
-            # insert func call
-            code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
-                                                                      'channels' if direction == 0 else 'result2',
-                                                                      str(
-                                                                          layers_inputs_shapes[layer_indx + 1].height),
-                                                                      str(layers_inputs_shapes[layer_indx + 1].width))
-            code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_indx)+'.txt',
-                                                           'channels' if direction == 0 else 'result2',
-                                                           layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *
-                                                           layers_inputs_shapes[layer_indx].width, str(
-                                                               layers_inputs_shapes[layer_indx].height),
-                                                           str(layers_inputs_shapes[layer_indx].width))
+    replacement_dict['*RW*'] = read_write
+    if DEBUGGING and layer_indx == layers_to_debug[0]:
+        # file_name
+        ifms_file = ifms_file_format.format(layer_indx if layer_indx > 0 else 1, layers_inputs_shapes[layer_indx].depth,
+                                            layers_inputs_shapes[layer_indx].height, layers_inputs_shapes[layer_indx].width)
+        # insert func call
+        code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
+                                                                    'channels' if direction == 0 else 'result2',
+                                                                    str(
+                                                                        layers_inputs_shapes[layer_indx + 1].height),
+                                                                    str(layers_inputs_shapes[layer_indx + 1].width))
+        code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_indx)+'.txt',
+                                                        'channels' if direction == 0 else 'result2',
+                                                        layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *
+                                                        layers_inputs_shapes[layer_indx].width, str(
+                                                            layers_inputs_shapes[layer_indx].height),
+                                                        str(layers_inputs_shapes[layer_indx].width))
 
-        code_to_insert += replace(replacement_dict, target_block)
+    code_to_insert += replace(replacement_dict, target_block)
 
     if DEBUGGING and layer_indx in layers_to_debug:
         code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_indx)+'.txt',
@@ -142,6 +139,9 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
                                                            layers_output_shapes[layer_indx].width, str(
                                                                layers_output_shapes[layer_indx].height),
                                                            str(layers_output_shapes[layer_indx].width))
+    
+    if expansion_projection[layer_indx] or layers_types[layer_indx] != 'pw':
+        direction = 1 - direction
 
 file_replacement = file_replacement[:insert_index] + \
     code_to_insert + file_replacement[insert_index:]

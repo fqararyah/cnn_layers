@@ -83,9 +83,11 @@ void pw_write_results_tile(
 //									layer_relu)<<"****scaled_val***\n";
 //							cout<<"\n************\n";
 //						}
-						fms_dt scaled_val = pw_relu_norm(
-								results_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], normalization,
-								layer_relu);
+						fms_dt scaled_val =
+								pw_relu_norm(
+										results_tile[tile_offset * pw_tile_d
+												+ t_d][t_h][t_w], normalization,
+										layer_relu);
 						if (read_write == 0 || read_write == 2) {
 							results[current_tile_indx + t_d * pw_tile_hw
 									+ t_h * pw_tile_w + t_w] = scaled_val;
@@ -128,7 +130,7 @@ void pw_conv_eng(fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w],
 								* weights_tile[f_d][starting_conv_d + t_d];
 					}
 				}
-				if(starting_conv_d == 0){
+				if (starting_conv_d == 0) {
 					results_tile[f_d][t_h][t_w] = 0;
 				}
 				results_tile[f_d][t_h][t_w] += tmp;
@@ -202,6 +204,14 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 			conv2_ith_loop: for (int t_in_h = 0; t_in_h < num_of_tiles_h;
 					t_in_h++) {
 				pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
+				// if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 4) {
+				// 	dumb_pw_pss_tile(
+				// 			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_b_pss_f.txt",
+				// 			results_tile);
+				// 	dumb_pw_weights_tile(
+				// 			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_b_w.txt",
+				// 			weights_tile, layer_conv_d);
+				// }
 
 #pragma HLS ARRAY_PARTITION variable = results_tile complete dim = 0
 				//############depth loop##############
@@ -211,10 +221,10 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 						layer_num_fils, layer_conv_d, num_of_tiles_hw,
 						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
 						num_of_tiles_d_in);
-				if (td_o == 0 && t_in_h == 0 && t_in_w == 0) {
+				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 3) {
 					dumb_pw_pss_tile(
-								"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
-								results_tile);
+							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
+							results_tile);
 					dumb_pw_weights_tile(
 							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w.txt",
 							weights_tile, layer_conv_d);

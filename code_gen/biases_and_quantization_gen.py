@@ -110,6 +110,9 @@ with open(h_file, 'w') as wf:
             (layers_weights_shapes[layer_index].num_of_filters, layers_weights_shapes[layer_index].depth, \
                 layers_weights_shapes[layer_index].height, layers_weights_shapes[layer_index].width))
         for i in range(layers_weights_shapes[layer_index].num_of_filters):
+            if layer_index == 2:
+                print(weights[i,:,:,:])
+                print('*****')
             fused_zero_points.append(np.sum(weights[i,:,:,:]) * -conv_fms_zero_points[layer_index] + biases[i])
             if layer_index == 3:
                 print(np.sum(weights[i,:,:,:]) * -conv_fms_zero_points[layer_index] , biases[i])

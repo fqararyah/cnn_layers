@@ -1,10 +1,13 @@
 import utils
+import prepare_off_chip_weights
 
 utils.set_globals('mob_v2', 'mobilenetv2')
 
 out_file = '../model/layers_specs.h' #'./out/layers_specs.h'
 
 to_replace = ['*LNF*', '*LD*', '*LW*', '*LH*', '*LST*', '*LPL*', '*LPR*', '*LFS*', '*i*', '*i-1*', '*i-1_pw*', '*LWOF*']
+
+weights_group_items = 64
 
 block_0 = "//****************************\n \
 const int layer_0_num_fils = *LNF* / alpha;\n\
@@ -102,7 +105,8 @@ with open(out_file, 'w') as f:
         if layers_types[i] == 'pw':
             replacement_dic['*LWOF*'] = cumulative_pw_weights
             if there_is_expansion_or_projection:
-                cumulative_pw_weights += layers_weights[i].get_size()
+                assert layers_weights[i].get_size() % weights_group_items == 0, layers_weights[i].get_size()
+                cumulative_pw_weights += int(layers_weights[i].get_size() / weights_group_items)
         if layers_types[i] in ['pw', 'c']:
             replacement_dic['*LNF*'] = layers_weights[i].num_of_filters 
         if layers_types[i] in ['dw', 'c']:
