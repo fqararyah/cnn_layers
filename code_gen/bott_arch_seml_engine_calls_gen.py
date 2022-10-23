@@ -38,7 +38,7 @@ debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [2, 3, 4, 5, 6, 7]
+layers_to_debug = [5, 6, 7]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
@@ -121,8 +121,8 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
         code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
                                                                     'channels' if direction == 0 else 'result2',
                                                                     str(
-                                                                        layers_inputs_shapes[layer_indx + 1].height),
-                                                                    str(layers_inputs_shapes[layer_indx + 1].width))
+                                                                        layers_inputs_shapes[layer_indx].height),
+                                                                    str(layers_inputs_shapes[layer_indx].width))
         code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_indx)+'.txt',
                                                         'channels' if direction == 0 else 'result2',
                                                         layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *

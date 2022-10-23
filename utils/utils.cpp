@@ -27,17 +27,17 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 			for (int filter_index = 0; filter_index < pw_conv_parallelism_out;
 					filter_index++) {
 #pragma HLS UNROLL
-				if (layer == 3) {
-					cout << (within_filter_index * pw_conv_parallelism_out
-							+ filter_index) * weights_dt_width
-							+ weights_dt_offset <<" " << weights_dt_offset << "****c**" << "\n";
-					cout<<(weights_dt)chunck(
-							(within_filter_index * pw_conv_parallelism_out
-									+ filter_index) * weights_dt_width
-									+ weights_dt_offset,
-							(within_filter_index * pw_conv_parallelism_out
-									+ filter_index) * weights_dt_width)<<"\n";
-				}
+//				if (layer == 3) {
+//					cout << (within_filter_index * pw_conv_parallelism_out
+//							+ filter_index) * weights_dt_width
+//							+ weights_dt_offset <<" " << weights_dt_offset << "****c**" << "\n";
+//					cout<<(weights_dt)chunck(
+//							(within_filter_index * pw_conv_parallelism_out
+//									+ filter_index) * weights_dt_width
+//									+ weights_dt_offset,
+//							(within_filter_index * pw_conv_parallelism_out
+//									+ filter_index) * weights_dt_width)<<"\n";
+//				}
 				weights_tile[filter_index][weight_grp_index
 						* num_of_weights_in_the_same_filter_and_group
 						+ within_filter_index] = (weights_dt)chunck(
@@ -49,10 +49,10 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 			}
 		}
 	}
-	if (layer == 3) {
-	cout<<(weights_dt)weights[0](7, 0)<<" @zero\n";
-	cout<<(weights_dt)weights[0](8, 15)<<" @one\n";
-	}
+//	if (layer == 3) {
+//	cout<<(weights_dt)weights[0](7, 0)<<" @zero\n";
+//	cout<<(weights_dt)weights[0](8, 15)<<" @one\n";
+//	}
 }
 
 void fill_layer_0_weights(

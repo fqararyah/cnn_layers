@@ -71,11 +71,11 @@ void fill_input_image(string file_name,
 }
 
 void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
-		const int ofms_h, const int ofms_w) {
+		const int ifms_h, const int ifms_w) {
 
-	int ofms_hw = ofms_h * ofms_w;
-	int num_tiles_h = ofms_h / pw_tile_h;
-	int num_tiles_w = ofms_w / pw_tile_w;
+	int ofms_hw = ifms_h * ifms_w;
+	int num_tiles_h = ifms_h / pw_tile_h;
+	int num_tiles_w = ifms_w / pw_tile_w;
 	int num_tiles_hw = num_tiles_h * num_tiles_w;
 
 	int a;
@@ -83,8 +83,8 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 	std::ifstream infile(file_name);
 	while (infile >> a) {
 		int z = (line / ofms_hw);
-		int h = ((line % ofms_hw) / ofms_w);
-		int w = (line % ofms_w);
+		int h = ((line % ofms_hw) / ifms_w);
+		int w = (line % ifms_w);
 
 		int tile_in_z = z / pw_tile_d;
 		int tile_in_h = h / pw_tile_h;
