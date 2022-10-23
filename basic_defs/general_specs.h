@@ -28,7 +28,7 @@ const int max_conv_h = 3;
 const int max_conv_w = 3;
 const int max_fms_size =
 	DF ? switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth: 112 * 112 * 96;
-const int max_tmp_fms_size = 56 * 56 * 24 * 8 / 7;
+const int max_tmp_fms_size = 56 * 56 * 24;
 
 const int median_depth = 96;
 const int median_width = 14;

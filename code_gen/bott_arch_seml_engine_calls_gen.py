@@ -13,7 +13,7 @@ ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
 debugging_includes_block = '#include "../tests/test_utils.h"\n'
 
-expansion_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
+expansion_projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
@@ -27,18 +27,18 @@ dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_d
     layer_*i*_dw_strides, layer_*i*_dw_padding_left,layer_*i*_dw_padding_top,\n\
     *DIRECTION*);\n'
 
-projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
-    layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
-    layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
-    layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
-    layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
-    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
+# projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
+#     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
+#     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
+#     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
+#     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
+#     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
 
 debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [5, 6, 7]
+layers_to_debug = [2, 3, 4, 5, 6, 7, 8, 9]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
@@ -101,16 +101,14 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict['*DIRECTION*'] = direction
     read_write = 0
 
-    if layer_indx % 3 == 1 and expansion_projection[layer_indx]:
-        target_block = expansion_block
-        if layer_indx + 3 in skip_connections_indices:
+    if layers_types[layer_indx] == 'pw' and expansion_projection[layer_indx]:
+        target_block = expansion_projection_block
+        if layer_indx + 4 in skip_connections_indices:
             read_write = 2
-    elif layer_indx % 3 == 2:
-        target_block = dw_block
-    elif layer_indx % 3 == 0 and expansion_projection[layer_indx]:
-        target_block = projection_block
         if layer_indx + 1 in skip_connections_indices:
             read_write = 1
+    elif layers_types[layer_indx] == 'dw':
+        target_block = dw_block
 
     replacement_dict['*RW*'] = read_write
     if DEBUGGING and layer_indx == layers_to_debug[0]:

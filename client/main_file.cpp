@@ -5,8 +5,8 @@ void top_func(
 		weights_grp_dt off_chip_weights[all_pw_weights], int &result_o) {
 
 	fms_dt channels[max_fms_size];
-	fms_dt result[max_fms_size] = { 0 };
-	fms_dt result2[max_fms_size] = { 0 };
+	fms_dt result[max_fms_size];
+	fms_dt result2[max_fms_size];
 	fms_dt tmp_channels[max_tmp_fms_size];
 	fms_dt tmp_channels_2[max_tmp_fms_size];
 

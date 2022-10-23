@@ -101,6 +101,13 @@ void pw_write_results_tile(
 						if (read_write == 2) {	//2: expansion
 							tmp_channels[current_tile_indx + t_d * pw_tile_hw
 									+ t_h * pw_tile_w + t_w] = scaled_val;
+//							if (current_tile_indx + t_d * pw_tile_hw
+//									+ t_h * pw_tile_w + t_w >= 56 * 56 * 24)
+//								cout << layer << ": " << tile_indx << " "
+//										<< current_tile_indx << " " << t_d
+//										<< " " << t_h << " " << t_w << " "
+//										<< current_tile_indx + t_d * pw_tile_hw
+//												+ t_h * pw_tile_w + t_w << "\n";
 						}
 					}
 				}
@@ -230,19 +237,19 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 							weights_tile, layer_conv_d);
 				}
 				//} // end depth loop###########
+				int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d)
+						* num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w;
+//				if (layer == 7) {
+//					cout<<num_of_tiles_d_out<<" x "<<num_of_tiles_hw<<" x "<<num_of_tiles_w<<"\n";
+//				}
 				if (direction) {
-					pw_write_results_tile(results_tile, channels,
-							td_o * (pw_conv_parallelism_out / pw_tile_d)
-									* num_of_tiles_hw + t_in_h * num_of_tiles_w
-									+ t_in_w, tmp_channels,
-							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, layer_relu, layer, num_of_tiles_hw);
+					pw_write_results_tile(results_tile, channels, tile_index,
+							tmp_channels, td_o * pw_conv_parallelism_out,
+							layer_num_fils, read_write, layer_relu, layer,
+							num_of_tiles_hw);
 				} else {
-					pw_write_results_tile(results_tile, result,
-							td_o * (pw_conv_parallelism_out / pw_tile_d)
-									* num_of_tiles_hw + t_in_h * num_of_tiles_w
-									+ t_in_w, tmp_channels,
-							td_o * pw_conv_parallelism_out, layer_num_fils,
+					pw_write_results_tile(results_tile, result, tile_index,
+							tmp_channels, td_o * pw_conv_parallelism_out, layer_num_fils,
 							read_write, layer_relu, layer, num_of_tiles_hw);
 				}
 			}
