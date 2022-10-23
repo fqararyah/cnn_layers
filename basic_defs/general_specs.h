@@ -18,6 +18,9 @@ const int avgpool_input_depth = 1280;
 const int avgpool_input_height = 7;
 const int avgpool_input_width = 7;
 
+//skip connection
+const int skip_connection_depth = 3;
+
 //testing vars
 const int DF = 0;
 const int start_with_pw = 1;

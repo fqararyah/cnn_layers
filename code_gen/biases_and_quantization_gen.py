@@ -28,13 +28,15 @@ skip_connections_indices = utils.read_skip_connections_indices()
 
 conv_fms_scales = []
 conv_fms_scales_declaration_string = 'const static scales_dt conv_fms_scales[] = {'
-add_fms_scales_declaration_string = 'const static scales_dt add_fms_scales[] = {'
+add_layers_fms_scales = [0] * len(layers_types)
+add_layers_fms_scales_declaration_string = 'const static scales_dt add_layers_fms_scales[] = {'
 conv_fms_zero_points = []
 fused_zero_points = []
 fused_scales = []
 layers_fused_parameters_offsets = []
 conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[] = {'
-add_fms_zero_points_declaration_string = 'const static fms_dt add_fms_zero_points[] = {'
+add_layers_fms_zero_points = [0] * len(layers_types)
+add_layers_fms_zero_points_declaration_string = 'const static fms_dt add_layers_fms_zero_points[] = {'
 fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = {\n' 
 layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = {0, \n' 
 
@@ -62,14 +64,16 @@ with open(h_file, 'w') as wf:
         with open(fms_zero_points_file_format.format(fms_file_index), 'r') as f:
             zero_point = f.readline().replace(' ', '').replace('\n', '')
 
-        if layer_index - skip_connection_current_index in skip_connections_indices and \
-             skip_connections_indices[layer_index - skip_connection_current_index] == 1:
-            skip_connections_indices[layer_index - skip_connection_current_index] = 0
-            add_fms_scales_declaration_string += scale
-            add_fms_zero_points_declaration_string += zero_point
-            if skip_connection_current_index < len(skip_connections_indices) - 1:
-                add_fms_scales_declaration_string += ', '
-                add_fms_zero_points_declaration_string += ', '
+        if layer_index - skip_connection_current_index + 1 in skip_connections_indices \
+        and skip_connections_indices[layer_index - skip_connection_current_index + 1] == 1:
+            skip_connections_indices[layer_index - skip_connection_current_index + 1] = 0
+            add_layers_fms_scales[layer_index - skip_connection_current_index] = float(scale)
+            add_layers_fms_zero_points[layer_index - skip_connection_current_index] = int(zero_point)
+            #add_layers_fms_scales_declaration_string += scale
+            #add_layers_fms_zero_points_declaration_string += zero_point
+            #if skip_connection_current_index < len(skip_connections_indices) - 1:
+            #    add_layers_fms_scales_declaration_string += ', '
+            #    add_layers_fms_zero_points_declaration_string += ', '
                 
             skip_connection_current_index += 1 
         else:
@@ -81,13 +85,13 @@ with open(h_file, 'w') as wf:
 
         fms_file_index += 1 
 
-    add_fms_scales_declaration_string += '};\n'
-    add_fms_zero_points_declaration_string += '};\n'
+    #add_layers_fms_scales_declaration_string += '};\n'
+    #add_layers_fms_zero_points_declaration_string += '};\n'
     #conv_fms_scales += '};\n'
     #conv_fms_zero_points += '};\n'
 
-    wf.write(add_fms_scales_declaration_string)
-    wf.write(add_fms_zero_points_declaration_string)
+    wf.write(add_layers_fms_scales_declaration_string + str(add_layers_fms_scales).replace('[', '').replace(']', '};\n'))
+    wf.write(add_layers_fms_zero_points_declaration_string + str(add_layers_fms_zero_points).replace('[', '').replace(']', '};\n'))
     #wf.write(conv_fms_scales)
     wf.write(conv_fms_zero_pointsdeclaration_string + str(conv_fms_zero_points).replace('[', '').replace(']', '};\n') )
     wf.write(conv_fms_scales_declaration_string + str(conv_fms_scales).replace('[', '').replace(']', '};\n') )
