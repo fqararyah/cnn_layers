@@ -45,22 +45,34 @@ void pw_write_results_tile(
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
-	scales_dt current_layer_scale = conv_fms_scales[layer];
-	scales_dt skip_connection_other_layer_scale = conv_fms_scales[layer
-			- skip_connection_depth];
-	biases_dt current_layer_zero_point = conv_fms_zero_points[layer];
-	biases_dt skip_connection_other_layer_zero_point =
-			conv_fms_zero_points[layer - skip_connection_depth];
-	scales_dt add_layer_scale = add_layers_fms_scales[layer];
-	biases_dt add_layer_zero_point = add_layers_fms_zero_points[layer];
+	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer,
+			starting_d, layer);
+	fill_fused_scales(fused_scales, fused_scales_buffer, starting_d, layer);
+	scales_dt current_layer_scale = conv_fms_scales[layer + 1];
+	scales_dt skip_connection_other_layer_scale;
+	biases_dt skip_connection_other_layer_zero_point;
+
+	if (add_layers_fms_scales[layer
+								- skip_connection_depth + 1] == 0) {
+		skip_connection_other_layer_scale = conv_fms_scales[layer
+				- skip_connection_depth + 1];
+		skip_connection_other_layer_zero_point = conv_fms_zero_points[layer
+				- skip_connection_depth + 1];
+	}
+	else {
+		skip_connection_other_layer_scale = add_layers_fms_scales[layer
+				- skip_connection_depth + 1];
+		skip_connection_other_layer_zero_point = add_layers_fms_zero_points[layer
+				- skip_connection_depth + 1];
+	}
+
+	biases_dt current_layer_zero_point = conv_fms_zero_points[layer + 1];
+	scales_dt add_layer_scale = add_layers_fms_scales[layer + 1];
+	biases_dt add_layer_zero_point = add_layers_fms_zero_points[layer + 1];
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 	normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 	normalization.ofm_scale = conv_fms_scales[layer + 1];
-
-	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer,
-			starting_d, layer);
-	fill_fused_scales(fused_scales, fused_scales_buffer, starting_d, layer);
 
 	for (int tile_offset = 0; tile_offset < num_of_tiles_processed_in_parallel;
 			tile_offset++) {
@@ -80,7 +92,7 @@ void pw_write_results_tile(
 #pragma HLS UNROLL
 					for (int t_w = 0; t_w < pw_tile_w; t_w++) {
 #pragma HLS UNROLL
-//						if(tile_indx == 0 && t_h == 0 && t_w == 0){
+//						if(tile_indx == 0 && layer == 10){
 //							cout<<"\n************\n";
 //							cout<<results_tile[t_d][t_h][t_w]<<"***results_tile[t_d][t_h][t_w]***\n";
 //							cout<<normalization.fused_zero_point<<" ***fused_zero_point***\n";
@@ -97,26 +109,39 @@ void pw_write_results_tile(
 										results_tile[tile_offset * pw_tile_d
 												+ t_d][t_h][t_w], normalization,
 										layer_relu);
+						const int to_write_at_index = current_tile_indx
+								+ t_d * pw_tile_hw + t_h * pw_tile_w + t_w;
 						if (read_write == 0 || read_write == 2) {
-							results[current_tile_indx + t_d * pw_tile_hw
-									+ t_h * pw_tile_w + t_w] = scaled_val;
-						} else if (read_write == 1) {	//1: projection
-							pss_f_dt tmp = (
-									current_layer_scale
+							results[to_write_at_index] = scaled_val;
+						} else if (read_write == 1 || read_write == 3) {	//1: projection
+							pss_f_dt tmp =
+									(current_layer_scale
 											* (scaled_val
-													+ current_layer_zero_point)
+													- current_layer_zero_point)
 											+ skip_connection_other_layer_scale
-													* (tmp_channels[current_tile_indx
-															+ t_d * pw_tile_hw
-															+ t_h * pw_tile_w
-															+ t_w]
-															+ skip_connection_other_layer_zero_point) ) / add_layer_scale + add_layer_zero_point;
-							results[current_tile_indx + t_d * pw_tile_hw
-									+ t_h * pw_tile_w + t_w] = (fms_dt) tmp;
+													* (tmp_channels[to_write_at_index]
+															- skip_connection_other_layer_zero_point))
+											/ add_layer_scale
+											+ add_layer_zero_point;
+							results[to_write_at_index] = (fms_dt) tmp;
+							if(read_write == 3){
+								tmp_channels[to_write_at_index] = (fms_dt) tmp;
+							}
+							if (layer == 18) {
+								cout << current_layer_scale << " * ( "
+										<< scaled_val << " - "
+										<< current_layer_zero_point << ") + "
+										<< skip_connection_other_layer_scale
+										<< " * ("
+										<< tmp_channels[to_write_at_index]
+										<< " - "
+										<< skip_connection_other_layer_zero_point
+										<< ")) / " << add_layer_scale << " + "
+										<< add_layer_zero_point << "\n";
+							}
 						}
 						if (read_write == 2) {	//2: expansion
-							tmp_channels[current_tile_indx + t_d * pw_tile_hw
-									+ t_h * pw_tile_w + t_w] = scaled_val;
+							tmp_channels[to_write_at_index] = scaled_val;
 //							if (current_tile_indx + t_d * pw_tile_hw
 //									+ t_h * pw_tile_w + t_w >= 56 * 56 * 24)
 //								cout << layer << ": " << tile_indx << " "
@@ -185,15 +210,14 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 					td_i * num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w,
 					td_i * pw_tile_d, layer_conv_d);
 		}
-//		if (t_in_h == 0 && t_in_w == 0) {
-//			dumb_pw_channels_tile(
-//					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch."+
-//					to_string(td_i)+"txt",
-//					channels_buffer);
-//			dumb_pw_pss_tile(
-//					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss"
-//							+ to_string(td_i) + ".txt", results_tile);
-//		}
+		if (t_in_h == 0 && t_in_w == 0) {
+			dumb_pw_channels_tile(
+					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch."
+							+ to_string(td_i) + "txt", channels_buffer);
+			dumb_pw_pss_tile(
+					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss"
+							+ to_string(td_i) + ".txt", results_tile);
+		}
 		pw_conv_eng(channels_buffer, weights_tile, results_tile,
 				td_i * pw_tile_d, td_o * pw_conv_parallelism_out, layer_conv_d,
 				layer_num_fils);

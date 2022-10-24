@@ -13,8 +13,12 @@ ofms_parallelism_key = 'pw_conv_parallelism_out'
 
 off_chip_weights_file = '/media/SSD2TB/wd/cnn_layers/off_chip_weights/off_chip_weights.txt'
 
+layer_types = utils.read_layers_types()
+layers_weights_shapes = utils.read_layers_weight_shapes(layer_types)
+expansion_projection = utils.read_expansion_projection()
+
 first_off_chip_layer = 2
-last_off_chip_layer = 10 # len(layer_types)
+last_off_chip_layer = len(layer_types)
 
 def get_ofms_parallelism(parallelism_file):
     ofms_parallelism = 1

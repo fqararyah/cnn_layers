@@ -108,7 +108,7 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 				}
 			}
 		}
-//		if (starting_h == 8 && w == 0) {
+//		if (layer == 11 && starting_h == 16 && w == 0) {
 //			cout << "\n********xxx********\n";
 //			for (int i = 0; i < 3; i++) {
 //				for (int j = w * dw_tile_w; j < w * dw_tile_w + dw_tile_w; j++) {
@@ -212,7 +212,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 
 				const int in_tile_index = d * dw_tile_hw + h_offset * dw_tile_w
 						+ ((padding_left + i_w) % dw_tile_w);
-//				if (conv_depth == 0 && starting_h == 4 && w == 0) {
+//				if (layer == 11 && conv_depth == 0 && starting_h == 8 && w == 0) {
 //					cout << "\n************\n";
 //					cout << tmp << "***results_tile[t_d][t_h][t_w]***\n";
 //					cout << normalization.fused_zero_point

@@ -1,3 +1,4 @@
+from unittest import skip
 import utils
 
 utils.set_globals('mob_v2', 'mobilenetv2')
@@ -38,7 +39,7 @@ debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [2, 3, 4, 5, 6, 7, 8, 9]
+layers_to_debug = [2, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 28, 38, 39]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
@@ -92,6 +93,7 @@ with open(in_out_file, 'r') as f:
 
 direction = 1
 code_to_insert = ''
+skip_connections_depth = 3
 
 skip_connections_indices = utils.read_skip_connections_indices()
 for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
@@ -103,10 +105,11 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
 
     if layers_types[layer_indx] == 'pw' and expansion_projection[layer_indx]:
         target_block = expansion_projection_block
-        if layer_indx + 4 in skip_connections_indices:
-            read_write = 2
+        if layer_indx + skip_connections_depth + 1 in skip_connections_indices:
+            read_write += 2
         if layer_indx + 1 in skip_connections_indices:
-            read_write = 1
+            read_write += 1
+
     elif layers_types[layer_indx] == 'dw':
         target_block = dw_block
 
