@@ -127,18 +127,18 @@ void pw_write_results_tile(
 							if(read_write == 3){
 								tmp_channels[to_write_at_index] = (fms_dt) tmp;
 							}
-							if (layer == 18) {
-								cout << current_layer_scale << " * ( "
-										<< scaled_val << " - "
-										<< current_layer_zero_point << ") + "
-										<< skip_connection_other_layer_scale
-										<< " * ("
-										<< tmp_channels[to_write_at_index]
-										<< " - "
-										<< skip_connection_other_layer_zero_point
-										<< ")) / " << add_layer_scale << " + "
-										<< add_layer_zero_point << "\n";
-							}
+//							if (layer == 18) {
+//								cout << current_layer_scale << " * ( "
+//										<< scaled_val << " - "
+//										<< current_layer_zero_point << ") + "
+//										<< skip_connection_other_layer_scale
+//										<< " * ("
+//										<< tmp_channels[to_write_at_index]
+//										<< " - "
+//										<< skip_connection_other_layer_zero_point
+//										<< ")) / " << add_layer_scale << " + "
+//										<< add_layer_zero_point << "\n";
+//							}
 						}
 						if (read_write == 2) {	//2: expansion
 							tmp_channels[to_write_at_index] = scaled_val;

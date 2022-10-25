@@ -39,14 +39,21 @@ debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [2, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 24, 28, 38, 39]
+layers_to_debug = [20, 21, 22, 23, 24,25,26,27,28,29,30,31,32,33,34,35,36,37,38,39,40, 41,42,43]# 22, 23, 24, 28, 38, 39]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
 expansion_projection = utils.read_expansion_projection()
 layers_output_shapes = utils.read_layers_output_shapes()
 layers_inputs_shapes = utils.read_layers_input_shapes()
+skip_connections_indices = utils.read_skip_connections_indices()
 
+tf_lite_to_my_cnn_layer_ifms_mapping = {0: 1}
+skip_connections_so_far = 0
+for layer_index in range(1, len(layers_output_shapes)):
+    if layer_index in skip_connections_indices:
+        skip_connections_so_far += 1
+    tf_lite_to_my_cnn_layer_ifms_mapping[layer_index] = layer_index + skip_connections_so_far
 
 def replace(replacement_dic, block):
     for key, val in replacement_dic.items():
@@ -116,7 +123,7 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict['*RW*'] = read_write
     if DEBUGGING and layer_indx == layers_to_debug[0]:
         # file_name
-        ifms_file = ifms_file_format.format(layer_indx if layer_indx > 0 else 1, layers_inputs_shapes[layer_indx].depth,
+        ifms_file = ifms_file_format.format(tf_lite_to_my_cnn_layer_ifms_mapping[layer_indx], layers_inputs_shapes[layer_indx].depth,
                                             layers_inputs_shapes[layer_indx].height, layers_inputs_shapes[layer_indx].width)
         # insert func call
         code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,

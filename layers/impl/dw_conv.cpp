@@ -7,7 +7,7 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[dw_tile_d][3][max_dw_input_width], int layer,
 		int tile_indx, const int starting_h, const int strides,
 		const int number_of_tiles_w, int number_of_tiles_h, int startintg_d,
-		const int layer_conv_d, const int layer_width, int first_time,
+		const int layer_conv_d, const int layer_ifm_width, int first_time,
 		const int padding_top) {
 #pragma HLS INLINE off
 
@@ -108,16 +108,17 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 				}
 			}
 		}
-//		if (layer == 11 && starting_h == 16 && w == 0) {
-//			cout << "\n********xxx********\n";
-//			for (int i = 0; i < 3; i++) {
-//				for (int j = w * dw_tile_w; j < w * dw_tile_w + dw_tile_w; j++) {
-//					cout << channels_tile[0][i][j] << " ";
-//				}
-//				cout << "\n";
-//			}
-//			cout << "\n********xxx********\n";
-//		}
+		cout<<w<<"\n";
+		if (layer == 20 && starting_h == 2 && (w == 2 || w == 3) ) {
+			cout << "\n********xxx********"<<w<<"\n";
+			for (int i = 0; i < 3; i++) {
+				for (int j = w * dw_tile_w; j < w * dw_tile_w + dw_tile_w; j++) {
+					cout << channels_tile[0][i][j] << " ";
+				}
+				cout << "\n";
+			}
+			cout << "\n********xxx********\n";
+		}
 	}
 
 }
@@ -125,7 +126,7 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		const dw_weights_dt weights[max_conv_d][3][3],
 		fms_dt result[max_fms_size], int tile_index, const int starting_h,
-		int conv_depth, const int num_of_tiles_w, const int layer_width,
+		int conv_depth, const int num_of_tiles_w, const int layer_ifm_width,
 		const int strides, const int padding_left, int layer) {
 #pragma HLS INLINE off
 
@@ -192,7 +193,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 					for (int c_h = 0; c_h < 3; c_h++) {
 #pragma HLS UNROLL
 						const int absolute_i_w_index = tile_base_offset + i_w * strides + c_w;
-						if (absolute_i_w_index < num_of_tiles_w * strides * dw_tile_w) { // within ifm or padding right check
+						if (absolute_i_w_index < layer_ifm_width) { // within ifm or padding right check
 							tmp += weights[conv_depth + d][c_h][c_w]
 									* channels_tile[d][c_h][absolute_i_w_index];
 //							cout
@@ -212,25 +213,27 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 
 				const int in_tile_index = d * dw_tile_hw + h_offset * dw_tile_w
 						+ ((padding_left + i_w) % dw_tile_w);
-//				if (layer == 11 && conv_depth == 0 && starting_h == 8 && w == 0) {
-//					cout << "\n************\n";
-//					cout << tmp << "***results_tile[t_d][t_h][t_w]***\n";
-//					cout << normalization.fused_zero_point
-//							<< " ***fused_zero_point***\n";
-//					cout << normalization.fused_scales
-//							<< " ****fused_scales**\n";
-//					cout << normalization.ofm_zero_point
-//							<< " ***ofm_zero_point***\n";
-//					cout << normalization.ofm_scale << " ***ofm_scale***\n";
-//					cout << scaled_val << "****scaled_val***\n";
-//					cout << scaled_val << " " << starting_index + in_tile_index
-//							<< "*****ll****";
-//					cout << scaled_val << " " << starting_index + in_tile_index
-//							<< " " << w << " "
-//							<< (tile_index + w
-//									+ ((padding_left + i_w) / dw_tile_w))
-//									* dw_tile_size << "\n";
-//				}
+
+				//cout<<num_of_tiles_w<<"\n";
+				if (layer == 20 && conv_depth == 0 && starting_h == 1 && w == 1) {
+					cout << "\n************\n";
+					cout << tmp << "***results_tile[t_d][t_h][t_w]***\n";
+					cout << normalization.fused_zero_point
+							<< " ***fused_zero_point***\n";
+					cout << normalization.fused_scales
+							<< " ****fused_scales**\n";
+					cout << normalization.ofm_zero_point
+							<< " ***ofm_zero_point***\n";
+					cout << normalization.ofm_scale << " ***ofm_scale***\n";
+					cout << scaled_val << "****scaled_val***\n";
+					cout << scaled_val << " " << starting_index + in_tile_index
+							<< "*****ll****";
+					cout << scaled_val << " " << starting_index + in_tile_index
+							<< " " << w << " "
+							<< (tile_index + w
+									+ ((padding_left + i_w) / dw_tile_w))
+									* dw_tile_size << "\n";
+				}
 				result[current_starting_index + in_tile_index] = scaled_val;
 			}
 		}
@@ -239,8 +242,8 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 
 void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
-		const int layer, const int layer_conv_d, const int layer_width,
-		const int layer_height, const int num_of_tiles_d,
+		const int layer, const int layer_conv_d, const int layer_ifm_width,
+		const int layer_ifm_height, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
 		const int padding_left, const int padding_top, const int direction) {
 #pragma HLS INLINE off
@@ -256,14 +259,17 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 //#pragma HLS ARRAY_PARTITION variable = channels_tile_2 cyclic factor=pw_tile_w dim = 3
 
 	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
+	const int num_of_input_tiles_w = (layer_ifm_width / dw_tile_w);
+	const int num_of_input_tiles_h = (layer_ifm_width / dw_tile_h);
+	const int num_of_input_tiles_hw = num_of_input_tiles_w * num_of_input_tiles_h;
 	//int odd_even = 0;
 	dw_conv_itd_loop: for (int t_in_d = 0; t_in_d < num_of_tiles_d; t_in_d++) {
 
-		dw_conv_ith_loop: for (int t_in_h = 0; t_in_h < layer_height;
+		dw_conv_ith_loop: for (int t_in_h = 0; t_in_h < layer_ifm_height;
 				t_in_h++) {
 
-			int fill_tile_index = t_in_d * num_of_tiles_hw * strides * strides
-					+ (t_in_h * strides / dw_tile_h) * num_of_tiles_w * strides;
+			int fill_tile_index = t_in_d * num_of_input_tiles_hw
+					+ (t_in_h * strides / dw_tile_h) * num_of_input_tiles_w;
 			int conv_tile_index = t_in_d * num_of_tiles_hw
 					+ (t_in_h / dw_tile_h) * num_of_tiles_w;
 
@@ -271,12 +277,12 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 //				dw_fill_channels_buffer_3x3(result, channels_tile_1, tile_index,
 //						layer, t_in_h, strides, num_of_tiles_w,
 //						num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
-//						layer_width, 1);
+//						layer_ifm_width, 1);
 //			} else {
 //				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
 //						tile_index, t_in_h, strides, num_of_tiles_w,
 //						num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
-//						layer_width, 1);
+//						layer_ifm_width, 1);
 //			}
 
 //			tile_index = t_in_d * num_of_tiles_hw
@@ -285,43 +291,43 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 			if (direction) {
 				dw_fill_channels_buffer_3x3(result, channels_tile_1, layer,
 						fill_tile_index, t_in_h * strides, strides,
-						num_of_tiles_w * strides, num_of_tiles_h * strides,
-						t_in_d * dw_tile_d, layer_conv_d, layer_width,
+						num_of_input_tiles_w, num_of_input_tiles_h,
+						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_width,
 						t_in_h == 0, padding_top);
 				dw_conv_eng3x3(channels_tile_1, weights,
 						channels, //channels_tile_2
 						conv_tile_index, t_in_h, t_in_d * dw_tile_d,
-						num_of_tiles_w, layer_width, strides, padding_left,
+						num_of_tiles_w, layer_ifm_width, strides, padding_left,
 						layer);
 			} else {
 				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
 						fill_tile_index, t_in_h * strides, strides,
-						num_of_tiles_w * strides, num_of_tiles_h * strides,
-						t_in_d * dw_tile_d, layer_conv_d, layer_width,
+						num_of_input_tiles_w, num_of_input_tiles_h,
+						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_width,
 						t_in_h == 0, padding_top);
 				dw_conv_eng3x3(channels_tile_1, weights, result,
 						conv_tile_index, //channels_tile_2
-						t_in_h, t_in_d * dw_tile_d, num_of_tiles_w, layer_width,
+						t_in_h, t_in_d * dw_tile_d, num_of_tiles_w, layer_ifm_width,
 						strides, padding_left, layer);
 			}
 //			} else {
 //				if (direction) {
 //					dw_conv_eng3x3(channels_tile_1, weights, channels,
 //							tile_index, t_in_h, t_in_d * dw_tile_d,
-//							num_of_tiles_w, layer_width, strides, padding_left,
+//							num_of_tiles_w, layer_ifm_width, strides, padding_left,
 //							layer);
 //					dw_fill_channels_buffer_3x3(result, channels_tile_2, layer,
 //							tile_index, t_in_h, strides, num_of_tiles_w,
 //							num_of_tiles_h, t_in_d * dw_tile_d, layer_conv_d,
-//							layer_width, 0);
+//							layer_ifm_width, 0);
 //				} else {
 //					dw_conv_eng3x3(channels_tile_1, weights, result, tile_index,
 //							t_in_h, t_in_d * dw_tile_d, num_of_tiles_w,
-//							layer_width, strides, padding_left, layer);
+//							layer_ifm_width, strides, padding_left, layer);
 //					dw_fill_channels_buffer_3x3(channels, channels_tile_2,
 //							layer, tile_index, t_in_h, strides,
 //							num_of_tiles_w, num_of_tiles_h, t_in_d * dw_tile_d,
-//							layer_conv_d, layer_width, 0);
+//							layer_conv_d, layer_ifm_width, 0);
 //				}
 //			}
 			//odd_even = 1 - odd_even;

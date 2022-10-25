@@ -13,7 +13,8 @@ dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
-last_gen_layer = 40#len(layers_weights)
+first_gen_layer = 15
+last_gen_layer = 47#len(layers_weights)
 
 current_index = 0
 with open(dw_weights_h_file, 'w') as f:
@@ -21,7 +22,7 @@ with open(dw_weights_h_file, 'w') as f:
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
-    for ii in range(last_gen_layer):
+    for ii in range(first_gen_layer, last_gen_layer):
         if layers_types[ii] != 'dw':
             continue
         weights_file = weights_files_location +  weights_file_format.format(str(ii))

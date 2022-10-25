@@ -8,9 +8,15 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int ofms_size, const int ofms_h, const int ofms_w) {
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	int num_tiles_hw = (ofms_w / pw_tile_w) * (ofms_h / pw_tile_h);
-	int num_tiles_w = (ofms_w / pw_tile_w);
-	for (int i = 0; i < ofms_size; i++) {
+	bool skip_vals[max_tmp_fms_size];
+
+	int scaled_ofms_w = ((int)(((float)ofms_w / pw_tile_w) + 0.99)) * pw_tile_w;
+	int scaled_ofms_h = ((int)(((float)ofms_h / pw_tile_h) + 0.99)) * pw_tile_h;
+	int num_tiles_hw = (scaled_ofms_w / pw_tile_w) * (scaled_ofms_h / pw_tile_h);
+	int num_tiles_w = (scaled_ofms_w / pw_tile_w);
+	int scaled_ofms_size = ofms_size * scaled_ofms_h * scaled_ofms_w / (ofms_h * ofms_w);
+
+	for (int i = 0; i < scaled_ofms_size; i++) {
 		int tile_indx = i / pw_tile_size;
 		int in_tile_index = i % pw_tile_size;
 
@@ -23,17 +29,25 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int in_tile_w = in_tile_index % pw_tile_w;
 
 		int actual_index = (tile_in_d * pw_tile_d + in_tile_d)
-				* (ofms_h * ofms_w)
-				+ (tile_in_h * pw_tile_h + in_tile_h) * ofms_w
+				* (scaled_ofms_h * scaled_ofms_w)
+				+ (tile_in_h * pw_tile_h + in_tile_h) * scaled_ofms_w
 				+ tile_in_w * pw_tile_w + in_tile_w;
 
+		if (tile_in_w * pw_tile_w + in_tile_w >= ofms_w
+				|| tile_in_h * pw_tile_h + in_tile_h >= ofms_h) {
+			skip_vals[actual_index] = 1;
+		} else {
+			skip_vals[actual_index] = 0;
+		}
 		to_print_ofms[actual_index] = ofms[i];
 
 	}
 
 	myfile.open(file_name);
-	for (int i = 0; i < ofms_size; i++) {
-		myfile << to_print_ofms[i] << "\n";
+	for (int i = 0; i < scaled_ofms_size; i++) {
+		if(!skip_vals[i]){
+			myfile << to_print_ofms[i] << "\n";
+		}
 	}
 	myfile.close();
 }

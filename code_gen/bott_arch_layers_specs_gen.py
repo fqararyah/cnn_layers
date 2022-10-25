@@ -57,9 +57,9 @@ const int layer_*i*_dw_padding_right = *LPR*;\n \
 const int layer_*i*_dw_padding_top = *LPT*;\n \
 const int layer_*i*_dw_padding_bottom = *LPB*;\n \
 const int layer_*i*_dw_filter_size = *LFS*;\n \
-const int layer_*i*_dw_num_of_tiles_in_d = (int)(((float)layer_*i*_dw_depth / dw_tile_d) + 0.5);\n \
-const int layer_*i*_dw_num_of_tiles_w = layer_*i*_dw_ofm_width / dw_tile_w; \n \
-const int layer_*i*_dw_num_of_tiles_h = layer_*i*_dw_ofm_height / dw_tile_h; \n \
+const int layer_*i*_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_*i*_dw_depth / dw_tile_d);\n \
+const int layer_*i*_dw_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_dw_ofm_width / dw_tile_w); \n \
+const int layer_*i*_dw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_dw_ofm_height / dw_tile_h); \n \
 //****************************\n"
 
 projection_block = "//****************************\n \

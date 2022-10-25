@@ -46,9 +46,9 @@ const int layer_2_dw_num_fils = layer_1_pw_num_fils / alpha;
  const int layer_2_dw_padding_top = 1;
  const int layer_2_dw_padding_bottom = 1;
  const int layer_2_dw_filter_size = 3;
- const int layer_2_dw_num_of_tiles_in_d = (int)(((float)layer_2_dw_depth / dw_tile_d) + 0.5);
- const int layer_2_dw_num_of_tiles_w = layer_2_dw_ofm_width / dw_tile_w; 
- const int layer_2_dw_num_of_tiles_h = layer_2_dw_ofm_height / dw_tile_h; 
+ const int layer_2_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_2_dw_depth / dw_tile_d);
+ const int layer_2_dw_num_of_tiles_w = (int)(0.99 + (float)layer_2_dw_ofm_width / dw_tile_w); 
+ const int layer_2_dw_num_of_tiles_h = (int)(0.99 + (float)layer_2_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_3_pw_num_fils = 16 / alpha;
@@ -92,9 +92,9 @@ const int layer_5_dw_num_fils = layer_4_pw_num_fils / alpha;
  const int layer_5_dw_padding_top = 0;
  const int layer_5_dw_padding_bottom = 1;
  const int layer_5_dw_filter_size = 3;
- const int layer_5_dw_num_of_tiles_in_d = (int)(((float)layer_5_dw_depth / dw_tile_d) + 0.5);
- const int layer_5_dw_num_of_tiles_w = layer_5_dw_ofm_width / dw_tile_w; 
- const int layer_5_dw_num_of_tiles_h = layer_5_dw_ofm_height / dw_tile_h; 
+ const int layer_5_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_5_dw_depth / dw_tile_d);
+ const int layer_5_dw_num_of_tiles_w = (int)(0.99 + (float)layer_5_dw_ofm_width / dw_tile_w); 
+ const int layer_5_dw_num_of_tiles_h = (int)(0.99 + (float)layer_5_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_6_pw_num_fils = 24 / alpha;
@@ -138,9 +138,9 @@ const int layer_8_dw_num_fils = layer_7_pw_num_fils / alpha;
  const int layer_8_dw_padding_top = 1;
  const int layer_8_dw_padding_bottom = 1;
  const int layer_8_dw_filter_size = 3;
- const int layer_8_dw_num_of_tiles_in_d = (int)(((float)layer_8_dw_depth / dw_tile_d) + 0.5);
- const int layer_8_dw_num_of_tiles_w = layer_8_dw_ofm_width / dw_tile_w; 
- const int layer_8_dw_num_of_tiles_h = layer_8_dw_ofm_height / dw_tile_h; 
+ const int layer_8_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_8_dw_depth / dw_tile_d);
+ const int layer_8_dw_num_of_tiles_w = (int)(0.99 + (float)layer_8_dw_ofm_width / dw_tile_w); 
+ const int layer_8_dw_num_of_tiles_h = (int)(0.99 + (float)layer_8_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_9_pw_num_fils = 24 / alpha;
@@ -184,9 +184,9 @@ const int layer_11_dw_num_fils = layer_10_pw_num_fils / alpha;
  const int layer_11_dw_padding_top = 0;
  const int layer_11_dw_padding_bottom = 1;
  const int layer_11_dw_filter_size = 3;
- const int layer_11_dw_num_of_tiles_in_d = (int)(((float)layer_11_dw_depth / dw_tile_d) + 0.5);
- const int layer_11_dw_num_of_tiles_w = layer_11_dw_ofm_width / dw_tile_w; 
- const int layer_11_dw_num_of_tiles_h = layer_11_dw_ofm_height / dw_tile_h; 
+ const int layer_11_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_11_dw_depth / dw_tile_d);
+ const int layer_11_dw_num_of_tiles_w = (int)(0.99 + (float)layer_11_dw_ofm_width / dw_tile_w); 
+ const int layer_11_dw_num_of_tiles_h = (int)(0.99 + (float)layer_11_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_12_pw_num_fils = 32 / alpha;
@@ -230,9 +230,9 @@ const int layer_14_dw_num_fils = layer_13_pw_num_fils / alpha;
  const int layer_14_dw_padding_top = 1;
  const int layer_14_dw_padding_bottom = 1;
  const int layer_14_dw_filter_size = 3;
- const int layer_14_dw_num_of_tiles_in_d = (int)(((float)layer_14_dw_depth / dw_tile_d) + 0.5);
- const int layer_14_dw_num_of_tiles_w = layer_14_dw_ofm_width / dw_tile_w; 
- const int layer_14_dw_num_of_tiles_h = layer_14_dw_ofm_height / dw_tile_h; 
+ const int layer_14_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_14_dw_depth / dw_tile_d);
+ const int layer_14_dw_num_of_tiles_w = (int)(0.99 + (float)layer_14_dw_ofm_width / dw_tile_w); 
+ const int layer_14_dw_num_of_tiles_h = (int)(0.99 + (float)layer_14_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_15_pw_num_fils = 32 / alpha;
@@ -276,9 +276,9 @@ const int layer_17_dw_num_fils = layer_16_pw_num_fils / alpha;
  const int layer_17_dw_padding_top = 1;
  const int layer_17_dw_padding_bottom = 1;
  const int layer_17_dw_filter_size = 3;
- const int layer_17_dw_num_of_tiles_in_d = (int)(((float)layer_17_dw_depth / dw_tile_d) + 0.5);
- const int layer_17_dw_num_of_tiles_w = layer_17_dw_ofm_width / dw_tile_w; 
- const int layer_17_dw_num_of_tiles_h = layer_17_dw_ofm_height / dw_tile_h; 
+ const int layer_17_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_17_dw_depth / dw_tile_d);
+ const int layer_17_dw_num_of_tiles_w = (int)(0.99 + (float)layer_17_dw_ofm_width / dw_tile_w); 
+ const int layer_17_dw_num_of_tiles_h = (int)(0.99 + (float)layer_17_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_18_pw_num_fils = 32 / alpha;
@@ -322,9 +322,9 @@ const int layer_20_dw_num_fils = layer_19_pw_num_fils / alpha;
  const int layer_20_dw_padding_top = 0;
  const int layer_20_dw_padding_bottom = 1;
  const int layer_20_dw_filter_size = 3;
- const int layer_20_dw_num_of_tiles_in_d = (int)(((float)layer_20_dw_depth / dw_tile_d) + 0.5);
- const int layer_20_dw_num_of_tiles_w = layer_20_dw_ofm_width / dw_tile_w; 
- const int layer_20_dw_num_of_tiles_h = layer_20_dw_ofm_height / dw_tile_h; 
+ const int layer_20_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_20_dw_depth / dw_tile_d);
+ const int layer_20_dw_num_of_tiles_w = (int)(0.99 + (float)layer_20_dw_ofm_width / dw_tile_w); 
+ const int layer_20_dw_num_of_tiles_h = (int)(0.99 + (float)layer_20_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_21_pw_num_fils = 64 / alpha;
@@ -368,9 +368,9 @@ const int layer_23_dw_num_fils = layer_22_pw_num_fils / alpha;
  const int layer_23_dw_padding_top = 1;
  const int layer_23_dw_padding_bottom = 1;
  const int layer_23_dw_filter_size = 3;
- const int layer_23_dw_num_of_tiles_in_d = (int)(((float)layer_23_dw_depth / dw_tile_d) + 0.5);
- const int layer_23_dw_num_of_tiles_w = layer_23_dw_ofm_width / dw_tile_w; 
- const int layer_23_dw_num_of_tiles_h = layer_23_dw_ofm_height / dw_tile_h; 
+ const int layer_23_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_23_dw_depth / dw_tile_d);
+ const int layer_23_dw_num_of_tiles_w = (int)(0.99 + (float)layer_23_dw_ofm_width / dw_tile_w); 
+ const int layer_23_dw_num_of_tiles_h = (int)(0.99 + (float)layer_23_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_24_pw_num_fils = 64 / alpha;
@@ -414,9 +414,9 @@ const int layer_26_dw_num_fils = layer_25_pw_num_fils / alpha;
  const int layer_26_dw_padding_top = 1;
  const int layer_26_dw_padding_bottom = 1;
  const int layer_26_dw_filter_size = 3;
- const int layer_26_dw_num_of_tiles_in_d = (int)(((float)layer_26_dw_depth / dw_tile_d) + 0.5);
- const int layer_26_dw_num_of_tiles_w = layer_26_dw_ofm_width / dw_tile_w; 
- const int layer_26_dw_num_of_tiles_h = layer_26_dw_ofm_height / dw_tile_h; 
+ const int layer_26_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_26_dw_depth / dw_tile_d);
+ const int layer_26_dw_num_of_tiles_w = (int)(0.99 + (float)layer_26_dw_ofm_width / dw_tile_w); 
+ const int layer_26_dw_num_of_tiles_h = (int)(0.99 + (float)layer_26_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_27_pw_num_fils = 64 / alpha;
@@ -460,9 +460,9 @@ const int layer_29_dw_num_fils = layer_28_pw_num_fils / alpha;
  const int layer_29_dw_padding_top = 1;
  const int layer_29_dw_padding_bottom = 1;
  const int layer_29_dw_filter_size = 3;
- const int layer_29_dw_num_of_tiles_in_d = (int)(((float)layer_29_dw_depth / dw_tile_d) + 0.5);
- const int layer_29_dw_num_of_tiles_w = layer_29_dw_ofm_width / dw_tile_w; 
- const int layer_29_dw_num_of_tiles_h = layer_29_dw_ofm_height / dw_tile_h; 
+ const int layer_29_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_29_dw_depth / dw_tile_d);
+ const int layer_29_dw_num_of_tiles_w = (int)(0.99 + (float)layer_29_dw_ofm_width / dw_tile_w); 
+ const int layer_29_dw_num_of_tiles_h = (int)(0.99 + (float)layer_29_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_30_pw_num_fils = 64 / alpha;
@@ -506,9 +506,9 @@ const int layer_32_dw_num_fils = layer_31_pw_num_fils / alpha;
  const int layer_32_dw_padding_top = 1;
  const int layer_32_dw_padding_bottom = 1;
  const int layer_32_dw_filter_size = 3;
- const int layer_32_dw_num_of_tiles_in_d = (int)(((float)layer_32_dw_depth / dw_tile_d) + 0.5);
- const int layer_32_dw_num_of_tiles_w = layer_32_dw_ofm_width / dw_tile_w; 
- const int layer_32_dw_num_of_tiles_h = layer_32_dw_ofm_height / dw_tile_h; 
+ const int layer_32_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_32_dw_depth / dw_tile_d);
+ const int layer_32_dw_num_of_tiles_w = (int)(0.99 + (float)layer_32_dw_ofm_width / dw_tile_w); 
+ const int layer_32_dw_num_of_tiles_h = (int)(0.99 + (float)layer_32_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_33_pw_num_fils = 96 / alpha;
@@ -552,9 +552,9 @@ const int layer_35_dw_num_fils = layer_34_pw_num_fils / alpha;
  const int layer_35_dw_padding_top = 1;
  const int layer_35_dw_padding_bottom = 1;
  const int layer_35_dw_filter_size = 3;
- const int layer_35_dw_num_of_tiles_in_d = (int)(((float)layer_35_dw_depth / dw_tile_d) + 0.5);
- const int layer_35_dw_num_of_tiles_w = layer_35_dw_ofm_width / dw_tile_w; 
- const int layer_35_dw_num_of_tiles_h = layer_35_dw_ofm_height / dw_tile_h; 
+ const int layer_35_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_35_dw_depth / dw_tile_d);
+ const int layer_35_dw_num_of_tiles_w = (int)(0.99 + (float)layer_35_dw_ofm_width / dw_tile_w); 
+ const int layer_35_dw_num_of_tiles_h = (int)(0.99 + (float)layer_35_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_36_pw_num_fils = 96 / alpha;
@@ -598,9 +598,9 @@ const int layer_38_dw_num_fils = layer_37_pw_num_fils / alpha;
  const int layer_38_dw_padding_top = 1;
  const int layer_38_dw_padding_bottom = 1;
  const int layer_38_dw_filter_size = 3;
- const int layer_38_dw_num_of_tiles_in_d = (int)(((float)layer_38_dw_depth / dw_tile_d) + 0.5);
- const int layer_38_dw_num_of_tiles_w = layer_38_dw_ofm_width / dw_tile_w; 
- const int layer_38_dw_num_of_tiles_h = layer_38_dw_ofm_height / dw_tile_h; 
+ const int layer_38_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_38_dw_depth / dw_tile_d);
+ const int layer_38_dw_num_of_tiles_w = (int)(0.99 + (float)layer_38_dw_ofm_width / dw_tile_w); 
+ const int layer_38_dw_num_of_tiles_h = (int)(0.99 + (float)layer_38_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_39_pw_num_fils = 96 / alpha;
@@ -644,9 +644,9 @@ const int layer_41_dw_num_fils = layer_40_pw_num_fils / alpha;
  const int layer_41_dw_padding_top = 0;
  const int layer_41_dw_padding_bottom = 1;
  const int layer_41_dw_filter_size = 3;
- const int layer_41_dw_num_of_tiles_in_d = (int)(((float)layer_41_dw_depth / dw_tile_d) + 0.5);
- const int layer_41_dw_num_of_tiles_w = layer_41_dw_ofm_width / dw_tile_w; 
- const int layer_41_dw_num_of_tiles_h = layer_41_dw_ofm_height / dw_tile_h; 
+ const int layer_41_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_41_dw_depth / dw_tile_d);
+ const int layer_41_dw_num_of_tiles_w = (int)(0.99 + (float)layer_41_dw_ofm_width / dw_tile_w); 
+ const int layer_41_dw_num_of_tiles_h = (int)(0.99 + (float)layer_41_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_42_pw_num_fils = 160 / alpha;
@@ -690,9 +690,9 @@ const int layer_44_dw_num_fils = layer_43_pw_num_fils / alpha;
  const int layer_44_dw_padding_top = 1;
  const int layer_44_dw_padding_bottom = 1;
  const int layer_44_dw_filter_size = 3;
- const int layer_44_dw_num_of_tiles_in_d = (int)(((float)layer_44_dw_depth / dw_tile_d) + 0.5);
- const int layer_44_dw_num_of_tiles_w = layer_44_dw_ofm_width / dw_tile_w; 
- const int layer_44_dw_num_of_tiles_h = layer_44_dw_ofm_height / dw_tile_h; 
+ const int layer_44_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_44_dw_depth / dw_tile_d);
+ const int layer_44_dw_num_of_tiles_w = (int)(0.99 + (float)layer_44_dw_ofm_width / dw_tile_w); 
+ const int layer_44_dw_num_of_tiles_h = (int)(0.99 + (float)layer_44_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_45_pw_num_fils = 160 / alpha;
@@ -736,9 +736,9 @@ const int layer_47_dw_num_fils = layer_46_pw_num_fils / alpha;
  const int layer_47_dw_padding_top = 1;
  const int layer_47_dw_padding_bottom = 1;
  const int layer_47_dw_filter_size = 3;
- const int layer_47_dw_num_of_tiles_in_d = (int)(((float)layer_47_dw_depth / dw_tile_d) + 0.5);
- const int layer_47_dw_num_of_tiles_w = layer_47_dw_ofm_width / dw_tile_w; 
- const int layer_47_dw_num_of_tiles_h = layer_47_dw_ofm_height / dw_tile_h; 
+ const int layer_47_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_47_dw_depth / dw_tile_d);
+ const int layer_47_dw_num_of_tiles_w = (int)(0.99 + (float)layer_47_dw_ofm_width / dw_tile_w); 
+ const int layer_47_dw_num_of_tiles_h = (int)(0.99 + (float)layer_47_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_48_pw_num_fils = 160 / alpha;
@@ -782,9 +782,9 @@ const int layer_50_dw_num_fils = layer_49_pw_num_fils / alpha;
  const int layer_50_dw_padding_top = 1;
  const int layer_50_dw_padding_bottom = 1;
  const int layer_50_dw_filter_size = 3;
- const int layer_50_dw_num_of_tiles_in_d = (int)(((float)layer_50_dw_depth / dw_tile_d) + 0.5);
- const int layer_50_dw_num_of_tiles_w = layer_50_dw_ofm_width / dw_tile_w; 
- const int layer_50_dw_num_of_tiles_h = layer_50_dw_ofm_height / dw_tile_h; 
+ const int layer_50_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_50_dw_depth / dw_tile_d);
+ const int layer_50_dw_num_of_tiles_w = (int)(0.99 + (float)layer_50_dw_ofm_width / dw_tile_w); 
+ const int layer_50_dw_num_of_tiles_h = (int)(0.99 + (float)layer_50_dw_ofm_height / dw_tile_h); 
  //****************************
 //****************************
  const int layer_51_pw_num_fils = 320 / alpha;
