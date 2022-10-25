@@ -52,18 +52,16 @@ void pw_write_results_tile(
 	scales_dt skip_connection_other_layer_scale;
 	biases_dt skip_connection_other_layer_zero_point;
 
-	if (add_layers_fms_scales[layer
-								- skip_connection_depth + 1] == 0) {
+	if (add_layers_fms_scales[layer - skip_connection_depth + 1] == 0) {
 		skip_connection_other_layer_scale = conv_fms_scales[layer
 				- skip_connection_depth + 1];
 		skip_connection_other_layer_zero_point = conv_fms_zero_points[layer
 				- skip_connection_depth + 1];
-	}
-	else {
+	} else {
 		skip_connection_other_layer_scale = add_layers_fms_scales[layer
 				- skip_connection_depth + 1];
-		skip_connection_other_layer_zero_point = add_layers_fms_zero_points[layer
-				- skip_connection_depth + 1];
+		skip_connection_other_layer_zero_point =
+				add_layers_fms_zero_points[layer - skip_connection_depth + 1];
 	}
 
 	biases_dt current_layer_zero_point = conv_fms_zero_points[layer + 1];
@@ -92,18 +90,7 @@ void pw_write_results_tile(
 #pragma HLS UNROLL
 					for (int t_w = 0; t_w < pw_tile_w; t_w++) {
 #pragma HLS UNROLL
-//						if(tile_indx == 0 && layer == 10){
-//							cout<<"\n************\n";
-//							cout<<results_tile[t_d][t_h][t_w]<<"***results_tile[t_d][t_h][t_w]***\n";
-//							cout<<normalization.fused_zero_point<<" ***fused_zero_point***\n";
-//							cout<<normalization.fused_scales<<" ****fused_scales**\n";
-//							cout<<normalization.ofm_zero_point<<" ***ofm_zero_point***\n";
-//							cout<<normalization.ofm_scale<<" ***ofm_scale***\n";
-//							cout<<pw_relu_norm(
-//									results_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], normalization,
-//									layer_relu)<<"****scaled_val***\n";
-//							cout<<"\n************\n";
-//						}
+
 						fms_dt scaled_val =
 								pw_relu_norm(
 										results_tile[tile_offset * pw_tile_d
@@ -113,7 +100,28 @@ void pw_write_results_tile(
 								+ t_d * pw_tile_hw + t_h * pw_tile_w + t_w;
 						if (read_write == 0 || read_write == 2) {
 							results[to_write_at_index] = scaled_val;
-						} else if (read_write == 1 || read_write == 3) {	//1: projection
+//							if (layer == 22 && to_write_at_index == 0) {
+//								cout << "\n************\n";
+//								cout << results_tile[t_d][t_h][t_w]
+//										<< "***results_tile[t_d][t_h][t_w]***\n";
+//								cout << normalization.fused_zero_point
+//										<< " ***fused_zero_point***\n";
+//								cout << normalization.fused_scales
+//										<< " ****fused_scales**\n";
+//								cout << normalization.ofm_zero_point
+//										<< " ***ofm_zero_point***\n";
+//								cout << normalization.ofm_scale
+//										<< " ***ofm_scale***\n";
+//								cout
+//										<< pw_relu_norm(
+//												results_tile[tile_offset
+//														* pw_tile_d + t_d][t_h][t_w],
+//												normalization, layer_relu)
+//										<< "****scaled_val***\n";
+//								cout<<to_write_at_index<<"***index***\n";
+//								cout << "\n************\n";
+//							}
+						} else if (read_write == 1 || read_write == 3) {//1: projection
 							pss_f_dt tmp =
 									(current_layer_scale
 											* (scaled_val
@@ -124,7 +132,7 @@ void pw_write_results_tile(
 											/ add_layer_scale
 											+ add_layer_zero_point;
 							results[to_write_at_index] = (fms_dt) tmp;
-							if(read_write == 3){
+							if (read_write == 3) {
 								tmp_channels[to_write_at_index] = (fms_dt) tmp;
 							}
 //							if (layer == 18) {
@@ -191,7 +199,7 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 		fms_dt results[max_fms_size],
 		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 		pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
-		const int layer_num_fils, const int layer_conv_d,
+		int layer, const int layer_num_fils, const int layer_conv_d,
 		const int num_of_tiles_hw, const int num_of_tiles_w, int td_o,
 		int t_in_h, int t_in_w, const int direction,
 		const int num_of_tiles_d_in) {
@@ -210,10 +218,10 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 					td_i * num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w,
 					td_i * pw_tile_d, layer_conv_d);
 		}
-		if (t_in_h == 0 && t_in_w == 0) {
-			dumb_pw_channels_tile(
-					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch."
-							+ to_string(td_i) + "txt", channels_buffer);
+		if (layer == 22) {
+//			dumb_pw_channels_tile(
+//					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch."
+//							+ to_string(td_i) + "txt", channels_buffer);
 			dumb_pw_pss_tile(
 					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss"
 							+ to_string(td_i) + ".txt", results_tile);
@@ -265,16 +273,16 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 				//conv2_otd_loop: for (int td_i_o = 0;
 				//		td_i_o < current_depth_to_median_depth; td_i_o++) {
 				pw_conv_pipeline(channels, result, weights_tile, results_tile,
-						layer_num_fils, layer_conv_d, num_of_tiles_hw,
+						layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
 						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
 						num_of_tiles_d_in);
 				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 3) {
-					dumb_pw_pss_tile(
-							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
-							results_tile);
-					dumb_pw_weights_tile(
-							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w.txt",
-							weights_tile, layer_conv_d);
+//					dumb_pw_pss_tile(
+//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
+//							results_tile);
+//					dumb_pw_weights_tile(
+//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w.txt",
+//							weights_tile, layer_conv_d);
 				}
 				//} // end depth loop###########
 				int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d)

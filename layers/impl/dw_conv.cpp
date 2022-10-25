@@ -108,17 +108,17 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 				}
 			}
 		}
-		cout<<w<<"\n";
-		if (layer == 20 && starting_h == 2 && (w == 2 || w == 3) ) {
-			cout << "\n********xxx********"<<w<<"\n";
-			for (int i = 0; i < 3; i++) {
-				for (int j = w * dw_tile_w; j < w * dw_tile_w + dw_tile_w; j++) {
-					cout << channels_tile[0][i][j] << " ";
-				}
-				cout << "\n";
-			}
-			cout << "\n********xxx********\n";
-		}
+//		cout<<w<<"\n";
+//		if (layer == 20 && starting_h == 2 && (w == 2 || w == 3) ) {
+//			cout << "\n********xxx********"<<w<<"\n";
+//			for (int i = 0; i < 3; i++) {
+//				for (int j = w * dw_tile_w; j < w * dw_tile_w + dw_tile_w; j++) {
+//					cout << channels_tile[0][i][j] << " ";
+//				}
+//				cout << "\n";
+//			}
+//			cout << "\n********xxx********\n";
+//		}
 	}
 
 }
@@ -215,25 +215,25 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 						+ ((padding_left + i_w) % dw_tile_w);
 
 				//cout<<num_of_tiles_w<<"\n";
-				if (layer == 20 && conv_depth == 0 && starting_h == 1 && w == 1) {
-					cout << "\n************\n";
-					cout << tmp << "***results_tile[t_d][t_h][t_w]***\n";
-					cout << normalization.fused_zero_point
-							<< " ***fused_zero_point***\n";
-					cout << normalization.fused_scales
-							<< " ****fused_scales**\n";
-					cout << normalization.ofm_zero_point
-							<< " ***ofm_zero_point***\n";
-					cout << normalization.ofm_scale << " ***ofm_scale***\n";
-					cout << scaled_val << "****scaled_val***\n";
-					cout << scaled_val << " " << starting_index + in_tile_index
-							<< "*****ll****";
-					cout << scaled_val << " " << starting_index + in_tile_index
-							<< " " << w << " "
-							<< (tile_index + w
-									+ ((padding_left + i_w) / dw_tile_w))
-									* dw_tile_size << "\n";
-				}
+//				if (layer == 20 && conv_depth == 0 && starting_h == 1 && w == 1) {
+//					cout << "\n************\n";
+//					cout << tmp << "***results_tile[t_d][t_h][t_w]***\n";
+//					cout << normalization.fused_zero_point
+//							<< " ***fused_zero_point***\n";
+//					cout << normalization.fused_scales
+//							<< " ****fused_scales**\n";
+//					cout << normalization.ofm_zero_point
+//							<< " ***ofm_zero_point***\n";
+//					cout << normalization.ofm_scale << " ***ofm_scale***\n";
+//					cout << scaled_val << "****scaled_val***\n";
+//					cout << scaled_val << " " << starting_index + in_tile_index
+//							<< "*****ll****";
+//					cout << scaled_val << " " << starting_index + in_tile_index
+//							<< " " << w << " "
+//							<< (tile_index + w
+//									+ ((padding_left + i_w) / dw_tile_w))
+//									* dw_tile_size << "\n";
+//				}
 				result[current_starting_index + in_tile_index] = scaled_val;
 			}
 		}
