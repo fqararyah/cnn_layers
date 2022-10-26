@@ -39,11 +39,9 @@ debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-layers_to_debug = [\
-    #2, 12, 13, 20, 21, 22, 23, 24,25,26,27,28,29,30,31\
-    #,\
-    32,33,34\
-        ]#,35,36,37,38,39,40, 41,42,43]# 22, 23, 24, 28, 38, 39]
+#layers_to_debug = [2, 12, 13, 20, 21, 22, 23, 24,25,26,27,28,29,30,31, 32,33,34, 35, 36, 37, 38, 39, 40, 41, 
+#layers_to_debug = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+layers_to_debug = [51, 52]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
@@ -93,11 +91,19 @@ with open(in_out_file, 'r') as f:
         if utils.START_CODE_GENERATION_SIGNAL in line:
             insert_index = len(file_replacement)
             in_a_code_gen_area = True
-            if '[' in line and ']' in line:
-                layers_to_generate = [int(x) for x in (
-                    line.replace(' ', '').split('[')[1].split(']')[
-                        0].replace(' ', '').split(':')
-                )]
+            if '[' in line and ']' in line and ':' in line:
+                layers_to_generate_start_end = line.replace(' ', '').split('[')[1].split(']')[
+                            0].replace(' ', '').split(':')
+            
+            if 2 == len(layers_to_generate_start_end) and layers_to_generate_start_end[-1] == '':
+                layers_to_generate_start_end[-1] = len(layers_inputs_shapes)
+            elif 1 == len(layers_to_generate_start_end):
+                layers_to_generate_start_end.append(len(layers_inputs_shapes))
+            
+            
+            layers_to_generate = [int(x) for x in (
+                int(layers_to_generate_start_end[0]), int(layers_to_generate_start_end[1])
+            )]
         elif utils.END_CODE_GENERATION_SIGNAL in line:
             in_a_code_gen_area = False
             file_replacement += line

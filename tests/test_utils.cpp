@@ -8,7 +8,8 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int ofms_size, const int ofms_h, const int ofms_w) {
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	bool skip_vals[98304];
+	const int size = 147456;
+	bool skip_vals[size];
 
 	int scaled_ofms_w = ((int) (((float) ofms_w / pw_tile_w) + 0.99))
 			* pw_tile_w;
@@ -38,7 +39,7 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 				+ (tile_in_h * pw_tile_h + in_tile_h) * scaled_ofms_w
 				+ tile_in_w * pw_tile_w + in_tile_w;
 
-		if (actual_index < 98304) {
+		if (actual_index < size) {
 			if (tile_in_w * pw_tile_w + in_tile_w >= ofms_w
 					|| tile_in_h * pw_tile_h + in_tile_h >= ofms_h) {
 				skip_vals[actual_index] = 1;
@@ -53,7 +54,7 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 
 	myfile.open(file_name);
 	for (int i = 0; i < scaled_ofms_size; i++) {
-		if (i > 98304 || !skip_vals[i]) {
+		if (i > size || !skip_vals[i]) {
 			//if(ofms_size == 75264)cout<< to_print_ofms[i]<<"\n";
 			myfile << to_print_ofms[i] << "\n";
 		}
