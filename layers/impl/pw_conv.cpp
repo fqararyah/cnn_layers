@@ -98,7 +98,9 @@ void pw_write_results_tile(
 										layer_relu);
 						const int to_write_at_index = current_tile_indx
 								+ t_d * pw_tile_hw + t_h * pw_tile_w + t_w;
+
 						if (read_write == 0 || read_write == 2) {
+							cout<<tile_indx<<" "<<current_tile_indx<<" "<<to_write_at_index<<"\n";
 							results[to_write_at_index] = scaled_val;
 //							if (layer == 22 && to_write_at_index == 0) {
 //								cout << "\n************\n";

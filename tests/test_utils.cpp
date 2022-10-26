@@ -53,7 +53,7 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 
 	myfile.open(file_name);
 	for (int i = 0; i < scaled_ofms_size; i++) {
-		if (!skip_vals[i]) {
+		if (i > 98304 || !skip_vals[i]) {
 			//if(ofms_size == 75264)cout<< to_print_ofms[i]<<"\n";
 			myfile << to_print_ofms[i] << "\n";
 		}

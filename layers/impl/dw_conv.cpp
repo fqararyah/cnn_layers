@@ -7,7 +7,7 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[dw_tile_d][3][max_dw_input_width], int layer,
 		int tile_indx, const int starting_h, const int strides,
 		const int number_of_tiles_w, int number_of_tiles_h, int startintg_d,
-		const int layer_conv_d, const int layer_ifm_width, int first_time,
+		const int layer_conv_d, const int layer_ifm_height, int first_time,
 		const int padding_top) {
 #pragma HLS INLINE off
 
@@ -83,9 +83,8 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 					const int current_h_offset_from_the_tile_beginning = (h
 							- (conv_h - strides) + h_offset
 							+ extra_filled_first_time);
-					if (tile_in_h < number_of_tiles_h - 1
-							|| current_h_offset_from_the_tile_beginning
-									< dw_tile_h) {
+					if (tile_in_h * dw_tile_h + current_h_offset_from_the_tile_beginning
+									< layer_ifm_height) {
 						//if not last row
 						if (h >= conv_h - strides) {
 							//regular filling: the last row if stride is 1 or the last two rows if stride is 2
@@ -98,6 +97,13 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 							const int in_tile_index = d * dw_tile_hw
 									+ (current_h_offset_from_the_tile_beginning
 											% dw_tile_w) * dw_tile_h + i_w;
+//							if (layer == 32 && starting_h == 0 && w == 3) {
+//								cout<<starting_indx <<" = "<<"("<<tile_indx
+//												<<"+ (" << current_h_offset_from_the_tile_beginning
+//														<<"/"<< dw_tile_h<<")"
+//														<<"*" <<number_of_tiles_w <<"+" <<w<<")"
+//												<<"*"<< dw_tile_size<<"\n";
+//							}
 							channels_tile[d][h][w * pw_tile_w + i_w] =
 									channels[starting_indx + in_tile_index];
 						}
@@ -108,8 +114,8 @@ void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 				}
 			}
 		}
-//		cout<<w<<"\n";
-//		if (layer == 20 && starting_h == 2 && (w == 2 || w == 3) ) {
+		//cout<<w<<"\n";
+//		if (tile_indx == 0 && layer == 32 && starting_h == 0 && (w == 2 || w == 3) ) {
 //			cout << "\n********xxx********"<<w<<"\n";
 //			for (int i = 0; i < 3; i++) {
 //				for (int j = w * dw_tile_w; j < w * dw_tile_w + dw_tile_w; j++) {
@@ -215,7 +221,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 						+ ((padding_left + i_w) % dw_tile_w);
 
 				//cout<<num_of_tiles_w<<"\n";
-//				if (layer == 20 && conv_depth == 0 && starting_h == 1 && w == 1) {
+//				if (layer == 32 && conv_depth == 0 && starting_h == 0 && w == 3) {
 //					cout << "\n************\n";
 //					cout << tmp << "***results_tile[t_d][t_h][t_w]***\n";
 //					cout << normalization.fused_zero_point
@@ -259,8 +265,8 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 //#pragma HLS ARRAY_PARTITION variable = channels_tile_2 cyclic factor=pw_tile_w dim = 3
 
 	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
-	const int num_of_input_tiles_w = (layer_ifm_width / dw_tile_w);
-	const int num_of_input_tiles_h = (layer_ifm_width / dw_tile_h);
+	const int num_of_input_tiles_w = layer_ifm_width % dw_tile_w == 0 ? (layer_ifm_width / dw_tile_w): 1 + (layer_ifm_width / dw_tile_w);
+	const int num_of_input_tiles_h = layer_ifm_height % dw_tile_h == 0 ? (layer_ifm_height / dw_tile_h): 1 + (layer_ifm_height / dw_tile_h);
 	const int num_of_input_tiles_hw = num_of_input_tiles_w * num_of_input_tiles_h;
 	//int odd_even = 0;
 	dw_conv_itd_loop: for (int t_in_d = 0; t_in_d < num_of_tiles_d; t_in_d++) {
@@ -292,7 +298,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 				dw_fill_channels_buffer_3x3(result, channels_tile_1, layer,
 						fill_tile_index, t_in_h * strides, strides,
 						num_of_input_tiles_w, num_of_input_tiles_h,
-						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_width,
+						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_height,
 						t_in_h == 0, padding_top);
 				dw_conv_eng3x3(channels_tile_1, weights,
 						channels, //channels_tile_2
@@ -303,7 +309,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
 						fill_tile_index, t_in_h * strides, strides,
 						num_of_input_tiles_w, num_of_input_tiles_h,
-						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_width,
+						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_height,
 						t_in_h == 0, padding_top);
 				dw_conv_eng3x3(channels_tile_1, weights, result,
 						conv_tile_index, //channels_tile_2

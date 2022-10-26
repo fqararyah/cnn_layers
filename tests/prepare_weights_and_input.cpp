@@ -74,8 +74,8 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 		const int ifms_h, const int ifms_w) {
 
 	int ofms_hw = ifms_h * ifms_w;
-	int num_tiles_h = ifms_h / pw_tile_h;
-	int num_tiles_w = ifms_w / pw_tile_w;
+	int num_tiles_h = (ifms_h % pw_tile_h) == 0 ? (ifms_h / pw_tile_h): (ifms_h / pw_tile_h) + 1;
+	int num_tiles_w = (ifms_w % pw_tile_w) == 0 ? (ifms_w / pw_tile_w): (ifms_w / pw_tile_w) + 1;
 	int num_tiles_hw = num_tiles_h * num_tiles_w;
 
 	int a;
@@ -99,6 +99,9 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 				+ in_tile_w;
 
 		int actual_index = tile_index * pw_tile_size + in_tile_index;
+//		if(actual_index < 100){
+//			cout<<line<<" >> "<<actual_index <<"\n";
+//		}
 
 		layer_input[actual_index] = (fms_dt) a;
 //		if (line == 12544 + 8) {
@@ -129,14 +132,16 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 	}
 }
 
-void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size],
-		const int ofms_size, const int ofms_h, const int ofms_w) {
+void verify_fill_layer_input(string file_name, fms_dt ifms[max_fms_size],
+		const int ifms_size, const int ifms_h, const int ifms_w) {
 
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	int num_tiles_hw = (ofms_w / pw_tile_w) * (ofms_h / pw_tile_h);
-	int num_tiles_w = (ofms_w / pw_tile_w);
-	for (int i = 0; i < ofms_size; i++) {
+	int num_tiles_h = (ifms_h % pw_tile_h) == 0 ? (ifms_h / pw_tile_h): (ifms_h / pw_tile_h) + 1;
+	int num_tiles_w = (ifms_w % pw_tile_w) == 0 ? (ifms_w / pw_tile_w): (ifms_w / pw_tile_w) + 1;
+	int num_tiles_hw = num_tiles_h * num_tiles_w;
+
+	for (int i = 0; i < ifms_size; i++) {
 		int tile_indx = i / pw_tile_size;
 		int in_tile_index = i % pw_tile_size;
 
@@ -148,11 +153,11 @@ void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size],
 		int in_tile_h = (in_tile_index % pw_tile_hw) / pw_tile_w;
 		int in_tile_w = in_tile_index % pw_tile_w;
 
-		int actual_index = (tile_in_d * pw_tile_d + in_tile_d) * (ofms_h * ofms_w)
-				+ (tile_in_h * pw_tile_h + in_tile_h) * ofms_w + tile_in_w * pw_tile_w
+		int actual_index = (tile_in_d * pw_tile_d + in_tile_d) * (ifms_h * ifms_w)
+				+ (tile_in_h * pw_tile_h + in_tile_h) * ifms_w + tile_in_w * pw_tile_w
 				+ in_tile_w;
 
-		to_print_ofms[actual_index] = ofms[i];
+		to_print_ofms[actual_index] = ifms[i];
 //		if (i == 440 || i == 960 || i == 965
 //				|| i== 888 || i == 896) {
 //			cout << "\n" << i << "#####" << actual_index << "\n";
@@ -176,7 +181,7 @@ void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size],
 //		}
 	}
 	myfile.open(file_name);
-	for (int i = 0; i < ofms_size; i++) {
+	for (int i = 0; i < ifms_size; i++) {
 		myfile << to_print_ofms[i] << "\n";
 	}
 	myfile.close();
