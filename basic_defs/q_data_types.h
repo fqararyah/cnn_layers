@@ -23,8 +23,8 @@ const int fms_dt_width = 8;
 const int fms_dt_offset = fms_dt_width - 1;
 
 //scales, zero points, and biases
-const int scales_bit_width = 32;
-const int scales_integer_part_width = 3;
+const int scales_bit_width = 48;
+const int scales_integer_part_width = 6;
 const int biases_bit_width = 32;
 
 //pss
@@ -41,9 +41,9 @@ typedef ap_int<weights_dt_width> weights_dt;
 typedef ap_int<dw_weights_dt_width> dw_weights_dt;
 typedef ap_int<fms_dt_width> fms_dt;
 typedef ap_int<pss_dt_width> pss_dt;	   // partial sums
-typedef ap_fixed<pss_dt_width + 8, pss_dt_width> pss_f_dt;
+typedef ap_fixed<pss_dt_width + 16, pss_dt_width> pss_f_dt;
 typedef ap_int<dw_pss_dt_width> dw_pss_dt; // partial sums
-typedef ap_fixed<dw_pss_dt_width + 8, dw_pss_dt_width> dw_pss_f_dt;
+typedef ap_fixed<dw_pss_dt_width + 16, dw_pss_dt_width> dw_pss_f_dt;
 typedef ap_int<first_conv_pss_width> first_conv_pss_dt;
 typedef ap_uint<weights_group_items * weights_dt_width> weights_grp_dt;
 typedef ap_uint<11> counters_dt;

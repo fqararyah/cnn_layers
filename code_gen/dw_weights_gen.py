@@ -13,7 +13,7 @@ dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
-first_gen_layer = 42
+first_gen_layer = 2
 last_gen_layer = len(layers_weights)
 
 current_index = 0
