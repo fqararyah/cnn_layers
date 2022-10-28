@@ -21,6 +21,14 @@ fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization,
 	} else {
 		scaled_pss += quant_half;
 	}
+
+	if (layer_relu != 6 && scaled_pss > QUANTIZATION_MAX) {
+		scaled_pss = QUANTIZATION_MAX;
+	}
+	if (scaled_pss < QUANTIZATION_MIN) {
+		scaled_pss = QUANTIZATION_MIN;
+	}
+
 	fms_dt scaled_val = (fms_dt) scaled_pss;
 	return scaled_val;
 }

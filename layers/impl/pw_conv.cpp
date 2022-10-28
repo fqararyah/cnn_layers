@@ -266,10 +266,10 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
 						num_of_tiles_d_in);
 //				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 3) {
-//					dumb_pw_pss_tile(
+//					dump_pw_pss_tile(
 //							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
 //							results_tile);
-//					dumb_pw_weights_tile(
+//					dump_pw_weights_tile(
 //							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w.txt",
 //							weights_tile, layer_conv_d);
 //				}
@@ -286,10 +286,10 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 //					cout<<num_of_tiles_d_out<<" x "<<num_of_tiles_hw<<" x "<<num_of_tiles_w<<"\n";
 //				}
 //				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 52) {
-//					dumb_pw_pss_tile(
+//					dump_pw_pss_tile(
 //							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_b_pss_f.txt",
 //							results_tile);
-//					dumb_pw_weights_tile(
+//					dump_pw_weights_tile(
 //							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_b_w.txt",
 //							weights_tile, layer_conv_d);
 //				}

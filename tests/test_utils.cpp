@@ -4,7 +4,7 @@ void fill_layer_input_from_file(string file_name, int input_size) {
 
 }
 
-void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
+void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int ofms_size, const int ofms_h, const int ofms_w) {
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
@@ -54,7 +54,7 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 
 	myfile.open(file_name);
 	for (int i = 0; i < scaled_ofms_size; i++) {
-		if (i > size || !skip_vals[i]) {
+		if (i >= size || !skip_vals[i]) {
 			//if(ofms_size == 75264)cout<< to_print_ofms[i]<<"\n";
 			myfile << to_print_ofms[i] << "\n";
 		}
@@ -62,7 +62,7 @@ void dumb_layer_output(string file_name, fms_dt ofms[max_fms_size],
 	myfile.close();
 }
 
-void dumb_pw_pss_tile(string file_name,
+void dump_pw_pss_tile(string file_name,
 		pss_dt tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w]) {
 	ofstream myfile;
 	myfile.open(file_name);
@@ -78,7 +78,7 @@ void dumb_pw_pss_tile(string file_name,
 	myfile.close();
 }
 
-void dumb_pw_channels_tile(string file_name,
+void dump_pw_channels_tile(string file_name,
 		fms_dt tile[pw_tile_d][pw_tile_h][pw_tile_w]) {
 	ofstream myfile;
 	myfile.open(file_name);
@@ -94,7 +94,7 @@ void dumb_pw_channels_tile(string file_name,
 	myfile.close();
 }
 
-void dumb_pw_weights_tile(string file_name,
+void dump_pw_weights_tile(string file_name,
 		weights_dt tile[pw_conv_parallelism_out][max_conv_d], int layer_depth) {
 	ofstream myfile;
 	myfile.open(file_name);
@@ -106,4 +106,13 @@ void dumb_pw_weights_tile(string file_name,
 	}
 
 	myfile.close();
+}
+
+void dump_ouput(string file_name, fms_dt out[], int size){
+	ofstream myfile;
+	myfile.open(file_name);
+
+	for(int i=0;i<size;i++){
+		myfile << out[i] << "\n";
+	}
 }

@@ -22,8 +22,6 @@ EXPANSION_PROJECTION_FILE = input_folder + 'expansion_projection.txt'
 LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
 LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
 
-START_CODE_GENERATION_SIGNAL = 'begin_code_generation'
-END_CODE_GENERATION_SIGNAL = 'end_code_generation'
 def set_globals(prefix, full_name):
     global NET_PREFIX, NET_FULL_NAME, input_folder, IFMS_FILE, OFMS_FILE, LAYERS_TYPES_FILE, LAYERS_WEIGHTS_FILE, LAYERS_STRIDES_FILE\
         ,EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE, LAYERS_SKIP_CONNECTIONS_FILE

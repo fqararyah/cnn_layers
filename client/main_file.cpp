@@ -2,7 +2,7 @@
 
 void top_func(
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width],
-		weights_grp_dt off_chip_weights[all_pw_weights], int &result_o) {
+		weights_grp_dt off_chip_weights[all_pw_weights], fms_dt fc_input[fc_layer_input_size]) {
 
 	fms_dt channels[max_fms_size];
 	fms_dt result[max_fms_size];
@@ -17,8 +17,6 @@ void top_func(
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h][max_conv_w];
 
-	fms_dt fc_input[fc_layer_input_size];
-
 	seml(input_image, off_chip_weights, channels, result, result2, tmp_channels,
 			tmp_channels_2, weights_0, dw_weights_buffer, fc_input);
 
@@ -27,5 +25,4 @@ void top_func(
 #pragma HLS PIPELINE OFF
 		result_to_return += (int) (channels[i] + result[i] + result2[i]);
 	}
-	result_o = result_to_return;
 }

@@ -1,9 +1,9 @@
-from unittest import skip
+import code_generation_constants as constants
 import utils
+
 
 utils.set_globals('mob_v2', 'mobilenetv2')
 
-DEBUGGING = True
 
 in_out_file = '../client/seml.cpp'
 in_out_header_file = '../client/seml.h'
@@ -35,13 +35,13 @@ dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_d
 #     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
 #     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
 
-debugging_dump_ofms_block = 'dumb_layer_output("{}",\n {}, {}, {}, {});\n'
+debugging_dump_ofms_block = 'dump_layer_output("{}",\n {}, {}, {}, {});\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
-#layers_to_debug = [2, 12, 13, 20, 21, 22, 23, 24,25,26,27,28,29,30,31, 32,33,34, 35, 36, 37, 38, 39, 40, 41, 
+# layers_to_debug = [2, 12, 13, 20, 21, 22, 23, 24,25,26,27,28,29,30,31, 32,33,34, 35, 36, 37, 38, 39, 40, 41,
 #layers_to_debug = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
-layers_to_debug = [2,3,4,5,6,7,8,9,10, 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29, 30, 33, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
+#layers_to_debug = [2,3,4,5,6,7,8,9,10, 11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,28,29, 30, 33, 37, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
 
 layers_types = utils.read_layers_types()
 layers_strides = utils.read_layers_strides()
@@ -55,7 +55,9 @@ skip_connections_so_far = 0
 for layer_index in range(1, len(layers_output_shapes)):
     if layer_index in skip_connections_indices:
         skip_connections_so_far += 1
-    tf_lite_to_my_cnn_layer_ifms_mapping[layer_index] = layer_index + skip_connections_so_far
+    tf_lite_to_my_cnn_layer_ifms_mapping[layer_index] = layer_index + \
+        skip_connections_so_far
+
 
 def replace(replacement_dic, block):
     for key, val in replacement_dic.items():
@@ -63,9 +65,10 @@ def replace(replacement_dic, block):
 
     return block
 
+
 defines_str = ''
 file_replacement = ''
-if DEBUGGING:
+if constants.DEBUGGING:
     file_replacement += debugging_includes_block
 with open(in_out_header_file, 'r') as f:
     for line in f:
@@ -82,29 +85,17 @@ with open(in_out_header_file, 'w') as f:
 file_replacement = ''
 in_a_code_gen_area = False
 insert_index = -1
-layers_to_generate = [1, len(layers_types)]
+layers_to_generate = [constants.FIRST_LAYER_TO_GENERATE,
+                      constants.LAST_LAYER_TO_GENERATE + 1 if constants.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)]
 
 with open(in_out_file, 'r') as f:
     for line in f:
         if not in_a_code_gen_area:
             file_replacement += line
-        if utils.START_CODE_GENERATION_SIGNAL in line:
+        if constants.START_CODE_GENERATION_SIGNAL in line:
             insert_index = len(file_replacement)
             in_a_code_gen_area = True
-            if '[' in line and ']' in line and ':' in line:
-                layers_to_generate_start_end = line.replace(' ', '').split('[')[1].split(']')[
-                            0].replace(' ', '').split(':')
-            
-            if 2 == len(layers_to_generate_start_end) and layers_to_generate_start_end[-1] == '':
-                layers_to_generate_start_end[-1] = len(layers_inputs_shapes)
-            elif 1 == len(layers_to_generate_start_end):
-                layers_to_generate_start_end.append(len(layers_inputs_shapes))
-            
-            
-            layers_to_generate = [int(x) for x in (
-                int(layers_to_generate_start_end[0]), int(layers_to_generate_start_end[1])
-            )]
-        elif utils.END_CODE_GENERATION_SIGNAL in line:
+        elif constants.END_CODE_GENERATION_SIGNAL in line:
             in_a_code_gen_area = False
             file_replacement += line
 
@@ -131,33 +122,33 @@ for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
         target_block = dw_block
 
     replacement_dict['*RW*'] = read_write
-    if DEBUGGING and layer_indx == layers_to_debug[0]:
+    if constants.DEBUGGING and layer_indx == constants.LAYERS_TO_DEBUG[0]:
         # file_name
         ifms_file = ifms_file_format.format(tf_lite_to_my_cnn_layer_ifms_mapping[layer_indx], layers_inputs_shapes[layer_indx].depth,
                                             layers_inputs_shapes[layer_indx].height, layers_inputs_shapes[layer_indx].width)
         # insert func call
         code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
-                                                                    'channels' if direction == 0 else 'result2',
-                                                                    str(
-                                                                        layers_inputs_shapes[layer_indx].height),
-                                                                    str(layers_inputs_shapes[layer_indx].width))
+                                                                  'channels' if direction == 0 else 'result2',
+                                                                  str(
+                                                                      layers_inputs_shapes[layer_indx].height),
+                                                                  str(layers_inputs_shapes[layer_indx].width))
         code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_indx)+'.txt',
-                                                        'channels' if direction == 0 else 'result2',
-                                                        layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *
-                                                        layers_inputs_shapes[layer_indx].width, str(
-                                                            layers_inputs_shapes[layer_indx].height),
-                                                        str(layers_inputs_shapes[layer_indx].width))
+                                                                         'channels' if direction == 0 else 'result2',
+                                                                         layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *
+                                                                         layers_inputs_shapes[layer_indx].width, str(
+            layers_inputs_shapes[layer_indx].height),
+            str(layers_inputs_shapes[layer_indx].width))
 
     code_to_insert += replace(replacement_dict, target_block)
 
-    if DEBUGGING and layer_indx in layers_to_debug:
+    if constants.DEBUGGING and layer_indx in constants.LAYERS_TO_DEBUG:
         code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_indx)+'.txt',
                                                            'result2' if direction == 0 else 'channels',
                                                            layers_output_shapes[layer_indx].depth * layers_output_shapes[layer_indx].height *
                                                            layers_output_shapes[layer_indx].width, str(
                                                                layers_output_shapes[layer_indx].height),
                                                            str(layers_output_shapes[layer_indx].width))
-    
+
     if expansion_projection[layer_indx] or layers_types[layer_indx] != 'pw':
         direction = 1 - direction
 

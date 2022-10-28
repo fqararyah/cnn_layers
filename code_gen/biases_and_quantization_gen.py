@@ -56,9 +56,10 @@ with open(h_file, 'w') as wf:
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 
-    wf.write('const scales_dt pooling_fused_scale = 1.03462033597;\n')
+    #for now, I am getting the average pooling quantization manually from netron
+    wf.write('const scales_dt pooling_fused_scale = ' + str(0.0235294122248888 / 0.020379824563860893) + ';\n')
     wf.write('const biases_dt pooling_ifms_zero_point = -128;\n')
-    wf.write('const biases_dt pooling_ofms_zero_point = 128;\n')
+    wf.write('const biases_dt pooling_ofms_zero_point = -128;\n')
 
     fms_file_index = 1
     # writing fms scales and zero_points

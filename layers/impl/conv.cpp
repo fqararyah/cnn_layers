@@ -178,16 +178,16 @@ void layer_0_using_pw(
 //							//cout<<t_in_d * step_d <<" "<< t_in_h * step_h + c_h <<" "<< step_w + c_w<<"\n";
 //							if (t_in_h * step_h == 0
 //									&& t_in_w * step_w == 0 && td_o == 0) {
-//								dumb_pw_channels_tile(
+//								dump_pw_channels_tile(
 //										"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch"+to_string(t_in_d)+"_"
 //												+ to_string(c_h * 3 + c_w)
 //												+ ".txt", channels_buffer);
-//								dumb_pw_weights_tile(
+//								dump_pw_weights_tile(
 //										"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w"+to_string(t_in_d)+"_"
 //												+ to_string(c_h * 3 + c_w)
 //												+ ".txt", weights_tile,
 //										layer_conv_d);
-//								dumb_pw_pss_tile(
+//								dump_pw_pss_tile(
 //										"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss"+to_string(t_in_d)+"_"
 //												+ to_string(c_h * 3 + c_w)
 //												+ ".txt", results_tile);

@@ -66,4 +66,7 @@ struct fms_quantization_scheme {
 
 const pss_f_dt quant_half = (pss_f_dt) 0.5;
 const dw_pss_f_dt quant_dw_half = (dw_pss_f_dt) 0.5;
+const fms_dt QUANTIZATION_MAX = 127;
+const fms_dt QUANTIZATION_MIN = -128;
+
 #endif
