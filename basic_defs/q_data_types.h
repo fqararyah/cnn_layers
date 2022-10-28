@@ -24,7 +24,7 @@ const int fms_dt_offset = fms_dt_width - 1;
 
 //scales, zero points, and biases
 const int scales_bit_width = 48;
-const int scales_integer_part_width = 6;
+const int scales_integer_part_width = 8;
 const int biases_bit_width = 32;
 
 //pss

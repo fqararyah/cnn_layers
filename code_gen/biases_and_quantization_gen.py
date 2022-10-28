@@ -143,6 +143,8 @@ with open(h_file, 'w') as wf:
                                       else -add_layers_fms_zero_points[layer_index])
                                      + biases[i]
                                      )
+            # if fused_zero_points[-1] < -2**29 or fused_zero_points[-1] >= 2**29:
+            #     print(layer_index, 'XXXXXXXXXXXXXXXXXXXX', fused_zero_points[-1]) 
             # if layer_index == 3:
             #     print(np.sum(weights[i,:,:,:]) * -conv_fms_zero_points[layer_index] , biases[i])
         if len(layers_fused_parameters_offsets) == 0:
@@ -160,6 +162,8 @@ with open(h_file, 'w') as wf:
                                     (conv_fms_scales[layer_index] if layer_index not in skip_connections_indices
                                      else add_layers_fms_scales[layer_index])
                                     )
+                # if(fused_scales[-1] > 64):
+                #     print('XXXXXXXXXXXXXXX')
 
                 # if len(fused_scales_declaration_string) < 100:
                 #     print(fused_scales_declaration_string)

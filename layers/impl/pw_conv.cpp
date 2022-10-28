@@ -146,6 +146,8 @@ void pw_write_results_tile(
 							pss_f_dt tmp = (current_val + distant_val)
 									* add_layer_scale_reciprocal
 									+ add_layer_zero_point;
+
+							clamp(tmp);
 							results[to_write_at_index] = (fms_dt) tmp;
 //							if (layer == 45) {
 //								cout << "(" << current_layer_scale << " * ( "

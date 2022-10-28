@@ -38,12 +38,7 @@ void avgpool(fms_dt channels[max_fms_size],
 				- pooling_ifms_zero_point) * pooling_fused_scale
 				+ pooling_ofms_zero_point;
 
-		if(scaled_tmp > QUANTIZATION_MAX ){
-			scaled_tmp = QUANTIZATION_MAX;
-		}
-		if(scaled_tmp < QUANTIZATION_MIN){
-			scaled_tmp = QUANTIZATION_MIN;
-		}
+		clamp(scaled_tmp);
 
 		result[d] = (fms_dt) (scaled_tmp);
 	}

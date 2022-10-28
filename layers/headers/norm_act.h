@@ -9,4 +9,6 @@ fms_dt dw_relu_norm(dw_pss_dt pss, fms_quantization_scheme normalization, const 
 
 fms_dt conv_relu_norm(first_conv_pss_dt pss, fms_quantization_scheme normalization, const int layer_relu);
 
+void clamp(pss_f_dt &val);
+
 #endif
