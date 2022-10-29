@@ -152,13 +152,13 @@ void fill_fused_scales(const scales_dt fused_scales[],
 //}
 //
 //void v1_3_fill_layers_weights(
-//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
+//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 //		dw_weights_dt dw_weights_1[layer_1_dw_depth][v1_layer_1_dw_filter_size][v1_layer_1_dw_filter_size],
 //		weights_dt pw_weights_1[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth]) {
 //	for (int f = 0; f < layer_0_num_fils; f++) {
 //		for (int i = 0; i < layer_0_depth; i++) {
-//			for (int j = 0; j < layer_0_filter_size; j++) {
-//				for (int k = 0; k < layer_0_filter_size; k++) {
+//			for (int j = 0; j < layer_0_filter_dim; j++) {
+//				for (int k = 0; k < layer_0_filter_dim; k++) {
 //					weights_0[f][i][j][k] = (i + j + k) % 8;
 //				}
 //			}
@@ -183,7 +183,7 @@ void fill_fused_scales(const scales_dt fused_scales[],
 //}
 //
 //void v1_4_fill_layers_weights(
-//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
+//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 //		dw_weights_dt dw_weights_1[layer_1_dw_depth][v1_layer_1_dw_filter_size][v1_layer_1_dw_filter_size],
 //		dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
 //		weights_dt pw_weights_2[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth]) {
@@ -198,7 +198,7 @@ void fill_fused_scales(const scales_dt fused_scales[],
 //}
 //
 //void v1_7_layer_1_dw(
-//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
+//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 //		dw_weights_dt dw_weights_1[v1_layer_1_dw_depth][v1_layer_3_dw_filter_size][v1_layer_3_dw_filter_size],
 //		dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
 //		dw_weights_dt dw_weights_3[v1_layer_3_dw_depth][v1_layer_3_dw_filter_size][v1_layer_3_dw_filter_size],
@@ -232,7 +232,7 @@ void fill_fused_scales(const scales_dt fused_scales[],
 //}
 
 //void _7_fill_layers_weights(
-//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
+//		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 //		dw_weights_dt dw_weights_1[layer_1_dw_depth][layer_1_dw_filter_size][layer_1_dw_filter_size],
 //		dw_weights_dt dw_weights_3[layer_3_dw_depth][layer_3_dw_filter_size][layer_3_dw_filter_size],
 //		weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth],
@@ -242,8 +242,8 @@ void fill_fused_scales(const scales_dt fused_scales[],
 //	//**********dw**************
 //	for (int f = 0; f < layer_0_num_fils; f++) {
 //		for (int i = 0; i < layer_0_depth; i++) {
-//			for (int j = 0; j < layer_0_filter_size; j++) {
-//				for (int k = 0; k < layer_0_filter_size; k++) {
+//			for (int j = 0; j < layer_0_filter_dim; j++) {
+//				for (int k = 0; k < layer_0_filter_dim; k++) {
 //					weights_0[f][i][j][k] = (i + j + k) % 8;
 //				}
 //			}

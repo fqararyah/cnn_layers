@@ -17,9 +17,9 @@ void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 			* pw_tile_h;
 	int num_tiles_hw = (scaled_ofms_w / pw_tile_w)
 			* (scaled_ofms_h / pw_tile_h);
+
 	int num_tiles_w = (scaled_ofms_w / pw_tile_w);
-	int scaled_ofms_size = ofms_size * scaled_ofms_h * scaled_ofms_w
-			/ (ofms_h * ofms_w);
+	int scaled_ofms_size = (ofms_size / (ofms_h * ofms_w)) * scaled_ofms_h * scaled_ofms_w;
 
 	for (int i = 0; i < scaled_ofms_size; i++) {
 		//if(ofms_size == 75264)cout<< ofms[i]<<" ofm\n";

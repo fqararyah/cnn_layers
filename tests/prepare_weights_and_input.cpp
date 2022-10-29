@@ -64,18 +64,38 @@ void fill_input_image(string file_name,
 	while (infile >> a) {
 		int channel_index = line_num / input_image_hw;
 		int channel_row = (line_num % input_image_hw) / input_image_width;
-		int channel_col = line_num % input_image_height;
+		int channel_col = line_num % input_image_width;
 		line_num++;
 		input_image[channel_index][channel_row][channel_col] = (fms_dt) a;
 	}
+}
+
+void verify_input_image(string file_name,
+		fms_dt input_image[input_image_depth][input_image_height][input_image_width]) {
+
+	ofstream myfile;
+	const int input_image_hw = input_image_height * input_image_width;
+	myfile.open(file_name);
+	for (int d = 0; d < input_image_depth; d++) {
+		for (int h = 0; h < input_image_height; h++) {
+			for (int w = 0; w < input_image_width; w++) {
+				myfile << input_image[d][h][w] << "\n";
+			}
+		}
+	}
+	myfile.close();
 }
 
 void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 		const int ifms_h, const int ifms_w) {
 
 	int ofms_hw = ifms_h * ifms_w;
-	int num_tiles_h = (ifms_h % pw_tile_h) == 0 ? (ifms_h / pw_tile_h): (ifms_h / pw_tile_h) + 1;
-	int num_tiles_w = (ifms_w % pw_tile_w) == 0 ? (ifms_w / pw_tile_w): (ifms_w / pw_tile_w) + 1;
+	int num_tiles_h =
+			(ifms_h % pw_tile_h) == 0 ?
+					(ifms_h / pw_tile_h) : (ifms_h / pw_tile_h) + 1;
+	int num_tiles_w =
+			(ifms_w % pw_tile_w) == 0 ?
+					(ifms_w / pw_tile_w) : (ifms_w / pw_tile_w) + 1;
 	int num_tiles_hw = num_tiles_h * num_tiles_w;
 
 	int a;
@@ -137,8 +157,12 @@ void verify_fill_layer_input(string file_name, fms_dt ifms[max_fms_size],
 
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	int num_tiles_h = (ifms_h % pw_tile_h) == 0 ? (ifms_h / pw_tile_h): (ifms_h / pw_tile_h) + 1;
-	int num_tiles_w = (ifms_w % pw_tile_w) == 0 ? (ifms_w / pw_tile_w): (ifms_w / pw_tile_w) + 1;
+	int num_tiles_h =
+			(ifms_h % pw_tile_h) == 0 ?
+					(ifms_h / pw_tile_h) : (ifms_h / pw_tile_h) + 1;
+	int num_tiles_w =
+			(ifms_w % pw_tile_w) == 0 ?
+					(ifms_w / pw_tile_w) : (ifms_w / pw_tile_w) + 1;
 	int num_tiles_hw = num_tiles_h * num_tiles_w;
 
 	for (int i = 0; i < ifms_size; i++) {
@@ -153,9 +177,10 @@ void verify_fill_layer_input(string file_name, fms_dt ifms[max_fms_size],
 		int in_tile_h = (in_tile_index % pw_tile_hw) / pw_tile_w;
 		int in_tile_w = in_tile_index % pw_tile_w;
 
-		int actual_index = (tile_in_d * pw_tile_d + in_tile_d) * (ifms_h * ifms_w)
-				+ (tile_in_h * pw_tile_h + in_tile_h) * ifms_w + tile_in_w * pw_tile_w
-				+ in_tile_w;
+		int actual_index = (tile_in_d * pw_tile_d + in_tile_d)
+				* (ifms_h * ifms_w)
+				+ (tile_in_h * pw_tile_h + in_tile_h) * ifms_w
+				+ tile_in_w * pw_tile_w + in_tile_w;
 
 		to_print_ofms[actual_index] = ifms[i];
 //		if (i == 440 || i == 960 || i == 965

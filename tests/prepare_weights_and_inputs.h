@@ -17,6 +17,9 @@ void validate_weights(string file_name,
 void fill_input_image(string file_name,
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width]);
 
+void verify_input_image(string file_name,
+		fms_dt input_image[input_image_depth][input_image_height][input_image_width]);
+
 void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 		const int ofms_h, const int ofms_w);
 

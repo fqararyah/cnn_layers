@@ -1,21 +1,21 @@
 #include "./headers/utils.h"
 
 void _5_layer_0_3x3_conv(
-	fms_dt channels_buffer[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-	layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
+	fms_dt channels_buffer[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 	fms_dt result[layer_1_dw_depth][layer_1_dw_ifm_width])
 {
 #pragma HLS INLINE off
 
-	fms_dt intermediate_channels_buffer[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][layer_0_filter_size] = {0};
+	fms_dt intermediate_channels_buffer[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][layer_0_filter_dim] = {0};
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
 	// fill the intermediate_channels_buffer
 	for (int d = 0; d < input_image_depth; d++)
 	{
-		for (int h = 0; h < layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
+		for (int h = 0; h < layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
 		{
-			for (int w = 0; w < layer_0_filter_size - layer_0_padding_left; w++)
+			for (int w = 0; w < layer_0_filter_dim - layer_0_padding_left; w++)
 			{
 				intermediate_channels_buffer[d][h][w + layer_0_padding_left] = channels_buffer[d][h][w];
 			}
@@ -49,12 +49,12 @@ layer_0_ofms:
 #pragma HLS UNROLL
 				// parallelized depth loop
 				layer_0_ch:
-					for (int h = 0; h < layer_0_filter_size; h++)
+					for (int h = 0; h < layer_0_filter_dim; h++)
 					{
 #pragma HLS UNROLL
 					// conv height loop
 					layer_0_cw:
-						for (int c_w = 0; c_w < layer_0_filter_size; c_w++)
+						for (int c_w = 0; c_w < layer_0_filter_dim; c_w++)
 						{
 #pragma HLS UNROLL
 							// conv width loop
@@ -75,19 +75,19 @@ layer_0_ofms:
 				for (int d = 0; d < input_image_depth; d++)
 				{
 #pragma HLS UNROLL
-					for (int c_h = 0; c_h < layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides; c_h++)
+					for (int c_h = 0; c_h < layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides; c_h++)
 					{
 #pragma HLS UNROLL
-						for (int c_w = 0; c_w < layer_0_filter_size - layer_0_strides; c_w++)
+						for (int c_w = 0; c_w < layer_0_filter_dim - layer_0_strides; c_w++)
 						{
 #pragma HLS UNROLL
 							intermediate_channels_buffer[d][c_h][c_w] = intermediate_channels_buffer[d][c_h][c_w + layer_0_strides];
 						}
-						for (int c_w = layer_0_filter_size - layer_0_strides; c_w < layer_0_filter_size; c_w++)
+						for (int c_w = layer_0_filter_dim - layer_0_strides; c_w < layer_0_filter_dim; c_w++)
 						{
 #pragma HLS UNROLL
-							intermediate_channels_buffer[d][c_h][c_w] = channels_buffer[d][c_h][c_w - (layer_0_filter_size - layer_0_strides) +
-																								(w + layer_0_filter_size - layer_0_padding_left)];
+							intermediate_channels_buffer[d][c_h][c_w] = channels_buffer[d][c_h][c_w - (layer_0_filter_dim - layer_0_strides) +
+																								(w + layer_0_filter_dim - layer_0_padding_left)];
 						}
 					}
 				}
@@ -354,7 +354,7 @@ void _5_layer_3_pw(
 
 void _5_stages_fill_channels_buffer(
 	fms_dt channels[input_image_depth][input_image_height][input_image_width],
-	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
 	int starting_h)
 {
 
@@ -366,7 +366,7 @@ void _5_stages_fill_channels_buffer(
 		for (int d = 0; d < input_image_depth; d++)
 		{
 #pragma HLS UNROLL
-			for (int h = 0; h < layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides - layer_0_strides; h++)
+			for (int h = 0; h < layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides - layer_0_strides; h++)
 			{
 #pragma HLS UNROLL
 				channels_buffer_0[d][h][w] = channels_buffer_0[d][h + layer_0_strides][w];
@@ -380,10 +380,10 @@ void _5_stages_fill_channels_buffer(
 		for (int d = 0; d < input_image_depth; d++)
 		{
 #pragma HLS UNROLL
-			for (int h = layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides - layer_0_strides; h < layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
+			for (int h = layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides - layer_0_strides; h < layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
 			{
 #pragma HLS UNROLL
-				channels_buffer_0[d][h][w] = channels[d][starting_h + h - (layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides - layer_0_strides)][w];
+				channels_buffer_0[d][h][w] = channels[d][starting_h + h - (layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides - layer_0_strides)][w];
 			}
 		}
 	}
@@ -397,7 +397,7 @@ void mobilenet_v2_pipeline_5(
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
 
-	dw_weights_dt dw_weights_1[layer_1_dw_depth][layer_0_filter_size][layer_0_filter_size];
+	dw_weights_dt dw_weights_1[layer_1_dw_depth][layer_0_filter_dim][layer_0_filter_dim];
 
 #pragma HLS ARRAY_PARTITION variable = dw_weights_1 type = complete dim = 1
 
@@ -410,7 +410,7 @@ void mobilenet_v2_pipeline_5(
 						   pw_weights_3);
 
 	//#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
+	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
 
 	fms_dt _5_layer_0_3x3_conv_out_0[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};
@@ -439,7 +439,7 @@ void mobilenet_v2_pipeline_5(
 	//###########################################################
 
 	//#########################odd###############################
-	fms_dt channels_buffer_1[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
+	fms_dt channels_buffer_1[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
 
 	fms_dt _5_layer_0_3x3_conv_out_1[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};

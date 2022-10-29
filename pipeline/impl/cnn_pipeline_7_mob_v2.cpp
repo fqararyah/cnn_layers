@@ -112,12 +112,12 @@ void cnn_pipeline_7_mob_v2(
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
 
-    layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size];
+    layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim];
 
     fill_layer_0_weights(weights_0);
 
     //#########################even###############################
-    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width];
+    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 2
     fms_dt _6_layer_0_3x3_conv_out_0[layer_1_pw_depth][_7_stages_layer_0_rows_at_once][layer_1_pw_ifm_width] =
@@ -161,7 +161,7 @@ void cnn_pipeline_7_mob_v2(
     //###########################################################
 
     //#########################odd###############################
-    fms_dt channels_buffer_1[input_image_depth][layer_0_filter_size + (_7_stages_layer_2_rows_at_once - 1) * layer_0_strides][input_image_width];
+    fms_dt channels_buffer_1[input_image_depth][layer_0_filter_dim + (_7_stages_layer_2_rows_at_once - 1) * layer_0_strides][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 2
 

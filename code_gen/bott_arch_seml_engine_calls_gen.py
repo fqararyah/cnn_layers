@@ -14,6 +14,8 @@ ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
 debugging_includes_block = '#include "../tests/test_utils.h"\n'
 
+layer_0_block = 'layer_0_3x3(weights_0, input_image, result2);\n'
+
 expansion_projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
@@ -99,57 +101,59 @@ with open(in_out_file, 'r') as f:
             in_a_code_gen_area = False
             file_replacement += line
 
-direction = 1
+direction = 0
 code_to_insert = ''
 skip_connections_depth = 3
 
 skip_connections_indices = utils.read_skip_connections_indices()
-for layer_indx in range(layers_to_generate[0], layers_to_generate[1]):
+for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     target_block = ''
     replacement_dict = {}
-    replacement_dict['*i*'] = layer_indx
+    replacement_dict['*i*'] = layer_index
     replacement_dict['*DIRECTION*'] = direction
     read_write = 0
 
-    if layers_types[layer_indx] == 'pw' and expansion_projection[layer_indx]:
+    if layer_index == 0:
+        target_block = layer_0_block
+    if layers_types[layer_index] == 'pw' and expansion_projection[layer_index]:
         target_block = expansion_projection_block
-        if layer_indx + skip_connections_depth + 1 in skip_connections_indices:
+        if layer_index + skip_connections_depth + 1 in skip_connections_indices:
             read_write += 2
-        if layer_indx + 1 in skip_connections_indices:
+        if layer_index + 1 in skip_connections_indices:
             read_write += 1
 
-    elif layers_types[layer_indx] == 'dw':
+    elif layers_types[layer_index] == 'dw':
         target_block = dw_block
-
+    
     replacement_dict['*RW*'] = read_write
-    if constants.DEBUGGING and layer_indx == constants.LAYERS_TO_DEBUG[0]:
+    if constants.DEBUGGING and layer_index == constants.LAYERS_TO_DEBUG[0]:
         # file_name
-        ifms_file = ifms_file_format.format(tf_lite_to_my_cnn_layer_ifms_mapping[layer_indx], layers_inputs_shapes[layer_indx].depth,
-                                            layers_inputs_shapes[layer_indx].height, layers_inputs_shapes[layer_indx].width)
+        ifms_file = ifms_file_format.format(tf_lite_to_my_cnn_layer_ifms_mapping[layer_index], layers_inputs_shapes[layer_index].depth,
+                                            layers_inputs_shapes[layer_index].height, layers_inputs_shapes[layer_index].width)
         # insert func call
         code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
                                                                   'channels' if direction == 0 else 'result2',
                                                                   str(
-                                                                      layers_inputs_shapes[layer_indx].height),
-                                                                  str(layers_inputs_shapes[layer_indx].width))
-        code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_indx)+'.txt',
+                                                                      layers_inputs_shapes[layer_index].height),
+                                                                  str(layers_inputs_shapes[layer_index].width))
+        code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_index)+'.txt',
                                                                          'channels' if direction == 0 else 'result2',
-                                                                         layers_inputs_shapes[layer_indx].depth * layers_inputs_shapes[layer_indx].height *
-                                                                         layers_inputs_shapes[layer_indx].width, str(
-            layers_inputs_shapes[layer_indx].height),
-            str(layers_inputs_shapes[layer_indx].width))
-
+                                                                         layers_inputs_shapes[layer_index].depth * layers_inputs_shapes[layer_index].height *
+                                                                         layers_inputs_shapes[layer_index].width, str(
+            layers_inputs_shapes[layer_index].height),
+            str(layers_inputs_shapes[layer_index].width))
+    
     code_to_insert += replace(replacement_dict, target_block)
 
-    if constants.DEBUGGING and layer_indx in constants.LAYERS_TO_DEBUG:
-        code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_indx)+'.txt',
+    if constants.DEBUGGING and layer_index in constants.LAYERS_TO_DEBUG:
+        code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_index)+'.txt',
                                                            'result2' if direction == 0 else 'channels',
-                                                           layers_output_shapes[layer_indx].depth * layers_output_shapes[layer_indx].height *
-                                                           layers_output_shapes[layer_indx].width, str(
-                                                               layers_output_shapes[layer_indx].height),
-                                                           str(layers_output_shapes[layer_indx].width))
+                                                           layers_output_shapes[layer_index].depth * layers_output_shapes[layer_index].height *
+                                                           layers_output_shapes[layer_index].width, str(
+                                                               layers_output_shapes[layer_index].height),
+                                                           str(layers_output_shapes[layer_index].width))
 
-    if expansion_projection[layer_indx] or layers_types[layer_indx] != 'pw':
+    if expansion_projection[layer_index] or layers_types[layer_index] != 'pw':
         direction = 1 - direction
 
 file_replacement = file_replacement[:insert_index] + \

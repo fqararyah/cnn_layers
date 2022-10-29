@@ -15,21 +15,21 @@
 using namespace std;
 
 void _6_layer_0_3x3_conv(
-    fms_dt channels_buffer[input_image_depth][layer_0_filter_size + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-    layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size],
+    fms_dt channels_buffer[input_image_depth][layer_0_filter_dim + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+    layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
     fms_dt result[layer_2_dw_depth][_6_stages_layer_1_rows_at_once][layer_2_dw_ifm_width])
 {
 #pragma HLS INLINE off
 
-    fms_dt intermediate_channels_buffer[input_image_depth][layer_0_filter_size + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides][layer_2_dw_filter_size] = {0};
+    fms_dt intermediate_channels_buffer[input_image_depth][layer_0_filter_dim + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides][layer_2_dw_filter_size] = {0};
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
     // fill the intermediate_channels_buffer
     for (int d = 0; d < input_image_depth; d++)
     {
-        for (int h = 0; h < layer_0_filter_size + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
+        for (int h = 0; h < layer_0_filter_dim + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
         {
-            for (int w = 0; w < layer_0_filter_size - layer_0_padding_left; w++)
+            for (int w = 0; w < layer_0_filter_dim - layer_0_padding_left; w++)
             {
                 intermediate_channels_buffer[d][h][w + layer_0_padding_left] = channels_buffer[d][h][w];
             }
@@ -66,12 +66,12 @@ layer_0_ofms:
 #pragma HLS UNROLL
                     // parallelized depth loop
                     layer_0_ch:
-                        for (int h = 0; h < layer_0_filter_size; h++)
+                        for (int h = 0; h < layer_0_filter_dim; h++)
                         {
 #pragma HLS UNROLL
                         // conv height loop
                         layer_0_cw:
-                            for (int c_w = 0; c_w < layer_0_filter_size; c_w++)
+                            for (int c_w = 0; c_w < layer_0_filter_dim; c_w++)
                             {
 #pragma HLS UNROLL
                                 // conv width loop
@@ -93,19 +93,19 @@ layer_0_ofms:
                 for (int d = 0; d < input_image_depth; d++)
                 {
 #pragma HLS UNROLL
-                    for (int c_h = 0; c_h < layer_0_filter_size + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides; c_h++)
+                    for (int c_h = 0; c_h < layer_0_filter_dim + (_6_stages_layer_1_rows_at_once - 1) * layer_0_strides; c_h++)
                     {
 #pragma HLS UNROLL
-                        for (int c_w = 0; c_w < layer_0_filter_size - layer_0_strides; c_w++)
+                        for (int c_w = 0; c_w < layer_0_filter_dim - layer_0_strides; c_w++)
                         {
 #pragma HLS UNROLL
                             intermediate_channels_buffer[d][c_h][c_w] = intermediate_channels_buffer[d][c_h][c_w + layer_0_strides];
                         }
-                        for (int c_w = layer_0_filter_size - layer_0_strides; c_w < layer_0_filter_size; c_w++)
+                        for (int c_w = layer_0_filter_dim - layer_0_strides; c_w < layer_0_filter_dim; c_w++)
                         {
 #pragma HLS UNROLL
-                            intermediate_channels_buffer[d][c_h][c_w] = channels_buffer[d][c_h][c_w - (layer_0_filter_size - layer_0_strides) +
-                                                                                                (w + layer_0_filter_size - layer_0_padding_left)];
+                            intermediate_channels_buffer[d][c_h][c_w] = channels_buffer[d][c_h][c_w - (layer_0_filter_dim - layer_0_strides) +
+                                                                                                (w + layer_0_filter_dim - layer_0_padding_left)];
                         }
                     }
                 }
@@ -532,11 +532,11 @@ void _6_layer_6_pw(
 
 void _6_stages_fill_channels_buffer(
     fms_dt channels[input_image_depth][input_image_height][input_image_width],
-    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_6_stages_layer_6_rows_at_once - 1) * layer_0_strides][input_image_width],
+    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_6_stages_layer_6_rows_at_once - 1) * layer_0_strides][input_image_width],
     int starting_h)
 {
 
-    int h_offset = starting_h < _6_stages_layer_6_rows_at_once * layer_0_strides ? layer_0_strides : layer_0_filter_size + (_6_stages_layer_6_rows_at_once - 1) * layer_0_strides - (layer_0_filter_size - layer_0_strides);
+    int h_offset = starting_h < _6_stages_layer_6_rows_at_once * layer_0_strides ? layer_0_strides : layer_0_filter_dim + (_6_stages_layer_6_rows_at_once - 1) * layer_0_strides - (layer_0_filter_dim - layer_0_strides);
 
     for (int w = 0; w < input_image_width; w++)
     {
@@ -544,7 +544,7 @@ void _6_stages_fill_channels_buffer(
         for (int d = 0; d < input_image_depth; d++)
         {
 #pragma HLS UNROLL
-            for (int h = 0; h < layer_0_filter_size - layer_0_strides; h++)
+            for (int h = 0; h < layer_0_filter_dim - layer_0_strides; h++)
             {
 #pragma HLS UNROLL
                 channels_buffer_0[d][h][w] = channels_buffer_0[d][h + h_offset][w];
@@ -558,12 +558,12 @@ void _6_stages_fill_channels_buffer(
         for (int d = 0; d < input_image_depth; d++)
         {
 #pragma HLS UNROLL
-            for (int h = layer_0_filter_size - layer_0_strides; h < layer_0_filter_size + (_6_stages_layer_6_rows_at_once - 1) * layer_0_strides; h++)
+            for (int h = layer_0_filter_dim - layer_0_strides; h < layer_0_filter_dim + (_6_stages_layer_6_rows_at_once - 1) * layer_0_strides; h++)
             {
 #pragma HLS UNROLL
-                if (starting_h + h - (layer_0_filter_size - layer_0_strides) < input_image_height)
+                if (starting_h + h - (layer_0_filter_dim - layer_0_strides) < input_image_height)
                 {
-                    channels_buffer_0[d][h][w] = channels[d][starting_h + h - (layer_0_filter_size - layer_0_strides)][w];
+                    channels_buffer_0[d][h][w] = channels[d][starting_h + h - (layer_0_filter_dim - layer_0_strides)][w];
                 }
             }
         }
@@ -580,12 +580,12 @@ void cnn_pipeline_6_mob_v2(
 
 #pragma HLS ARRAY_PARTITION variable = dw_weights_1 type = complete dim = 1
 
-    layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_size][layer_0_filter_size];
+    layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim];
     fill_layer_0_weights(weights_0);
     
 
     //#########################even###############################
-    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_6_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width];
+    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_6_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 2
     fms_dt _6_layer_0_3x3_conv_out_0[layer_1_pw_depth][_6_stages_layer_0_rows_at_once][layer_1_pw_ifm_width] =
@@ -624,7 +624,7 @@ void cnn_pipeline_6_mob_v2(
     //###########################################################
 
     //#########################odd###############################
-    fms_dt channels_buffer_1[input_image_depth][layer_0_filter_size + (_6_stages_layer_2_rows_at_once - 1) * layer_0_strides][input_image_width];
+    fms_dt channels_buffer_1[input_image_depth][layer_0_filter_dim + (_6_stages_layer_2_rows_at_once - 1) * layer_0_strides][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 2
 

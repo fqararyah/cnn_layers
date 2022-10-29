@@ -65,7 +65,7 @@ void mobilenet_v2_pipeline_4(
 						   pw_weights_3);
 
 	//#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 
 	fms_dt _5_layer_0_3x3_conv_out_0[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};
@@ -89,7 +89,7 @@ void mobilenet_v2_pipeline_4(
 	//###########################################################
 
 	//#########################odd###############################
-	fms_dt channels_buffer_1[input_image_depth][layer_0_filter_size + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_1[input_image_depth][layer_0_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 
 	fms_dt _5_layer_0_3x3_conv_out_1[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};

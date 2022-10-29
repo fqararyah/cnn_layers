@@ -432,7 +432,7 @@ width_loop_division:
 		{
 			if (odd_even)
 			{
-				fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_size - layer_0_strides)), 1- part_in_width);
+				fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width);
 				if (h >= 1)
 				{
 					_5_layer_0_3x3_conv_half(channels_buffer_1, weights_0,
@@ -461,7 +461,7 @@ width_loop_division:
 			}
 			else
 			{
-				fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_size - layer_0_strides)), 1- part_in_width );
+				fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
 				if (h >= 1)
 				{
 					_5_layer_0_3x3_conv_half(channels_buffer_0, weights_0,
@@ -497,7 +497,7 @@ width_loop_division:
 			{
 				if (odd_even)
 				{
-					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_size - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
 					_5_layer_0_3x3_conv_half(channels_buffer_1, weights_0,
 										_5_layer_0_3x3_conv_out_1);
 					_5_layer_1_pw(_5_layer_0_3x3_conv_out_0, pw_weights_1,
@@ -515,7 +515,7 @@ width_loop_division:
 				}
 				else
 				{
-					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_size - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
 					_5_layer_0_3x3_conv_half(channels_buffer_0, weights_0,
 										_5_layer_0_3x3_conv_out_0);
 					_5_layer_1_pw(_5_layer_0_3x3_conv_out_1, pw_weights_1,
@@ -542,7 +542,7 @@ width_loop_division:
 			{
 				if (odd_even)
 				{
-					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_size - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
 					if (h >= 1)
 					{
 						_5_layer_0_3x3_conv_half(channels_buffer_1, weights_0,
@@ -578,7 +578,7 @@ width_loop_division:
 				}
 				else
 				{
-					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_size - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
 					if (h >= 1)
 					{
 						_5_layer_0_3x3_conv_half(channels_buffer_0, weights_0,

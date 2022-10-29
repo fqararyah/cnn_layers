@@ -190,7 +190,7 @@ void mobilenet_v2_pipeline_6(
                            pw_weights_4);
 
     //#########################even###############################
-    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_size + (_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+    fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 2
     fms_dt _7_layer_0_3x3_conv_out_0[layer_1_pw_depth][_7_stages_layer_1_rows_at_once][layer_1_pw_ifm_width] =
@@ -229,7 +229,7 @@ void mobilenet_v2_pipeline_6(
     //###########################################################
 
     //#########################odd###############################
-    fms_dt channels_buffer_1[input_image_depth][layer_0_filter_size + (_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+    fms_dt channels_buffer_1[input_image_depth][layer_0_filter_dim + (_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 2
 

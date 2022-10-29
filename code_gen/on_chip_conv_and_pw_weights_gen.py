@@ -13,7 +13,7 @@ weights_file_format = {'c':'weights_{}_c.txt', 'pw': 'weights_{}_pw.txt'}
 conv_pw_weights_h_file = '../client/conv_pw_weights.h' #'./out/dw_weights.h'
 
 dw_weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i*[layer_*i*_num_fils][layer_*i*_depth]\
-    [layer_*i*_filter_size][layer_*i*_filter_size]' \
+    [layer_*i*_filter_dim][layer_*i*_filter_dim]' \
         ,'pw': 'const static weights_dt weights_*i*_pw[layer_*i*_pw_num_fils][layer_*i*_pw_depth]'}
 
 layers_types = utils.read_layers_types()
@@ -23,6 +23,7 @@ expansion_projection = utils.read_expansion_projection()
 num_of_generated_layers = 0
 with open(conv_pw_weights_h_file, 'w') as f:
     f.write('#include "../basic_defs/basic_defs_glue.h"\n')
+    f.write('#include "../model/layers_specs.h"\n')
     f.write("#ifndef CONV_PW_WEIGHTS\n")
     f.write("#define CONV_PW_WEIGHTS\n")
 
