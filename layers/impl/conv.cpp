@@ -10,6 +10,7 @@ void fill_channels_buffer_0(
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
 		int starting_h) {
 
+	const biases_dt current_layer_zero_point = conv_fms_zero_points[0];
 	const int filled_first_time = layer_0_filter_dim - layer_0_strides;
 	if (starting_h == 0) // first time
 			{
@@ -26,7 +27,7 @@ void fill_channels_buffer_0(
 			for (int h = 0; h < layer_0_filter_dim - layer_0_strides; h++) {
 				for (int w = 0; w < input_image_width; w++) {
 					channels_tile[d][h][w] =
-							channels[d][h + layer_0_strides][w];
+							channels_tile[d][h + layer_0_strides][w];
 				}
 			}
 		}
@@ -42,7 +43,7 @@ void fill_channels_buffer_0(
 							+ starting_h * layer_0_strides + filled_first_time
 							- start_filling_h_offset][w];
 				} else {
-					channels_tile[d][h][w] = conv_fms_zero_points[1];
+					channels_tile[d][h][w] = current_layer_zero_point;
 				}
 			}
 		}
@@ -55,6 +56,7 @@ void layer_0_conv_engine(
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
 		fms_dt results[max_fms_size], int starting_h) {
 
+	const biases_dt current_layer_zero_point = conv_fms_zero_points[0];
 	for (int f = 0; f < layer_0_num_fils; f++) {
 		fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 		normalization.ofm_zero_point = conv_fms_zero_points[2];
@@ -66,18 +68,25 @@ void layer_0_conv_engine(
 			for (int d = 0; d < layer_0_depth; d++) {
 				for (int c_h = 0; c_h < layer_0_filter_dim; c_h++) {
 					for (int c_w = 0; c_w < layer_0_filter_dim; c_w++) {
-						tmp += weights_0[f][d][c_h][c_w]
-								* channels_tile[d][c_h][w * layer_0_strides
-										+ c_w];
-						if (starting_h == 0 && w == 1) {
+						if (w * layer_0_strides + c_w < layer_0_ifm_width) {
+							tmp += weights_0[f][d][c_h][c_w]
+									* channels_tile[d][c_h][w * layer_0_strides
+											+ c_w];
+						} else {
+							tmp += weights_0[f][d][c_h][c_w]
+									* current_layer_zero_point;
+						}
+						if (starting_h == 111 && w == 0 && f ==8) {
 							cout << weights_0[f][d][c_h][c_w] << "*"
 									<< channels_tile[d][c_h][w * layer_0_strides
 											+ c_w] << "+";
 						}
 					}
-					if (starting_h == 0 && w == 1) cout << "\n";
+					if (starting_h == 111 && w == 0 && f ==8)
+						cout << "\n";
 				}
-				if (starting_h == 0 && w == 1)  cout<<"*********\n";
+				if (starting_h == 111 && w == 0 && f ==8)
+					cout << "*********\n";
 			}
 			const int tile_in_d = f / pw_tile_d;
 			const int tile_in_h = starting_h / pw_tile_h;
@@ -91,7 +100,10 @@ void layer_0_conv_engine(
 			const int in_tile_w = w % pw_tile_w;
 			const int in_tile_index = in_tile_d * pw_tile_hw
 					+ in_tile_h * pw_tile_w + in_tile_w;
-			cout << tmp << " " << conv_relu_norm(tmp, normalization, 6) << "\n";
+			if (starting_h == 111 && w == 0 && f ==8) {
+				cout << tmp << " " << conv_relu_norm(tmp, normalization, 6)
+						<< "\n";
+			}
 			results[tile_index * pw_tile_size + in_tile_index] = conv_relu_norm(
 					tmp, normalization, 6);
 		}

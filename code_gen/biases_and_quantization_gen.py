@@ -78,9 +78,9 @@ with open(h_file, 'w') as wf:
         if layer_index - skip_connection_current_index - 1 in skip_connections_indices \
                 and skip_connections_indices[layer_index - skip_connection_current_index - 1] == 1:
             # the first -1 is because ofm of a layer is stored in file fms_layer_index+1
-            if layer_index == 22:
-                print(scale)
-                print(zero_point)
+            # if layer_index == 22:
+            #     print(scale)
+            #     print(zero_point)
             skip_connections_indices[layer_index -
                                      skip_connection_current_index - 1] = 0
             add_layers_fms_scales_rec[layer_index -
