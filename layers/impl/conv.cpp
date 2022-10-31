@@ -76,17 +76,17 @@ void layer_0_conv_engine(
 							tmp += weights_0[f][d][c_h][c_w]
 									* current_layer_zero_point;
 						}
-						if (starting_h == 111 && w == 0 && f ==8) {
-							cout << weights_0[f][d][c_h][c_w] << "*"
-									<< channels_tile[d][c_h][w * layer_0_strides
-											+ c_w] << "+";
-						}
+//						if (starting_h == 111 && w == 0 && f ==8) {
+//							cout << weights_0[f][d][c_h][c_w] << "*"
+//									<< channels_tile[d][c_h][w * layer_0_strides
+//											+ c_w] << "+";
+//						}
 					}
-					if (starting_h == 111 && w == 0 && f ==8)
-						cout << "\n";
+//					if (starting_h == 111 && w == 0 && f ==8)
+//						cout << "\n";
 				}
-				if (starting_h == 111 && w == 0 && f ==8)
-					cout << "*********\n";
+//				if (starting_h == 111 && w == 0 && f ==8)
+//					cout << "*********\n";
 			}
 			const int tile_in_d = f / pw_tile_d;
 			const int tile_in_h = starting_h / pw_tile_h;
@@ -100,10 +100,10 @@ void layer_0_conv_engine(
 			const int in_tile_w = w % pw_tile_w;
 			const int in_tile_index = in_tile_d * pw_tile_hw
 					+ in_tile_h * pw_tile_w + in_tile_w;
-			if (starting_h == 111 && w == 0 && f ==8) {
-				cout << tmp << " " << conv_relu_norm(tmp, normalization, 6)
-						<< "\n";
-			}
+//			if (starting_h == 111 && w == 0 && f ==8) {
+//				cout << tmp << " " << conv_relu_norm(tmp, normalization, 6)
+//						<< "\n";
+//			}
 			results[tile_index * pw_tile_size + in_tile_index] = conv_relu_norm(
 					tmp, normalization, 6);
 		}
