@@ -7,14 +7,14 @@ utils.set_globals('mob_v2', 'mobilenetv2')
 
 bit_width = 8
 from_files = True
-on_chip_conv_and_layers = 2
+on_chip_conv_and_layers = 7
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
 weights_file_format = {'c':'weights_{}_c.txt', 'pw': 'weights_{}_pw.txt'}
 conv_pw_weights_h_file = '../client/conv_pw_weights.h' #'./out/dw_weights.h'
 
-dw_weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i*[layer_*i*_num_fils][layer_*i*_depth]\
-    [layer_*i*_filter_dim][layer_*i*_filter_dim]' \
-        ,'pw': 'const static weights_dt weights_*i*_pw[layer_*i*_pw_num_fils][layer_*i*_pw_depth]'}
+weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i*[layer_*i*_num_fils][layer_*i*_depth]'+\
+    '[layer_*i*_filter_dim][layer_*i*_filter_dim]' \
+        ,'pw': 'const static weights_dt pw_weights_*i*[layer_*i*_pw_num_fils][layer_*i*_pw_depth]'}
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
@@ -37,7 +37,7 @@ with open(conv_pw_weights_h_file, 'w') as f:
         num_of_generated_layers += 1
         weights_file = weights_files_location +  weights_file_format[layers_types[ii]].format(str(ii))
 
-        f.write(dw_weights_declaration_string[layers_types[ii]].replace(
+        f.write(weights_declaration_string[layers_types[ii]].replace(
             '*i*', str(ii)) + '= {\n')
         
         if from_files:

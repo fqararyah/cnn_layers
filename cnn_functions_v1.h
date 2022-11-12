@@ -95,7 +95,7 @@ const int v1_layer_4_pw_ifm_width = v1_layer_3_dw_ofm_width;
 const int v1_layer_4_pw_ofm_width = v1_layer_4_pw_ifm_width;
 
 //*****variable based on experiment*****
-const int v1_layer_0_parallelism_ofms = 1;
+const int v1_sesl_layer_0_parallelism_ofms = 1;
 const int v1_layer_1_dw_parallelism = 2;
 
 const int v1_layer_2_pw_parallelism_in = 32;

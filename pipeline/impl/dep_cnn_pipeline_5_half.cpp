@@ -43,10 +43,10 @@ void _5_layer_0_3x3_conv_half(
 
 layer_0_ofms:
 	for (int o_o_d = 0;
-		 o_o_d < layer_0_num_fils / layer_0_parallelism_ofms; o_o_d++)
+		 o_o_d < layer_0_num_fils / sesl_layer_0_parallelism_ofms; o_o_d++)
 	{
 		// depth loop
-		int o_o_d_offset = o_o_d * layer_0_parallelism_ofms;
+		int o_o_d_offset = o_o_d * sesl_layer_0_parallelism_ofms;
 
 	layer_0_pipeline:
 		for (int w = 0; w < _5_stages_layer_1_pw_input_width; w++)
@@ -56,7 +56,7 @@ layer_0_ofms:
 			first_conv_pss_dt tmp = 0;
 		layer_0_parallelized_ofms:
 			for (int o_d = 0;
-				 o_d < layer_0_parallelism_ofms; o_d++)
+				 o_d < sesl_layer_0_parallelism_ofms; o_d++)
 			{
 				first_conv_pss_dt tmp = 0;
 #pragma HLS UNROLL

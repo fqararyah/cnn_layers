@@ -25,10 +25,10 @@ void _7_layer_0_3x3_conv(
 
 layer_0_ofms:
     for (int o_o_d = 0;
-         o_o_d < layer_0_num_fils / layer_0_parallelism_ofms; o_o_d++)
+         o_o_d < layer_0_num_fils / sesl_layer_0_parallelism_ofms; o_o_d++)
     {
         // outer filters loop
-        int o_o_d_offset = o_o_d * layer_0_parallelism_ofms; // for indexing in depth
+        int o_o_d_offset = o_o_d * sesl_layer_0_parallelism_ofms; // for indexing in depth
 
     layer_0_pipeline:
         for (int w = 0; w < input_image_width; w +=
@@ -41,7 +41,7 @@ layer_0_ofms:
 #pragma HLS UNROLL
             layer_0_parallelized_ofms:
                 for (int o_d = 0;
-                     o_d < layer_0_parallelism_ofms; o_d++)
+                     o_d < sesl_layer_0_parallelism_ofms; o_d++)
                 {
                     first_conv_pss_dt tmp = 0;
 #pragma HLS UNROLL

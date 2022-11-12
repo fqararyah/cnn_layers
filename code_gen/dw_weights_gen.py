@@ -15,14 +15,21 @@ dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
 
+last_layer = constants.LAST_LAYER_TO_GENERATE + 1 if \
+        constants.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
+first_layer = constants.FIRST_LAYER_TO_GENERATE
+
+if constants.PIPELINE:
+    last_layer = max(last_layer, constants.PILELINE_LEN + 1)
+    first_layer = 0
+
 current_index = 0
 with open(dw_weights_h_file, 'w') as f:
     f.write('#include "../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
-    for ii in range(constants.FIRST_LAYER_TO_GENERATE, constants.LAST_LAYER_TO_GENERATE + 1 if \
-        constants.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)):
+    for ii in range(first_layer, last_layer):
         if layers_types[ii] != 'dw':
             continue
         weights_file = weights_files_location + \

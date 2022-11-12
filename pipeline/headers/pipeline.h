@@ -1,8 +1,22 @@
-#include "../../basic_defs/basic_defs_glue.h"
-#include "../../client/sesl_pw_weights.h"
-
 #ifndef PIPELINE
 #define PIPELINE
+
+#include "../../basic_defs/basic_defs_glue.h"
+#include "../../client/conv_pw_weights.h"
+
+#include "../../client/quantization_and_biases.h"
+#include "../../utils/utils.h"
+
+#include "../../layers/headers/layers_glue.h"
+
+
+#include "../../model/model_glue.h"
+
+#include "../headers/pipeline_glue.h"
+
+#include "../../client/dw_weights.h"
+#include "../../tests/test_utils.h"
+
 
 const int _4_stages_layer_0_rows_at_once = 1;
 const int _5_stages_layer_0_rows_at_once = 2;
@@ -40,6 +54,42 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 		const int num_of_tiles_hw, const int num_of_tiles_w, int td_o,
 		int td_i_o, int t_in_h, int t_in_w);
 
+void cnn_pipeline_7_mob_v2(
+    fms_dt channels[input_image_depth][input_image_height][input_image_width],
+    fms_dt result[max_fms_size]);
+
+void _6_layer_0_3x3_conv(
+		fms_dt channels_buffer[input_image_depth][layer_0_filter_dim
+				+ (_6_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width],
+		const layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+		fms_dt result[layer_2_dw_depth][_6_stages_layer_0_rows_at_once][layer_2_dw_ifm_width]);
+
+void _6_layer_2_dw(
+		fms_dt channels_buffer[layer_2_dw_depth][_6_stages_layer_2_rows_at_once][layer_2_dw_ifm_width],
+		const dw_weights_dt dw_weights[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
+		fms_dt upper[layer_2_dw_depth][layer_2_dw_filter_size
+				- layer_2_dw_strides][layer_2_dw_ifm_width],
+		fms_dt lower[layer_2_dw_depth][_6_stages_layer_2_rows_at_once][layer_2_dw_ifm_width],
+		fms_dt result[layer_3_pw_depth][_6_stages_layer_2_rows_at_once][layer_3_pw_ifm_width],
+		int active_row);
+
+void _6_layer_4_pw_5_dw(
+		fms_dt channels_buffer[layer_4_pw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
+		const weights_dt weights[layer_4_pw_num_fils][layer_4_pw_depth],
+		const dw_weights_dt dw_weights[layer_5_dw_depth][layer_5_dw_filter_size][layer_5_dw_filter_size],
+		fms_dt upper[layer_5_dw_depth][layer_5_dw_ifm_width],
+		fms_dt lower[layer_5_dw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
+		fms_dt result[layer_6_pw_depth][layer_6_pw_ifm_width], int active_row);
+
+void _6_layer_3_pw(
+		fms_dt channels_buffer[layer_3_pw_depth][_6_stages_layer_3_rows_at_once][layer_3_pw_ifm_width],
+		const weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
+		fms_dt result[layer_4_pw_depth][_6_stages_layer_3_rows_at_once][layer_5_dw_ifm_width]); 
+
+void _7_layer_6_pw(
+		fms_dt channels_buffer[layer_6_pw_depth][layer_6_pw_ifm_width],
+		const weights_dt weights[layer_6_pw_num_fils][layer_6_pw_depth],
+		fms_dt result[layer_7_pw_depth][layer_7_pw_ifm_width]);
 
 //void mobilenetv1_pipeline_6(
 //		fms_dt channels[input_image_depth][input_image_height][input_image_width],

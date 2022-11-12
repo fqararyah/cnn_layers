@@ -10,7 +10,7 @@ void fill_channels_buffer_0(
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
 		int starting_h) {
 
-	const biases_dt current_layer_zero_point = conv_fms_zero_points[0];
+	const fms_dt current_layer_zero_point = conv_fms_zero_points[0];
 	const int filled_first_time = layer_0_filter_dim - layer_0_strides;
 	if (starting_h == 0) // first time
 			{

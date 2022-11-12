@@ -30,18 +30,23 @@ int main() {
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 1000;
+	int images_to_test = 1;
 	struct dirent *ent;
 	if ((dir = opendir(input_images_folder.c_str())) != NULL) {
 		/* print all the files and directories within directory */
 		while ((ent = readdir(dir)) != NULL) {
-			cout<<input_images_folder + ent->d_name<<"\n";
-			fill_input_image(input_images_folder + ent->d_name, input_image);
-			verify_input_image(input_image_v_file,input_image);
+			string file_name = input_images_folder + ent->d_name;
+			if (file_name.find(".txt") == std::string::npos) {
+				continue;
+			}
+			cout << file_name << "\n";
+			fill_input_image(file_name, input_image);
+			verify_input_image(input_image_v_file, input_image);
 			top_func(input_image, glued_weights, fc_input);
-			dump_ouput(output_folder + ent->d_name, fc_input, fc_layer_input_size);
+			dump_ouput(output_folder + ent->d_name, fc_input,
+					fc_layer_input_size);
 			img_count++;
-			if(img_count == images_to_test){
+			if (img_count == images_to_test) {
 				break;
 			}
 		}
