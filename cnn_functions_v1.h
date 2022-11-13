@@ -105,7 +105,7 @@ const int v1_layer_3_pw_parallelism_out = 1;
 const int v1_layer_4_pw_parallelism_in = 128;
 const int v1_layer_4_pw_parallelism_out = 1;
 
-const int v1_layer_2_dw_parallelism = v1_layer_2_pw_parallelism_out;
+const int v1_sesl_layer_2_dw_parallelism = v1_layer_2_pw_parallelism_out;
 const int v1_layer_3_dw_parallelism = v1_layer_3_pw_parallelism_out;
 //*********end DF*********
 
