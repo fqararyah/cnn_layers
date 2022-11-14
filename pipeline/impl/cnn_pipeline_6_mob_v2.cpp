@@ -161,8 +161,7 @@ void _6_layer_2_dw(
 	const int first_fill_width_offset = layer_2_dw_filter_size
 			- layer_2_dw_padding_left;
 	const int first_fill_top_offset = first_row * layer_2_dw_padding_top;
-	const int num_cols_to_shift = layer_2_dw_filter_size
-								- layer_2_dw_strides;
+	const int num_cols_to_shift = layer_2_dw_filter_size - layer_2_dw_strides;
 
 	layer_2_dw_main_loop: for (int row = 0;
 			row < _6_stages_layer_2_rows_at_once; row++) {
@@ -213,7 +212,7 @@ void _6_layer_2_dw(
 				for (int h = 0; h < layer_2_dw_filter_size - from_upper_offset;
 						h++) {
 #pragma HLS UNROLL
-					// padding
+					// padding left
 					if (layer_2_dw_padding_left) {
 						intermediate_channels_buffer[d][h + from_upper_offset][0] =
 								current_layer_zero_point;
@@ -245,7 +244,7 @@ void _6_layer_2_dw(
 #pragma HLS UNROLL
 							tmp += intermediate_channels_buffer[o_d][c_h][c_w]
 									* dw_weights[o_o_d_offset + o_d][c_h][c_w];
-							if (o_o_d == 0 && o_d == 0 && w == 2) {
+							if (o_o_d == 0 && o_d == 0 && w == 3) {
 								cout
 										<< intermediate_channels_buffer[o_d][c_h][c_w]
 										<< " * "
@@ -267,9 +266,9 @@ void _6_layer_2_dw(
 					result[o_o_d_offset + o_d][row][w] = dw_relu_norm(tmp,
 							normalization, 6);
 
-					if (o_o_d == 0 && o_d == 0 && w == 2) {
-						cout << tmp << " tpm "<<dw_relu_norm(tmp,
-								normalization, 6)<<"\n";
+					if (o_o_d == 0 && o_d == 0 && w == 3) {
+						cout << tmp << " tpm "
+								<< dw_relu_norm(tmp, normalization, 6) << "\n";
 					}
 					//#####################end DW################
 					//#####################shift and fill intermediate#################
@@ -300,10 +299,13 @@ void _6_layer_2_dw(
 								// padding right
 								if (c_w + starting_fill_index
 										< layer_2_dw_ifm_width) {
-									intermediate_channels_buffer[o_d][h][c_w + num_cols_to_shift] =
-											upper[o_o_d_offset + o_d][h + row][c_w + starting_fill_index];
+									intermediate_channels_buffer[o_d][h][c_w
+											+ num_cols_to_shift] =
+											upper[o_o_d_offset + o_d][h + row][c_w
+													+ starting_fill_index];
 								} else {
-									intermediate_channels_buffer[o_d][h][c_w + num_cols_to_shift] =
+									intermediate_channels_buffer[o_d][h][c_w
+											+ num_cols_to_shift] =
 											current_layer_zero_point;
 								}
 							}
@@ -316,17 +318,26 @@ void _6_layer_2_dw(
 							h < layer_2_dw_filter_size - from_upper_offset;
 							h++) {
 #pragma HLS UNROLL
-						for (int c_w = layer_2_dw_padding_left;
-								c_w < layer_2_dw_filter_size; c_w++) {
+						for (int c_w = 0; c_w < layer_2_dw_strides; c_w++) {
 #pragma HLS UNROLL
 							// padding right
 							if (c_w + starting_fill_index
 									< layer_2_dw_ifm_width) {
 								intermediate_channels_buffer[o_d][h
-										+ from_upper_offset][c_w + num_cols_to_shift] =
-										channels_buffer[o_o_d_offset + o_d][h][c_w + starting_fill_index];
+										+ from_upper_offset][c_w
+										+ num_cols_to_shift] =
+										channels_buffer[o_o_d_offset + o_d][h][c_w
+												+ starting_fill_index];
+								if (o_o_d == 0 && o_d == 0 && w == 2) {
+									cout << h << " , "<< c_w + starting_fill_index << " >> "
+											<< channels_buffer[o_o_d_offset
+													+ o_d][h][c_w
+													+ starting_fill_index]
+											<< "\n";
+								}
 							} else {
-								intermediate_channels_buffer[o_d][h][c_w + num_cols_to_shift] =
+								intermediate_channels_buffer[o_d][h][c_w
+										+ num_cols_to_shift] =
 										current_layer_zero_point;
 							}
 						}
@@ -782,26 +793,26 @@ void cnn_pipeline_6_mob_v2(
 	_6_layer_0_3x3_conv(channels_buffer_1, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 0);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 1);
 //##########
 	_6_stages_fill_channels_buffer(channels, channels_buffer_1, 10);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_0);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 1);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 0);
 //##########
 	_6_stages_fill_channels_buffer(channels, channels_buffer_0, 14);
 	_6_layer_0_3x3_conv(channels_buffer_1, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 1);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 0);
 	_6_layer_3_pw(_6_layer_2_dw_out_1, pw_weights_3, _6_layer_3_pw_out_1);
 //##########
 	_6_stages_fill_channels_buffer(channels, channels_buffer_1, 18);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_0);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 1);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 0);
 	_6_layer_3_pw(_6_layer_2_dw_out_0, pw_weights_3, _6_layer_3_pw_out_0);
 	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_1, pw_weights_4, dw_weights_5,
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,

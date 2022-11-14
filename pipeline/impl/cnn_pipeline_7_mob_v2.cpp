@@ -234,8 +234,7 @@ void cnn_pipeline_7_mob_v2(
 			- layer_2_dw_strides;
 	const fms_dt layer_2_ifms_zero_point = conv_fms_zero_points[2];
 	for (int d = 0; d < layer_2_dw_depth; d++) {
-		for (int h = 0; h < layer_2_dw_padding_top;
-				h++) {
+		for (int h = 0; h < layer_2_dw_padding_top; h++) {
 			for (int w = 0; w < layer_2_dw_ifm_width; w++) {
 				_6_layer_2_dw_upper[d][h][w] = layer_2_ifms_zero_point;
 			}
@@ -276,43 +275,37 @@ void cnn_pipeline_7_mob_v2(
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 0);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 1);
 //##########
 	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 11);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_0);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 1);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 0);
+	_6_layer_3_pw(_6_layer_2_dw_out_0, pw_weights_3, _6_layer_3_pw_out_0);
 //##########
 	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 15);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 1);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 0);
 	_6_layer_3_pw(_6_layer_2_dw_out_1, pw_weights_3, _6_layer_3_pw_out_1);
+	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_0, pw_weights_4, dw_weights_5,
+			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
+			1);
 //##########
 	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 19);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_0);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 1);
+			_6_layer_2_dw_lower, _6_layer_2_dw_out_1, 0);
 	_6_layer_3_pw(_6_layer_2_dw_out_0, pw_weights_3, _6_layer_3_pw_out_0);
 	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_1, pw_weights_4, dw_weights_5,
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,
 			1);
-//##########
-	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 23);
-	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-			_6_layer_0_3x3_conv_out_1);
-	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
-			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 1);
-	_6_layer_3_pw(_6_layer_2_dw_out_1, pw_weights_3, _6_layer_3_pw_out_1);
-	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_0, pw_weights_4, dw_weights_5,
-			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
-			1);
-	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, _6_layer_6_pw_out_1);
-	int even_odd = 0;
-	const int pipeline_filling_stages = 7;
+	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, _6_layer_6_pw_out_0);
+	int even_odd = 1;
+	const int pipeline_filling_stages = 6;
 	int h = pipeline_filling_stages;
 	const int channels_buffer_0_height = layer_0_filter_dim
 			+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides;
