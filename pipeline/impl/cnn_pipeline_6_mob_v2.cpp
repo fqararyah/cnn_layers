@@ -464,7 +464,7 @@ void _6_layer_4_pw_5_dw(
 		const dw_weights_dt dw_weights[layer_5_dw_depth][layer_5_dw_filter_size][layer_5_dw_filter_size],
 		fms_dt upper[layer_5_dw_depth][layer_5_dw_ifm_width],
 		fms_dt lower[layer_5_dw_depth][layer_5_dw_strides][layer_5_dw_ifm_width],
-		fms_dt result[layer_6_pw_depth][layer_6_pw_ifm_width], int active_row) {
+		fms_dt result[layer_6_pw_depth][layer_6_pw_ifm_width], int starting_h) {
 
 #pragma HLS INLINE off
 
@@ -512,15 +512,30 @@ void _6_layer_4_pw_5_dw(
 						w < layer_5_dw_filter_size; w++) {
 #pragma HLS UNROLL
 					//padding top
-					if (active_row == 0 and h < layer_5_dw_padding_top) {
+					if (starting_h == 0 and h < layer_5_dw_padding_top) {
 						intermediate_channels_buffer[d][h][w] =
 								current_dw_ifms_zero_point;
 					} else {
-						intermediate_channels_buffer[d][h][w] = upper[d][h][w
+						intermediate_channels_buffer[d][h][w] = upper[d][w
 								- layer_5_dw_padding_left];
+						if (o_o_d_offset == 0 && d == 0) {
+							cout<<d<<" "<<h<<" "<<w<<" "<<upper[d][w - layer_5_dw_padding_left]<<"   ";
+						}
 					}
 				}
 			}
+		}
+		if (o_o_d_offset == 0) {
+			cout << ">>>>>>>>>>>1>>>>>>>>\n";
+			for (int h = 0; h < layer_5_dw_filter_size; h++) {
+				for (int w = layer_5_dw_padding_left;
+						w < layer_5_dw_filter_size; w++) {
+
+					cout << intermediate_channels_buffer[0][h][w] << " ";
+				}
+				cout << "\n";
+			}
+			cout << ">>>>>>>>>>>1>>>>>>>>\n";
 		}
 
 		layer_4_pw_pipeline: for (int w = 0; w < layer_5_dw_ofm_width; w++) {
@@ -569,9 +584,36 @@ void _6_layer_4_pw_5_dw(
 					}
 				}
 			}
+			if (w == 0 && o_o_d_offset == 0) {
+				cout << ">>>>>>>>>>>2>>>>>>>>\n";
+				for (int h = 0; h < layer_5_dw_filter_size; h++) {
+					for (int w = layer_5_dw_padding_left;
+							w < layer_5_dw_filter_size; w++) {
+
+						cout << intermediate_channels_buffer[0][h][w] << " ";
+					}
+					cout << "\n";
+				}
+				cout << ">>>>>>>>>>>2>>>>>>>>\n";
+			}
+
 			if (w == 0) {					//not enough columns are ready
 				continue;
 			}
+
+			if (w == 1 && o_o_d_offset == 0) {
+				cout << ">>>>>>>>>>>2>>>>>>>>\n";
+				for (int h = 0; h < layer_5_dw_filter_size; h++) {
+					for (int w = layer_5_dw_padding_left;
+							w < layer_5_dw_filter_size; w++) {
+
+						cout << intermediate_channels_buffer[0][h][w] << " ";
+					}
+					cout << "\n";
+				}
+				cout << ">>>>>>>>>>>2>>>>>>>>\n";
+			}
+
 			//###############end PW####################
 			//###############DW########################
 			layer_5_fill_loops: for (int o_d = 0;
@@ -605,10 +647,11 @@ void _6_layer_4_pw_5_dw(
 					for (int c_w = 0; c_w < layer_5_dw_filter_size; c_w++) {
 						// conv width loop
 #pragma HLS UNROLL
-						tmp += intermediate_channels_buffer[o_d][c_h][w + c_w]
+						tmp += intermediate_channels_buffer[o_d][c_h][c_w]
 								* dw_weights[o_o_d_offset + o_d][c_h][c_w];
 					}
 				}
+
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
 						fused_scales[current_dw_fused_parameters_offsets
@@ -620,6 +663,12 @@ void _6_layer_4_pw_5_dw(
 				normalization.ofm_scale_rec = current_dw_ofms_scale;
 				result[o_o_d_offset + o_d][w] = dw_relu_norm(tmp, normalization,
 						6);
+
+				if (o_o_d == 0 && o_d == 0 && w < 3) {
+					cout << "\n" << tmp << " >> "
+							<< dw_relu_norm(tmp, normalization, 6) << "\n";
+				}
+
 				//#####################end DW################
 				//#####################shift and fill intermediate#################
 				for (int c_h = 0; c_h < layer_5_dw_filter_size; c_h++) {
@@ -663,7 +712,7 @@ void _6_layer_4_pw_5_dw(
 		}
 		cout << "\n";
 	}
-	cout << "\result\n";
+	cout << "\nresult\n";
 	for (int w = 0; w < layer_6_pw_ifm_width; w++) {
 		cout << result[0][w] << " ";
 	}
@@ -897,7 +946,7 @@ void cnn_pipeline_6_mob_v2(
 	_6_layer_3_pw(_6_layer_2_dw_out_0, pw_weights_3, _6_layer_3_pw_out_0);
 	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_1, pw_weights_4, dw_weights_5,
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,
-			1);
+			0);
 //##########
 	int even_odd = 1;
 	int h = 6;
