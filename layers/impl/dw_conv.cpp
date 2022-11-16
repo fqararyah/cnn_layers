@@ -168,7 +168,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 					fused_zero_points[current_layer_fused_parameters_offsets
 							+ conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
-			normalization.ofm_scale = conv_fms_scales[layer + 1];
+			normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
 
 			fms_dt scaled_val = dw_relu_norm(tmp, normalization, 6);
 			const int in_tile_index = d * dw_tile_hw + h_offset * dw_tile_w;
@@ -190,7 +190,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 					fused_zero_points[current_layer_fused_parameters_offsets
 							+ conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
-			normalization.ofm_scale = conv_fms_scales[layer + 1];
+			normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
 			for (int i_w = 0; i_w < dw_tile_w; i_w++) {
 #pragma HLS UNROLL
 				dw_pss_dt tmp = 0;

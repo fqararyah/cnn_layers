@@ -36,7 +36,7 @@ void _7_layer_6_pw(
 						fused_zero_points[layers_fused_parameters_offsets[6]
 								+ o_d];
 				normalization.ofm_zero_point = conv_fms_zero_points[6 + 1];
-				normalization.ofm_scale = conv_fms_scales[6 + 1];
+				normalization.ofm_scale_rec = conv_fms_scales_rec[6 + 1];
 				result[o_o_d_offset + o_d][w] = dw_relu_norm(tmp, normalization,
 						6);
 			}
@@ -81,7 +81,7 @@ void _7_layer_7_pw(
 						fused_zero_points[layers_fused_parameters_offsets[7]
 								+ o_d];
 				normalization.ofm_zero_point = conv_fms_zero_points[7 + 1];
-				normalization.ofm_scale = conv_fms_scales[7 + 1];
+				normalization.ofm_scale_rec = conv_fms_scales_rec[7 + 1];
 				result[offset_in_result] = pw_relu_norm(tmp, normalization,
 						layer_7_relu);
 			}

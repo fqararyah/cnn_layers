@@ -60,7 +60,7 @@ void layer_0_conv_engine(
 	for (int f = 0; f < layer_0_num_fils; f++) {
 		fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 		normalization.ofm_zero_point = conv_fms_zero_points[2];
-		normalization.ofm_scale = conv_fms_scales[2];
+		normalization.ofm_scale_rec = conv_fms_scales_rec[2];
 		normalization.fused_zero_point = fused_zero_points[f];
 		normalization.fused_scales = fused_scales[f];
 		for (int w = 0; w < layer_0_ofm_width; w++) {
@@ -173,7 +173,7 @@ void layer_0_3x3(
 // 								fused_scales_buffer[in_tile_index];
 // 						normalization.ofm_zero_point =
 // 								conv_fms_zero_points[layer + 2];
-// 						normalization.ofm_scale = conv_fms_scales[layer + 2];
+// 						normalization.ofm_scale = conv_fms_scales_rec[layer + 2];
 // 						fms_dt scaled_val =
 // 								conv_relu_norm(
 // 										results_tile[tile_offset * pw_tile_d

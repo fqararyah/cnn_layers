@@ -58,7 +58,7 @@ typedef int biases_dt;
 struct fms_quantization_scheme {
 	 fms_dt ofm_zero_point;
 	 scales_dt ifm_scale;
-	 scales_dt ofm_scale;
+	 scales_dt ofm_scale_rec;
 	 biases_dt fused_zero_point;
 	 scales_dt fused_scales;
 	//const biases_dt bias;

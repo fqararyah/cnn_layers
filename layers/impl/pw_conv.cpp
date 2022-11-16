@@ -70,7 +70,7 @@ void pw_write_results_tile(
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 	normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
-	normalization.ofm_scale = conv_fms_scales[layer + 1];
+	normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
 
 	for (int tile_offset = 0; tile_offset < num_of_tiles_processed_in_parallel;
 			tile_offset++) {

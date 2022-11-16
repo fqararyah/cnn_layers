@@ -28,8 +28,10 @@ h_file = '../client/quantization_and_biases.h'  # './out/dw_weights.h'
 
 skip_connections_indices = utils.read_skip_connections_indices()
 
+conv_fms_scales_rec = []
 conv_fms_scales = []
 conv_fms_scales_declaration_string = 'const static scales_dt conv_fms_scales[] = {'
+conv_fms_scales_rec_declaration_string = 'const static scales_dt conv_fms_scales_rec[] = {'
 add_layers_fms_scales_rec = [0] * len(layers_types)
 add_layers_fms_scales = [0] * len(layers_types)
 add_layers_fms_scales_rec_declaration_string = 'const static scales_dt add_layers_fms_scales_rec[] = {'
@@ -66,6 +68,7 @@ with open(h_file, 'w') as wf:
     for layer_index in range(overall_fms_scales):
         if layer_index < overall_fms_scales - 1 and layers_types[layer_index - skip_connection_current_index] == 'pw' \
                 and expansion_projection[layer_index - skip_connection_current_index] == 0:
+            conv_fms_scales_rec.append(0)
             conv_fms_scales.append(0)
             conv_fms_zero_points.append(0)
             continue
@@ -92,14 +95,9 @@ with open(h_file, 'w') as wf:
 
             skip_connection_current_index += 1
         else:
+            conv_fms_scales_rec.append(1.0/float(scale))
             conv_fms_scales.append(float(scale))
             conv_fms_zero_points.append(int(zero_point))
-            # if(len(conv_fms_scales) <= 12):
-            #     print(len(conv_fms_scales) - 1, scale)
-            #     print(len(conv_fms_scales) - 1, zero_point)
-            # if layer_index - skip_connection_current_index < len(layers_weights_shapes) - 1:
-            #    conv_fms_scales += ', '
-            #    conv_fms_zero_points += ', '
 
         fms_file_index += 1
 
@@ -109,11 +107,13 @@ with open(h_file, 'w') as wf:
              str(add_layers_fms_scales).replace('[', '').replace(']', '};\n'))
     wf.write(add_layers_fms_zero_points_declaration_string +
              str(add_layers_fms_zero_points).replace('[', '').replace(']', '};\n'))
-    # wf.write(conv_fms_scales)
+
     wf.write(conv_fms_zero_pointsdeclaration_string +
              str(conv_fms_zero_points).replace('[', '').replace(']', '};\n'))
     wf.write(conv_fms_scales_declaration_string +
              str(conv_fms_scales).replace('[', '').replace(']', '};\n'))
+    wf.write(conv_fms_scales_rec_declaration_string +
+             str(conv_fms_scales_rec).replace('[', '').replace(']', '};\n'))
     # writing weights scales and zero_points
     for layer_index in range(len(layers_weights_shapes)):
         biases = []
@@ -154,7 +154,6 @@ with open(h_file, 'w') as wf:
             layers_fused_parameters_offsets.append(layers_weights_shapes[layer_index].num_of_filters +
                                                    layers_fused_parameters_offsets[-1])
 
-        # print(len(conv_fms_scales))
         with open(weights_scales_file_format.format(layer_index), 'r') as f:
             for line in f:
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
@@ -162,14 +161,6 @@ with open(h_file, 'w') as wf:
                                     (conv_fms_scales[layer_index] if layer_index not in skip_connections_indices
                                      else add_layers_fms_scales[layer_index])
                                     )
-                # if(fused_scales[-1] > 64):
-                #     print('XXXXXXXXXXXXXXX')
-
-                # if len(fused_scales_declaration_string) < 100:
-                #     print(fused_scales_declaration_string)
-                #     print( weight_scale \
-                #     , conv_fms_scales[layer_index], (conv_fms_scales[layer_index + 1] if conv_fms_scales[layer_index + 1] != 0 else \
-                #        conv_fms_scales[layer_index + 2] ))
 
         with open(weights_zero_points_file_format.format(layer_index), 'r') as f:
             for line in f:
