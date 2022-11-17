@@ -491,6 +491,8 @@ void _6_layer_4_pw_5_dw(
 	const int cols_filled_first_time = layer_5_dw_filter_size
 			- layer_5_dw_padding_left;
 
+	const int pw_iterations_before_first_dw = filter_shift_offset;
+
 	layer_4_pw__dw_main_loop: for (int o_o_d = 0;
 			o_o_d < layer_4_pw_num_fils / layer_4_pw_parallelism_out; o_o_d++) {
 		int o_o_d_offset = o_o_d * layer_4_pw_parallelism_out;
@@ -519,13 +521,15 @@ void _6_layer_4_pw_5_dw(
 						intermediate_channels_buffer[d][h][w] = upper[d][w
 								- layer_5_dw_padding_left];
 						if (o_o_d_offset == 0 && d == 0) {
-							cout<<d<<" "<<h<<" "<<w<<" "<<upper[d][w - layer_5_dw_padding_left]<<"   ";
+							cout << d << " " << h << " " << w << " "
+									<< upper[d][w - layer_5_dw_padding_left]
+									<< "   ";
 						}
 					}
 				}
 			}
 		}
-		if (o_o_d_offset == 0) {
+		if (o_o_d_offset <= 1) {
 			cout << ">>>>>>>>>>>1>>>>>>>>\n";
 			for (int h = 0; h < layer_5_dw_filter_size; h++) {
 				for (int w = layer_5_dw_padding_left;
@@ -538,76 +542,69 @@ void _6_layer_4_pw_5_dw(
 			cout << ">>>>>>>>>>>1>>>>>>>>\n";
 		}
 
-		layer_4_pw_pipeline: for (int w = 0; w < layer_5_dw_ofm_width; w++) {
+		layer_4_pw_pipeline: for (int w = 0;
+				w < layer_5_dw_ofm_width + pw_iterations_before_first_dw; w++) {
 #pragma HLS PIPELINE
 			//###################PW#######################
 			const int pw_starting_point = w * layer_5_dw_strides;
-			for (int pw_w = pw_starting_point;
-					pw_w < pw_starting_point + layer_5_dw_strides; pw_w++) {
-				layer_4_pw_loops: for (int o_d = 0;
-						o_d < layer_4_pw_parallelism_out; o_d++) {
+			if (w < layer_5_dw_ofm_width) {
+				for (int pw_w = pw_starting_point;
+						pw_w < pw_starting_point + layer_5_dw_strides; pw_w++) {
+					layer_4_pw_loops: for (int o_d = 0;
+							o_d < layer_4_pw_parallelism_out; o_d++) {
 #pragma HLS UNROLL
-					// parallelized filters loop
-					for (int row = 0; row < _6_stages_layer_4_rows_at_once;
-							row++) {
+						// parallelized filters loop
+						for (int row = 0; row < _6_stages_layer_4_rows_at_once;
+								row++) {
 #pragma HLS UNROLL
-						// FMs width loop
-						pss_dt tmp = 0;
-						for (int d = 0; d < layer_4_pw_parallelism_in; d++) {
+							// FMs width loop
+							pss_dt tmp = 0;
+							for (int d = 0; d < layer_4_pw_parallelism_in;
+									d++) {
 #pragma HLS UNROLL
-							// parallelized depth loop
-							tmp += ((fms_dt) channels_buffer[d][row][pw_w])
-									* weights[o_o_d_offset + o_d][d];
-						}
+								// parallelized depth loop
+								tmp += ((fms_dt) channels_buffer[d][row][pw_w])
+										* weights[o_o_d_offset + o_d][d];
+							}
 
-						fms_quantization_scheme normalization = { 0, 0, 0, 0 };
-						normalization.fused_scales =
-								fused_scales[current_pw_fused_parameters_offsets
-										+ o_o_d_offset + o_d];
-						normalization.fused_zero_point =
-								fused_zero_points[current_pw_fused_parameters_offsets
-										+ o_o_d_offset + o_d];
-						normalization.ofm_zero_point =
-								current_pw_ofms_zero_point;
-						normalization.ofm_scale_rec = current_pw_ofms_scale;
+							fms_quantization_scheme normalization =
+									{ 0, 0, 0, 0 };
+							normalization.fused_scales =
+									fused_scales[current_pw_fused_parameters_offsets
+											+ o_o_d_offset + o_d];
+							normalization.fused_zero_point =
+									fused_zero_points[current_pw_fused_parameters_offsets
+											+ o_o_d_offset + o_d];
+							normalization.ofm_zero_point =
+									current_pw_ofms_zero_point;
+							normalization.ofm_scale_rec = current_pw_ofms_scale;
 
-						fms_dt scaled_val = pw_relu_norm(tmp, normalization,
-								layer_3_relu);
+							fms_dt scaled_val = pw_relu_norm(tmp, normalization,
+									layer_3_relu);
 
-						lower[o_o_d_offset + o_d][row][pw_w] = scaled_val;
-						//fill first col if it is the beginning of a row
-						if (layer_5_dw_padding_left == 0 && w == 0
-								&& pw_w < extra_cols_filled_first_time) {
-							intermediate_channels_buffer[o_d][row
-									+ filter_shift_rows][pw_w] = scaled_val;
+							lower[o_o_d_offset + o_d][row][pw_w] = scaled_val;
+							//fill first col if it is the beginning of a row
+							if (layer_5_dw_padding_left == 0 && w == 0
+									&& pw_w < extra_cols_filled_first_time) {
+								intermediate_channels_buffer[o_d][row
+										+ filter_shift_rows][pw_w] = scaled_val;
+							}
 						}
 					}
 				}
-			}
-			if (w == 0 && o_o_d_offset == 0) {
-				cout << ">>>>>>>>>>>2>>>>>>>>\n";
-				for (int h = 0; h < layer_5_dw_filter_size; h++) {
-					for (int w = layer_5_dw_padding_left;
-							w < layer_5_dw_filter_size; w++) {
-
-						cout << intermediate_channels_buffer[0][h][w] << " ";
-					}
-					cout << "\n";
-				}
-				cout << ">>>>>>>>>>>2>>>>>>>>\n";
 			}
 
 			if (w == 0) {					//not enough columns are ready
 				continue;
 			}
 
-			if (w == 1 && o_o_d_offset == 0) {
+			if (w <= 2 && o_o_d_offset == 1) {
 				cout << ">>>>>>>>>>>2>>>>>>>>\n";
 				for (int h = 0; h < layer_5_dw_filter_size; h++) {
 					for (int w = layer_5_dw_padding_left;
 							w < layer_5_dw_filter_size; w++) {
 
-						cout << intermediate_channels_buffer[0][h][w] << " ";
+						cout << intermediate_channels_buffer[1][h][w] << " ";
 					}
 					cout << "\n";
 				}
@@ -616,28 +613,46 @@ void _6_layer_4_pw_5_dw(
 
 			//###############end PW####################
 			//###############DW########################
+			const int dw_starting_point = (w - pw_iterations_before_first_dw)
+					* layer_5_dw_strides;
+			const int dw_starting_next_iter_point = (w
+					- pw_iterations_before_first_dw + 1) * layer_5_dw_strides;
 			layer_5_fill_loops: for (int o_d = 0;
 					o_d < layer_4_pw_parallelism_out; o_d++) {
 #pragma HLS UNROLL
-				for (int row = filter_shift_offset; row < layer_5_dw_strides;
-						row++) {
+				for (int row = filter_shift_offset;
+						row < layer_5_dw_filter_size; row++) {
 					for (int c_w = filter_shift_offset;
 							c_w < layer_5_dw_filter_size; c_w++) {
 						// conv width loop
 #pragma HLS UNROLL
-						if (pw_starting_point + c_w
+						if (dw_starting_point + (c_w - filter_shift_offset)
 								+ extra_cols_filled_first_time
 								< layer_5_dw_ifm_width) {
 							intermediate_channels_buffer[o_d][row][c_w] =
 									lower[o_o_d_offset + o_d][row
-											- filter_shift_offset][pw_starting_point
-											+ c_w + extra_cols_filled_first_time
-											- filter_shift_offset];
+											- filter_shift_offset][dw_starting_point
+											+ (c_w - filter_shift_offset)
+											+ extra_cols_filled_first_time];
 						} else {
 							intermediate_channels_buffer[o_d][row][c_w] =
 									current_dw_ifms_zero_point;
 						}
 					}
+				}
+
+				if (w <= 2 && o_o_d_offset + o_d == 1) {
+					cout << ">>>>>>>>>>>3>>>>>>>>\n";
+					for (int h = 0; h < layer_5_dw_filter_size; h++) {
+						for (int w = layer_5_dw_padding_left;
+								w < layer_5_dw_filter_size; w++) {
+
+							cout << intermediate_channels_buffer[1][h][w]
+									<< " ";
+						}
+						cout << "\n";
+					}
+					cout << ">>>>>>>>>>>3>>>>>>>>\n";
 				}
 
 				dw_pss_dt tmp = 0;
@@ -661,7 +676,7 @@ void _6_layer_4_pw_5_dw(
 								+ o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_dw_ofms_zero_point;
 				normalization.ofm_scale_rec = current_dw_ofms_scale;
-				result[o_o_d_offset + o_d][w] = dw_relu_norm(tmp, normalization,
+				result[o_o_d_offset + o_d][w - pw_iterations_before_first_dw] = dw_relu_norm(tmp, normalization,
 						6);
 
 				if (o_o_d == 0 && o_d == 0 && w < 3) {
@@ -685,12 +700,14 @@ void _6_layer_4_pw_5_dw(
 					for (int c_w = filter_shift_offset;
 							c_w < layer_5_dw_filter_size; c_w++) {
 #pragma HLS UNROLL
-						if (pw_starting_point + cols_filled_first_time + c_w
-								- filter_shift_offset > layer_5_dw_ifm_width) {
+						if (dw_starting_next_iter_point
+								+ (c_w - filter_shift_offset)
+								+ extra_cols_filled_first_time
+								< layer_5_dw_ifm_width) {
 							intermediate_channels_buffer[o_d][c_h][c_w] =
-									upper[o_o_d_offset + o_d][pw_starting_point
-											+ cols_filled_first_time + c_w
-											- filter_shift_offset];
+									upper[o_o_d_offset + o_d][dw_starting_next_iter_point
+											+ (c_w - filter_shift_offset)
+											+ extra_cols_filled_first_time];
 						} else {
 							intermediate_channels_buffer[o_d][c_h][c_w] =
 									current_dw_ifms_zero_point;
@@ -703,18 +720,18 @@ void _6_layer_4_pw_5_dw(
 	}
 	cout << "\nupper\n";
 	for (int w = 0; w < layer_4_pw_ifm_width; w++) {
-		cout << upper[0][w] << " ";
+		cout << upper[1][w] << " ";
 	}
 	cout << "\nlower\n";
 	for (int h = 0; h < _7_stages_layer_4_rows_at_once; h++) {
 		for (int w = 0; w < layer_4_pw_ifm_width; w++) {
-			cout << lower[0][h][w] << " ";
+			cout << lower[1][h][w] << " ";
 		}
 		cout << "\n";
 	}
 	cout << "\nresult\n";
 	for (int w = 0; w < layer_6_pw_ifm_width; w++) {
-		cout << result[0][w] << " ";
+		cout << result[1][w] << " ";
 	}
 	cout << "\n";
 
