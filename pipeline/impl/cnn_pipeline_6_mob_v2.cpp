@@ -518,7 +518,7 @@ void _6_layer_4_pw_5_dw(
 						intermediate_channels_buffer[d][h][w] =
 								current_dw_ifms_zero_point;
 					} else {
-						intermediate_channels_buffer[d][h][w] = upper[d][w
+						intermediate_channels_buffer[d][h][w] = upper[o_o_d_offset + d][w
 								- layer_5_dw_padding_left];
 						if (o_o_d_offset == 0 && d == 0) {
 							cout << d << " " << h << " " << w << " "
@@ -528,18 +528,18 @@ void _6_layer_4_pw_5_dw(
 					}
 				}
 			}
-		}
-		if (o_o_d_offset <= 1) {
-			cout << ">>>>>>>>>>>1>>>>>>>>\n";
-			for (int h = 0; h < layer_5_dw_filter_size; h++) {
-				for (int w = layer_5_dw_padding_left;
-						w < layer_5_dw_filter_size; w++) {
-
-					cout << intermediate_channels_buffer[0][h][w] << " ";
-				}
-				cout << "\n";
-			}
-			cout << ">>>>>>>>>>>1>>>>>>>>\n";
+//			if (o_o_d_offset + d == 13) {
+//				cout << ">>>>>>>>>>>1>>>>>>>>\n";
+//				for (int h = 0; h < layer_5_dw_filter_size; h++) {
+//					for (int w = layer_5_dw_padding_left;
+//							w < layer_5_dw_filter_size; w++) {
+//
+//						cout << intermediate_channels_buffer[0][h][w] << " ";
+//					}
+//					cout << "\n";
+//				}
+//				cout << ">>>>>>>>>>>1>>>>>>>>\n";
+//			}
 		}
 
 		layer_4_pw_pipeline: for (int w = 0;
@@ -598,18 +598,18 @@ void _6_layer_4_pw_5_dw(
 				continue;
 			}
 
-			if (w <= 2 && o_o_d_offset == 1) {
-				cout << ">>>>>>>>>>>2>>>>>>>>\n";
-				for (int h = 0; h < layer_5_dw_filter_size; h++) {
-					for (int w = layer_5_dw_padding_left;
-							w < layer_5_dw_filter_size; w++) {
-
-						cout << intermediate_channels_buffer[1][h][w] << " ";
-					}
-					cout << "\n";
-				}
-				cout << ">>>>>>>>>>>2>>>>>>>>\n";
-			}
+//			if (w <= 2 && o_o_d_offset + o_d == 13) {
+//				cout << ">>>>>>>>>>>2>>>>>>>>\n";
+//				for (int h = 0; h < layer_5_dw_filter_size; h++) {
+//					for (int w = layer_5_dw_padding_left;
+//							w < layer_5_dw_filter_size; w++) {
+//
+//						cout << intermediate_channels_buffer[1][h][w] << " ";
+//					}
+//					cout << "\n";
+//				}
+//				cout << ">>>>>>>>>>>2>>>>>>>>\n";
+//			}
 
 			//###############end PW####################
 			//###############DW########################
@@ -641,19 +641,19 @@ void _6_layer_4_pw_5_dw(
 					}
 				}
 
-				if (w <= 2 && o_o_d_offset + o_d == 1) {
-					cout << ">>>>>>>>>>>3>>>>>>>>\n";
-					for (int h = 0; h < layer_5_dw_filter_size; h++) {
-						for (int w = layer_5_dw_padding_left;
-								w < layer_5_dw_filter_size; w++) {
-
-							cout << intermediate_channels_buffer[1][h][w]
-									<< " ";
-						}
-						cout << "\n";
-					}
-					cout << ">>>>>>>>>>>3>>>>>>>>\n";
-				}
+//				if (w <= 2 && o_o_d_offset + o_d == 13) {
+//					cout << ">>>>>>>>>>>3>>>>>>>>\n";
+//					for (int h = 0; h < layer_5_dw_filter_size; h++) {
+//						for (int w = layer_5_dw_padding_left;
+//								w < layer_5_dw_filter_size; w++) {
+//
+//							cout << intermediate_channels_buffer[1][h][w]
+//									<< " ";
+//						}
+//						cout << "\n";
+//					}
+//					cout << ">>>>>>>>>>>3>>>>>>>>\n";
+//				}
 
 				dw_pss_dt tmp = 0;
 				// parallelized depth loop
@@ -676,13 +676,13 @@ void _6_layer_4_pw_5_dw(
 								+ o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_dw_ofms_zero_point;
 				normalization.ofm_scale_rec = current_dw_ofms_scale;
-				result[o_o_d_offset + o_d][w - pw_iterations_before_first_dw] = dw_relu_norm(tmp, normalization,
-						6);
+				result[o_o_d_offset + o_d][w - pw_iterations_before_first_dw] =
+						dw_relu_norm(tmp, normalization, 6);
 
-				if (o_o_d == 0 && o_d == 0 && w < 3) {
-					cout << "\n" << tmp << " >> "
-							<< dw_relu_norm(tmp, normalization, 6) << "\n";
-				}
+//				if (o_o_d == 0 && o_d == 0 && w < 3) {
+//					cout << "\n" << tmp << " >> "
+//							<< dw_relu_norm(tmp, normalization, 6) << "\n";
+//				}
 
 				//#####################end DW################
 				//#####################shift and fill intermediate#################
@@ -718,22 +718,22 @@ void _6_layer_4_pw_5_dw(
 			}				//o_d
 		}				//w
 	}
-	cout << "\nupper\n";
-	for (int w = 0; w < layer_4_pw_ifm_width; w++) {
-		cout << upper[1][w] << " ";
-	}
-	cout << "\nlower\n";
-	for (int h = 0; h < _7_stages_layer_4_rows_at_once; h++) {
-		for (int w = 0; w < layer_4_pw_ifm_width; w++) {
-			cout << lower[1][h][w] << " ";
-		}
-		cout << "\n";
-	}
-	cout << "\nresult\n";
-	for (int w = 0; w < layer_6_pw_ifm_width; w++) {
-		cout << result[1][w] << " ";
-	}
-	cout << "\n";
+//	cout << "\nupper\n";
+//	for (int w = 0; w < layer_4_pw_ifm_width; w++) {
+//		cout << upper[13][w] << " ";
+//	}
+//	cout << "\nlower\n";
+//	for (int h = 0; h < _7_stages_layer_4_rows_at_once; h++) {
+//		for (int w = 0; w < layer_4_pw_ifm_width; w++) {
+//			cout << lower[13][h][w] << " ";
+//		}
+//		cout << "\n";
+//	}
+//	cout << "\nresult\n";
+//	for (int w = 0; w < layer_6_pw_ifm_width; w++) {
+//		cout << result[13][w] << " ";
+//	}
+//	cout << "\n";
 
 	layer_4_pw_dw_shift_loop: for (int o_o_d = 0;
 			o_o_d < layer_4_pw_num_fils / layer_4_pw_parallelism_out; o_o_d++) {

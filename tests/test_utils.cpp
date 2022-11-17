@@ -4,6 +4,17 @@ void fill_layer_input_from_file(string file_name, int input_size) {
 
 }
 
+void dump_layer_output_no_tiling(string file_name, fms_dt ofms[max_fms_size],
+		int ofms_size, const int ofms_h, const int ofms_w) {
+	ofstream myfile;
+	myfile.open(file_name);
+	for (int i = 0; i < ofms_size; i++) {
+		//if(ofms_size == 75264)cout<< to_print_ofms[i]<<"\n";
+		myfile << ofms[i] << "\n";
+	}
+	myfile.close();
+}
+
 void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int ofms_size, const int ofms_h, const int ofms_w) {
 	ofstream myfile;

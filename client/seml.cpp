@@ -11,12 +11,18 @@ void seml(
 		fms_dt fc_input[fc_layer_input_size]) {
 
 	//begin_code_generation
+//fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fms/fms_8_144_56_56.txt",
+// channels, 56, 56);
+//verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_8.txt",
+// channels, 451584, 56, 56);
 fill_dw_layer_weights(dw_weights_8, dw_weights_buffer, layer_8_dw_depth, layer_8_dw_filter_size, layer_8_dw_filter_size);
     dw_conv_3x3(dw_weights_buffer, channels, result2, 8, layer_8_dw_depth,
     layer_8_dw_ifm_width, layer_8_dw_ifm_height, layer_8_dw_num_of_tiles_in_d,
     layer_8_dw_num_of_tiles_h, layer_8_dw_num_of_tiles_w,
     layer_8_dw_strides, layer_8_dw_padding_left,layer_8_dw_padding_top,
     0);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+ result2, 451584, 56, 56);
 pw_conv(off_chip_weights, channels, result2, 9, layer_9_pw_depth,
     layer_9_pw_num_fils, layer_9_pw_num_of_tiles_in_d,
     layer_9_pw_num_of_tiles_out_d, layer_9_pw_num_of_tiles_h,
