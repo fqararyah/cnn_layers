@@ -1,7 +1,6 @@
+#include "../headers/layers_imp_common_includes.h"
 #include "../headers/dw_conv.h"
-#include "../headers/norm_act.h"
-#include "../../client/quantization_and_biases.h"
-#include "../../tests/test_utils.h"
+
 
 void dw_fill_channels_buffer_3x3(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[dw_tile_d][3][max_dw_input_width], int layer,

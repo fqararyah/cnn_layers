@@ -1,5 +1,5 @@
-#include "seml.h"
-#include "../pipeline/headers/pipeline_glue.h"
+#include "hls_only_main_file.h"
+#include "../tests/test_utils.h"
 
 void top_func(
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width],

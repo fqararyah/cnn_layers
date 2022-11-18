@@ -1,5 +1,5 @@
-#include "prepare_weights_and_inputs.h"
-#include "../client/main_file.h"
+#include "../client/prepare_weights_and_inputs.h"
+#include "../client/hls_only_main_file.h"
 #include <iostream>
 #include <dirent.h>
 #include "test_utils.h"

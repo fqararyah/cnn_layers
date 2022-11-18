@@ -1,6 +1,5 @@
+#include "../headers/layers_imp_common_includes.h"
 #include "../headers/pooling.h"
-#include "../../client/quantization_and_biases.h"
-#include "../../tests/test_utils.h"
 
 void avgpool(fms_dt channels[max_fms_size],
 		fms_dt result[fc_layer_input_size]) {

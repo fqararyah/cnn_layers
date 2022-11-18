@@ -1,19 +1,13 @@
 #ifndef SEML
 #define SEML
-#include "../tests/test_utils.h"
-#include "../tests/prepare_weights_and_inputs.h"
-#include "quantization_and_biases.h"
-#include "../utils/utils.h"
-#include "../layers/headers/layers_glue.h"
-
-#include "../model/model_glue.h"
+#include "../../../../client/prepare_weights_and_inputs.h"
+#include "../../../utils/utils.h"
+#include "../../../layers/headers/layers_glue.h"
 
 //#include "../pipeline/headers/pipeline_glue.h"
 
 //#include "../cnn_functions_v1.h"
 
-#include "dw_weights.h"
-#include "conv_pw_weights.h"
 
 #include <iostream>
 #include <math.h>

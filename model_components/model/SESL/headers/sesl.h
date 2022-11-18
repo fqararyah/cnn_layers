@@ -1,22 +1,11 @@
-#ifndef PIPELINE
-#define PIPELINE
+#ifndef SESL
+#define SESL
 
-#include "../../basic_defs/basic_defs_glue.h"
-#include "../../client/conv_pw_weights.h"
+#include "../../../basic_defs/basic_defs_glue.h"
 
-#include "../../client/quantization_and_biases.h"
-#include "../../utils/utils.h"
+#include "../../../layers/headers/layers_glue.h"
 
-#include "../../layers/headers/layers_glue.h"
-
-
-#include "../../model/model_glue.h"
-
-#include "../headers/pipeline_glue.h"
-
-#include "../../client/dw_weights.h"
-#include "../../tests/test_utils.h"
-
+#include "sesl_parallelism.h"
 
 const int _4_stages_layer_0_rows_at_once = 1;
 const int _5_stages_layer_0_rows_at_once = 2;

@@ -24,7 +24,7 @@ biases_file_format = weights_scales_biases_files_location + 'weights_{}_biases.t
 layers_types = utils.read_layers_types()
 layers_weights_shapes = utils.read_layers_weight_shapes(layers_types)
 
-h_file = '../client/quantization_and_biases.h'  # './out/dw_weights.h'
+h_file = '../model_components/model/headers/quantization_and_biases.h'  # './out/dw_weights.h'
 
 skip_connections_indices = utils.read_skip_connections_indices()
 
@@ -54,7 +54,7 @@ overall_fms_scales = len(skip_connections_indices) + \
 expansion_projection = utils.read_expansion_projection()
 skip_connection_current_index = 0
 with open(h_file, 'w') as wf:
-    wf.write('#include "../basic_defs/basic_defs_glue.h"\n')
+    wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 

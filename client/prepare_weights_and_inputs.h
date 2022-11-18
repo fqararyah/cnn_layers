@@ -1,7 +1,7 @@
 #ifndef PREPARE_WEIGHTS_INPUTS
 #define PREPARE_WEIGHTS_INPUTS
-#include "../basic_defs/basic_defs_glue.h"
-#include "../model/model_glue.h"
+#include "../model_components/basic_defs/basic_defs_glue.h"
+#include "../model_components/model/headers/model_glue.h"
 #include <fstream>
 #include "ap_int.h"
 #include <iostream>

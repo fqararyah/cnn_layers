@@ -5,14 +5,14 @@ import utils
 utils.set_globals('mob_v2', 'mobilenetv2')
 
 
-in_out_file = '../client/seml.cpp'
-in_out_header_file = '../client/seml.h'
+in_out_file = '../model_components/model/SEML/imp/seml.cpp'
+in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
 ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fms/'
 
 ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
-debugging_includes_block = '#include "../tests/test_utils.h"\n'
+debugging_includes_block = '#include "../../tests/test_utils.h"\n'
 
 layer_0_block = 'layer_0_3x3(weights_0, input_image, result2);\n'
 

@@ -13,7 +13,7 @@ const int layer_4_pw_parallelism_in = 16;
 const int layer_4_pw_parallelism_out = 2;
 const int layer_6_pw_parallelism_in = 96;
 const int layer_6_pw_parallelism_out = 1;
-const int layer_7_pw_parallelism_in = 96;
+const int layer_7_pw_parallelism_in = 24;
 const int layer_7_pw_parallelism_out = 1;
 
 const int layer_1_dw_parallelism = layer_1_pw_parallelism_out;

@@ -1,8 +1,8 @@
 #ifndef TESTS_UTILs
 #define TESTS_UTILs
 
-#include "../basic_defs/basic_defs_glue.h"
-#include "../model/model_glue.h"
+#include "../model_components/basic_defs/basic_defs_glue.h"
+#include "../model_components/model/headers/model_glue.h"
 #include <iostream>
 #include <fstream>
 

@@ -7,8 +7,8 @@ utils.set_globals('mob_v2', 'mobilenetv2')
 bit_width = 8
 from_files = True
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
-weights_file_format = 'weights_{}_dw.txt'
-dw_weights_h_file = '../client/dw_weights.h'  # './out/dw_weights.h'
+reading_weights_file_format = 'weights_{}_dw.txt'
+dw_weights_h_file = '../model_components/model/headers/dw_weights.h'  # './out/dw_weights.h'
 
 dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_size][layer_*i*_dw_filter_size]'
 
@@ -25,7 +25,7 @@ if constants.PIPELINE:
 
 current_index = 0
 with open(dw_weights_h_file, 'w') as f:
-    f.write('#include "../basic_defs/basic_defs_glue.h"\n')
+    f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
@@ -33,7 +33,7 @@ with open(dw_weights_h_file, 'w') as f:
         if layers_types[ii] != 'dw':
             continue
         weights_file = weights_files_location + \
-            weights_file_format.format(str(ii))
+            reading_weights_file_format.format(str(ii))
         f.write(dw_weights_declaration_string.replace(
             '*i*', str(ii)) + '= {\n')
 

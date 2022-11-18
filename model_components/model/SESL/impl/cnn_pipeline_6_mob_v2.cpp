@@ -1,6 +1,7 @@
-#include "../headers/pipeline.h"
+#include "../headers/sesl.h"
 #include <iostream>
 #include <math.h>
+#include "../../../../tests/test_utils.h"
 
 using namespace std;
 
@@ -11,8 +12,9 @@ void _6_layer_0_3x3_conv(
 		fms_dt result[layer_2_dw_depth][_6_stages_layer_0_rows_at_once][layer_2_dw_ifm_width]) {
 #pragma HLS INLINE off
 
-	fms_dt intermediate_channels_buffer[input_image_depth][layer_0_filter_dim
-			+ (_6_stages_layer_0_rows_at_once - 1) * layer_0_strides][layer_2_dw_filter_size] =
+	const int _channels_buffer_height = layer_0_filter_dim
+			+ (_6_stages_layer_0_rows_at_once - 1) * layer_0_strides;
+	fms_dt intermediate_channels_buffer[input_image_depth][_channels_buffer_height][layer_2_dw_filter_size] =
 			{ 0 };
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
@@ -26,11 +28,7 @@ void _6_layer_0_3x3_conv(
 
 		// fill the intermediate_channels_buffer
 		for (int d = 0; d < input_image_depth; d++) {
-			for (int h = 0;
-					h
-							< layer_0_filter_dim
-									+ (_6_stages_layer_0_rows_at_once - 1)
-											* layer_0_strides; h++) {
+			for (int h = 0; h < _channels_buffer_height; h++) {
 				for (int w = 0; w < layer_0_filter_dim - layer_0_padding_left;
 						w++) {
 					intermediate_channels_buffer[d][h][w + layer_0_padding_left] =
@@ -45,7 +43,7 @@ void _6_layer_0_3x3_conv(
 #pragma HLS PIPELINE
 			const int starting_fill_index = w + offset_left;
 			// FMs width loop
-			for (int row = 0; row <= _6_stages_layer_0_rows_at_once; row++) {
+			for (int row = 0; row < _6_stages_layer_0_rows_at_once; row++) {
 #pragma HLS UNROLL
 				const int conv_start_h = row * layer_0_strides;
 				layer_0_parallelized_ofms: for (int o_d = 0;
@@ -88,6 +86,15 @@ void _6_layer_0_3x3_conv(
 							fused_scales[o_o_d_offset + o_d];
 					result[o_o_d_offset + o_d][row][w / layer_0_strides] =
 							conv_relu_norm(tmp, normalization, 6);
+					if (o_o_d_offset + o_d >= layer_2_dw_depth
+							|| row >= _6_stages_layer_0_rows_at_once
+							|| w / layer_0_strides >= layer_2_dw_ifm_width) {
+						cout
+								<< "\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n";
+						cout<<"o_o_d_offset + o_d >= layer_2_dw_depth "<<o_o_d_offset + o_d<<" "<< layer_2_dw_depth<<"\n";
+						cout<<"row >= _6_stages_layer_0_rows_at_once " << row << " " << _6_stages_layer_0_rows_at_once<<"\n";
+						cout<<"w / layer_0_strides >= layer_2_dw_ifm_width " << row << " " << layer_2_dw_ifm_width<<"\n";
+					}
 //					if (o_o_d == 0 && o_d == 0 && w == 0) {
 //						cout << tmp << " "
 //								<< conv_relu_norm(tmp, normalization, 6)
@@ -110,13 +117,28 @@ void _6_layer_0_3x3_conv(
 								c_w < layer_0_filter_dim - layer_0_strides;
 								c_w++) {
 #pragma HLS UNROLL
+							if (d >= input_image_depth
+									|| c_h >= _channels_buffer_height
+									|| c_w + layer_0_strides
+											>= layer_2_dw_filter_size) {
+								cout
+										<< "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
+							}
 							intermediate_channels_buffer[d][c_h][c_w] =
 									intermediate_channels_buffer[d][c_h][c_w
 											+ layer_0_strides];
+
 						}
 						for (int c_w = layer_0_filter_dim - layer_0_strides;
 								c_w < layer_0_filter_dim; c_w++) {
 #pragma HLS UNROLL
+							if (d >= input_image_depth
+									|| c_h >= _channels_buffer_height
+									|| c_w
+											>= layer_2_dw_filter_size) {
+								cout
+										<< "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
+							}
 							if (c_w - (layer_0_filter_dim - layer_0_strides)
 									+ starting_fill_index < layer_0_ifm_width) {
 								intermediate_channels_buffer[d][c_h][c_w] =
@@ -518,13 +540,14 @@ void _6_layer_4_pw_5_dw(
 						intermediate_channels_buffer[d][h][w] =
 								current_dw_ifms_zero_point;
 					} else {
-						intermediate_channels_buffer[d][h][w] = upper[o_o_d_offset + d][w
-								- layer_5_dw_padding_left];
-						if (o_o_d_offset == 0 && d == 0) {
-							cout << d << " " << h << " " << w << " "
-									<< upper[d][w - layer_5_dw_padding_left]
-									<< "   ";
-						}
+						intermediate_channels_buffer[d][h][w] =
+								upper[o_o_d_offset + d][w
+										- layer_5_dw_padding_left];
+//						if (o_o_d_offset == 0 && d == 0) {
+//							cout << d << " " << h << " " << w << " "
+//									<< upper[d][w - layer_5_dw_padding_left]
+//									<< "   ";
+//						}
 					}
 				}
 			}

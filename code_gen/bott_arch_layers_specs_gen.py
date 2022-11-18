@@ -3,7 +3,7 @@ import prepare_off_chip_weights
 
 utils.set_globals('mob_v2', 'mobilenetv2')
 
-out_file = '../model/layers_specs.h' #'./out/layers_specs.h'
+out_file = '../model_components/model/headers/layers_specs.h' #'./out/layers_specs.h'
 
 to_replace = ['*LNF*', '*LD*', '*LW*', '*LH*', '*LST*', '*LPL*', '*LPR*', '*LFS*', '*i*', '*i-1*', '*i-1_pw*', '*LWOF*']
 
@@ -96,7 +96,7 @@ current_block_indx = 0
 cumulative_pw_weights = 0
 target_block = ''
 with open(out_file, 'w') as f:
-    f.write('#include "../basic_defs/basic_defs_glue.h"\n')
+    f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef LAYERS_SPECS\n")
     f.write("#define LAYERS_SPECS\n")
     for i in range(len(layers_types)):

@@ -10,7 +10,7 @@ from_files = True
 on_chip_conv_and_layers = 7
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
 weights_file_format = {'c':'weights_{}_c.txt', 'pw': 'weights_{}_pw.txt'}
-conv_pw_weights_h_file = '../client/conv_pw_weights.h' #'./out/dw_weights.h'
+conv_pw_weights_h_file = '../model_components/model/headers/on_chip_conv_pw_weights.h' #'./out/dw_weights.h'
 
 weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i*[layer_*i*_num_fils][layer_*i*_depth]'+\
     '[layer_*i*_filter_dim][layer_*i*_filter_dim]' \
@@ -22,8 +22,8 @@ expansion_projection = utils.read_expansion_projection()
 
 num_of_generated_layers = 0
 with open(conv_pw_weights_h_file, 'w') as f:
-    f.write('#include "../basic_defs/basic_defs_glue.h"\n')
-    f.write('#include "../model/layers_specs.h"\n')
+    f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
+    f.write('#include "layers_specs.h"\n')
     f.write("#ifndef CONV_PW_WEIGHTS\n")
     f.write("#define CONV_PW_WEIGHTS\n")
 

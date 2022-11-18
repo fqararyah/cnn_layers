@@ -2,7 +2,7 @@
 #define CONV
 
 #include "../../basic_defs/basic_defs_glue.h"
-#include "../../model/model_glue.h"
+#include "../../model/headers/model_glue.h"
 
 void layer_0_using_pw(
 		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3],

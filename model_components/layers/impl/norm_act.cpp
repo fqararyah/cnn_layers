@@ -1,5 +1,5 @@
+#include "../headers/layers_imp_common_includes.h"
 #include "../headers/norm_act.h"
-#include  "../../client/quantization_and_biases.h"
 
 void clamp(pss_f_dt &val) {
 #pragma HLS INLINE
