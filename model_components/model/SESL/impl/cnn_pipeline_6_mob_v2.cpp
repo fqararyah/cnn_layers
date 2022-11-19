@@ -91,9 +91,14 @@ void _6_layer_0_3x3_conv(
 							|| w / layer_0_strides >= layer_2_dw_ifm_width) {
 						cout
 								<< "\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n";
-						cout<<"o_o_d_offset + o_d >= layer_2_dw_depth "<<o_o_d_offset + o_d<<" "<< layer_2_dw_depth<<"\n";
-						cout<<"row >= _6_stages_layer_0_rows_at_once " << row << " " << _6_stages_layer_0_rows_at_once<<"\n";
-						cout<<"w / layer_0_strides >= layer_2_dw_ifm_width " << row << " " << layer_2_dw_ifm_width<<"\n";
+						cout << "o_o_d_offset + o_d >= layer_2_dw_depth "
+								<< o_o_d_offset + o_d << " " << layer_2_dw_depth
+								<< "\n";
+						cout << "row >= _6_stages_layer_0_rows_at_once " << row
+								<< " " << _6_stages_layer_0_rows_at_once
+								<< "\n";
+						cout << "w / layer_0_strides >= layer_2_dw_ifm_width "
+								<< row << " " << layer_2_dw_ifm_width << "\n";
 					}
 //					if (o_o_d == 0 && o_d == 0 && w == 0) {
 //						cout << tmp << " "
@@ -134,8 +139,7 @@ void _6_layer_0_3x3_conv(
 #pragma HLS UNROLL
 							if (d >= input_image_depth
 									|| c_h >= _channels_buffer_height
-									|| c_w
-											>= layer_2_dw_filter_size) {
+									|| c_w >= layer_2_dw_filter_size) {
 								cout
 										<< "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
 							}
@@ -580,37 +584,55 @@ void _6_layer_4_pw_5_dw(
 						for (int row = 0; row < _6_stages_layer_4_rows_at_once;
 								row++) {
 #pragma HLS UNROLL
-							// FMs width loop
-							pss_dt tmp = 0;
-							for (int d = 0; d < layer_4_pw_parallelism_in;
-									d++) {
+							if (starting_h + row < layer_4_pw_ifm_height) {
+								// FMs width loop
+								pss_dt tmp = 0;
+								for (int d = 0; d < layer_4_pw_parallelism_in;
+										d++) {
 #pragma HLS UNROLL
-								// parallelized depth loop
-								tmp += ((fms_dt) channels_buffer[d][row][pw_w])
-										* weights[o_o_d_offset + o_d][d];
-							}
+									// parallelized depth loop
+									tmp +=
+											((fms_dt) channels_buffer[d][row][pw_w])
+													* weights[o_o_d_offset + o_d][d];
+								}
 
-							fms_quantization_scheme normalization =
-									{ 0, 0, 0, 0 };
-							normalization.fused_scales =
-									fused_scales[current_pw_fused_parameters_offsets
-											+ o_o_d_offset + o_d];
-							normalization.fused_zero_point =
-									fused_zero_points[current_pw_fused_parameters_offsets
-											+ o_o_d_offset + o_d];
-							normalization.ofm_zero_point =
-									current_pw_ofms_zero_point;
-							normalization.ofm_scale_rec = current_pw_ofms_scale;
+								fms_quantization_scheme normalization = { 0, 0,
+										0, 0 };
+								normalization.fused_scales =
+										fused_scales[current_pw_fused_parameters_offsets
+												+ o_o_d_offset + o_d];
+								normalization.fused_zero_point =
+										fused_zero_points[current_pw_fused_parameters_offsets
+												+ o_o_d_offset + o_d];
+								normalization.ofm_zero_point =
+										current_pw_ofms_zero_point;
+								normalization.ofm_scale_rec =
+										current_pw_ofms_scale;
 
-							fms_dt scaled_val = pw_relu_norm(tmp, normalization,
-									layer_3_relu);
+								fms_dt scaled_val = pw_relu_norm(tmp,
+										normalization, layer_3_relu);
 
-							lower[o_o_d_offset + o_d][row][pw_w] = scaled_val;
-							//fill first col if it is the beginning of a row
-							if (layer_5_dw_padding_left == 0 && w == 0
-									&& pw_w < extra_cols_filled_first_time) {
-								intermediate_channels_buffer[o_d][row
-										+ filter_shift_rows][pw_w] = scaled_val;
+								lower[o_o_d_offset + o_d][row][pw_w] =
+										scaled_val;
+								//fill first col if it is the beginning of a row
+								if (layer_5_dw_padding_left == 0 && w == 0
+										&& pw_w
+												< extra_cols_filled_first_time) {
+									intermediate_channels_buffer[o_d][row
+											+ filter_shift_rows][pw_w] =
+											scaled_val;
+								}
+							} else {
+								lower[o_o_d_offset + o_d][row][pw_w] =
+										current_dw_ifms_zero_point;
+								//fill first col if it is the beginning of a row
+								if (layer_5_dw_padding_left == 0 && w == 0
+										&& pw_w
+												< extra_cols_filled_first_time) {
+									intermediate_channels_buffer[o_d][row
+											+ filter_shift_rows][pw_w] =
+											current_dw_ifms_zero_point;
+								}
 							}
 						}
 					}
@@ -657,7 +679,7 @@ void _6_layer_4_pw_5_dw(
 											- filter_shift_offset][dw_starting_point
 											+ (c_w - filter_shift_offset)
 											+ extra_cols_filled_first_time];
-						} else {
+						} else {			//padding right
 							intermediate_channels_buffer[o_d][row][c_w] =
 									current_dw_ifms_zero_point;
 						}
@@ -731,7 +753,7 @@ void _6_layer_4_pw_5_dw(
 									upper[o_o_d_offset + o_d][dw_starting_next_iter_point
 											+ (c_w - filter_shift_offset)
 											+ extra_cols_filled_first_time];
-						} else {
+						} else {				//padding right
 							intermediate_channels_buffer[o_d][c_h][c_w] =
 									current_dw_ifms_zero_point;
 						}
