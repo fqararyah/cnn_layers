@@ -86,20 +86,20 @@ void _6_layer_0_3x3_conv(
 							fused_scales[o_o_d_offset + o_d];
 					result[o_o_d_offset + o_d][row][w / layer_0_strides] =
 							conv_relu_norm(tmp, normalization, 6);
-					if (o_o_d_offset + o_d >= layer_2_dw_depth
-							|| row >= _6_stages_layer_0_rows_at_once
-							|| w / layer_0_strides >= layer_2_dw_ifm_width) {
-						cout
-								<< "\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n";
-						cout << "o_o_d_offset + o_d >= layer_2_dw_depth "
-								<< o_o_d_offset + o_d << " " << layer_2_dw_depth
-								<< "\n";
-						cout << "row >= _6_stages_layer_0_rows_at_once " << row
-								<< " " << _6_stages_layer_0_rows_at_once
-								<< "\n";
-						cout << "w / layer_0_strides >= layer_2_dw_ifm_width "
-								<< row << " " << layer_2_dw_ifm_width << "\n";
-					}
+//					if (o_o_d_offset + o_d >= layer_2_dw_depth
+//							|| row >= _6_stages_layer_0_rows_at_once
+//							|| w / layer_0_strides >= layer_2_dw_ifm_width) {
+//						cout
+//								<< "\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n";
+//						cout << "o_o_d_offset + o_d >= layer_2_dw_depth "
+//								<< o_o_d_offset + o_d << " " << layer_2_dw_depth
+//								<< "\n";
+//						cout << "row >= _6_stages_layer_0_rows_at_once " << row
+//								<< " " << _6_stages_layer_0_rows_at_once
+//								<< "\n";
+//						cout << "w / layer_0_strides >= layer_2_dw_ifm_width "
+//								<< row << " " << layer_2_dw_ifm_width << "\n";
+//					}
 //					if (o_o_d == 0 && o_d == 0 && w == 0) {
 //						cout << tmp << " "
 //								<< conv_relu_norm(tmp, normalization, 6)
@@ -122,13 +122,13 @@ void _6_layer_0_3x3_conv(
 								c_w < layer_0_filter_dim - layer_0_strides;
 								c_w++) {
 #pragma HLS UNROLL
-							if (d >= input_image_depth
-									|| c_h >= _channels_buffer_height
-									|| c_w + layer_0_strides
-											>= layer_2_dw_filter_size) {
-								cout
-										<< "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
-							}
+//							if (d >= input_image_depth
+//									|| c_h >= _channels_buffer_height
+//									|| c_w + layer_0_strides
+//											>= layer_2_dw_filter_size) {
+//								cout
+//										<< "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
+//							}
 							intermediate_channels_buffer[d][c_h][c_w] =
 									intermediate_channels_buffer[d][c_h][c_w
 											+ layer_0_strides];
@@ -137,12 +137,12 @@ void _6_layer_0_3x3_conv(
 						for (int c_w = layer_0_filter_dim - layer_0_strides;
 								c_w < layer_0_filter_dim; c_w++) {
 #pragma HLS UNROLL
-							if (d >= input_image_depth
-									|| c_h >= _channels_buffer_height
-									|| c_w >= layer_2_dw_filter_size) {
-								cout
-										<< "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
-							}
+//							if (d >= input_image_depth
+//									|| c_h >= _channels_buffer_height
+//									|| c_w >= layer_2_dw_filter_size) {
+//								cout
+//										<< "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
+//							}
 							if (c_w - (layer_0_filter_dim - layer_0_strides)
 									+ starting_fill_index < layer_0_ifm_width) {
 								intermediate_channels_buffer[d][c_h][c_w] =

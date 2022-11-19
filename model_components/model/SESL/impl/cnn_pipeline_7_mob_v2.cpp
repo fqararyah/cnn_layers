@@ -60,15 +60,15 @@ void _7_layer_7_pw(
 
 #pragma HLS INLINE off
 
-	if (starting_h > 50) {
-		cout << "***7***\n";
-		for (int w = 0; w < 5; w++) {
-			//for (int d = 0; d < layer_7_pw_depth; d++)
-			cout << channels_buffer[0][w] << " ";
-			//cout << "\n";
-		}
-		cout << "******\n";
-	}
+//	if (starting_h > 50) {
+//		cout << "***7***\n";
+//		for (int w = 0; w < 5; w++) {
+//			//for (int d = 0; d < layer_7_pw_depth; d++)
+//			cout << channels_buffer[0][w] << " ";
+//			//cout << "\n";
+//		}
+//		cout << "******\n";
+//	}
 
 	const int current_layer_fused_parameters_offsets =
 			layers_fused_parameters_offsets[7];
@@ -76,6 +76,7 @@ void _7_layer_7_pw(
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[7 + 1];
 	const scales_dt current_layer_ofms_scale = conv_fms_scales_rec[7 + 1];
 
+	const int num_tiles_hw = layer_7_pw_num_of_tiles_h * layer_7_pw_num_of_tiles_w;
 	// rows for next DW
 	//cout<<"\nstarting_h: "<<starting_h<<"\n";
 	for (int o_o_d = 0;
@@ -98,7 +99,7 @@ void _7_layer_7_pw(
 
 				int tile_in_w = w / pw_tile_w;
 				int tile_index = tile_in_z * num_tiles_hw
-						+ tile_in_h * num_tiles_w + tile_in_w;
+						+ tile_in_h * layer_7_pw_num_of_tiles_w + tile_in_w;
 
 
 				int in_tile_w = w % pw_tile_w;
@@ -131,17 +132,17 @@ void _7_layer_7_pw(
 				normalization.ofm_scale_rec = current_layer_ofms_scale;
 				result[offset_in_result] = pw_relu_norm(tmp,
 						normalization, layer_7_relu);
-				if (o_o_d_offset + o_d == 0) {
-//					cout << "\n"<<tmp <<" >> "<<pw_relu_norm(tmp, normalization, layer_7_relu)
-//							<< "\n";
-					cout << pw_relu_norm(tmp, normalization, layer_7_relu)
-							<< " ";
-				}
+//				if (o_o_d_offset + o_d == 0) {
+////					cout << "\n"<<tmp <<" >> "<<pw_relu_norm(tmp, normalization, layer_7_relu)
+////							<< "\n";
+//					cout << pw_relu_norm(tmp, normalization, layer_7_relu)
+//							<< " ";
+//				}
 			}
 		}
-		if (o_o_d == 0) {
-			cout << "\n";
-		}
+//		if (o_o_d == 0) {
+//			cout << "\n";
+//		}
 	}
 }
 
@@ -501,8 +502,8 @@ void cnn_pipeline_7_mob_v2(
 			switch_point_fms_height - pipeline_filling_stages + 4);
 	_6_layer_4_pw_5_dw_starting_h += _7_stages_layer_4_rows_at_once;
 //##########
-	cout << "\n_6_layer_4_pw_5_dw_starting_h " << _6_layer_4_pw_5_dw_starting_h
-			<< "\n";
+//	cout << "\n_6_layer_4_pw_5_dw_starting_h " << _6_layer_4_pw_5_dw_starting_h
+//			<< "\n";
 	//padding bottom
 	// by the end of the previous _6_layer_2_dw, _6_layer_2_dw_upper contains the last two valid rows of the first layer output.
 	//This time, _6_layer_2_dw will produce only one valid row
@@ -515,13 +516,13 @@ void cnn_pipeline_7_mob_v2(
 	}
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
 			_6_layer_2_dw_lower, _6_layer_2_dw_out_0, 0);
-	_6_layer_3_pw(_6_layer_2_dw_out_1, pw_weights_3, _6_layer_3_pw_out_1);
-	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_1, pw_weights_4, dw_weights_5,
-			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,
+	_6_layer_3_pw(_6_layer_2_dw_out_0, pw_weights_3, _6_layer_3_pw_out_0);
+	_6_layer_4_pw_5_dw(_6_layer_3_pw_out_0, pw_weights_4, dw_weights_5,
+			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
 			_6_layer_4_pw_5_dw_starting_h);
-	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, _6_layer_6_pw_out_1);
-	_7_layer_7_pw(_6_layer_6_pw_out_1, pw_weights_7, result,
-			switch_point_fms_height - pipeline_filling_stages + 4);
+	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, _6_layer_6_pw_out_0);
+	_7_layer_7_pw(_6_layer_6_pw_out_0, pw_weights_7, result,
+			switch_point_fms_height - pipeline_filling_stages + 5);
 //##########
 
 //	_7_stages_fill_channels_buffer(channels, channels_buffer_0,
