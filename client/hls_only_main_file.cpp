@@ -18,10 +18,10 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h][max_conv_w];
-	cnn_pipeline_7_mob_v2(input_image, channels);
+	cnn_pipeline_7_mob_v2(input_image, channels, tmp_channels);
 //	dump_layer_output(
-//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
-//			channels, 451584, 56, 56);
+//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_6.txt",
+//			tmp_channels, 56*56*24, 56, 56);
 	seml(input_image, off_chip_weights, channels, result, result2, tmp_channels,
 			tmp_channels_2, weights_0, dw_weights_buffer, fc_input);
 }

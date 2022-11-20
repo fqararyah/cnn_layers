@@ -45,7 +45,7 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 
 void cnn_pipeline_7_mob_v2(
     fms_dt channels[input_image_depth][input_image_height][input_image_width],
-    fms_dt result[max_fms_size]);
+    fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]);
 
 void _6_layer_0_3x3_conv(
 		fms_dt channels_buffer[input_image_depth][layer_0_filter_dim

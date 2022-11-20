@@ -53,6 +53,52 @@ void _7_layer_6_pw(
 	}
 }
 
+void write_to_tmp_channel(
+		fms_dt channels_buffer[layer_6_pw_num_fils][layer_6_pw_ofm_width],
+		fms_dt tmp_channels[max_tmp_fms_size], int starting_h) {
+#pragma HLS INLINE off
+
+	const int num_tiles_hw = layer_6_pw_num_of_tiles_h
+			* layer_6_pw_num_of_tiles_w;
+
+	const int tile_in_h = starting_h / pw_tile_h;
+	const int in_tile_h = starting_h % pw_tile_h;
+
+	// rows for next DW
+	//cout<<"\nstarting_h: "<<starting_h<<"\n";
+	write_to_tmp_channel_loops: for (int o_o_d = 0;
+			o_o_d < layer_6_pw_num_fils / layer_6_pw_parallelism_out; o_o_d++) {
+		int o_o_d_offset = o_o_d * layer_6_pw_parallelism_out;
+		// filters loop
+		for (int o_d = 0; o_d < layer_6_pw_parallelism_out; o_d++) {
+#pragma HLS UNROLL
+			const int tile_in_z = (o_o_d_offset + o_d) / pw_tile_d;
+			const int in_tile_z = (o_o_d_offset + o_d) % pw_tile_d;
+			layer_7_pw_pipeline: for (int w = 0; w < layer_6_pw_ofm_width;
+					w++) {
+#pragma HLS PIPELINE
+				// FMs width loop
+				// parallelized filters loop
+				pss_dt tmp = 0;
+
+				const int tile_in_w = w / pw_tile_w;
+				const int tile_index = tile_in_z * num_tiles_hw
+						+ tile_in_h * layer_6_pw_num_of_tiles_w + tile_in_w;
+
+				const int in_tile_w = w % pw_tile_w;
+				const int in_tile_index = in_tile_z * pw_tile_hw
+						+ in_tile_h * pw_tile_w + in_tile_w;
+
+				const int index_in_tmp_channels = tile_index * pw_tile_size
+						+ in_tile_index;
+
+				tmp_channels[index_in_tmp_channels] =
+						channels_buffer[o_o_d_offset + o_d][w];
+			}
+		}
+	}
+}
+
 void _7_layer_7_pw(
 		fms_dt channels_buffer[layer_7_pw_depth][layer_7_pw_ifm_width],
 		const weights_dt weights[layer_7_pw_num_fils][layer_7_pw_depth],
@@ -76,37 +122,40 @@ void _7_layer_7_pw(
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[7 + 1];
 	const scales_dt current_layer_ofms_scale = conv_fms_scales_rec[7 + 1];
 
-	const int num_tiles_hw = layer_7_pw_num_of_tiles_h * layer_7_pw_num_of_tiles_w;
+	const int num_tiles_hw = layer_7_pw_num_of_tiles_h
+			* layer_7_pw_num_of_tiles_w;
+
+	const int tile_in_h = starting_h / pw_tile_h;
+	const int in_tile_h = starting_h % pw_tile_h;
+
 	// rows for next DW
 	//cout<<"\nstarting_h: "<<starting_h<<"\n";
 	for (int o_o_d = 0;
 			o_o_d < layer_7_pw_num_fils / layer_7_pw_parallelism_out; o_o_d++) {
 		int o_o_d_offset = o_o_d * layer_7_pw_parallelism_out;
 		// filters loop
-		const int tile_in_z = o_o_d_offset / pw_tile_d;
-		const int tile_in_h = starting_h / pw_tile_h;
-		int in_tile_z = o_o_d_offset % pw_tile_d;
-		int in_tile_h = starting_h % pw_tile_h;
-		layer_7_pw_pipeline: for (int w = 0; w < layer_7_pw_ifm_width; w++) {
-#pragma HLS PIPELINE
-			// FMs width loop
-			layer_7_pw_loops: for (int o_d = 0;
-					o_d < layer_7_pw_parallelism_out; o_d++) {
+		layer_7_pw_loops: for (int o_d = 0; o_d < layer_7_pw_parallelism_out;
+				o_d++) {
 #pragma HLS UNROLL
+			const int tile_in_z = (o_o_d_offset + o_d) / pw_tile_d;
+			const int in_tile_z = (o_o_d_offset + o_d) % pw_tile_d;
+			layer_7_pw_pipeline: for (int w = 0; w < layer_7_pw_ifm_width;
+					w++) {
+#pragma HLS PIPELINE
+				// FMs width loop
 				// parallelized filters loop
 				pss_dt tmp = 0;
 
-
-				int tile_in_w = w / pw_tile_w;
-				int tile_index = tile_in_z * num_tiles_hw
+				const int tile_in_w = w / pw_tile_w;
+				const int tile_index = tile_in_z * num_tiles_hw
 						+ tile_in_h * layer_7_pw_num_of_tiles_w + tile_in_w;
 
-
-				int in_tile_w = w % pw_tile_w;
-				int in_tile_index = in_tile_z * pw_tile_hw
+				const int in_tile_w = w % pw_tile_w;
+				const int in_tile_index = in_tile_z * pw_tile_hw
 						+ in_tile_h * pw_tile_w + in_tile_w;
 
-				int offset_in_result = tile_index * pw_tile_size + in_tile_index;
+				const int index_in_result = tile_index * pw_tile_size
+						+ in_tile_index;
 
 				for (int d = 0; d < layer_7_pw_parallelism_in; d++) {
 #pragma HLS UNROLL
@@ -130,8 +179,8 @@ void _7_layer_7_pw(
 								+ o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
 				normalization.ofm_scale_rec = current_layer_ofms_scale;
-				result[offset_in_result] = pw_relu_norm(tmp,
-						normalization, layer_7_relu);
+				result[index_in_result] = pw_relu_norm(tmp, normalization,
+						layer_7_relu);
 //				if (o_o_d_offset + o_d == 0) {
 ////					cout << "\n"<<tmp <<" >> "<<pw_relu_norm(tmp, normalization, layer_7_relu)
 ////							<< "\n";
@@ -200,7 +249,7 @@ void _7_stages_fill_channels_buffer(
 
 void cnn_pipeline_7_mob_v2(
 		fms_dt channels[input_image_depth][input_image_height][input_image_width],
-		fms_dt result[max_fms_size]) {
+		fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]) {
 #pragma HLS INLINE off
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
@@ -400,6 +449,7 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
 			3);
 	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, _6_layer_6_pw_out_1);
+	write_to_tmp_channel(_6_layer_6_pw_out_1, tmp_channels, 0);
 
 //	cout << "***6***\n";
 //	for (int w = 0; w < 5; w++) {
@@ -441,6 +491,8 @@ void cnn_pipeline_7_mob_v2(
 					_6_layer_4_5_pw_dw_out_0, _6_layer_4_pw_5_dw_starting_h);
 			_7_layer_6_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6,
 					_6_layer_6_pw_out_1);
+			write_to_tmp_channel(_6_layer_6_pw_out_1, tmp_channels,
+					h - pipeline_filling_stages + 1);
 			_7_layer_7_pw(_6_layer_6_pw_out_0, pw_weights_7, result,
 					h - pipeline_filling_stages);
 		} else {
@@ -459,6 +511,8 @@ void cnn_pipeline_7_mob_v2(
 					_6_layer_4_5_pw_dw_out_1, _6_layer_4_pw_5_dw_starting_h);
 			_7_layer_6_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6,
 					_6_layer_6_pw_out_0);
+			write_to_tmp_channel(_6_layer_6_pw_out_0, tmp_channels,
+					h - pipeline_filling_stages + 1);
 			_7_layer_7_pw(_6_layer_6_pw_out_1, pw_weights_7, result,
 					h - pipeline_filling_stages);
 		}
@@ -471,6 +525,8 @@ void cnn_pipeline_7_mob_v2(
 			switch_point_fms_height - pipeline_filling_stages);
 //##########
 	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, _6_layer_6_pw_out_0);
+	write_to_tmp_channel(_6_layer_6_pw_out_0, tmp_channels,
+			h - pipeline_filling_stages + 1);
 	_7_layer_7_pw(_6_layer_6_pw_out_0, pw_weights_7, result,
 			switch_point_fms_height - pipeline_filling_stages + 1);
 //##########
@@ -478,6 +534,8 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,
 			_6_layer_4_pw_5_dw_starting_h);
 	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, _6_layer_6_pw_out_1);
+	write_to_tmp_channel(_6_layer_6_pw_out_1, tmp_channels,
+			h - pipeline_filling_stages + 2);
 	_7_layer_7_pw(_6_layer_6_pw_out_1, pw_weights_7, result,
 			switch_point_fms_height - pipeline_filling_stages + 2);
 	_6_layer_4_pw_5_dw_starting_h += _7_stages_layer_4_rows_at_once;
@@ -487,6 +545,8 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
 			_6_layer_4_pw_5_dw_starting_h);
 	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, _6_layer_6_pw_out_0);
+	write_to_tmp_channel(_6_layer_6_pw_out_0, tmp_channels,
+			h - pipeline_filling_stages + 3);
 	_7_layer_7_pw(_6_layer_6_pw_out_0, pw_weights_7, result,
 			switch_point_fms_height - pipeline_filling_stages + 3);
 	_6_layer_4_pw_5_dw_starting_h += _7_stages_layer_4_rows_at_once;
@@ -498,6 +558,8 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,
 			_6_layer_4_pw_5_dw_starting_h);
 	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, _6_layer_6_pw_out_1);
+	write_to_tmp_channel(_6_layer_6_pw_out_1, tmp_channels,
+			h - pipeline_filling_stages + 4);
 	_7_layer_7_pw(_6_layer_6_pw_out_1, pw_weights_7, result,
 			switch_point_fms_height - pipeline_filling_stages + 4);
 	_6_layer_4_pw_5_dw_starting_h += _7_stages_layer_4_rows_at_once;
@@ -521,6 +583,8 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
 			_6_layer_4_pw_5_dw_starting_h);
 	_7_layer_6_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, _6_layer_6_pw_out_0);
+	write_to_tmp_channel(_6_layer_6_pw_out_0, tmp_channels,
+			h - pipeline_filling_stages + 5);
 	_7_layer_7_pw(_6_layer_6_pw_out_0, pw_weights_7, result,
 			switch_point_fms_height - pipeline_filling_stages + 5);
 //##########

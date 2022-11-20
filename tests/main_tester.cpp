@@ -30,7 +30,7 @@ int main() {
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 1;
+	int images_to_test = 1000;
 	struct dirent *ent;
 	if ((dir = opendir(input_images_folder.c_str())) != NULL) {
 		/* print all the files and directories within directory */
