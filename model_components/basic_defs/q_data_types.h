@@ -21,6 +21,7 @@ const int weights_group_items = 512 / weights_dt_width;//TODO double check that 
 //fms
 const int fms_dt_width = 8;
 const int fms_dt_offset = fms_dt_width - 1;
+const int input_image_group_items = 512 / fms_dt_width;
 
 //scales, zero points, and biases
 const int scales_bit_width = 48;
@@ -46,9 +47,9 @@ typedef ap_int<dw_pss_dt_width> dw_pss_dt; // partial sums
 typedef ap_fixed<dw_pss_dt_width + 16, dw_pss_dt_width> dw_pss_f_dt;
 typedef ap_int<first_conv_pss_width> first_conv_pss_dt;
 typedef ap_uint<weights_group_items * weights_dt_width> weights_grp_dt;
+typedef ap_uint<input_image_group_items * fms_dt_width> fms_grp_dt;
 typedef ap_uint<11> counters_dt;
 typedef ap_uint<input_image_dt_width> input_image_dt;
-//typedef ap_uint<input_image_dt_width * input_image_group_items> input_image_grp_dt;
 typedef ap_int<input_image_pss_dt_width> input_image_pss_dt;
 typedef ap_int<fc_weights_dt_width> fc_weights_dt;
 typedef ap_int<fc_out_dt_width> fc_out_dt;

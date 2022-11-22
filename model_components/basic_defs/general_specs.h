@@ -44,7 +44,5 @@ const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_ite
 const int input_image_height = 224;
 const int input_image_width = 224;
 const int input_image_depth = 3;
-const int input_image_group_items = input_image_width / 2;
-const int num_input_image_tiles_w = input_image_width / input_image_group_items;
 
 #endif

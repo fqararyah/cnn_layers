@@ -14,6 +14,14 @@ void glue_weights(string file_name,
 void validate_weights(string file_name,
 		weights_grp_dt glued_weights[all_pw_weights]);
 
+void glue_input_image(string file_name,
+		fms_grp_dt input_image[input_image_depth * input_image_height
+				* input_image_width / input_image_group_items]);
+
+void verify_glued_image(string file_name,
+		fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width
+				/ input_image_group_items]) ;
+
 void fill_input_image(string file_name,
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width]);
 

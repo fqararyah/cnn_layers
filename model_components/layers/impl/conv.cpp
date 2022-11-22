@@ -3,48 +3,48 @@
 #include "../headers/pw_conv.h"
 
 void fill_channels_buffer_0(
-		fms_dt channels[input_image_depth][input_image_height][input_image_width],
+		fms_grp_dt channels[input_image_depth*input_image_height*input_image_width/input_image_group_items],
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
 		int starting_h) {
-
-	const fms_dt current_layer_zero_point = conv_fms_zero_points[0];
-	const int filled_first_time = layer_0_filter_dim - layer_0_strides;
-	if (starting_h == 0) // first time
-			{
-		for (int d = 0; d < input_image_depth; d++) {
-			for (int h = 0; h < layer_0_filter_dim - layer_0_strides; h++) {
-				for (int w = 0; w < input_image_width; w++) {
-					channels_tile[d][h][w] = channels[d][h][w];
-				}
-			}
-		}
-	} else // shift
-	{
-		for (int d = 0; d < input_image_depth; d++) {
-			for (int h = 0; h < layer_0_filter_dim - layer_0_strides; h++) {
-				for (int w = 0; w < input_image_width; w++) {
-					channels_tile[d][h][w] =
-							channels_tile[d][h + layer_0_strides][w];
-				}
-			}
-		}
-	}
-
-	for (int d = 0; d < input_image_depth; d++) {
-		const int start_filling_h_offset = layer_0_filter_dim - layer_0_strides;
-		for (int h = start_filling_h_offset; h < layer_0_filter_dim; h++) {
-			for (int w = 0; w < input_image_width; w++) {
-				if (h + starting_h * layer_0_strides + filled_first_time
-						- start_filling_h_offset < input_image_height) {
-					channels_tile[d][h][w] = channels[d][h
-							+ starting_h * layer_0_strides + filled_first_time
-							- start_filling_h_offset][w];
-				} else {
-					channels_tile[d][h][w] = current_layer_zero_point;
-				}
-			}
-		}
-	}
+//
+//	const fms_dt current_layer_zero_point = conv_fms_zero_points[0];
+//	const int filled_first_time = layer_0_filter_dim - layer_0_strides;
+//	if (starting_h == 0) // first time
+//			{
+//		for (int d = 0; d < input_image_depth; d++) {
+//			for (int h = 0; h < layer_0_filter_dim - layer_0_strides; h++) {
+//				for (int w = 0; w < input_image_width; w++) {
+//					channels_tile[d][h][w] = channels[d][h][w];
+//				}
+//			}
+//		}
+//	} else // shift
+//	{
+//		for (int d = 0; d < input_image_depth; d++) {
+//			for (int h = 0; h < layer_0_filter_dim - layer_0_strides; h++) {
+//				for (int w = 0; w < input_image_width; w++) {
+//					channels_tile[d][h][w] =
+//							channels_tile[d][h + layer_0_strides][w];
+//				}
+//			}
+//		}
+//	}
+//
+//	for (int d = 0; d < input_image_depth; d++) {
+//		const int start_filling_h_offset = layer_0_filter_dim - layer_0_strides;
+//		for (int h = start_filling_h_offset; h < layer_0_filter_dim; h++) {
+//			for (int w = 0; w < input_image_width; w++) {
+//				if (h + starting_h * layer_0_strides + filled_first_time
+//						- start_filling_h_offset < input_image_height) {
+//					channels_tile[d][h][w] = channels[d][h
+//							+ starting_h * layer_0_strides + filled_first_time
+//							- start_filling_h_offset][w];
+//				} else {
+//					channels_tile[d][h][w] = current_layer_zero_point;
+//				}
+//			}
+//		}
+//	}
 }
 
 // Note that this implementation of layer_0 is not not very optimized
@@ -109,7 +109,7 @@ void layer_0_conv_engine(
 
 void layer_0_3x3(
 		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
-		fms_dt channels[input_image_depth][input_image_height][input_image_width],
+		fms_grp_dt channels[input_image_depth*input_image_height*input_image_width / input_image_group_items],
 		fms_dt result[max_fms_size]) {
 	fms_dt channels_tile[layer_0_depth][layer_0_filter_dim][layer_0_ifm_width];
 	for (int h = 0; h < layer_0_ofm_height; h++) {

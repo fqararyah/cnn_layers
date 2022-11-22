@@ -26,11 +26,12 @@ int main() {
 //	cout<<(weights_dt)glued_weights[0](7, 0)<<" @zero\n";
 //	cout<<(weights_dt)glued_weights[512](7, 0)<<" @512\n";
 	//validate_weights(weights_file, glued_weights);
-	fms_dt input_image[input_image_depth][input_image_height][input_image_width];
+	fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width
+			/ input_image_group_items];
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 1000;
+	int images_to_test = 1;
 	struct dirent *ent;
 	if ((dir = opendir(input_images_folder.c_str())) != NULL) {
 		/* print all the files and directories within directory */
@@ -40,9 +41,12 @@ int main() {
 				continue;
 			}
 			cout << file_name << "\n";
-			fill_input_image(file_name, input_image);
-			verify_input_image(input_image_v_file, input_image);
-			top_func(input_image, glued_weights, fc_input);
+			glue_input_image(file_name, input_image);
+			verify_glued_image(input_image_v_file, input_image);
+			int ready_to_receive_new_input = 0;
+			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
+			top_func(input_image, glued_weights, fc_input,
+					ready_to_receive_new_input_ptr);
 			dump_ouput(output_folder + ent->d_name, fc_input,
 					fc_layer_input_size);
 			img_count++;

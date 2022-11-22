@@ -44,7 +44,7 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 		int td_i_o, int t_in_h, int t_in_w);
 
 void cnn_pipeline_7_mob_v2(
-    fms_dt channels[input_image_depth][input_image_height][input_image_width],
+		fms_grp_dt input_image[input_image_depth*input_image_height*input_image_width/input_image_group_items],
     fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]);
 
 void _6_layer_0_3x3_conv(
@@ -58,7 +58,6 @@ void _6_layer_2_dw(
 		const dw_weights_dt dw_weights[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
 		fms_dt upper[layer_2_dw_depth][layer_2_dw_filter_size
 				- layer_2_dw_strides][layer_2_dw_ifm_width],
-		fms_dt lower[layer_2_dw_depth][_6_stages_layer_2_rows_at_once][layer_2_dw_ifm_width],
 		fms_dt result[layer_3_pw_depth][_6_stages_layer_2_rows_at_once][layer_3_pw_ifm_width],
 		int active_row);
 

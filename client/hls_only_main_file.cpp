@@ -2,9 +2,9 @@
 #include "../tests/test_utils.h"
 
 void top_func(
-		fms_dt input_image[input_image_depth][input_image_height][input_image_width],
+		fms_grp_dt input_image[input_image_depth*input_image_height*input_image_width/input_image_group_items],
 		weights_grp_dt off_chip_weights[all_pw_weights],
-		fms_dt fc_input[fc_layer_input_size]) {
+		fms_dt fc_input[fc_layer_input_size], int *ready_to_receive_a_new_input_ptr) {
 
 	fms_dt channels[max_fms_size];
 	fms_dt result[max_fms_size];

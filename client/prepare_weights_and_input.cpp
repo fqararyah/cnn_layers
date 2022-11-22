@@ -54,6 +54,54 @@ void validate_weights(string file_name,
 	}
 }
 
+void glue_input_image(string file_name,
+		fms_grp_dt glued_input_image[input_image_depth * input_image_height
+				* input_image_width / input_image_group_items]) {
+	int a;
+	std::ifstream infile(file_name);
+
+	int line_num = 0;
+	while (infile >> a) {
+		fms_dt val = (fms_dt) a;
+		int external_index = line_num / input_image_group_items;
+		int internal_index = line_num % input_image_group_items;
+		glued_input_image[external_index](
+				internal_index * fms_dt_width + fms_dt_offset,
+				internal_index * fms_dt_width) = val;
+		line_num++;
+	}
+}
+
+void verify_glued_image(string file_name,
+		fms_grp_dt glued_input_image[input_image_depth * input_image_height
+				* input_image_width / input_image_group_items]) {
+	int a;
+	std::ifstream infile(file_name);
+	bool failed = false;
+	int line_num = 0;
+	while (infile >> a) {
+		fms_dt weight = (fms_dt) a;
+		int external_index = line_num / input_image_group_items;
+		int internal_index = line_num % input_image_group_items;
+		if (weight
+				!= (fms_dt) glued_input_image[external_index](
+						internal_index * fms_dt_width + fms_dt_offset,
+						internal_index * fms_dt_width)) {
+			cout << "\n failed at: " << line_num << " " << weight << " != "
+					<< (fms_dt) glued_input_image[external_index](
+							internal_index * fms_dt_width
+									+ fms_dt_offset,
+							internal_index * fms_dt_width)<<"\n";
+			failed = true;
+			break;
+		}
+		line_num++;
+	}
+	if (!failed) {
+		cout << "\n" << line_num << " input image items have been glued SUCESSFULLY!\n";
+	}
+}
+
 void fill_input_image(string file_name,
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width]) {
 	int a;
