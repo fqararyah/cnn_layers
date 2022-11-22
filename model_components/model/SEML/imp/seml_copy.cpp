@@ -13,6 +13,43 @@ void seml(
 		fms_dt fc_input[fc_layer_input_size]) {
 
 	//begin_code_generation
+layer_0_3x3(weights_0, input_image, result2);
+fill_dw_layer_weights(dw_weights_2, dw_weights_buffer, layer_2_dw_depth, layer_2_dw_filter_size, layer_2_dw_filter_size);
+    dw_conv_3x3(dw_weights_buffer, channels, result2, 2, layer_2_dw_depth,
+    layer_2_dw_ifm_width, layer_2_dw_ifm_height, layer_2_dw_num_of_tiles_in_d,
+    layer_2_dw_num_of_tiles_h, layer_2_dw_num_of_tiles_w,
+    layer_2_dw_strides, layer_2_dw_padding_left,layer_2_dw_padding_top,
+    1);
+pw_conv(off_chip_weights, channels, result2, 3, layer_3_pw_depth,
+    layer_3_pw_num_fils, layer_3_pw_num_of_tiles_in_d,
+    layer_3_pw_num_of_tiles_out_d, layer_3_pw_num_of_tiles_h,
+    layer_3_pw_num_of_tiles_w, tmp_channels, 0,
+    layer_3_pw_num_of_weight_groups_for_one_pass,
+    0, layer_3_pw_weights_offset, layer_3_relu);
+pw_conv(off_chip_weights, channels, result2, 4, layer_4_pw_depth,
+    layer_4_pw_num_fils, layer_4_pw_num_of_tiles_in_d,
+    layer_4_pw_num_of_tiles_out_d, layer_4_pw_num_of_tiles_h,
+    layer_4_pw_num_of_tiles_w, tmp_channels, 0,
+    layer_4_pw_num_of_weight_groups_for_one_pass,
+    1, layer_4_pw_weights_offset, layer_4_relu);
+fill_dw_layer_weights(dw_weights_5, dw_weights_buffer, layer_5_dw_depth, layer_5_dw_filter_size, layer_5_dw_filter_size);
+    dw_conv_3x3(dw_weights_buffer, channels, result2, 5, layer_5_dw_depth,
+    layer_5_dw_ifm_width, layer_5_dw_ifm_height, layer_5_dw_num_of_tiles_in_d,
+    layer_5_dw_num_of_tiles_h, layer_5_dw_num_of_tiles_w,
+    layer_5_dw_strides, layer_5_dw_padding_left,layer_5_dw_padding_top,
+    0);
+pw_conv(off_chip_weights, channels, result2, 6, layer_6_pw_depth,
+    layer_6_pw_num_fils, layer_6_pw_num_of_tiles_in_d,
+    layer_6_pw_num_of_tiles_out_d, layer_6_pw_num_of_tiles_h,
+    layer_6_pw_num_of_tiles_w, tmp_channels, 2,
+    layer_6_pw_num_of_weight_groups_for_one_pass,
+    1, layer_6_pw_weights_offset, layer_6_relu);
+pw_conv(off_chip_weights, channels, result2, 7, layer_7_pw_depth,
+    layer_7_pw_num_fils, layer_7_pw_num_of_tiles_in_d,
+    layer_7_pw_num_of_tiles_out_d, layer_7_pw_num_of_tiles_h,
+    layer_7_pw_num_of_tiles_w, tmp_channels, 0,
+    layer_7_pw_num_of_weight_groups_for_one_pass,
+    0, layer_7_pw_weights_offset, layer_7_relu);
 fill_dw_layer_weights(dw_weights_8, dw_weights_buffer, layer_8_dw_depth, layer_8_dw_filter_size, layer_8_dw_filter_size);
     dw_conv_3x3(dw_weights_buffer, channels, result2, 8, layer_8_dw_depth,
     layer_8_dw_ifm_width, layer_8_dw_ifm_height, layer_8_dw_num_of_tiles_in_d,

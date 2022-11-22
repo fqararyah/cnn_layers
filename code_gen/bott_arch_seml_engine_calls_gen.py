@@ -12,7 +12,7 @@ ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt
 
 ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
-debugging_includes_block = '#include "../../tests/test_utils.h"\n'
+debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
 layer_0_block = 'layer_0_3x3(weights_0, input_image, result2);\n'
 
@@ -105,7 +105,24 @@ direction = 0
 code_to_insert = ''
 skip_connections_depth = 3
 
+for i in range(layers_to_generate[0] + 1):
+    if layers_types[layer_index] == 'pw' and not expansion_projection[layer_index]:
+        continue
+    direction = 1-direction
+
+
 skip_connections_indices = utils.read_skip_connections_indices()
+
+max_fms_size_in_seml = layers_inputs_shapes[0].width * layers_inputs_shapes[0].width * layers_inputs_shapes[0].depth
+max_fms_size_in_seml_layer_index = layers_inputs_shapes[0]
+for i in range(layers_to_generate[0], layers_to_generate[1]):
+    current_fms_size = layers_inputs_shapes[i].width * layers_inputs_shapes[i].width * layers_inputs_shapes[i].depth
+    if( current_fms_size > max_fms_size_in_seml):
+        max_fms_size_in_seml = current_fms_size
+        max_fms_size_in_seml_layer_index = i
+
+print(max_fms_size_in_seml, max_fms_size_in_seml_layer_index)
+
 for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     target_block = ''
     replacement_dict = {}
@@ -124,7 +141,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
 
     elif layers_types[layer_index] == 'dw':
         target_block = dw_block
-    
+
     replacement_dict['*RW*'] = read_write
     if constants.DEBUGGING and layer_index == constants.LAYERS_TO_DEBUG[0]:
         # file_name
@@ -142,7 +159,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
                                                                          layers_inputs_shapes[layer_index].width, str(
             layers_inputs_shapes[layer_index].height),
             str(layers_inputs_shapes[layer_index].width))
-    
+
     code_to_insert += replace(replacement_dict, target_block)
 
     if constants.DEBUGGING and layer_index in constants.LAYERS_TO_DEBUG:
