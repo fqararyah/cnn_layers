@@ -55,8 +55,8 @@ void validate_weights(string file_name,
 }
 
 void glue_input_image(string file_name,
-		fms_grp_dt glued_input_image[input_image_depth * input_image_height
-				* input_image_width / input_image_group_items]) {
+		fms_grp_dt input_image[input_image_depth
+				* input_image_num_fms_groups_in_a_channel]) {
 	int a;
 	std::ifstream infile(file_name);
 
@@ -67,11 +67,12 @@ void glue_input_image(string file_name,
 		const int y = (line_num % input_image_hw) / input_image_width;
 		const int x = line_num % input_image_width;
 		int external_index = z * input_image_num_fms_groups_in_a_channel
-				+ y * input_image_num_fms_groups_in_width + x / input_image_group_items;
+				+ y * input_image_num_fms_groups_in_width
+				+ x / input_image_group_items;
 		int internal_index = x % input_image_group_items;
-		cout << line_num << " >> " << z << ", " << y << ", " << x << ", "
-				<< external_index << ", " << internal_index << "\n";
-		glued_input_image[external_index](
+//		cout << line_num << " >> " << z << ", " << y << ", " << x << ", "
+//				<< external_index << ", " << internal_index << "\n";
+		input_image[external_index](
 				internal_index * fms_dt_width + fms_dt_offset,
 				internal_index * fms_dt_width) = val;
 		line_num++;
@@ -79,8 +80,8 @@ void glue_input_image(string file_name,
 }
 
 void verify_glued_image(string file_name,
-		fms_grp_dt glued_input_image[input_image_depth * input_image_height
-				* input_image_width / input_image_group_items]) {
+		fms_grp_dt input_image[input_image_depth
+				* input_image_num_fms_groups_in_a_channel]) {
 	int a;
 	std::ifstream infile(file_name);
 	bool failed = false;
@@ -91,14 +92,15 @@ void verify_glued_image(string file_name,
 		const int y = (line_num % input_image_hw) / input_image_width;
 		const int x = line_num % input_image_width;
 		int external_index = z * input_image_num_fms_groups_in_a_channel
-				+ y * input_image_num_fms_groups_in_width + x / input_image_group_items;
+				+ y * input_image_num_fms_groups_in_width
+				+ x / input_image_group_items;
 		int internal_index = x % input_image_group_items;
 		if (val
-				!= (fms_dt) glued_input_image[external_index](
+				!= (fms_dt) input_image[external_index](
 						internal_index * fms_dt_width + fms_dt_offset,
 						internal_index * fms_dt_width)) {
 			cout << "\n failed at: " << line_num << " " << val << " != "
-					<< (fms_dt) glued_input_image[external_index](
+					<< (fms_dt) input_image[external_index](
 							internal_index * fms_dt_width + fms_dt_offset,
 							internal_index * fms_dt_width) << "\n";
 			failed = true;

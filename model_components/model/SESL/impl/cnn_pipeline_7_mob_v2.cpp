@@ -218,8 +218,7 @@ void fill_row(fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_group
 }
 
 void _7_stages_fill_channels_buffer(
-		fms_grp_dt channels[input_image_depth * input_image_height
-				* input_image_width / input_image_group_items],
+		fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
 		fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
 				+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width],
 		int starting_h) {
@@ -297,19 +296,18 @@ void _7_stages_fill_channels_buffer(
 			}
 		}
 	}
-	cout << "*********************\n";
-	for (int h = 0; h < buffer_height; h++) {
-		for (int w = 0; w < layer_0_ifm_width; w++) {
-			cout << channels_buffer_0[1][h][w]<<" ";
-		}
-		cout << "\n";
-	}
-	cout << "*********************\n";
+//	cout << "*********************\n";
+//	for (int h = 0; h < buffer_height; h++) {
+//		for (int w = 0; w < layer_0_ifm_width; w++) {
+//			cout << channels_buffer_0[1][h][w]<<" ";
+//		}
+//		cout << "\n";
+//	}
+//	cout << "*********************\n";
 }
 
 void cnn_pipeline_7_mob_v2(
-		fms_grp_dt channels[input_image_depth * input_image_height
-				* input_image_width / input_image_group_items],
+		fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
 		fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]) {
 #pragma HLS INLINE off
 

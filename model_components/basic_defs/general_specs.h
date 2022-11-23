@@ -4,7 +4,7 @@
 // switch point
 const int switch_point_fms_width = 56;
 const int switch_point_fms_height = 56;
-const int switch_point_fms_depth = 24;
+const int switch_point_fms_depth = 144; // not really, but the max of ...
 
 //MobileNetsV1, but could be useful in future
 const int alpha = 1;
@@ -22,7 +22,7 @@ const int avgpool_input_width = 7;
 const int skip_connection_depth = 3;
 
 //testing vars
-const int DF = 0;
+const int DF = 1;
 const int start_with_pw = 1;
 
 //maxs for buffers

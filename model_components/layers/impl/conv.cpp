@@ -3,7 +3,7 @@
 #include "../headers/pw_conv.h"
 
 void fill_channels_buffer_0(
-		fms_grp_dt channels[input_image_depth*input_image_height*input_image_width/input_image_group_items],
+		fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
 		int starting_h) {
 //

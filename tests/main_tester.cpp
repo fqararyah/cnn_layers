@@ -25,13 +25,12 @@ int main() {
 	glue_weights(weights_file, glued_weights);
 //	cout<<(weights_dt)glued_weights[0](7, 0)<<" @zero\n";
 //	cout<<(weights_dt)glued_weights[512](7, 0)<<" @512\n";
-	//validate_weights(weights_file, glued_weights);
-	fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width
-			/ input_image_group_items];
+	validate_weights(weights_file, glued_weights);
+	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 1;
+	int images_to_test = 100;
 	struct dirent *ent;
 	if ((dir = opendir(input_images_folder.c_str())) != NULL) {
 		/* print all the files and directories within directory */
@@ -42,7 +41,8 @@ int main() {
 			}
 			cout << file_name << "\n";
 			glue_input_image(file_name, input_image);
-			verify_glued_image(input_image_v_file, input_image);
+			//verify_glued_image(file_name, input_image);
+			//validate_weights(weights_file, glued_weights);
 			int ready_to_receive_new_input = 0;
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 			top_func(input_image, glued_weights, fc_input,

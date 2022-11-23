@@ -104,6 +104,7 @@ with open(out_file, 'w') as f:
         there_is_expansion_or_projection = expansion_projection[i] != 0
         if layers_types[i] == 'pw':
             replacement_dic['*LWOF*'] = cumulative_pw_weights
+            #print(i, layers_weights[i].get_size(), weights_group_items, cumulative_pw_weights)
             if there_is_expansion_or_projection:
                 assert layers_weights[i].get_size() % weights_group_items == 0, layers_weights[i].get_size()
                 cumulative_pw_weights += int(layers_weights[i].get_size() / weights_group_items)

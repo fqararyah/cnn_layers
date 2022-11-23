@@ -1,7 +1,6 @@
 #include "../headers/layers_imp_common_includes.h"
 #include "../headers/pw_conv.h"
 
-
 void pw_fill_channels_buffer(fms_dt channels[max_fms_size],
 		fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w], int tile_indx,
 		int starting_d, const int layer_conv_d) {
@@ -147,7 +146,7 @@ void pw_write_results_tile(
 
 							clamp(tmp);
 							results[to_write_at_index] = (fms_dt) tmp;
-//							if (layer == 45) {
+//							if (layer == 9) {
 //								cout << "(" << current_layer_scale << " * ( "
 //										<< scaled_val << " - "
 //										<< current_layer_zero_point << ") + "
@@ -219,6 +218,12 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 			pw_fill_channels_buffer(results, channels_buffer,
 					td_i * num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w,
 					td_i * pw_tile_d, layer_conv_d);
+//			if (td_o == 0 && td_i == 0 && t_in_h == 0 && t_in_w == 0
+//					&& layer == 9) {
+//				dump_pw_channels_tile(
+//						"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_ch_f.txt",
+//						channels_buffer);
+//			}
 		} else {
 			pw_fill_channels_buffer(channels, channels_buffer,
 					td_i * num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w,
@@ -265,7 +270,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 						layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
 						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
 						num_of_tiles_d_in);
-//				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 3) {
+//				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 9) {
 //					dump_pw_pss_tile(
 //							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
 //							results_tile);
@@ -273,6 +278,14 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 //							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w.txt",
 //							weights_tile, layer_conv_d);
 //				}
+//				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 8) {
+//									dump_pw_pss_tile(
+//											"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f_8.txt",
+//											results_tile);
+//									dump_pw_weights_tile(
+//											"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w_9.txt",
+//											weights_tile, layer_conv_d);
+//								}
 				//} // end depth loop###########
 //				if (layer == 33) {
 //					cout << td_o << " * (" << pw_conv_parallelism_out << "/"

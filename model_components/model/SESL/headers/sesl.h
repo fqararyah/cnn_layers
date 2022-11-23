@@ -44,7 +44,7 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 		int td_i_o, int t_in_h, int t_in_w);
 
 void cnn_pipeline_7_mob_v2(
-		fms_grp_dt input_image[input_image_depth*input_image_height*input_image_width/input_image_group_items],
+		fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
     fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]);
 
 void _6_layer_0_3x3_conv(
