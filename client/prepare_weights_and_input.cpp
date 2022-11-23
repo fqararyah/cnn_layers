@@ -63,8 +63,14 @@ void glue_input_image(string file_name,
 	int line_num = 0;
 	while (infile >> a) {
 		fms_dt val = (fms_dt) a;
-		int external_index = line_num / input_image_group_items;
-		int internal_index = line_num % input_image_group_items;
+		const int z = line_num / input_image_hw;
+		const int y = (line_num % input_image_hw) / input_image_width;
+		const int x = line_num % input_image_width;
+		int external_index = z * input_image_num_fms_groups_in_a_channel
+				+ y * input_image_num_fms_groups_in_width + x / input_image_group_items;
+		int internal_index = x % input_image_group_items;
+		cout << line_num << " >> " << z << ", " << y << ", " << x << ", "
+				<< external_index << ", " << internal_index << "\n";
 		glued_input_image[external_index](
 				internal_index * fms_dt_width + fms_dt_offset,
 				internal_index * fms_dt_width) = val;
@@ -80,25 +86,29 @@ void verify_glued_image(string file_name,
 	bool failed = false;
 	int line_num = 0;
 	while (infile >> a) {
-		fms_dt weight = (fms_dt) a;
-		int external_index = line_num / input_image_group_items;
-		int internal_index = line_num % input_image_group_items;
-		if (weight
+		fms_dt val = (fms_dt) a;
+		const int z = line_num / input_image_hw;
+		const int y = (line_num % input_image_hw) / input_image_width;
+		const int x = line_num % input_image_width;
+		int external_index = z * input_image_num_fms_groups_in_a_channel
+				+ y * input_image_num_fms_groups_in_width + x / input_image_group_items;
+		int internal_index = x % input_image_group_items;
+		if (val
 				!= (fms_dt) glued_input_image[external_index](
 						internal_index * fms_dt_width + fms_dt_offset,
 						internal_index * fms_dt_width)) {
-			cout << "\n failed at: " << line_num << " " << weight << " != "
+			cout << "\n failed at: " << line_num << " " << val << " != "
 					<< (fms_dt) glued_input_image[external_index](
-							internal_index * fms_dt_width
-									+ fms_dt_offset,
-							internal_index * fms_dt_width)<<"\n";
+							internal_index * fms_dt_width + fms_dt_offset,
+							internal_index * fms_dt_width) << "\n";
 			failed = true;
 			break;
 		}
 		line_num++;
 	}
 	if (!failed) {
-		cout << "\n" << line_num << " input image items have been glued SUCESSFULLY!\n";
+		cout << "\n" << line_num
+				<< " input image items have been glued SUCESSFULLY!\n";
 	}
 }
 

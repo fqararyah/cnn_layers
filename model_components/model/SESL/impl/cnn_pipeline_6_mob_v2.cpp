@@ -391,7 +391,7 @@ void _6_layer_2_dw(
 
 	const int num_to_be_shifted_rows = upper_height
 			- _7_stages_layer_2_rows_at_once;
-	layer_1_pw_dw_shift_loop: for (int o_o_d = 0;
+	layer_2_dw_shift_loop: for (int o_o_d = 0;
 			o_o_d < layer_1_pw_num_fils / layer_1_pw_parallelism_out; o_o_d++) {
 		int o_o_d_offset = o_o_d * layer_1_pw_parallelism_out;
 		layer_1_shift_pipeline: for (int w = 0; w < layer_2_dw_ifm_width; w++) {

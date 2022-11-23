@@ -195,21 +195,20 @@ void _7_layer_7_pw(
 	}
 }
 
-void fill_row(fms_grp_dt tmp_buffer[],
+void fill_row(fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_groups_in_width],
 		fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
 				+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width],
-		const int num_fms_groups_in_width, int row) {
+		const int input_image_num_fms_groups_in_width, int row) {
 
 #pragma HLS INLINE OFF
 
 	for (int d = 0; d < input_image_depth; d++) {
 #pragma HLS UNROLL
-		const int d_offset = d * num_fms_groups_in_width;
-		for (int o_w = 0; o_w < num_fms_groups_in_width; o_w++) {
+		for (int o_w = 0; o_w < input_image_num_fms_groups_in_width; o_w++) {
 			const int o_w_offset = o_w * input_image_group_items;
-			fms_grp_dt chunck = tmp_buffer[o_w + num_fms_groups_in_width];
+			fms_grp_dt chunck = tmp_buffer[d][o_w];
 			for (int w = 0; w < input_image_group_items; w++) {
-				if (o_w_offset + w < input_image_dt_width) {
+				if (o_w_offset + w < input_image_width) {
 					channels_buffer_0[d][row][o_w_offset + w] = (fms_dt) chunck(
 							w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
 				}
@@ -231,18 +230,13 @@ void _7_stages_fill_channels_buffer(
 			+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides;
 	const int rows_to_shift = layer_0_filter_dim - layer_0_strides;
 
-	const int num_fms_groups_in_width =
-			(input_image_dt_width % input_image_group_items) == 0 ?
-					input_image_dt_width / input_image_group_items :
-					1 + (input_image_dt_width / input_image_group_items);
-
 	const int filling_starting_offset =
 			starting_h == 0 ?
-					num_fms_groups_in_width * input_image_depth
+					input_image_num_fms_groups_in_width
 							* rows_to_shift :
-					starting_h * input_image_depth * num_fms_groups_in_width;
+					starting_h * input_image_num_fms_groups_in_width;
 
-	const int num_fms_groups_to_fitch = num_fms_groups_in_width
+	const int num_fms_groups_to_fitch = input_image_num_fms_groups_in_width
 			* (buffer_height - rows_to_shift);
 
 	const int shift_starting_point =
@@ -252,7 +246,7 @@ void _7_stages_fill_channels_buffer(
 	const int first_time_offset =
 			starting_h == 0 ? (layer_0_filter_dim - layer_0_strides) : 0;
 
-	fms_grp_dt tmp_buffer[num_fms_groups_to_fitch];
+	fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_groups_in_width];
 
 //shift
 	if (starting_h != 0) {
@@ -271,37 +265,46 @@ void _7_stages_fill_channels_buffer(
 	} else {
 //fill first time:
 		for (int h = 0; h < rows_to_shift; h++) {
-			const int h_offset = h * num_fms_groups_in_width
-					* input_image_depth;
-			for (int i = 0; i < num_fms_groups_in_width; i++) {
-				tmp_buffer[i] = channels[h_offset];
+			const int h_offset = h * input_image_num_fms_groups_in_width;
+			for (int d = 0; d < input_image_depth; d++) {
+				const int d_offst = h_offset + d * input_image_num_fms_groups_in_a_channel;
+				for (int i = 0; i < input_image_num_fms_groups_in_width; i++) {
+					tmp_buffer[d][i] = channels[d_offst + i];
+				}
 			}
-			fill_row(tmp_buffer, channels_buffer_0, num_fms_groups_in_width, h);
+			fill_row(tmp_buffer, channels_buffer_0, input_image_num_fms_groups_in_width, h);
 		}
 	}
 
 //fill
-	for (int w = 0; w < input_image_width; w++) {
-#pragma HLS PIPELINE
-		for (int d = 0; d < input_image_depth; d++) {
-#pragma HLS UNROLL
 
-			for (int h = rows_to_shift; h < buffer_height; h++) {
-				const int h_offset = filling_starting_offset
-						+ (h - rows_to_shift) * num_fms_groups_in_width
-								* input_image_depth;
-				if (h + starting_h < input_image_height) {
-					for (int i = 0; i < num_fms_groups_in_width;
-							i++) {
-						tmp_buffer[i] = channels[h_offset + i];
-					}
-					fill_row(tmp_buffer, channels_buffer_0, num_fms_groups_in_width, h);
-				} else {	//padding bottom
+	for (int h = rows_to_shift; h < buffer_height; h++) {
+		const int h_offset = filling_starting_offset
+				+ (h - rows_to_shift) * input_image_num_fms_groups_in_width;
+		if ((h - rows_to_shift) + starting_h < input_image_height) {
+			for (int d = 0; d < input_image_depth; d++) {
+				const int d_offst = h_offset + d * input_image_num_fms_groups_in_a_channel;
+				for (int i = 0; i < input_image_num_fms_groups_in_width; i++) {
+					tmp_buffer[d][i] = channels[d_offst + i];
+				}
+			}
+			fill_row(tmp_buffer, channels_buffer_0, input_image_num_fms_groups_in_width, h);
+		} else {	//padding bottom
+			for (int d = 0; d < input_image_depth; d++) {
+				for (int w = 0; w < input_image_width; w++) {
 					channels_buffer_0[d][h][w] = current_layer_zero_point;
 				}
 			}
 		}
 	}
+	cout << "*********************\n";
+	for (int h = 0; h < buffer_height; h++) {
+		for (int w = 0; w < layer_0_ifm_width; w++) {
+			cout << channels_buffer_0[1][h][w]<<" ";
+		}
+		cout << "\n";
+	}
+	cout << "*********************\n";
 }
 
 void cnn_pipeline_7_mob_v2(

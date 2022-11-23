@@ -44,5 +44,11 @@ const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_ite
 const int input_image_height = 224;
 const int input_image_width = 224;
 const int input_image_depth = 3;
+const int input_image_hw = input_image_height * input_image_width;
+const int input_image_num_fms_groups_in_width =
+			(input_image_width % input_image_group_items) == 0 ?
+					input_image_width / input_image_group_items :
+					1 + (input_image_width / input_image_group_items);
+const int input_image_num_fms_groups_in_a_channel = input_image_num_fms_groups_in_width * input_image_height;
 
 #endif
