@@ -27,7 +27,8 @@ void pw_write_results_tile(
 		fms_dt results[max_fms_size], int tile_indx,
 		fms_dt tmp_channels[max_tmp_fms_size], int starting_d,
 		const int layer_conv_d, int read_write, const int layer_relu, int layer,
-		const int num_of_tiles_hw) {
+		const int num_of_tiles_hw,
+		scales_dt fused_scales[], biases_dt fused_zero_points[]) {
 	// read_write = 1 when the current layer is the one that is directly connected to the OFMs that have a residual connection to a previous layer
 	// read_write = 2 when the current layer has a residual connection
 
@@ -42,9 +43,9 @@ void pw_write_results_tile(
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
-	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer,
+	fill_fused_zero_points_buffer(fused_zero_points, fused_zero_points_buffer,
 			starting_d, layer);
-	fill_fused_scales(fused_scales, fused_scales_buffer, starting_d, layer);
+	fill_fused_scales_buffer(fused_scales, fused_scales_buffer, starting_d, layer);
 	scales_dt current_layer_scale = conv_fms_scales[layer + 1];
 	biases_dt current_layer_zero_point = conv_fms_zero_points[layer + 1];
 	scales_dt skip_connection_other_layer_scale;
@@ -72,8 +73,6 @@ void pw_write_results_tile(
 	for (int tile_offset = 0; tile_offset < num_of_tiles_processed_in_parallel;
 			tile_offset++) {
 #pragma HLS PIPELINE
-//#pragma HLS dependence variable = results inter false
-//#pragma HLS dependence variable = results intra false
 		const int current_tile_indx =
 				(tile_indx + tile_offset * num_of_tiles_hw) * pw_tile_size;
 		for (int t_d = 0; t_d < pw_tile_d; t_d++) {
@@ -241,7 +240,8 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int num_of_tiles_d_out, const int num_of_tiles_h,
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
 		int read_write, const int num_of_weight_groups, const int direction,
-		const int layer_weights_offset, const int layer_relu) {
+		const int layer_weights_offset, const int layer_relu,
+		scales_dt fused_scales[], biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
@@ -310,12 +310,12 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 					pw_write_results_tile(results_tile, channels, tile_index,
 							tmp_channels, td_o * pw_conv_parallelism_out,
 							layer_num_fils, read_write, layer_relu, layer,
-							num_of_tiles_hw);
+							num_of_tiles_hw, fused_scales, fused_zero_points);
 				} else {
 					pw_write_results_tile(results_tile, result, tile_index,
 							tmp_channels, td_o * pw_conv_parallelism_out,
 							layer_num_fils, read_write, layer_relu, layer,
-							num_of_tiles_hw);
+							num_of_tiles_hw, fused_scales, fused_zero_points);
 				}
 			}
 		}

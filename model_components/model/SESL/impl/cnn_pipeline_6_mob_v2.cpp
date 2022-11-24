@@ -81,9 +81,9 @@ void _6_layer_0_3x3_conv(
 					normalization.ofm_zero_point = conv_fms_zero_points[2];
 					normalization.ofm_scale_rec = conv_fms_scales_rec[2];
 					normalization.fused_zero_point =
-							fused_zero_points[o_o_d_offset + o_d];
+							layer_0_fused_zero_points[o_o_d_offset + o_d];
 					normalization.fused_scales =
-							fused_scales[o_o_d_offset + o_d];
+							layer_0_fused_scales[o_o_d_offset + o_d];
 					result[o_o_d_offset + o_d][row][w / layer_0_strides] =
 							conv_relu_norm(tmp, normalization, 6);
 //					if (o_o_d_offset + o_d >= layer_2_dw_depth
@@ -285,11 +285,9 @@ void _6_layer_2_dw(
 
 					fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 					normalization.fused_scales =
-							fused_scales[current_layer_fused_parameters_offsets
-									+ o_o_d_offset + o_d];
+							layer_2_fused_scales[o_o_d_offset + o_d];
 					normalization.fused_zero_point =
-							fused_zero_points[current_layer_fused_parameters_offsets
-									+ o_o_d_offset + o_d];
+							layer_2_fused_zero_points[o_o_d_offset + o_d];
 					normalization.ofm_zero_point =
 							current_layer_ofms_zero_point;
 					normalization.ofm_scale_rec = current_layer_ofms_scale;
@@ -459,11 +457,9 @@ void _6_layer_3_pw(
 //					}
 					fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 					normalization.fused_scales =
-							fused_scales[current_layer_fused_parameters_offsets
-									+ o_o_d_offset + o_d];
+							layer_3_fused_scales[o_o_d_offset + o_d];
 					normalization.fused_zero_point =
-							fused_zero_points[current_layer_fused_parameters_offsets
-									+ o_o_d_offset + o_d];
+							layer_3_fused_zero_points[o_o_d_offset + o_d];
 					normalization.ofm_zero_point =
 							current_layer_ofms_zero_point;
 					normalization.ofm_scale_rec = current_layer_ofms_scale;
@@ -598,11 +594,9 @@ void _6_layer_4_pw_5_dw(
 								fms_quantization_scheme normalization = { 0, 0,
 										0, 0 };
 								normalization.fused_scales =
-										fused_scales[current_pw_fused_parameters_offsets
-												+ o_o_d_offset + o_d];
+										layer_4_fused_scales[o_o_d_offset + o_d];
 								normalization.fused_zero_point =
-										fused_zero_points[current_pw_fused_parameters_offsets
-												+ o_o_d_offset + o_d];
+										layer_4_fused_zero_points[o_o_d_offset + o_d];
 								normalization.ofm_zero_point =
 										current_pw_ofms_zero_point;
 								normalization.ofm_scale_rec =
@@ -713,11 +707,9 @@ void _6_layer_4_pw_5_dw(
 
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
-						fused_scales[current_dw_fused_parameters_offsets
-								+ o_o_d_offset + o_d];
+						layer_5_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
-						fused_zero_points[current_dw_fused_parameters_offsets
-								+ o_o_d_offset + o_d];
+						layer_5_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_dw_ofms_zero_point;
 				normalization.ofm_scale_rec = current_dw_ofms_scale;
 				result[o_o_d_offset + o_d][w - pw_iterations_before_first_dw] =
@@ -827,10 +819,9 @@ void _6_layer_6_pw(
 				}
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
-						fused_scales[layers_fused_parameters_offsets[6] + o_d];
+						layer_6_fused_scales[o_o_d_offset +o_d];
 				normalization.fused_zero_point =
-						fused_zero_points[layers_fused_parameters_offsets[6]
-								+ o_d];
+						layer_6_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = conv_fms_zero_points[6 + 1];
 				normalization.ofm_scale_rec = conv_fms_scales_rec[6 + 1];
 				result[offset_in_result] = pw_relu_norm(tmp, normalization,
@@ -894,8 +885,6 @@ void cnn_pipeline_6_mob_v2(
 #pragma HLS INLINE off
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
-
-#pragma HLS ARRAY_PARTITION variable = dw_weights_1 type = complete dim = 1
 
 //#########################even###############################
 	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim

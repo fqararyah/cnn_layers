@@ -35,13 +35,17 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		const int layer_weights_offset);
 
 
-void fill_fused_zero_points(const biases_dt fused_zero_points[],
+void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
   biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
  int starting_d, int layer);
 
-void fill_fused_scales(const scales_dt fused_scales[],
+void fill_fused_scales_buffer(const scales_dt fused_scales[],
   scales_dt fused_scales_buffer[pw_conv_parallelism_out],
  int starting_d, int layer);
+
+void fill_fused_scales_and_zero_points(const scales_dt layer_fused_scales[],
+  scales_dt fused_scales[],const biases_dt layer_fused_zero_points[],
+  biases_dt fused_zero_points[], const int layer_num_filters);
 
 //void v1_3_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 //                         dw_weights_dt dw_weights_1[layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],

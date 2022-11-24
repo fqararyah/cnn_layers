@@ -37,16 +37,13 @@ add_layers_fms_scales = [0] * len(layers_types)
 add_layers_fms_scales_rec_declaration_string = 'const static scales_dt add_layers_fms_scales_rec[] = {'
 add_layers_fms_scales_declaration_string = 'const static scales_dt add_layers_fms_scales[] = {'
 conv_fms_zero_points = []
-fused_zero_points = []
-fused_scales = []
+
 layers_fused_parameters_offsets = []
 conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[] = {'
 add_layers_fms_zero_points = [0] * len(layers_types)
 add_layers_fms_zero_points_declaration_string = 'const static fms_dt add_layers_fms_zero_points[] = {'
-fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = {\n'
 layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = {0, \n'
 
-fused_scales_declaration_string = 'const static scales_dt fused_scales[] = {'
 weights_zero_points_declaration_string = 'const static fms_dt weights_zero_points[] = {'
 
 overall_fms_scales = len(skip_connections_indices) + \
@@ -116,6 +113,8 @@ with open(h_file, 'w') as wf:
              str(conv_fms_scales_rec).replace('[', '').replace(']', '};\n'))
     # writing weights scales and zero_points
     for layer_index in range(len(layers_weights_shapes)):
+        fused_zero_points = []
+        fused_scales = []
         biases = []
         if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
             layers_fused_parameters_offsets.append(
@@ -167,16 +166,21 @@ with open(h_file, 'w') as wf:
                 weights_zero_points_declaration_string += line.replace(
                     ' ', '').replace('\n', '') + ', '
 
-    fused_zero_points_declaration_string += str(
+        fused_zero_points_declaration_string = 'const static biases_dt layer_{}_fused_zero_points[] = \n'.format(layer_index)
+        fused_zero_points_declaration_string += '{ ' +  str(
         fused_zero_points).replace('[', '').replace(']', '') + '};\n'
-    fused_scales_declaration_string += str(
+        
+        fused_scales_declaration_string = 'const static scales_dt layer_{}_fused_scales[] ='.format(layer_index)
+        fused_scales_declaration_string += '{ ' +  str(
         fused_scales).replace('[', '').replace(']', '') + '};\n'
+
+        wf.write(fused_zero_points_declaration_string)
+        wf.write(fused_scales_declaration_string)
+
     weights_zero_points_declaration_string += '};\n'
 
     wf.write(layers_fused_parameters_offsets_declaration_string +
              str(layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
-    wf.write(fused_zero_points_declaration_string)
-    wf.write(fused_scales_declaration_string)
     # wf.write(weights_zero_points_declaration_string)
     wf.write("#endif\n")
 

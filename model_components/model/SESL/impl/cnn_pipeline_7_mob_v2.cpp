@@ -39,11 +39,9 @@ void _7_layer_6_pw(
 				}
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
-						fused_scales[current_layer_fused_parameters_offsets
-								+ o_o_d_offset + o_d];
+						layer_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
-						fused_zero_points[current_layer_fused_parameters_offsets
-								+ o_o_d_offset + o_d];
+						layer_6_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
 				normalization.ofm_scale_rec = current_layer_ofms_scale;
 				result[o_o_d_offset + o_d][w] = dw_relu_norm(tmp, normalization,
@@ -172,11 +170,9 @@ void _7_layer_7_pw(
 
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
-						fused_scales[current_layer_fused_parameters_offsets
-								+ o_o_d_offset + o_d];
+						layer_7_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
-						fused_zero_points[current_layer_fused_parameters_offsets
-								+ o_o_d_offset + o_d];
+						layer_7_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
 				normalization.ofm_scale_rec = current_layer_ofms_scale;
 				result[index_in_result] = pw_relu_norm(tmp, normalization,
@@ -205,6 +201,7 @@ void fill_row(fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_group
 	for (int d = 0; d < input_image_depth; d++) {
 #pragma HLS UNROLL
 		for (int o_w = 0; o_w < input_image_num_fms_groups_in_width; o_w++) {
+#pragma HLS PIPELINE OFF
 			const int o_w_offset = o_w * input_image_group_items;
 			fms_grp_dt chunck = tmp_buffer[d][o_w];
 			for (int w = 0; w < input_image_group_items; w++) {

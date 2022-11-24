@@ -51,7 +51,7 @@ void fill_channels_buffer_0(
 void layer_0_conv_engine(
 		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
-		fms_dt results[max_fms_size], int starting_h) {
+		fms_dt results[max_fms_size], int starting_h,  scales_dt fused_scales[], biases_dt fused_zero_points[]) {
 
 	const biases_dt current_layer_zero_point = conv_fms_zero_points[0];
 	for (int f = 0; f < layer_0_num_fils; f++) {
@@ -110,11 +110,11 @@ void layer_0_conv_engine(
 void layer_0_3x3(
 		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 		fms_grp_dt channels[input_image_depth*input_image_height*input_image_width / input_image_group_items],
-		fms_dt result[max_fms_size]) {
+		fms_dt result[max_fms_size], scales_dt fused_scales[], biases_dt fused_zero_points[]) {
 	fms_dt channels_tile[layer_0_depth][layer_0_filter_dim][layer_0_ifm_width];
 	for (int h = 0; h < layer_0_ofm_height; h++) {
 		fill_channels_buffer_0(channels, channels_tile, h);
-		layer_0_conv_engine(weights_0, channels_tile, result, h);
+		layer_0_conv_engine(weights_0, channels_tile, result, h,  fused_scales, fused_zero_points);
 	}
 }
 
@@ -142,17 +142,15 @@ void layer_0_3x3(
 
 // 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 // 	scales_dt fused_scales_buffer[pw_conv_parallelism_out];
-// 	fill_fused_zero_points(fused_zero_points, fused_zero_points_buffer,
+// 	fill_fused_zero_points_buffer(fused_zero_points, fused_zero_points_buffer,
 // 			starting_d, layer);
-// 	fill_fused_scales(fused_scales, fused_scales_buffer, starting_d, layer);
+// 	fill_fused_scales_buffer(fused_scales, fused_scales_buffer, starting_d, layer);
 
 // 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 
 // 	for (int tile_offset = 0; tile_offset < pw_conv_parallelism_out / pw_tile_d;
 // 			tile_offset++) {
 // #pragma HLS PIPELINE
-// //#pragma HLS dependence variable = results inter false
-// //#pragma HLS dependence variable = results intra false
 // 		const int current_fms_indx = (tile_indx + tile_offset * num_of_tiles_hw)
 // 				* pw_tile_size;
 // 		//cout << current_fms_indx << "\n";

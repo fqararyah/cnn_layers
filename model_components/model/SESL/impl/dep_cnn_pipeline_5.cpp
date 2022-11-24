@@ -326,7 +326,6 @@ void _5_layer_3_pw(
 		for (int w = 0; w < layer_3_pw_ifm_width; w++)
 		{
 #pragma HLS PIPELINE
-#pragma HLS dependence variable = result inter false
 		// FMs width loop
 		layer_3_pw_loops:
 			for (int o_d = 0;

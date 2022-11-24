@@ -26,7 +26,7 @@ const int DF = 1;
 const int start_with_pw = 1;
 
 //maxs for buffers
-const int max_conv_d = 1024 / alpha;
+const int max_conv_d = 1280 / alpha; //to_automate
 const int max_conv_h = 3;
 const int max_conv_w = 3;
 const int max_fms_size =

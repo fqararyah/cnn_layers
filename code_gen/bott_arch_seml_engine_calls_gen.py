@@ -14,21 +14,25 @@ ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
 debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
-layer_0_block = 'layer_0_3x3(weights_0, input_image, result2);\n'
+fill_quantization_parameters_block = 'fill_fused_scales_and_zero_points(layer_*i*_fused_scales,\n\
+  fused_scales, layer_*i*_fused_zero_points,\n\
+  fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
+
+layer_0_block = 'layer_0_3x3(weights_0, input_image, result2, fused_scales, fused_zero_points);\n'
 
 expansion_projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
-    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu);\n'
+    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu, fused_scales, fused_zero_points);\n'
 
 dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
     dw_conv_3x3(dw_weights_buffer, channels, result2, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left,layer_*i*_dw_padding_top,\n\
-    *DIRECTION*);\n'
+    *DIRECTION*, fused_scales, fused_zero_points);\n'
 
 # projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
 #     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
@@ -124,23 +128,27 @@ for i in range(layers_to_generate[0], layers_to_generate[1]):
 print(max_fms_size_in_seml, max_fms_size_in_seml_layer_index)
 
 for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
-    target_block = ''
+    target_block = fill_quantization_parameters_block
     replacement_dict = {}
     replacement_dict['*i*'] = layer_index
     replacement_dict['*DIRECTION*'] = direction
+
     read_write = 0
 
     if layer_index == 0:
-        target_block = layer_0_block
+        target_block += layer_0_block
+        replacement_dict['*TYPE*_'] = ''
     if layers_types[layer_index] == 'pw' and expansion_projection[layer_index]:
-        target_block = expansion_projection_block
+        replacement_dict['*TYPE*'] = 'pw'
+        target_block += expansion_projection_block
         if layer_index + skip_connections_depth + 1 in skip_connections_indices:
             read_write += 2
         if layer_index + 1 in skip_connections_indices:
             read_write += 1
 
     elif layers_types[layer_index] == 'dw':
-        target_block = dw_block
+        target_block += dw_block
+        replacement_dict['*TYPE*'] = 'dw'
 
     replacement_dict['*RW*'] = read_write
     if constants.DEBUGGING and layer_index == constants.LAYERS_TO_DEBUG[0]:

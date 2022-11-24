@@ -250,14 +250,12 @@ layer_1_2_pw_dw_main_loop:
 			 w++)
 		{
 #pragma HLS PIPELINE
-#pragma HLS dependence variable = result inter false
 		//###################PW#######################
 		layer_1_2_pw_dw_loops:
 			for (int o_d = 0;
 				 o_d < v1_layer_2_pw_parallelism_out; o_d++)
 			{
 #pragma HLS UNROLL
-#pragma HLS dependence variable = result inter false
 				// parallelized filters loop
 				if (w < v1_layer_2_dw_ifm_width)
 				{
