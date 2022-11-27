@@ -183,7 +183,7 @@ void _6_layer_2_dw(
 	const fms_dt current_layer_zero_point = conv_fms_zero_points[2];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[2 + 1];
-	const scales_dt current_layer_ofms_scale = conv_fms_scales_rec[2 + 1];
+	const rec_scales_dt current_layer_ofms_scale = conv_fms_scales_rec[2 + 1];
 
 	const int current_layer_fused_parameters_offsets =
 			layers_fused_parameters_offsets[2];
@@ -425,7 +425,7 @@ void _6_layer_3_pw(
 			layers_fused_parameters_offsets[3];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[3 + 1];
-	const scales_dt current_layer_ofms_scale = conv_fms_scales_rec[3 + 1];
+	const rec_scales_dt current_layer_ofms_scale = conv_fms_scales_rec[3 + 1];
 
 // rows for next DW
 	for (int o_o_d = 0;
@@ -496,13 +496,13 @@ void _6_layer_4_pw_5_dw(
 			layers_fused_parameters_offsets[4];
 
 	const fms_dt current_pw_ofms_zero_point = conv_fms_zero_points[4 + 1];
-	const scales_dt current_pw_ofms_scale = conv_fms_scales_rec[4 + 1];
+	const rec_scales_dt current_pw_ofms_scale = conv_fms_scales_rec[4 + 1];
 
 	const int current_dw_fused_parameters_offsets =
 			layers_fused_parameters_offsets[5];
 
 	const fms_dt current_dw_ofms_zero_point = conv_fms_zero_points[5 + 1];
-	const scales_dt current_dw_ofms_scale = conv_fms_scales_rec[5 + 1];
+	const rec_scales_dt current_dw_ofms_scale = conv_fms_scales_rec[5 + 1];
 	const fms_dt current_dw_ifms_zero_point = conv_fms_zero_points[5];
 
 	const int filter_shift_rows = layer_5_dw_filter_size - layer_5_dw_strides;

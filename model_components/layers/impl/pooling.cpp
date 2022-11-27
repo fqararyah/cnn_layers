@@ -33,12 +33,10 @@ void avgpool(fms_dt channels[max_fms_size],
 				tmp += channels[tile_index * pw_tile_size + in_tile_index];
 			}
 		}
-		pss_f_dt scaled_tmp = (((pss_f_dt) tmp) / avgpool_input_hw
+		pss_f_dt scaled_tmp = (tmp / avgpool_input_hw
 				- pooling_ifms_zero_point) * pooling_fused_scale
 				+ pooling_ofms_zero_point;
 
-		clamp(scaled_tmp);
-
-		result[d] = (fms_dt) (scaled_tmp);
+		result[d] = clamp(scaled_tmp);
 	}
 }

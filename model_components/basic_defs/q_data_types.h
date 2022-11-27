@@ -24,8 +24,13 @@ const int fms_dt_offset = fms_dt_width - 1;
 const int input_image_group_items = 512 / fms_dt_width;
 
 //scales, zero points, and biases
-const int scales_bit_width = 48;
-const int scales_integer_part_width = 8;
+const int scales_bit_width = 48;//48
+const int scales_integer_part_width = 1;
+const int fused_scales_bit_width = 36;//48
+const int fused_scales_integer_part_width = 1;
+const int rec_scales_bit_width = 24;//48
+const int rec_scales_integer_part_width = 8;
+
 const int biases_bit_width = 32;
 
 //pss
@@ -42,9 +47,9 @@ typedef ap_int<weights_dt_width> weights_dt;
 typedef ap_int<dw_weights_dt_width> dw_weights_dt;
 typedef ap_int<fms_dt_width> fms_dt;
 typedef ap_int<pss_dt_width> pss_dt;	   // partial sums
-typedef ap_fixed<pss_dt_width + 16, pss_dt_width> pss_f_dt;
+typedef ap_fixed<pss_dt_width + 10, pss_dt_width> pss_f_dt; //+ 16
 typedef ap_int<dw_pss_dt_width> dw_pss_dt; // partial sums
-typedef ap_fixed<dw_pss_dt_width + 16, dw_pss_dt_width> dw_pss_f_dt;
+typedef ap_fixed<dw_pss_dt_width + 10, dw_pss_dt_width> dw_pss_f_dt; // + 16
 typedef ap_int<first_conv_pss_width> first_conv_pss_dt;
 typedef ap_uint<weights_group_items * weights_dt_width> weights_grp_dt;
 typedef ap_uint<input_image_group_items * fms_dt_width> fms_grp_dt;
@@ -54,14 +59,19 @@ typedef ap_int<input_image_pss_dt_width> input_image_pss_dt;
 typedef ap_int<fc_weights_dt_width> fc_weights_dt;
 typedef ap_int<fc_out_dt_width> fc_out_dt;
 
-typedef ap_fixed<scales_bit_width, scales_integer_part_width> scales_dt;
+typedef ap_ufixed<scales_bit_width, scales_integer_part_width> scales_dt;
+//typedef scales_dt fused_scales_dt;
+typedef ap_ufixed<fused_scales_bit_width, fused_scales_integer_part_width> fused_scales_dt;
+//typedef scales_dt rec_scales_dt;
+typedef ap_ufixed<rec_scales_bit_width, rec_scales_integer_part_width> rec_scales_dt;
+
 typedef int biases_dt;
 struct fms_quantization_scheme {
 	 fms_dt ofm_zero_point;
 	 scales_dt ifm_scale;
-	 scales_dt ofm_scale_rec;
+	 rec_scales_dt ofm_scale_rec;
 	 biases_dt fused_zero_point;
-	 scales_dt fused_scales;
+	 fused_scales_dt fused_scales;
 	//const biases_dt bias;
 };
 

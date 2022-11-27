@@ -133,7 +133,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		fms_dt result[max_fms_size], int tile_index, const int starting_h,
 		int conv_depth, const int num_of_tiles_w, const int layer_ifm_width,
 		const int strides, const int padding_left, int layer,
-		const scales_dt fused_scales[], const biases_dt fused_zero_points[]) {
+		const fused_scales_dt fused_scales[], const biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
@@ -245,7 +245,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 		const int layer_ifm_height, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
 		const int padding_left, const int padding_top, const int direction,
-		scales_dt fused_scales[], biases_dt fused_zero_points[]) {
+		fused_scales_dt fused_scales[], biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 	fms_dt channels_tile_1[dw_tile_d][3][max_dw_input_width];
 //	fms_dt channels_tile_2[dw_tile_d][3][max_dw_input_width];

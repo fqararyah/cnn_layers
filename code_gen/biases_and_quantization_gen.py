@@ -1,10 +1,11 @@
 import numpy as np
 import utils
+import math
 
 utils.set_globals('mob_v2', 'mobilenetv2')
 
 scales_bit_width = 18
-scales_integer_part_width = 0
+scales_integer_part_width = 1
 biases_bit_width = 32
 
 from_files = True
@@ -31,10 +32,10 @@ skip_connections_indices = utils.read_skip_connections_indices()
 conv_fms_scales_rec = []
 conv_fms_scales = []
 conv_fms_scales_declaration_string = 'const static scales_dt conv_fms_scales[] = {'
-conv_fms_scales_rec_declaration_string = 'const static scales_dt conv_fms_scales_rec[] = {'
+conv_fms_scales_rec_declaration_string = 'const static rec_scales_dt conv_fms_scales_rec[] = {'
 add_layers_fms_scales_rec = [0] * len(layers_types)
 add_layers_fms_scales = [0] * len(layers_types)
-add_layers_fms_scales_rec_declaration_string = 'const static scales_dt add_layers_fms_scales_rec[] = {'
+add_layers_fms_scales_rec_declaration_string = 'const static rec_scales_dt add_layers_fms_scales_rec[] = {'
 add_layers_fms_scales_declaration_string = 'const static scales_dt add_layers_fms_scales[] = {'
 conv_fms_zero_points = []
 
@@ -56,7 +57,7 @@ with open(h_file, 'w') as wf:
     wf.write("#define BIAS_QUANT\n")
 
     #for now, I am getting the average pooling quantization manually from netron
-    wf.write('const scales_dt pooling_fused_scale = ' + str(0.0235294122248888 / 0.020379824563860893) + ';\n')
+    wf.write('const fused_scales_dt pooling_fused_scale = ' + str(0.0235294122248888 / 0.020379824563860893) + ';\n')
     wf.write('const biases_dt pooling_ifms_zero_point = -128;\n')
     wf.write('const biases_dt pooling_ofms_zero_point = -128;\n')
 
@@ -85,15 +86,21 @@ with open(h_file, 'w') as wf:
                                      skip_connection_current_index - 1] = 0
             add_layers_fms_scales_rec[layer_index -
                                       skip_connection_current_index - 1] = 1 / float(scale)
+            assert( add_layers_fms_scales_rec[layer_index -
+                                      skip_connection_current_index - 1] < 255)
             add_layers_fms_scales[layer_index -
                                   skip_connection_current_index - 1] = float(scale)
+            assert(add_layers_fms_scales[layer_index -
+                                  skip_connection_current_index - 1] < 2)
             add_layers_fms_zero_points[layer_index -
                                        skip_connection_current_index - 1] = int(zero_point)
 
             skip_connection_current_index += 1
         else:
             conv_fms_scales_rec.append(1.0/float(scale))
+            assert(conv_fms_scales_rec[-1] < 255)
             conv_fms_scales.append(float(scale))
+            assert(conv_fms_scales[-1] < 2)
             conv_fms_zero_points.append(int(zero_point))
 
         fms_file_index += 1
@@ -160,6 +167,14 @@ with open(h_file, 'w') as wf:
                                     (conv_fms_scales[layer_index] if layer_index not in skip_connections_indices
                                      else add_layers_fms_scales[layer_index])
                                     )
+                assert(fused_scales[-1] < 0.1)
+                if layer_index == 0:
+                    current_log = math.log2(fused_scales[-1])
+                    abs_current_log_int = abs(int(current_log))
+                    decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
+                    print(fused_scales[-1], decomposed_val * (2 ** -abs_current_log_int))
+                    assert(abs_current_log_int > 0)
+                    assert(decomposed_val <= 1)
 
         with open(weights_zero_points_file_format.format(layer_index), 'r') as f:
             for line in f:
@@ -170,7 +185,7 @@ with open(h_file, 'w') as wf:
         fused_zero_points_declaration_string += '{ ' +  str(
         fused_zero_points).replace('[', '').replace(']', '') + '};\n'
         
-        fused_scales_declaration_string = 'const static scales_dt layer_{}_fused_scales[] ='.format(layer_index)
+        fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_fused_scales[] ='.format(layer_index)
         fused_scales_declaration_string += '{ ' +  str(
         fused_scales).replace('[', '').replace(']', '') + '};\n'
 

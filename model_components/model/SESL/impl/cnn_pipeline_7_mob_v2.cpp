@@ -16,7 +16,7 @@ void _7_layer_6_pw(
 			layers_fused_parameters_offsets[6];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[6 + 1];
-	const scales_dt current_layer_ofms_scale = conv_fms_scales_rec[6 + 1];
+	const rec_scales_dt current_layer_ofms_scale = conv_fms_scales_rec[6 + 1];
 
 	// rows for next DW
 	for (int o_o_d = 0;
@@ -118,7 +118,7 @@ void _7_layer_7_pw(
 			layers_fused_parameters_offsets[7];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[7 + 1];
-	const scales_dt current_layer_ofms_scale = conv_fms_scales_rec[7 + 1];
+	const rec_scales_dt current_layer_ofms_scale = conv_fms_scales_rec[7 + 1];
 
 	const int num_tiles_hw = layer_7_pw_num_of_tiles_h
 			* layer_7_pw_num_of_tiles_w;
@@ -350,7 +350,7 @@ void cnn_pipeline_7_mob_v2(
 
 #pragma HLS ARRAY_PARTITION variable = _6_layer_3_pw_out_0 complete dim = 1
 
-#pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_0 cyclic factor = layer_4_pw_parallelism_in/2 dim = 1
+#pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_0 cyclic factor = layer_7_pw_parallelism_in/2 dim = 1
 
 	fms_dt _6_layer_6_pw_out_0[layer_7_pw_depth][layer_7_pw_ifm_width] = { 0 };
 #pragma HLS ARRAY_PARTITION variable = _6_layer_6_pw_out_0 complete dim = 1
@@ -382,7 +382,7 @@ void cnn_pipeline_7_mob_v2(
 
 #pragma HLS ARRAY_PARTITION variable = _6_layer_3_pw_out_1 complete dim = 1
 
-#pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_1 cyclic factor = layer_4_pw_parallelism_in/2 dim = 1
+#pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_1 cyclic factor = layer_7_pw_parallelism_in/2 dim = 1
 
 	fms_dt _6_layer_6_pw_out_1[layer_7_pw_depth][layer_7_pw_ifm_width] = { 0 };
 #pragma HLS ARRAY_PARTITION variable = _6_layer_6_pw_out_1 complete dim = 1

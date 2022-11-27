@@ -25,6 +25,6 @@ void top_func(
 //	dump_layer_output(
 //				"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_7.txt",
 //				result2, 56*56*144, 56, 56);
-//	seml(input_image, off_chip_weights, channels, result, result2, tmp_channels,
-//			tmp_channels_2, weights_0, dw_weights_buffer, fc_input);
+	seml(input_image, off_chip_weights, channels, result, result2, tmp_channels,
+			tmp_channels_2, weights_0, dw_weights_buffer, fc_input);
 }
