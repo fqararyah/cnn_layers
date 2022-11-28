@@ -97,21 +97,29 @@ void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
 }
 
 void fill_fused_scales_buffer(const fused_scales_dt fused_scales[],
-		fused_scales_dt fused_scales_buffer[], int starting_d, int layer) {
+		fused_scales_dt fused_scales_buffer[],
+		const relu_6_fused_scales_dt relu_6_fused_scales[],
+		relu_6_fused_scales_dt relu_6_fused_scales_buffer[],
+		int starting_d, int layer) {
 	//const int starting_index = layers_fused_parameters_offsets[layer];
 	for (int i = 0; i < pw_conv_parallelism_out; i++) {
 		fused_scales_buffer[i] = fused_scales[starting_d + i];
+		relu_6_fused_scales_buffer[i] = relu_6_fused_scales[starting_d + i];
 	}
 }
 
 void fill_fused_scales_and_zero_points(const fused_scales_dt layer_fused_scales[],
-		fused_scales_dt fused_scales[], const biases_dt layer_fused_zero_points[],
+		fused_scales_dt fused_scales[], 
+		const relu_6_fused_scales_dt layer_relu_6_fused_scales[],
+		relu_6_fused_scales_dt relu_6_fused_scales[],
+		const biases_dt layer_fused_zero_points[],
 		biases_dt fused_zero_points[], const int layer_num_filters) {
 	for (int i = 0; i < max_conv_d; i++) {
 		if (i >= layer_num_filters) {
 			break;
 		}
 		fused_scales[i] = layer_fused_scales[i];
+		relu_6_fused_scales[i] = layer_relu_6_fused_scales[i];
 		fused_zero_points[i] = layer_fused_zero_points[i];
 	}
 }

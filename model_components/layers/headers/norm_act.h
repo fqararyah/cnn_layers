@@ -5,7 +5,7 @@
 
 fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization, const int layer_relu);
 
-pss_f_dt pw_relu_norm_no_q(pss_dt pss, fms_quantization_scheme normalization,
+pss_f_dt pw_relu_norm_no_q_no_relu(pss_dt pss, fms_quantization_scheme normalization,
 		const int layer_relu);
 
 fms_dt dw_relu_norm(dw_pss_dt pss, fms_quantization_scheme normalization, const int layer_relu);

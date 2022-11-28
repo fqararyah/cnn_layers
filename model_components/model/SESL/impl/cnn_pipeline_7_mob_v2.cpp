@@ -1,5 +1,4 @@
 #include <iostream>
-#include <math.h>
 #include "../headers/sesl.h"
 #include "../../../../tests/test_utils.h"
 
@@ -16,7 +15,8 @@ void _7_layer_6_pw(
 			layers_fused_parameters_offsets[6];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[6 + 1];
-	const rec_scales_dt current_layer_ofms_scale = conv_fms_scales_rec[6 + 1];
+	const rec_scales_dt current_layer_ofms_scale_rec = conv_fms_scales_rec[6 + 1];
+	const scales_dt current_layer_ofms_scale = conv_fms_scales[6 + 1];
 
 	// rows for next DW
 	for (int o_o_d = 0;
@@ -40,10 +40,13 @@ void _7_layer_6_pw(
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
 						layer_6_fused_scales[o_o_d_offset + o_d];
+				normalization.relu_6_fused_scale =
+							layer_6_relu_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
 						layer_6_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
-				normalization.ofm_scale_rec = current_layer_ofms_scale;
+				normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
+				normalization.ofm_scale = current_layer_ofms_scale;
 				result[o_o_d_offset + o_d][w] = dw_relu_norm(tmp, normalization,
 						layer_6_relu);
 			}
@@ -118,7 +121,9 @@ void _7_layer_7_pw(
 			layers_fused_parameters_offsets[7];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[7 + 1];
-	const rec_scales_dt current_layer_ofms_scale = conv_fms_scales_rec[7 + 1];
+
+	const rec_scales_dt current_layer_ofms_scale_rec = conv_fms_scales_rec[7 + 1];
+	const scales_dt current_layer_ofms_scale = conv_fms_scales[7 + 1];
 
 	const int num_tiles_hw = layer_7_pw_num_of_tiles_h
 			* layer_7_pw_num_of_tiles_w;
@@ -171,10 +176,13 @@ void _7_layer_7_pw(
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
 						layer_7_fused_scales[o_o_d_offset + o_d];
+				normalization.relu_6_fused_scale =
+							layer_7_relu_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
 						layer_7_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
-				normalization.ofm_scale_rec = current_layer_ofms_scale;
+				normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
+				normalization.ofm_scale = current_layer_ofms_scale;
 				result[index_in_result] = pw_relu_norm(tmp, normalization,
 						layer_7_relu);
 //				if (o_o_d_offset + o_d == 0) {

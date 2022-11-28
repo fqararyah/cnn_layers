@@ -133,7 +133,8 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		fms_dt result[max_fms_size], int tile_index, const int starting_h,
 		int conv_depth, const int num_of_tiles_w, const int layer_ifm_width,
 		const int strides, const int padding_left, int layer,
-		const fused_scales_dt fused_scales[], const biases_dt fused_zero_points[]) {
+		const fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[],
+		 const biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
@@ -162,9 +163,11 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 				}
 			}
 			normalization.fused_scales = fused_scales[conv_depth + d];
+			normalization.relu_6_fused_scale = relu_6_fused_scales[conv_depth + d];
 			normalization.fused_zero_point = fused_zero_points[conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 			normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
+			normalization.ofm_scale = conv_fms_scales[layer + 1];
 
 			fms_dt scaled_val = dw_relu_norm(tmp, normalization, 6);
 			const int in_tile_index = d * dw_tile_hw + h_offset * dw_tile_w;
@@ -180,9 +183,11 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		dw_conv_eng3x3_g_pipe: for (int d = 0; d < dw_tile_d; d++) {
 #pragma HLS UNROLL
 			normalization.fused_scales = fused_scales[conv_depth + d];
+			normalization.relu_6_fused_scale = relu_6_fused_scales[conv_depth + d];
 			normalization.fused_zero_point = fused_zero_points[conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 			normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
+			normalization.ofm_scale = conv_fms_scales[layer + 1];
 			for (int i_w = 0; i_w < dw_tile_w; i_w++) {
 #pragma HLS UNROLL
 				dw_pss_dt tmp = 0;
@@ -245,7 +250,8 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 		const int layer_ifm_height, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
 		const int padding_left, const int padding_top, const int direction,
-		fused_scales_dt fused_scales[], biases_dt fused_zero_points[]) {
+		fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[],
+		 biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 	fms_dt channels_tile_1[dw_tile_d][3][max_dw_input_width];
 //	fms_dt channels_tile_2[dw_tile_d][3][max_dw_input_width];
@@ -305,7 +311,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 						channels, //channels_tile_2
 						conv_tile_index, t_in_h, t_in_d * dw_tile_d,
 						num_of_tiles_w, layer_ifm_width, strides, padding_left,
-						layer, fused_scales, fused_zero_points);
+						layer, fused_scales, relu_6_fused_scales, fused_zero_points);
 			} else {
 				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
 						fill_tile_index, t_in_h * strides, strides,
@@ -316,7 +322,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 						conv_tile_index, //channels_tile_2
 						t_in_h, t_in_d * dw_tile_d, num_of_tiles_w,
 						layer_ifm_width, strides, padding_left, layer,
-						fused_scales, fused_zero_points);
+						fused_scales, relu_6_fused_scales, fused_zero_points);
 			}
 //			} else {
 //				if (direction) {

@@ -25,7 +25,8 @@ biases_file_format = weights_scales_biases_files_location + 'weights_{}_biases.t
 layers_types = utils.read_layers_types()
 layers_weights_shapes = utils.read_layers_weight_shapes(layers_types)
 
-h_file = '../model_components/model/headers/quantization_and_biases.h'  # './out/dw_weights.h'
+# './out/dw_weights.h'
+h_file = '../model_components/model/headers/quantization_and_biases.h'
 
 skip_connections_indices = utils.read_skip_connections_indices()
 
@@ -56,8 +57,9 @@ with open(h_file, 'w') as wf:
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 
-    #for now, I am getting the average pooling quantization manually from netron
-    wf.write('const fused_scales_dt pooling_fused_scale = ' + str(0.0235294122248888 / 0.020379824563860893) + ';\n')
+    # for now, I am getting the average pooling quantization manually from netron
+    wf.write('const fused_scales_dt pooling_fused_scale = ' +
+             str(0.0235294122248888 / 0.020379824563860893) + ';\n')
     wf.write('const biases_dt pooling_ifms_zero_point = -128;\n')
     wf.write('const biases_dt pooling_ofms_zero_point = -128;\n')
 
@@ -86,12 +88,12 @@ with open(h_file, 'w') as wf:
                                      skip_connection_current_index - 1] = 0
             add_layers_fms_scales_rec[layer_index -
                                       skip_connection_current_index - 1] = 1 / float(scale)
-            assert( add_layers_fms_scales_rec[layer_index -
-                                      skip_connection_current_index - 1] < 255)
+            assert(add_layers_fms_scales_rec[layer_index -
+                                             skip_connection_current_index - 1] < 255)
             add_layers_fms_scales[layer_index -
                                   skip_connection_current_index - 1] = float(scale)
             assert(add_layers_fms_scales[layer_index -
-                                  skip_connection_current_index - 1] < 2)
+                                         skip_connection_current_index - 1] < 2)
             add_layers_fms_zero_points[layer_index -
                                        skip_connection_current_index - 1] = int(zero_point)
 
@@ -100,7 +102,8 @@ with open(h_file, 'w') as wf:
             conv_fms_scales_rec.append(1.0/float(scale))
             assert(conv_fms_scales_rec[-1] < 255)
             conv_fms_scales.append(float(scale))
-            assert(conv_fms_scales[-1] < 2)
+            assert(conv_fms_scales[-1] < 1)
+            assert(conv_fms_scales[-1] > 0.001)
             conv_fms_zero_points.append(int(zero_point))
 
         fms_file_index += 1
@@ -122,6 +125,7 @@ with open(h_file, 'w') as wf:
     for layer_index in range(len(layers_weights_shapes)):
         fused_zero_points = []
         fused_scales = []
+        relu_6_fused_scales = []
         biases = []
         if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
             layers_fused_parameters_offsets.append(
@@ -150,7 +154,7 @@ with open(h_file, 'w') as wf:
                                      + biases[i]
                                      )
             # if fused_zero_points[-1] < -2**29 or fused_zero_points[-1] >= 2**29:
-            #     print(layer_index, 'XXXXXXXXXXXXXXXXXXXX', fused_zero_points[-1]) 
+            #     print(layer_index, 'XXXXXXXXXXXXXXXXXXXX', fused_zero_points[-1])
             # if layer_index == 3:
             #     print(np.sum(weights[i,:,:,:]) * -conv_fms_zero_points[layer_index] , biases[i])
         if len(layers_fused_parameters_offsets) == 0:
@@ -163,34 +167,52 @@ with open(h_file, 'w') as wf:
         with open(weights_scales_file_format.format(layer_index), 'r') as f:
             for line in f:
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
-                fused_scales.append(weight_scale *
-                                    (conv_fms_scales[layer_index] if layer_index not in skip_connections_indices
-                                     else add_layers_fms_scales[layer_index])
-                                    )
-                assert(fused_scales[-1] < 0.1)
-                if layer_index == 0:
-                    current_log = math.log2(fused_scales[-1])
-                    abs_current_log_int = abs(int(current_log))
-                    decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
-                    print(fused_scales[-1], decomposed_val * (2 ** -abs_current_log_int))
-                    assert(abs_current_log_int > 0)
-                    assert(decomposed_val <= 1)
+                ifm_weight_fused_scale = weight_scale * \
+                    (conv_fms_scales[layer_index]
+                     if layer_index not in skip_connections_indices else add_layers_fms_scales[layer_index])
+                ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
+                fused_scales.append(ofm_ifm_weigh_fused_scale)
+                assert(ofm_ifm_weigh_fused_scale <= 1)
+                assert(ofm_ifm_weigh_fused_scale > 0)
+                # assert(fused_scales[-1] <= 1)
+                # if layer_index == 0:
+                # current_log = math.log2(fused_scales[-1])
+                # abs_current_log_int = abs(int(current_log))
+                # decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
+                # #print(fused_scales[-1], decomposed_val * (2 ** -abs_current_log_int))
+                # assert(abs_current_log_int > 0 and abs_current_log_int < 64)
+                # assert(fused_scales[-1] == decomposed_val * (2 ** -abs_current_log_int))
+                # fused_scales[-1] = decomposed_val
+                if  2** 31 - 1 < (6 / ifm_weight_fused_scale):
+                    relu_6_fused_scales.append(2** 31 - 1)
+                else:
+                    relu_6_fused_scales.append( round(6 / ifm_weight_fused_scale) )
+                
+                assert(relu_6_fused_scales[-1] > 0)   
 
         with open(weights_zero_points_file_format.format(layer_index), 'r') as f:
             for line in f:
                 weights_zero_points_declaration_string += line.replace(
                     ' ', '').replace('\n', '') + ', '
 
-        fused_zero_points_declaration_string = 'const static biases_dt layer_{}_fused_zero_points[] = \n'.format(layer_index)
-        fused_zero_points_declaration_string += '{ ' +  str(
-        fused_zero_points).replace('[', '').replace(']', '') + '};\n'
-        
-        fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_fused_scales[] ='.format(layer_index)
-        fused_scales_declaration_string += '{ ' +  str(
-        fused_scales).replace('[', '').replace(']', '') + '};\n'
+        fused_zero_points_declaration_string = 'const static biases_dt layer_{}_fused_zero_points[] = \n'.format(
+            layer_index)
+        fused_zero_points_declaration_string += '{ ' + str(
+            fused_zero_points).replace('[', '').replace(']', '') + '};\n'
+
+        fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_fused_scales[] ='.format(
+            layer_index)
+        fused_scales_declaration_string += '{ ' + str(
+            fused_scales).replace('[', '').replace(']', '') + '};\n'
+
+        relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_relu_6_fused_scales[] ='.format(
+            layer_index)
+        relu_6_fused_scales_declaration_string += '{ ' + str(
+            relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
         wf.write(fused_zero_points_declaration_string)
         wf.write(fused_scales_declaration_string)
+        wf.write(relu_6_fused_scales_declaration_string)
 
     weights_zero_points_declaration_string += '};\n'
 

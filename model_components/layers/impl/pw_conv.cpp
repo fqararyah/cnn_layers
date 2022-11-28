@@ -88,6 +88,7 @@ void scale_pss_tile(
 		pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		pss_f_dt pss_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		const int layer_relu, fused_scales_dt fused_scales[],
+		relu_6_fused_scales_dt relu_6_fused_scales[],
 		biases_dt fused_zero_points[], int starting_d, const int layer, int read_write) {
 
 #pragma HLS INLINE off
@@ -102,14 +103,16 @@ void scale_pss_tile(
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out];
+	relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out];
 	fill_fused_zero_points_buffer(fused_zero_points, fused_zero_points_buffer,
 			starting_d, layer);
-	fill_fused_scales_buffer(fused_scales, fused_scales_buffer, starting_d,
+	fill_fused_scales_buffer(fused_scales, fused_scales_buffer, relu_6_fused_scales, relu_6_fused_scales_buffer, starting_d,
 			layer);
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 	normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
 	normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
+	normalization.ofm_scale = conv_fms_scales[layer + 1];
 
 	pss_to_fms_tile_o_d: for (int tile_offset = 0;
 			tile_offset < num_of_tiles_processed_in_parallel; tile_offset++) {
@@ -118,6 +121,7 @@ void scale_pss_tile(
 			normalization.fused_zero_point =
 					fused_zero_points_buffer[in_tile_index];
 			normalization.fused_scales = fused_scales_buffer[in_tile_index];
+			normalization.relu_6_fused_scale = relu_6_fused_scales_buffer[in_tile_index];
 			tile_h: for (int t_h = 0; t_h < pw_tile_h; t_h++) {
 				tile_w: for (int t_w = 0; t_w < pw_tile_w; t_w++) {
 #pragma HLS PIPELINE
@@ -129,7 +133,7 @@ void scale_pss_tile(
 										normalization, layer_relu);
 					} else if (read_write == 1 || read_write == 3) {
 						scaled_tmp =
-								pw_relu_norm_no_q(
+								pw_relu_norm_no_q_no_relu(
 										pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 										normalization, layer_relu);
 					}
@@ -325,7 +329,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
 		int read_write, const int num_of_weight_groups, const int direction,
 		const int layer_weights_offset, const int layer_relu,
-		fused_scales_dt fused_scales[], biases_dt fused_zero_points[]) {
+		fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
@@ -370,7 +374,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 						num_of_tiles_d_in);
 
 				scale_pss_tile(results_tile, scaled_result_tile,
-						layer_relu, fused_scales, fused_zero_points,
+						layer_relu, fused_scales, relu_6_fused_scales, fused_zero_points,
 						td_o * pw_conv_parallelism_out, layer, read_write);
 
 //				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 9) {

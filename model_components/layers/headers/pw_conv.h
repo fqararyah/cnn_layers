@@ -10,7 +10,8 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
 		int read_write, const int num_of_weight_groups
 		, const int direction, const int layer_weights_offset, const int layer_relu,
-		fused_scales_dt fused_scales[], biases_dt fused_zero_points[]
+		fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[],
+		 biases_dt fused_zero_points[]
 		);
 
 void pw_conv_eng(fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w],

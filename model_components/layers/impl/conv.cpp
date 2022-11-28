@@ -51,15 +51,17 @@ void fill_channels_buffer_0(
 void layer_0_conv_engine(
 		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 		fms_dt channels_tile[input_image_depth][layer_0_filter_dim][input_image_width],
-		fms_dt results[max_fms_size], int starting_h,  fused_scales_dt fused_scales[], biases_dt fused_zero_points[]) {
+		fms_dt results[max_fms_size], int starting_h,  fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[]) {
 
 	const biases_dt current_layer_zero_point = conv_fms_zero_points[0];
 	for (int f = 0; f < layer_0_num_fils; f++) {
 		fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 		normalization.ofm_zero_point = conv_fms_zero_points[2];
 		normalization.ofm_scale_rec = conv_fms_scales_rec[2];
+		normalization.ofm_scale = conv_fms_scales[2];
 		normalization.fused_zero_point = fused_zero_points[f];
 		normalization.fused_scales = fused_scales[f];
+		normalization.relu_6_fused_scale = relu_6_fused_scales[f];
 		for (int w = 0; w < layer_0_ofm_width; w++) {
 			pss_dt tmp = 0;
 			for (int d = 0; d < layer_0_depth; d++) {
@@ -110,10 +112,10 @@ void layer_0_conv_engine(
 void layer_0_3x3(
 		const layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
 		fms_grp_dt channels[input_image_depth*input_image_height*input_image_width / input_image_group_items],
-		fms_dt result[max_fms_size], fused_scales_dt fused_scales[], biases_dt fused_zero_points[]) {
+		fms_dt result[max_fms_size], fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[]) {
 	fms_dt channels_tile[layer_0_depth][layer_0_filter_dim][layer_0_ifm_width];
 	for (int h = 0; h < layer_0_ofm_height; h++) {
 		fill_channels_buffer_0(channels, channels_tile, h);
-		layer_0_conv_engine(weights_0, channels_tile, result, h,  fused_scales, fused_zero_points);
+		layer_0_conv_engine(weights_0, channels_tile, result, h,  fused_scales, relu_6_fused_scales, fused_zero_points);
 	}
 }

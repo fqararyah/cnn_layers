@@ -15,24 +15,24 @@ ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
 fill_quantization_parameters_block = 'fill_fused_scales_and_zero_points(layer_*i*_fused_scales,\n\
-  fused_scales, layer_*i*_fused_zero_points,\n\
+  fused_scales, layer_*i*_relu_6_fused_scales, relu_6_fused_scales, layer_*i*_fused_zero_points,\n\
   fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
 
-layer_0_block = 'layer_0_3x3(weights_0, input_image, result2, fused_scales, fused_zero_points);\n'
+layer_0_block = 'layer_0_3x3(weights_0, input_image, result2, fused_scales, relu_6_fused_scales, fused_zero_points);\n'
 
 expansion_projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
-    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu, fused_scales, fused_zero_points);\n'
+    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu, fused_scales, relu_6_fused_scales, fused_zero_points);\n'
 
 dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
     dw_conv_3x3(dw_weights_buffer, channels, result2, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left,layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, fused_scales, fused_zero_points);\n'
+    *DIRECTION*, fused_scales, relu_6_fused_scales, fused_zero_points);\n'
 
 # projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
 #     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
