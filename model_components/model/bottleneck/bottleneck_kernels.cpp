@@ -1,0 +1,113 @@
+#include "bottleneck_kernels.h"
+
+//*************************
+void fill_expansion_kernel_input_buffer(fms_dt bottleneck_input[],
+                                  fms_dt expansion_input_buffer[],
+                                  const int bottleneck_ifms_depth,
+                                  const int bottleneck_ifms_width,
+                                  int filling_h, int filling_w)
+{
+#pragma HLS INLINE
+
+    pss_dt pss = 0;
+    const int filling_offset = filling_h * bottleneck_ifms_depth * bottleneck_ifms_width + w * bottleneck_ifms_depth;
+    for (int i = 0; i < bottleneck_ifms_depth; i++)
+    {
+#pragma HLS UNROLL
+        expansion_input_buffer[i] += filter[i] * bottleneck_input[filling_offset + i];
+    }
+}
+
+pss_dt expansion_kernel(fms_dt ifms_buffer[], const int ifms_depth, weights_dt filter[])
+{
+#pragma HLS INLINE
+
+    pss_dt pss = 0;
+    for (int i = 0; i < ifms_depth; i++)
+    {
+#pragma HLS UNROLL
+        pss += filter[i] * ifms_buffer[i];
+    }
+
+    return pss;
+}
+//*************************
+
+//*************************
+void projection_kernel(fms_dt ifms_val, const int ofms_depth, weights_dt filter[], pss_dt pss_buffer[])
+{
+#pragma HLS INLINE
+
+    pss_dt pss = 0;
+    for (int i = 0; i < ofms_depth; i++)
+    {
+#pragma HLS UNROLL
+        pss_buffer[i] += filter[i] * ifms_val;
+    }
+}
+//*************************
+
+//*************************
+void fill_dw_ifms_buffer_upper_part(fms_dt ifms_buffer[], fms_dt *filling_src, const int strides, const int filter_dim, int ifms_w_offset, const int ifms_width)
+{
+#pragma HLS INLINE
+
+    const int end_filling_offset_h = filter_dim - strides;
+    const int start_filling_offset_w = filter_dim - strides;
+    for (int h = 0; h < end_filling_offset_h; h++)
+    {
+#pragma HLS UNROLL
+        for (int w = start_filling_offset_w; w < filter_dim; w++)
+        {
+#pragma HLS UNROLL
+            ifms_buffer[h * filter_dim + w] = filling_src[h * ifms_width + (ifms_w_offset + w - start_filling_offset_w)];
+        }
+    }
+}
+
+void fill_dw_ifms_buffer_lower_part(fms_dt ifms_buffer[], fms_dt *filling_src, const int strides, const int filter_dim)
+{
+#pragma HLS INLINE
+
+    const int start_filling_offset = filter_dim - strides;
+    for (int h = start_filling_offset; h < filter_dim; h++)
+    {
+#pragma HLS UNROLL
+        for (int w = start_filling_offset; w < filter_dim; w++)
+        {
+#pragma HLS UNROLL
+            ifms_buffer[h * filter_dim + w] = filling_src[(h - start_filling_offset) * strides + (w - start_filling_offset)];
+        }
+    }
+}
+
+void shift_dw_ifms_buffer_horizontally(fms_dt ifms_buffer[], const int strides, const int filter_dim)
+{
+#pragma HLS INLINE
+
+    for (int h = 0; h < filter_dim; h++)
+    {
+#pragma HLS UNROLL
+        for (int w = 0; w < filter_dim - strides; w++)
+        {
+#pragma HLS UNROLL
+            ifms_buffer[h * filter_dim + w] = ifms_buffer[h * filter_dim + w + strides];
+        }
+    }
+}
+
+dw_pss_dt dw_kernel(fms_dt ifms_buffer[], weights_dt filter[], const int filter_dim)
+{
+#pragma HLS INLINE
+
+    dw_pss_dt pss = 0;
+    for (int c_h = 0; c_h < filter_dim; c_h++)
+    {
+        for (int c_w = 0; c_w < filter_dim; c_w++)
+        {
+            pss += ifms_buffer[c_h * filter_dim + c_w] * filter[c_h * filter_dim + c_w];
+        }
+    }
+    return pss;
+}
+//*************************

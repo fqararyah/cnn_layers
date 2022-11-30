@@ -16,14 +16,14 @@ void avgpool(fms_dt channels[max_fms_size],
 					1 + avgpool_input_width / pw_tile_w;
 	const int num_tiles_hw = num_tiles_h * num_tiles_w;
 
-	dw_conv_itd_loop: for (int d = 0; d < avgpool_input_depth; d++) {
+	avgpool_itd_loop: for (int d = 0; d < avgpool_input_depth; d++) {
 		pss_dt tmp = 0;
 		const int tile_in_d = (d / pw_tile_d);
 		const int in_tile_d = (d % pw_tile_d);
-		dw_conv_ith_loop: for (int h = 0; h < avgpool_input_height; h++) {
+		avgpool_ith_loop: for (int h = 0; h < avgpool_input_height; h++) {
 			const int tile_in_h = h / pw_tile_h;
 			const int in_tile_h = h % pw_tile_h;
-			dw_conv_itw_loop: for (int w = 0; w < avgpool_input_width; w++) {
+			avgpool_itw_loop: for (int w = 0; w < avgpool_input_width; w++) {
 				const int tile_in_w = w / pw_tile_w;
 				const int in_tile_w = w % pw_tile_w;
 				const int tile_index = tile_in_d * num_tiles_hw

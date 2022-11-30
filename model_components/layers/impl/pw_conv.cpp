@@ -27,8 +27,8 @@ void read_and_scale_tile_from_tmp_channels(
 		pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		int starting_d, const int layer_num_filters, const int num_of_tiles_hw,
 		int tile_index, int read_write, const int layer) {
-
 #pragma HLS INLINE off
+
 	if (read_write == 1 || read_write == 3) {
 		int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
 				/ pw_tile_d;
@@ -64,6 +64,7 @@ void read_and_scale_tile_from_tmp_channels(
 					const int in_tile_index = tile_offset * pw_tile_d + t_d;
 					read_a_tile_from_tmp_channels_tile_h: for (int t_h = 0;
 							t_h < pw_tile_h; t_h++) {
+#pragma HLS PIPELINE
 						read_a_tile_from_tmp_channels_w: for (int t_w = 0;
 								t_w < pw_tile_w; t_w++) {
 #pragma HLS UNROLL
@@ -91,7 +92,7 @@ void scale_pss_tile(
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		biases_dt fused_zero_points[], int starting_d, const int layer, int read_write) {
 
-#pragma HLS INLINE off
+#pragma HLS INLINE
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
 			/ pw_tile_d;
 	if (pw_conv_parallelism_out < pw_tile_d) {
@@ -117,12 +118,14 @@ void scale_pss_tile(
 	pss_to_fms_tile_o_d: for (int tile_offset = 0;
 			tile_offset < num_of_tiles_processed_in_parallel; tile_offset++) {
 		tile_d: for (int t_d = 0; t_d < pw_tile_d; t_d++) {
+#pragma HLS UNROLL
 			const int in_tile_index = tile_offset * pw_tile_d + t_d;
 			normalization.fused_zero_point =
 					fused_zero_points_buffer[in_tile_index];
 			normalization.fused_scales = fused_scales_buffer[in_tile_index];
 			normalization.relu_6_fused_scale = relu_6_fused_scales_buffer[in_tile_index];
 			tile_h: for (int t_h = 0; t_h < pw_tile_h; t_h++) {
+#pragma HLS UNROLL
 				tile_w: for (int t_w = 0; t_w < pw_tile_w; t_w++) {
 #pragma HLS PIPELINE
 					pss_f_dt scaled_tmp;
@@ -174,12 +177,12 @@ void pw_write_results_tile(
 				(tile_indx + tile_offset * num_of_tiles_hw) * pw_tile_size;
 		pw_write_results_tile_d: for (int t_d = 0; t_d < pw_tile_d; t_d++) {
 			if (t_d + starting_d < layer_num_filters) {
-
 				pw_write_results_tile_h: for (int t_h = 0; t_h < pw_tile_h;
 						t_h++) {
+#pragma HLS PIPELINE
 					pw_write_results_tile_w: for (int t_w = 0; t_w < pw_tile_w;
 							t_w++) {
-#pragma HLS PIPELINE
+#pragma HLS UNROLL
 						const int to_write_at_index = current_tile_indx
 								+ t_d * pw_tile_hw + t_h * pw_tile_w + t_w;
 
@@ -333,9 +336,9 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 #pragma HLS INLINE off
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
-	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
-
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
+
+	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 
 	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
 #pragma HLS ARRAY_PARTITION variable = tmp_channels_scaled_tile complete dim = 3

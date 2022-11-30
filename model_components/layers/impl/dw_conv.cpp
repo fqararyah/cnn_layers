@@ -176,9 +176,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 	}
 	//***
 	dw_conv_eng3x3_g_main: for (int w = 0; w < num_of_tiles_w; w++) {
-#pragma HLS PIPELINE
-#pragma HLS dependence variable = result inter false
-#pragma HLS dependence variable = result intra false
+#pragma HLS PIPELINE II=2
 		int tile_base_offset = w * dw_tile_w * strides;
 		dw_conv_eng3x3_g_pipe: for (int d = 0; d < dw_tile_d; d++) {
 #pragma HLS UNROLL
