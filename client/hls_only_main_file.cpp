@@ -22,7 +22,7 @@ void top_func(
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h][max_conv_w];
 
-	//cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
+	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
 //	int even_odd = 1;
 //	MIL: for (int i = 0; i < 10; i++) {
 ////	dump_layer_output(
@@ -43,6 +43,6 @@ void top_func(
 	//if (even_odd) {
 //		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
 //	} else {
-		seml(off_chip_weights, channels, result2, tmp_channels2, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
+		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
 //	}
 }

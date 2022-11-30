@@ -6,6 +6,7 @@
 
 const int max_of_bottlenecks_projection_filters = 24;
 const int max_of_bottlenecks_layers_depths = 144;
+const int max_of_bottlenecks_expansion_layers_depths = 24;
 
 const int bottleneck_1_ifms_depth = layer_4_pw_depth;
 const int bottleneck_1_ifms_height = layer_4_pw_ifm_height;

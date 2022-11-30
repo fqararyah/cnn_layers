@@ -117,8 +117,9 @@ for i in range(layers_to_generate[0] + 1):
 
 skip_connections_indices = utils.read_skip_connections_indices()
 
-max_fms_size_in_seml = layers_inputs_shapes[0].width * layers_inputs_shapes[0].width * layers_inputs_shapes[0].depth
-max_fms_size_in_seml_layer_index = layers_inputs_shapes[0]
+max_fms_size_in_seml = layers_inputs_shapes[layers_to_generate[0]].width * layers_inputs_shapes[layers_to_generate[0]].width *\
+     layers_inputs_shapes[layers_to_generate[0]].depth
+max_fms_size_in_seml_layer_index = layers_to_generate[0]
 for i in range(layers_to_generate[0], layers_to_generate[1]):
     current_fms_size = layers_inputs_shapes[i].width * layers_inputs_shapes[i].width * layers_inputs_shapes[i].depth
     if( current_fms_size > max_fms_size_in_seml):
