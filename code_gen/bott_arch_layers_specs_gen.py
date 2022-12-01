@@ -1,7 +1,9 @@
 import utils
 import prepare_off_chip_weights
 
-utils.set_globals('mob_v2', 'mobilenetv2')
+import code_generation_constants as cgc
+
+utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 out_file = '../model_components/model/headers/layers_specs.h' #'./out/layers_specs.h'
 

@@ -3,19 +3,18 @@
 #define PARALLELISM_AND_TILING
 
 const int pw_tile_d = 1;
-const int pw_tile_h = 4;
-const int pw_tile_w = 4;
-const int pw_tile_w_offset = 4;
+const int pw_tile_h = 2;
+const int pw_tile_w = 2;
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;
 const int pw_conv_parallelism_in = pw_tile_d;
-const int pw_conv_parallelism_out = 4; //>= tile_d: 16, 32, 64
+//WARNING, when pw_conv_parallelism_out is changes, generate script should be run
+const int pw_conv_parallelism_out = 8; //>= tile_d and >=8: 16, 32, 64 (< 8 is not working for weight load)
 
 const int dw_tile_d = pw_tile_d;
 const int dw_tile_h = pw_tile_h;
 const int dw_tile_w = pw_tile_w;
-const int dw_tile_w_offset = pw_tile_w_offset;
-const int dw_tile_hw = dw_tile_h * dw_tile_w_offset;
+const int dw_tile_hw = dw_tile_h * dw_tile_w;
 const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;
 
 const int max_dw_input_width = 112 + 8; // + 8 just to avoid dealing with paddings while still being divisable by 8

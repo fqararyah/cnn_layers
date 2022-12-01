@@ -20,19 +20,19 @@ fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization,
 					const int layer_relu)
 {
 #pragma HLS INLINE
-	pss_f_dt scaled_pss = pss + normalization.fused_zero_point;
+	pss += normalization.fused_zero_point;
 	if (layer_relu == 6)
 	{
-		if (scaled_pss < 0)
+		if (pss < 0)
 		{
-			scaled_pss = 0;
+			pss = 0;
 		}
-		if (scaled_pss > normalization.relu_6_fused_scale)
+		if (pss > normalization.relu_6_fused_scale)
 		{
-			scaled_pss = normalization.relu_6_fused_scale;
+			pss = normalization.relu_6_fused_scale;
 		}
 	}
-	scaled_pss *= normalization.fused_scales;
+	pss_f_dt scaled_pss = pss * normalization.fused_scales;
 	scaled_pss += normalization.ofm_zero_point;
 	if (scaled_pss < 0)
 	{
@@ -42,7 +42,6 @@ fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization,
 	{
 		scaled_pss += quant_half;
 	}
-
 	return clamp(scaled_pss);
 }
 
@@ -60,19 +59,19 @@ fms_dt dw_relu_norm(dw_pss_dt pss, fms_quantization_scheme normalization,
 					const int layer_relu)
 {
 #pragma HLS INLINE
-	dw_pss_f_dt scaled_pss = pss + normalization.fused_zero_point;
+	pss += normalization.fused_zero_point;
 	if (layer_relu == 6)
 	{
-		if (scaled_pss < 0)
+		if (pss < 0)
 		{
-			scaled_pss = 0;
+			pss = 0;
 		}
-		if (scaled_pss > normalization.relu_6_fused_scale)
+		if (pss > normalization.relu_6_fused_scale)
 		{
-			scaled_pss = normalization.relu_6_fused_scale;
+			pss = normalization.relu_6_fused_scale;
 		}
 	}
-	scaled_pss *= normalization.fused_scales;
+	dw_pss_f_dt scaled_pss = pss * normalization.fused_scales;
 	scaled_pss += normalization.ofm_zero_point;
 	if (scaled_pss < 0)
 	{
@@ -90,19 +89,19 @@ fms_dt conv_relu_norm(first_conv_pss_dt pss,
 					  fms_quantization_scheme normalization, const int layer_relu)
 {
 #pragma HLS INLINE
-	pss_f_dt scaled_pss = pss + normalization.fused_zero_point;
+	pss += normalization.fused_zero_point;
 	if (layer_relu == 6)
 	{
-		if (scaled_pss < 0)
+		if (pss < 0)
 		{
-			scaled_pss = 0;
+			pss = 0;
 		}
-		if (scaled_pss > normalization.relu_6_fused_scale)
+		if (pss > normalization.relu_6_fused_scale)
 		{
-			scaled_pss = normalization.relu_6_fused_scale;
+			pss = normalization.relu_6_fused_scale;
 		}
 	}
-	scaled_pss *= normalization.fused_scales;
+	pss_f_dt scaled_pss = pss * normalization.fused_scales;
 	scaled_pss += normalization.ofm_zero_point;
 	if (scaled_pss < 0)
 	{

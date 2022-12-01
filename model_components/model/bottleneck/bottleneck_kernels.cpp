@@ -40,6 +40,7 @@ void shift_dw_ifms_buffer_horizontally(fms_dt ifms_buffer[max_of_bottlenecks_lay
 {
 #pragma HLS INLINE
 
+for(int d-0;d<)
     for (int h = 0; h < filter_dim; h++)
     {
 #pragma HLS UNROLL
@@ -116,6 +117,9 @@ int conv_d)
     for (int i = 0; i < ofms_depth; i++)
     {
 #pragma HLS UNROLL
+    if(conv_d == 0){
+        pss_buffer[i] = 0;
+    }
         pss_buffer[i] += weights[i][conv_d] * ifms_val;
     }
 }

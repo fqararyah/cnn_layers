@@ -1,14 +1,14 @@
-import code_generation_constants as constants
+import code_generation_constants as cgc
 import utils
 
 
-utils.set_globals('mob_v2', 'mobilenetv2')
+utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 
 in_out_file = '../model_components/model/SEML/imp/seml.cpp'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
-ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/fms/'
+ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(cgc.MODEL_NAME)
 
 ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
@@ -74,7 +74,7 @@ def replace(replacement_dic, block):
 
 defines_str = ''
 file_replacement = ''
-if constants.DEBUGGING:
+if cgc.DEBUGGING:
     file_replacement += debugging_includes_block
 with open(in_out_header_file, 'r') as f:
     for line in f:
@@ -91,17 +91,17 @@ with open(in_out_header_file, 'w') as f:
 file_replacement = ''
 in_a_code_gen_area = False
 insert_index = -1
-layers_to_generate = [constants.FIRST_LAYER_TO_GENERATE,
-                      constants.LAST_LAYER_TO_GENERATE + 1 if constants.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)]
+layers_to_generate = [cgc.FIRST_LAYER_TO_GENERATE,
+                      cgc.LAST_LAYER_TO_GENERATE + 1 if cgc.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)]
 
 with open(in_out_file, 'r') as f:
     for line in f:
         if not in_a_code_gen_area:
             file_replacement += line
-        if constants.START_CODE_GENERATION_SIGNAL in line:
+        if cgc.START_CODE_GENERATION_SIGNAL in line:
             insert_index = len(file_replacement)
             in_a_code_gen_area = True
-        elif constants.END_CODE_GENERATION_SIGNAL in line:
+        elif cgc.END_CODE_GENERATION_SIGNAL in line:
             in_a_code_gen_area = False
             file_replacement += line
 
@@ -152,7 +152,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         replacement_dict['*TYPE*'] = 'dw'
 
     replacement_dict['*RW*'] = read_write
-    if constants.DEBUGGING and layer_index == constants.LAYERS_TO_DEBUG[0]:
+    if cgc.DEBUGGING and layer_index == cgc.LAYERS_TO_DEBUG[0]:
         # file_name
         ifms_file = ifms_file_format.format(tf_lite_to_my_cnn_layer_ifms_mapping[layer_index], layers_inputs_shapes[layer_index].depth,
                                             layers_inputs_shapes[layer_index].height, layers_inputs_shapes[layer_index].width)
@@ -171,7 +171,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
 
     code_to_insert += replace(replacement_dict, target_block)
 
-    if constants.DEBUGGING and layer_index in constants.LAYERS_TO_DEBUG:
+    if cgc.DEBUGGING and layer_index in cgc.LAYERS_TO_DEBUG:
         code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_index)+'.txt',
                                                            'result2' if direction == 0 else 'channels',
                                                            layers_output_shapes[layer_index].depth * layers_output_shapes[layer_index].height *

@@ -1,8 +1,9 @@
 import numpy as np
 import utils
 import math
+import code_generation_constants as cgc
 
-utils.set_globals('mob_v2', 'mobilenetv2')
+utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 scales_bit_width = 18
 scales_integer_part_width = 1
@@ -10,9 +11,9 @@ biases_bit_width = 32
 
 from_files = True
 weights_scales_biases_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
-    'tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
+    'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 fms_scales_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
-    'tflite_scripts_imgnt_accuracy_and_weight_extraction/fms/'
+    'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(cgc.MODEL_NAME)
 
 fms_scales_file_format = fms_scales_files_location + 'fms_{}_scales.txt'
 fms_zero_points_file_format = fms_scales_files_location + 'fms_{}_zero_points.txt'

@@ -1,12 +1,12 @@
 
-import code_generation_constants as constants
+import code_generation_constants as cgc
 import utils
 
-utils.set_globals('mob_v2', 'mobilenetv2')
+utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/'
+weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}_dw.txt'
 dw_weights_h_file = '../model_components/model/headers/dw_weights.h'  # './out/dw_weights.h'
 
@@ -15,12 +15,12 @@ dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
 
-last_layer = constants.LAST_LAYER_TO_GENERATE + 1 if \
-        constants.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
-first_layer = constants.FIRST_LAYER_TO_GENERATE
+last_layer = cgc.LAST_LAYER_TO_GENERATE + 1 if \
+        cgc.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
+first_layer = cgc.FIRST_LAYER_TO_GENERATE
 
-if constants.PIPELINE:
-    last_layer = max(last_layer, constants.PILELINE_LEN + 1)
+if cgc.PIPELINE:
+    last_layer = max(last_layer, cgc.PILELINE_LEN + 1)
     first_layer = 0
 
 current_index = 0
