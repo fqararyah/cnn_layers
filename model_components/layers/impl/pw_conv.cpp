@@ -24,7 +24,7 @@ void pw_fill_channels_buffer(fms_dt channels[max_fms_size],
 //									+ t_h * pw_tile_w + t_w]<<", ";
 				}
 			}
-		//	cout<<"\n";
+			//	cout<<"\n";
 		}
 	}
 }
@@ -68,10 +68,11 @@ void read_and_scale_tile_from_tmp_channels(
 					+ tile_offset * num_of_tiles_hw) * pw_tile_size;
 			pw_write_results_tile_d: for (int t_d = 0; t_d < pw_tile_d; t_d++) {
 				if (t_d + starting_d < layer_num_filters) {
+#pragma HLS PIPELINE II=2
 					const int in_tile_index = tile_offset * pw_tile_d + t_d;
 					read_a_tile_from_tmp_channels_tile_h: for (int t_h = 0;
 							t_h < pw_tile_h; t_h++) {
-#pragma HLS PIPELINE
+#pragma HLS UNROLL
 						read_a_tile_from_tmp_channels_w: for (int t_w = 0;
 								t_w < pw_tile_w; t_w++) {
 #pragma HLS UNROLL
@@ -104,8 +105,8 @@ void scale_pss_tile(
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		biases_dt fused_zero_points[], int starting_d, const int layer,
 		int read_write) {
-
 #pragma HLS INLINE
+
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
 			/ pw_tile_d;
 	if (pw_conv_parallelism_out < pw_tile_d) {
@@ -170,17 +171,13 @@ void pw_write_results_tile(
 		pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		int starting_d, const int layer_num_filters, int read_write,
 		const int layer_relu, int layer, const int num_of_tiles_hw) {
+#pragma HLS INLINE off
+
 // read_write = 1 when the current layer is the one that is directly connected to the OFMs that have a residual connection to a previous layer
 // read_write = 2 when the current layer has a residual connection
 
 	int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out
 			/ pw_tile_d;
-	if (pw_conv_parallelism_out < pw_tile_d) {
-		num_of_tiles_processed_in_parallel = 1;
-	} else if (pw_conv_parallelism_out % pw_tile_d != 0) {
-		num_of_tiles_processed_in_parallel = 1
-				+ pw_conv_parallelism_out / pw_tile_d;
-	}
 
 	rec_scales_dt add_layer_scale_reciprocal = add_layers_fms_scales_rec[layer
 			+ 1];
@@ -192,9 +189,10 @@ void pw_write_results_tile(
 				(tile_indx + tile_offset * num_of_tiles_hw) * pw_tile_size;
 		pw_write_results_tile_d: for (int t_d = 0; t_d < pw_tile_d; t_d++) {
 			if (t_d + starting_d < layer_num_filters) {
+#pragma HLS PIPELINE
 				pw_write_results_tile_h: for (int t_h = 0; t_h < pw_tile_h;
 						t_h++) {
-#pragma HLS PIPELINE
+#pragma HLS UNROLL
 					pw_write_results_tile_w: for (int t_w = 0; t_w < pw_tile_w;
 							t_w++) {
 #pragma HLS UNROLL
@@ -354,9 +352,9 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 
 	conv2_ots_loop: for (int td_o = 0; td_o < num_of_tiles_d_out; td_o++) {
-		//fill_weights_tile_off_chip(weights, weights_tile,
-		//		td_o * pw_conv_parallelism_out, layer, layer_num_fils,
-		//		layer_conv_d, num_of_weight_groups, layer_weights_offset);
+		fill_weights_tile_off_chip(weights, weights_tile,
+				td_o * pw_conv_parallelism_out, layer, layer_num_fils,
+				layer_conv_d, num_of_weight_groups, layer_weights_offset);
 		conv2_ith_loop: for (int t_in_h = 0; t_in_h < num_of_tiles_h;
 				t_in_h++) {
 			//############width loop##############
@@ -374,65 +372,31 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 				int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d)
 						* num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w;
 
-//				read_and_scale_tile_from_tmp_channels(tmp_channels,
-//						tmp_channels_scaled_tile,
-//						td_o * pw_conv_parallelism_out, layer_num_fils,
-//						num_of_tiles_hw, tile_index, read_write, layer);
+				read_and_scale_tile_from_tmp_channels(tmp_channels,
+						tmp_channels_scaled_tile,
+						td_o * pw_conv_parallelism_out, layer_num_fils,
+						num_of_tiles_hw, tile_index, read_write, layer);
 
-//				pw_conv_pipeline(channels, result, weights_tile, results_tile,
-//						layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
-//						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
-//						num_of_tiles_d_in);
+				pw_conv_pipeline(channels, result, weights_tile, results_tile,
+						layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
+						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
+						num_of_tiles_d_in);
 
-//				scale_pss_tile(results_tile, scaled_result_tile, layer_relu,
-//						fused_scales, relu_6_fused_scales, fused_zero_points,
-//						td_o * pw_conv_parallelism_out, layer, read_write);
-
-//				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 9) {
-//					dump_pw_pss_tile(
-//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f.txt",
-//							results_tile);
-//					dump_pw_weights_tile(
-//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w.txt",
-//							weights_tile, layer_conv_d);
-//				}
-//				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 8) {
-//					dump_pw_pss_tile(
-//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_pss_f_8.txt",
-//							results_tile);
-//					dump_pw_weights_tile(
-//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_w_9.txt",
-//							weights_tile, layer_conv_d);
-//				}
-				//} // end depth loop###########
-//				if (layer == 33) {
-//					cout << td_o << " * (" << pw_conv_parallelism_out << "/"
-//							<< pw_tile_d << ")" << " * " << num_of_tiles_hw
-//							<< " + " << t_in_h << " * " << num_of_tiles_w
-//							<< " + " << t_in_w << "\n";
-//				}
-//				if (layer == 7) {
-//					cout<<num_of_tiles_d_out<<" x "<<num_of_tiles_hw<<" x "<<num_of_tiles_w<<"\n";
-//				}
-//				if (td_o == 0 && t_in_h == 0 && t_in_w == 0 && layer == 52) {
-//					dump_pw_pss_tile(
-//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_b_pss_f.txt",
-//							results_tile);
-//					dump_pw_weights_tile(
-//							"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tile_b_w.txt",
-//							weights_tile, layer_conv_d);
-//				}
-//				if (direction) {
-//					pw_write_results_tile(scaled_result_tile, channels,
-//							tile_index, tmp_channels, tmp_channels_scaled_tile,
-//							td_o * pw_conv_parallelism_out, layer_num_fils,
-//							read_write, layer_relu, layer, num_of_tiles_hw);
-//				} else {
-//					pw_write_results_tile(scaled_result_tile, result,
-//							tile_index, tmp_channels, tmp_channels_scaled_tile,
-//							td_o * pw_conv_parallelism_out, layer_num_fils,
-//							read_write, layer_relu, layer, num_of_tiles_hw);
-//				}
+				scale_pss_tile(results_tile, scaled_result_tile, layer_relu,
+						fused_scales, relu_6_fused_scales, fused_zero_points,
+						td_o * pw_conv_parallelism_out, layer, read_write);
+//
+				if (direction) {
+					pw_write_results_tile(scaled_result_tile, channels,
+							tile_index, tmp_channels, tmp_channels_scaled_tile,
+							td_o * pw_conv_parallelism_out, layer_num_fils,
+							read_write, layer_relu, layer, num_of_tiles_hw);
+				} else {
+					pw_write_results_tile(scaled_result_tile, result,
+							tile_index, tmp_channels, tmp_channels_scaled_tile,
+							td_o * pw_conv_parallelism_out, layer_num_fils,
+							read_write, layer_relu, layer, num_of_tiles_hw);
+				}
 			}
 		}
 	}

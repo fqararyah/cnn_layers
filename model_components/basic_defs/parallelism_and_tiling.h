@@ -2,9 +2,9 @@
 #ifndef PARALLELISM_AND_TILING
 #define PARALLELISM_AND_TILING
 
-const int pw_tile_d = 1;
-const int pw_tile_h = 2;
-const int pw_tile_w = 2;
+const int pw_tile_d = 4;
+const int pw_tile_h = 8;
+const int pw_tile_w = 8;
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;
 const int pw_conv_parallelism_in = pw_tile_d;
@@ -16,6 +16,8 @@ const int dw_tile_h = pw_tile_h;
 const int dw_tile_w = pw_tile_w;
 const int dw_tile_hw = dw_tile_h * dw_tile_w;
 const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;
+const int dw_max_v2_buffer_width = dw_tile_w * 2 + (3 - 1);//where 2 is max strides and 3 is max conv kernel dim
+const int dw_max_v2_buffer_height = 3;//3 is max conv kernel dim
 
 const int max_dw_input_width = 112 + 8; // + 8 just to avoid dealing with paddings while still being divisable by 8
 const int max_tile_w = pw_tile_w;

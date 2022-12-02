@@ -299,7 +299,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 //			tile_index = t_in_d * num_of_tiles_hw
 //					+ (t_in_h / dw_tile_h) * num_of_tiles_w;
 //			if (odd_even) {
-			if (direction) {
+			//if (direction) {
 				dw_fill_channels_buffer_3x3(result, channels_tile_1, layer,
 						fill_tile_index, t_in_h * strides, strides,
 						num_of_input_tiles_w, num_of_input_tiles_h,
@@ -310,18 +310,18 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 						conv_tile_index, t_in_h, t_in_d * dw_tile_d,
 						num_of_tiles_w, layer_ifm_width, strides, padding_left,
 						layer, fused_scales, relu_6_fused_scales, fused_zero_points);
-			} else {
-				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
-						fill_tile_index, t_in_h * strides, strides,
-						num_of_input_tiles_w, num_of_input_tiles_h,
-						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_height,
-						t_in_h == 0, padding_top);
-				dw_conv_eng3x3(channels_tile_1, weights, result,
-						conv_tile_index, //channels_tile_2
-						t_in_h, t_in_d * dw_tile_d, num_of_tiles_w,
-						layer_ifm_width, strides, padding_left, layer,
-						fused_scales, relu_6_fused_scales, fused_zero_points);
-			}
+//			} else {
+//				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
+//						fill_tile_index, t_in_h * strides, strides,
+//						num_of_input_tiles_w, num_of_input_tiles_h,
+//						t_in_d * dw_tile_d, layer_conv_d, layer_ifm_height,
+//						t_in_h == 0, padding_top);
+//				dw_conv_eng3x3(channels_tile_1, weights, result,
+//						conv_tile_index, //channels_tile_2
+//						t_in_h, t_in_d * dw_tile_d, num_of_tiles_w,
+//						layer_ifm_width, strides, padding_left, layer,
+//						fused_scales, relu_6_fused_scales, fused_zero_points);
+//			}
 //			} else {
 //				if (direction) {
 //					dw_conv_eng3x3(channels_tile_1, weights, channels,
