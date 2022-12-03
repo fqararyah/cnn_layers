@@ -185,11 +185,12 @@ void pw_write_results_tile(
 
 	pw_write_results_tile_o_d: for (int tile_offset = 0;
 			tile_offset < num_of_tiles_processed_in_parallel; tile_offset++) {
+#pragma HLS PIPELINE
 		const int current_tile_indx =
 				(tile_indx + tile_offset * num_of_tiles_hw) * pw_tile_size;
 		pw_write_results_tile_d: for (int t_d = 0; t_d < pw_tile_d; t_d++) {
+#pragma HLS UNROLL
 			if (t_d + starting_d < layer_num_filters) {
-#pragma HLS PIPELINE
 				pw_write_results_tile_h: for (int t_h = 0; t_h < pw_tile_h;
 						t_h++) {
 #pragma HLS UNROLL
