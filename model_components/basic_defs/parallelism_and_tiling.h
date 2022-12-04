@@ -17,8 +17,9 @@ const int dw_tile_w = pw_tile_w;
 const int dw_tile_hw = dw_tile_h * dw_tile_w;
 const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;
 const int dw_max_v2_buffer_height = dw_tile_h * (3 - 1);//where 3 is max conv kernel dim and 1 is mi strides
+const int dw_max_v2_buffer_width = dw_max_v2_buffer_height;//where 3 is max conv kernel dim and 1 is mi strides
 
-const int max_dw_input_width = 112 + 8; // + 8 just to avoid dealing with paddings while still being divisable by 8
+const int max_dw_input_width = 112 + 1 + 1;//where 1 is max padding left and right
 const int max_tile_w = pw_tile_w;
 const int max_tile_h = pw_tile_h;
 const int max_tile_d = pw_tile_d > dw_tile_d ? pw_tile_d : dw_tile_d;

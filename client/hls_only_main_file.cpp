@@ -22,7 +22,7 @@ void top_func(
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h][max_conv_w];
 
-	//cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
+	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
 	//	dump_layer_output(
 	//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_6.txt",
 	//			tmp_channels, 56*56*24, 56, 56);
