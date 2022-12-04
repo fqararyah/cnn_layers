@@ -198,7 +198,7 @@ void dw_fill_ifms_buffer(ms_dt channels[max_fms_size],
 }
 
 void dw_conv_engine(const dw_weights_dt weights[max_conv_d][], fms_dt ifms_buffer[dw_tile_d][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
-                    fms_dt results_buffer[dw_tile_d][dw_tile_h], const int filter_dim, const int in_tile_d, const int tile_d_offset, const int strides,
+                    fms_dt results_buffer[dw_tile_d], const int filter_dim, const int in_tile_d, const int tile_d_offset, const int strides,
                     fms_quantization_scheme normalization, const int layer_relu)
 {
 #pragma HLS INLINE
@@ -210,27 +210,31 @@ void dw_conv_engine(const dw_weights_dt weights[max_conv_d][], fms_dt ifms_buffe
         for (int c_w = 0; c_w < filter_dim; c_w++)
         {
 #pragma HLS UNROLL
-            tmp_pss += weights[conv_d][c_h * filter_dim + c_w] * ifms_buffer[in_tile_d][h * strides + c_h][c_w];
+            tmp_pss += weights[tile_d_offset][c_h * filter_dim + c_w] * ifms_buffer[in_tile_d][h * strides + c_h][c_w];
         }
     }
 }
 
-void dw_ifms_buffer_preprocessing(ms_dt channels[max_fms_size], const dw_weights_dt weights[max_conv_d][],
-                                  fms_dt upper_row[dw_tile_d][max_dw_input_width],
-                                  fms_dt lower_row[dw_tile_d][max_dw_input_width],
-                                  fms_dt ifms_buffer[dw_tile_d][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
-                                  fms_dt col_segment_left[dw_tile_d][dw_tile_h],
-                                  fms_dt col_segment_right[dw_tile_d][dw_tile_h],
-                                  const int strides,
-                                  const int padding_left,
-                                  const int padding_top,
-                                  const int ifm_width,
-                                  const int ifm_height,
-                                  int ifm_tile_in_h, int ifm_tile_in_w,
-                                  const int num_of_ifms_tiles_w,
-                                  const int num_of_ifms_tiles_h,
-                                  int absolute_offset_in_ifms,
-                                  const fms_dt fms_zero_point)
+void dw_conv_pipeline(ms_dt channels[max_fms_size], const dw_weights_dt weights[max_conv_d][],
+                      fms_dt upper_row[dw_tile_d][max_dw_input_width],
+                      fms_dt lower_row[dw_tile_d][max_dw_input_width],
+                      fms_dt ifms_buffer[dw_tile_d][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
+                      fms_dt col_segment_left[dw_tile_d][dw_tile_h],
+                      fms_dt col_segment_right[dw_tile_d][dw_tile_h],
+                      const int filter_dim,
+                      const int strides,
+                      const int padding_left,
+                      const int padding_top,
+                      const int ifm_width,
+                      const int ifm_height,
+                      int ifm_tile_in_h, int ifm_tile_in_w,
+                      const int tile_d_offset,
+                      const int num_of_ifms_tiles_w,
+                      const int num_of_ifms_tiles_h,
+                      int absolute_offset_in_ifms,
+                      const fms_dt fms_zero_point,
+                      fms_quantization_scheme normalization,
+                      const int layer_relu)
 {
 #pragma HLS INLINE off
 
@@ -244,6 +248,9 @@ void dw_ifms_buffer_preprocessing(ms_dt channels[max_fms_size], const dw_weights
                         absolute_offset_in_ifms, ifm_height, ifm_width, num_of_ifms_tiles_w, num_of_ifms_tiles_h,
                         strides == 1, strides == 1);
 
+    dw_conv_engine(weights, ifms_buffer, filter_dim, tile_d_offset, strides,
+                   normalization, layer_relu);
+
     bool is_padding_row = (padding_top && ifm_tile_in_h == 0) || ifm_tile_in_h == num_of_ifms_tiles_h - 1;
     fill_ifms_tile_depth_row_segment(channels, lower_row, ifm_tile_in_w,
                                      absolute_offset_in_ifms, padding_left,
@@ -251,36 +258,6 @@ void dw_ifms_buffer_preprocessing(ms_dt channels[max_fms_size], const dw_weights
 
     shift_col_segments(col_segment_left, col_segment_right);
     shift_segment_between_rows(upper_row, lower_row, ifm_tile_in_w, padding_left);
-}
-
-void dw_conv_pipeline(ms_dt channels[max_fms_size], const dw_weights_dt weights[max_conv_d][],
-                      fms_dt upper_row[dw_tile_d][max_dw_input_width],
-                      fms_dt lower_row[dw_tile_d][max_dw_input_width],
-                      fms_dt ifms_buffer[dw_tile_d][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
-                      fms_dt col_segment_left[dw_tile_d][dw_tile_h],
-                      fms_dt col_segment_right[dw_tile_d][dw_tile_h],
-                      fms_dt results_buffer[dw_tile_d][dw_tile_h],
-                      const int filter_dim, const int strides,
-                      const int padding_left,
-                      const int pading_right,
-                      const int padding_top,
-                      const int ifm_width,
-                      const int ifm_height,
-                      const int tile_d_offset,
-                      int ifm_tile_in_h, int ifm_tile_in_w,
-                      const int num_of_ifms_tiles_w,
-                      const int num_of_ifms_tiles_h,
-                      int absolute_offset_in_ifms,
-                      fms_quantization_scheme normalization,
-                      const fms_dt fms_zero_point,
-                      const int layer_relu)
-{
-#pragma HLS INLINE off
-
-    dw_conv_engine(weights, ifms_buffer,
-                   fms_dt results_buffer[dw_tile_d][dw_tile_h], filter_dim,
-                   tile_d_offset, strides,
-                   normalization, layer_relu);
 }
 
 void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
