@@ -13,6 +13,10 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 		relu_6_fused_scales_dt relu_6_fused_scales[max_conv_d];
 		biases_dt fused_zero_points[max_conv_d];
 		//begin_code_generation
+fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/fms_2_32_112_112.txt",
+ channels, 112, 112);
+verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_2.txt",
+ channels, 401408, 112, 112);
 fill_fused_scales_and_zero_points(layer_2_fused_scales,
   fused_scales, layer_2_relu_6_fused_scales, relu_6_fused_scales, layer_2_fused_zero_points,
   fused_zero_points, layer_2_dw_num_fils);
@@ -22,6 +26,8 @@ fill_dw_layer_weights(dw_weights_2, dw_weights_buffer, layer_2_dw_depth, layer_2
     layer_2_dw_num_of_tiles_h, layer_2_dw_num_of_tiles_w,
     layer_2_dw_strides, layer_2_dw_padding_left, layer_2_dw_padding_right, layer_2_dw_padding_top,
     0, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_2.txt",
+ result2, 401408, 112, 112);
 fill_fused_scales_and_zero_points(layer_3_fused_scales,
   fused_scales, layer_3_relu_6_fused_scales, relu_6_fused_scales, layer_3_fused_zero_points,
   fused_zero_points, layer_3_pw_num_fils);
@@ -31,6 +37,8 @@ pw_conv(off_chip_weights, channels, result2, 3, layer_3_pw_depth,
     layer_3_pw_num_of_tiles_w, tmp_channels, 0,
     layer_3_pw_num_of_weight_groups_for_one_pass,
     1, layer_3_pw_weights_offset, layer_3_relu, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_3.txt",
+ channels, 200704, 112, 112);
 fill_fused_scales_and_zero_points(layer_4_fused_scales,
   fused_scales, layer_4_relu_6_fused_scales, relu_6_fused_scales, layer_4_fused_zero_points,
   fused_zero_points, layer_4_pw_num_fils);
@@ -40,6 +48,8 @@ pw_conv(off_chip_weights, channels, result2, 4, layer_4_pw_depth,
     layer_4_pw_num_of_tiles_w, tmp_channels, 0,
     layer_4_pw_num_of_weight_groups_for_one_pass,
     0, layer_4_pw_weights_offset, layer_4_relu, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_4.txt",
+ result2, 1204224, 112, 112);
 fill_fused_scales_and_zero_points(layer_5_fused_scales,
   fused_scales, layer_5_relu_6_fused_scales, relu_6_fused_scales, layer_5_fused_zero_points,
   fused_zero_points, layer_5_dw_num_fils);
@@ -49,6 +59,8 @@ fill_dw_layer_weights(dw_weights_5, dw_weights_buffer, layer_5_dw_depth, layer_5
     layer_5_dw_num_of_tiles_h, layer_5_dw_num_of_tiles_w,
     layer_5_dw_strides, layer_5_dw_padding_left, layer_5_dw_padding_right, layer_5_dw_padding_top,
     1, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_5.txt",
+ channels, 301056, 56, 56);
 fill_fused_scales_and_zero_points(layer_6_fused_scales,
   fused_scales, layer_6_relu_6_fused_scales, relu_6_fused_scales, layer_6_fused_zero_points,
   fused_zero_points, layer_6_pw_num_fils);
@@ -58,6 +70,8 @@ pw_conv(off_chip_weights, channels, result2, 6, layer_6_pw_depth,
     layer_6_pw_num_of_tiles_w, tmp_channels, 2,
     layer_6_pw_num_of_weight_groups_for_one_pass,
     0, layer_6_pw_weights_offset, layer_6_relu, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
+ result2, 75264, 56, 56);
 fill_fused_scales_and_zero_points(layer_7_fused_scales,
   fused_scales, layer_7_relu_6_fused_scales, relu_6_fused_scales, layer_7_fused_zero_points,
   fused_zero_points, layer_7_pw_num_fils);
@@ -67,6 +81,8 @@ pw_conv(off_chip_weights, channels, result2, 7, layer_7_pw_depth,
     layer_7_pw_num_of_tiles_w, tmp_channels, 0,
     layer_7_pw_num_of_weight_groups_for_one_pass,
     1, layer_7_pw_weights_offset, layer_7_relu, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+ channels, 451584, 56, 56);
 fill_fused_scales_and_zero_points(layer_8_fused_scales,
   fused_scales, layer_8_relu_6_fused_scales, relu_6_fused_scales, layer_8_fused_zero_points,
   fused_zero_points, layer_8_dw_num_fils);
@@ -76,6 +92,8 @@ fill_dw_layer_weights(dw_weights_8, dw_weights_buffer, layer_8_dw_depth, layer_8
     layer_8_dw_num_of_tiles_h, layer_8_dw_num_of_tiles_w,
     layer_8_dw_strides, layer_8_dw_padding_left, layer_8_dw_padding_right, layer_8_dw_padding_top,
     0, fused_scales, relu_6_fused_scales, fused_zero_points);
+dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+ result2, 451584, 56, 56);
 // 	//end_code_generation
 		avgpool(result2, fc_input);
 		//fc_layer(fc_weights, fc_input, fc_output);

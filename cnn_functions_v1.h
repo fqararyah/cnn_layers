@@ -134,7 +134,7 @@ void v1_4_layer_0_3x3_conv(
 void v1_4_layer_2_pw_dw(
     fms_dt channels_buffer[v1_layer_2_pw_depth][v1_4_stages_layer_2_rows_at_once][v1_layer_2_dw_ifm_width],
     weights_dt weights[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth],
-    dw_weights_dt dw_weights[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
+    dw_weights_dt dw_weights[v1_layer_2_dw_depth][max_conv_h * max_conv_w,
     fms_dt upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width],
     fms_dt lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
 	fms_dt result[max_fms_size], int starting_h, int active_row);
