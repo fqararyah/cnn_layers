@@ -22,7 +22,7 @@ const int avgpool_input_width = 7;
 const int skip_connection_depth = 3;
 
 //testing vars
-const int DF = 1;
+const int DF = 0;
 const int start_with_pw = 1;
 
 //maxs for buffers

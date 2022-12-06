@@ -29,9 +29,9 @@ void fill_layer_0_weights(
 		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3]);
 
 void fill_dw_layer_weights(
-		const dw_weights_dt src[max_conv_d][max_conv_h][max_conv_w],
-		dw_weights_dt dst[max_conv_d][max_conv_h][max_conv_w], const int conv_d,
-		const int conv_h, const int conv_w);
+		const dw_weights_dt src[max_conv_d][max_conv_h * max_conv_w],
+		dw_weights_dt dst[max_conv_d][max_conv_h * max_conv_w],
+		const int conv_d, const int conv_h, const int conv_w);
 
 void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],

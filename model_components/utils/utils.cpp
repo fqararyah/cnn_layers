@@ -69,17 +69,17 @@ void fill_layer_0_weights(
 }
 
 void fill_dw_layer_weights(
-		const dw_weights_dt src[max_conv_d][max_conv_h][max_conv_w],
-		dw_weights_dt dst[max_conv_d][max_conv_h][max_conv_w], const int conv_d,
-		const int conv_h, const int conv_w) {
+		const dw_weights_dt src[max_conv_d][max_conv_h * max_conv_w],
+		dw_weights_dt dst[max_conv_d][max_conv_h * max_conv_w],
+		const int conv_d, const int conv_h, const int conv_w) {
 #pragma HLS INLINE OFF
-	for (int d = 0; d < max_conv_d; d++) {
+	for (int d = 0; d < conv_d; d++) {
 		if (d < conv_d) {
-			for (int h = 0; h < max_conv_h; h++) {
+			for (int h = 0; h < conv_h; h++) {
 				if (h < conv_h) {
-					for (int w = 0; w < max_conv_w; w++) {
+					for (int w = 0; w < conv_w; w++) {
 						if (w < conv_w) {
-							dst[d][h][w] = src[d][h][w];
+							dst[d][h * conv_w + w] = src[d][h * conv_w + w];
 						}
 					}
 				}
@@ -99,8 +99,8 @@ void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
 void fill_fused_scales_buffer(const fused_scales_dt fused_scales[],
 		fused_scales_dt fused_scales_buffer[],
 		const relu_6_fused_scales_dt relu_6_fused_scales[],
-		relu_6_fused_scales_dt relu_6_fused_scales_buffer[],
-		int starting_d, int layer) {
+		relu_6_fused_scales_dt relu_6_fused_scales_buffer[], int starting_d,
+		int layer) {
 	//const int starting_index = layers_fused_parameters_offsets[layer];
 	for (int i = 0; i < pw_conv_parallelism_out; i++) {
 		fused_scales_buffer[i] = fused_scales[starting_d + i];
@@ -108,8 +108,9 @@ void fill_fused_scales_buffer(const fused_scales_dt fused_scales[],
 	}
 }
 
-void fill_fused_scales_and_zero_points(const fused_scales_dt layer_fused_scales[],
-		fused_scales_dt fused_scales[], 
+void fill_fused_scales_and_zero_points(
+		const fused_scales_dt layer_fused_scales[],
+		fused_scales_dt fused_scales[],
 		const relu_6_fused_scales_dt layer_relu_6_fused_scales[],
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		const biases_dt layer_fused_zero_points[],

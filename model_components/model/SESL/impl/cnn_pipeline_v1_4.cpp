@@ -33,7 +33,7 @@ layer_0_ofms:
 
 	layer_0_pipeline:
 		for (int w = 0; w < input_image_width; w +=
-													layer_0_strides)
+											   layer_0_strides)
 		{
 #pragma HLS PIPELINE
 			// FMs width loop
@@ -104,7 +104,7 @@ layer_0_ofms:
 
 void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size - v1_layer_1_dw_strides][v1_layer_1_dw_ifm_width],
 					 fms_dt lower[v1_layer_1_dw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ifm_width],
-					 dw_weights_dt dw_weights[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size][v1_layer_1_dw_filter_size],
+					 dw_weights_dt dw_weights[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size * v1_layer_1_dw_filter_size],
 					 fms_dt result[v1_layer_1_dw_num_fils][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ofm_width], int active_row)
 {
 
@@ -155,7 +155,7 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 
 			layer_1_dw_pipeline:
 				for (int w = 0; w < v1_layer_1_dw_ifm_width; w +=
-																layer_1_dw_strides)
+															 layer_1_dw_strides)
 				{
 #pragma HLS PIPELINE
 				// FMs width loop
@@ -172,7 +172,7 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 							{
 								// conv width loop
 #pragma HLS UNROLL
-								tmp += intermediate_pw_results[d][c_h][c_w] * dw_weights[o_d_offset + d][c_h][c_w];
+								tmp += intermediate_pw_results[d][c_h][c_w] * dw_weights[o_d_offset + d][c_h * layer_2_dw_filter_size + c_w];
 							}
 						}
 						fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);
@@ -211,7 +211,7 @@ layer_1_dw_shift_loops:
 void v1_4_layer_2_pw_dw(
 	fms_dt channels_buffer[v1_layer_2_pw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
 	weights_dt weights[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth],
-	dw_weights_dt dw_weights[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
+	dw_weights_dt dw_weights[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size * v1_layer_2_dw_filter_size],
 	fms_dt upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width],
 	fms_dt lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
 	fms_dt result[max_fms_size], int starting_h, int active_row)
@@ -307,7 +307,7 @@ layer_1_2_pw_dw_main_loop:
 						{
 							// conv width loop
 #pragma HLS UNROLL
-							tmp += intermediate_pw_results[o_d][c_h][w + c_w] * dw_weights[o_o_d_offset + o_d][c_h][c_w];
+							tmp += intermediate_pw_results[o_d][c_h][w + c_w] * dw_weights[o_o_d_offset + o_d][c_h* layer_2_dw_filter_size +  c_w];
 						}
 					}
 					fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);
@@ -343,7 +343,7 @@ layer_1_2_pw_dw_main_loop:
 		}
 	}
 
-	layer_1_2_pw_dw_shift_loop:
+layer_1_2_pw_dw_shift_loop:
 	for (int w = 0; w < v1_layer_2_pw_ifm_width;
 		 w++)
 	{
@@ -414,9 +414,9 @@ void mobilenet_v1_pipeline_4(
 	dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size];
 	weights_dt pw_weights_2[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth];
 
-//#pragma hls array_PARTITION variable = channels type = complete dim = 1
+	//#pragma hls array_PARTITION variable = channels type = complete dim = 1
 
-//#pragma hls array_PARTITION variable = dw_weights_1 type = complete dim = 1
+	//#pragma hls array_PARTITION variable = dw_weights_1 type = complete dim = 1
 
 	v1_4_fill_layers_weights(weights_0, dw_weights_1, dw_weights_2, pw_weights_2);
 
@@ -431,19 +431,19 @@ void mobilenet_v1_pipeline_4(
 	fms_dt v1_4_layer_2_dw_upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width] = {0};
 	fms_dt v1_4_layer_2_dw_lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width] = {0};
 
-//#pragma hls array_PARTITION variable = channels_buffer_0 complete dim = 1
-//#pragma hls array_PARTITION variable = channels_buffer_0 complete dim = 2
+	//#pragma hls array_PARTITION variable = channels_buffer_0 complete dim = 1
+	//#pragma hls array_PARTITION variable = channels_buffer_0 complete dim = 2
 
-//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_0 cyclic factor = 16 dim = 1
-//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_0 cyclic factor = 2 dim = 2
-//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_0 cyclic factor = 2 dim = 3
+	//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_0 cyclic factor = 16 dim = 1
+	//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_0 cyclic factor = 2 dim = 2
+	//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_0 cyclic factor = 2 dim = 3
 
-//#pragma hls array_PARTITION variable = v1_4_layer_1_dw_upper complete dim = 1
+	//#pragma hls array_PARTITION variable = v1_4_layer_1_dw_upper complete dim = 1
 
-//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_upper complete dim = 1
-//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_lower cyclic factor = 8 dim = 1
-//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_lower cyclic factor = 2 dim = 2
-//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_lower cyclic factor = 2 dim = 3
+	//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_upper complete dim = 1
+	//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_lower cyclic factor = 8 dim = 1
+	//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_lower cyclic factor = 2 dim = 2
+	//#pragma hls array_PARTITION variable = v1_4_layer_2_dw_lower cyclic factor = 2 dim = 3
 
 #pragma hls array_PARTITION variable = v1_4_layer_1_dw_out_0 complete dim = 1
 #pragma hls array_PARTITION variable = v1_4_layer_1_dw_out_0 complete dim = 2
@@ -457,12 +457,12 @@ void mobilenet_v1_pipeline_4(
 
 	fms_dt v1_4_layer_1_dw_out_1[v1_layer_2_pw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_2_pw_ifm_width] = {0};
 
-//#pragma hls array_PARTITION variable = channels_buffer_1 complete dim = 1
-//#pragma hls array_PARTITION variable = channels_buffer_1 complete dim = 2
+	//#pragma hls array_PARTITION variable = channels_buffer_1 complete dim = 1
+	//#pragma hls array_PARTITION variable = channels_buffer_1 complete dim = 2
 
-//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_1 cyclic factor = 16 dim = 1
-//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_1 cyclic factor = 2 dim = 2
-//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_1 cyclic factor = 2 dim = 3
+	//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_1 cyclic factor = 16 dim = 1
+	//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_1 cyclic factor = 2 dim = 2
+	//#pragma hls array_PARTITION variable = v1_4_layer_0_3x3_conv_out_1 cyclic factor = 2 dim = 3
 
 #pragma hls array_PARTITION variable = v1_4_layer_1_dw_out_1 complete dim = 1
 #pragma hls array_PARTITION variable = v1_4_layer_1_dw_out_1 complete dim = 2

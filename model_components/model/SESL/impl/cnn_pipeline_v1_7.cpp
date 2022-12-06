@@ -4,7 +4,7 @@
 void v1_7_layer_2_pw_dw(
 	fms_dt channels_buffer[v1_layer_2_pw_depth][v1_7_stages_layer_1_rows_at_once][v1_layer_2_dw_ifm_width],
 	weights_dt weights[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth],
-	dw_weights_dt dw_weights[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
+	dw_weights_dt dw_weights[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size*v1_layer_2_dw_filter_size],
 	fms_dt upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width],
 	fms_dt lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
 	fms_dt result[v1_layer_3_pw_depth][v1_layer_3_pw_ifm_width], int active_row)
@@ -100,7 +100,7 @@ layer_1_2_pw_dw_main_loop:
 						{
 							// conv width loop
 #pragma HLS UNROLL
-							tmp += intermediate_pw_results[o_d][c_h][w + c_w] * dw_weights[o_o_d_offset + o_d][c_h][c_w];
+							tmp += intermediate_pw_results[o_d][c_h][w + c_w] * dw_weights[o_o_d_offset + o_d][c_h* layer_2_dw_filter_size + c_w];
 						}
 					}
 					fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);
@@ -154,7 +154,7 @@ layer_1_2_pw_dw_shift_loop:
 void v1_7_layer_3_pw_dw(
 	fms_dt channels_buffer[v1_layer_3_pw_depth][v1_layer_3_pw_ifm_width],
 	weights_dt weights[v1_layer_3_pw_num_fils][v1_layer_3_pw_depth],
-	dw_weights_dt dw_weights[v1_layer_3_dw_depth][v1_layer_3_dw_filter_size][v1_layer_3_dw_filter_size],
+	dw_weights_dt dw_weights[v1_layer_3_dw_depth][v1_layer_3_dw_filter_size*v1_layer_3_dw_filter_size],
 	fms_dt upper[v1_layer_3_dw_depth][v1_layer_3_dw_filter_size - v1_layer_3_dw_strides][v1_layer_3_dw_ifm_width],
 	fms_dt lower[v1_layer_3_dw_depth][v1_layer_3_dw_strides][v1_layer_3_dw_ifm_width],
 	fms_dt result[v1_layer_4_pw_depth][v1_layer_4_pw_ifm_width], int active_row)
@@ -251,7 +251,7 @@ layer_1_pw__dw_main_loop:
 								{
 									// conv width loop
 #pragma HLS UNROLL
-									tmp += intermediate_pw_results[o_d][c_h][c_w] * dw_weights[o_o_d_offset + o_d][c_h][c_w];
+									tmp += intermediate_pw_results[o_d][c_h][c_w] * dw_weights[o_o_d_offset + o_d][c_h* layer_2_dw_filter_size + c_w];
 								}
 							}
 							fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);

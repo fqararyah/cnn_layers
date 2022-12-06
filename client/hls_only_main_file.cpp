@@ -20,7 +20,7 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = cyclic factor = main_buffers_partitining_factor
 #pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
-	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h][max_conv_w];
+	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h * max_conv_w];
 
 	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
 	//	dump_layer_output(

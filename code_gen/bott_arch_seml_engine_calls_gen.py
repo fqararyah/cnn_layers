@@ -31,7 +31,7 @@ dw_block = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_d
     dw_conv_3x3(dw_weights_buffer, channels, result2, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
-    layer_*i*_dw_strides, layer_*i*_dw_padding_left,layer_*i*_dw_padding_top,\n\
+    layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
     *DIRECTION*, fused_scales, relu_6_fused_scales, fused_zero_points);\n'
 
 # projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
@@ -135,11 +135,13 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     replacement_dict['*DIRECTION*'] = direction
 
     read_write = 0
+    if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
+        continue
 
     if layer_index == 0:
         target_block += layer_0_block
         replacement_dict['*TYPE*_'] = ''
-    if layers_types[layer_index] == 'pw' and expansion_projection[layer_index]:
+    if layers_types[layer_index] == 'pw':
         replacement_dict['*TYPE*'] = 'pw'
         target_block += expansion_projection_block
         if layer_index + skip_connections_depth + 1 in skip_connections_indices:

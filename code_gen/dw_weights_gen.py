@@ -6,17 +6,19 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
+weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
+    cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}_dw.txt'
-dw_weights_h_file = '../model_components/model/headers/dw_weights.h'  # './out/dw_weights.h'
+# './out/dw_weights.h'
+dw_weights_h_file = '../model_components/model/headers/dw_weights.h'
 
-dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_size][layer_*i*_dw_filter_size]'
+dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_size * layer_*i*_dw_filter_size]'
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
 
 last_layer = cgc.LAST_LAYER_TO_GENERATE + 1 if \
-        cgc.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
+    cgc.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
 first_layer = cgc.FIRST_LAYER_TO_GENERATE
 
 if cgc.PIPELINE:
@@ -42,13 +44,13 @@ with open(dw_weights_h_file, 'w') as f:
                 for i in range(layers_weights[ii].num_of_filters):
                     f.write('{')
                     for j in range(layers_weights[ii].height):
-                        f.write('{')
                         for k in range(layers_weights[ii].width):
                             f.write(f2.readline().replace(
                                 ' ', '').replace('\n', ''))
                             if(k < layers_weights[ii].width - 1):
                                 f.write(', ')
-                        f.write('},\n')
+                        if j != layers_weights[ii].height - 1:
+                            f.write(',\n')
                     f.write('},\n')
                 f.write('};\n')
         else:

@@ -100,7 +100,7 @@ layer_0_ofms:
 
 void v1_3_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size - v1_layer_1_dw_strides][v1_layer_1_dw_ifm_width],
 					 fms_dt lower[v1_layer_1_dw_depth][v1_layer_1_dw_ifm_width],
-					 dw_weights_dt dw_weights[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size][v1_layer_1_dw_filter_size],
+					 dw_weights_dt dw_weights[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size*v1_layer_1_dw_filter_size],
 					 fms_dt result[v1_layer_1_dw_num_fils][v1_layer_1_dw_ofm_width])
 {
 
@@ -162,7 +162,7 @@ void v1_3_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 					{
 						// conv width loop
 #pragma HLS UNROLL
-						tmp += intermediate_pw_results[o_d][c_h][c_w] * dw_weights[o_d_offset + o_d][c_h][c_w];
+						tmp += intermediate_pw_results[o_d][c_h][c_w] * dw_weights[o_d_offset + o_d][c_h* layer_2_dw_filter_size + c_w];
 					}
 				}
 				fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);
