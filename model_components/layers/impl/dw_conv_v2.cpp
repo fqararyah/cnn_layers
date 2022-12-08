@@ -30,7 +30,7 @@ void fill_ifms_tile_depth_col_segment(fms_dt channels[max_fms_size],
 
 void shift_col_segment(fms_dt left_col_segment[dw_tile_d][dw_tile_h],
                        fms_dt ifms_buffer[dw_tile_d][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
-                       const int use_upper_row)
+                       const int use_upper_row, const int filter_dim)
 {
 #pragma HLS INLINE
 
@@ -41,7 +41,7 @@ void shift_col_segment(fms_dt left_col_segment[dw_tile_d][dw_tile_h],
         {
 #pragma HLS UNROLL
             left_col_segment[d][h] =
-                ifms_buffer[d][h + use_upper_row][dw_max_v2_buffer_width - 1];
+                ifms_buffer[d][h + use_upper_row][dw_max_v2_buffer_width - filter_dim + 1];
         }
     }
 }
@@ -54,7 +54,7 @@ void fill_ifms_tile_depth_row_segment(fms_dt channels[max_fms_size],
                                       bool last_segment_in_row)
 {
 #pragma HLS INLINE
-    cout << "\nffffffffffffffffffffffff\n";
+
     const int starting_fill_w_offset = tile_index_in_w * dw_tile_w;
     for (int w = 0; w < dw_tile_w; w++)
     {
@@ -67,7 +67,10 @@ void fill_ifms_tile_depth_row_segment(fms_dt channels[max_fms_size],
                 row[d][w + starting_fill_w_offset + padding_left] =
                     channels[absolute_offset + d * dw_tile_hw + w];
                 if (d == 0)
-                    cout << w + starting_fill_w_offset + padding_left << " >>>> " << channels[absolute_offset + d * dw_tile_hw + w] << "\n";
+                    cout << w + starting_fill_w_offset + padding_left
+                         << " >>>> "
+                         << channels[absolute_offset + d * dw_tile_hw + w]
+                         << "\n";
             }
             else
             {
@@ -105,9 +108,9 @@ void fill_ifms_tile_depth_row_segment(fms_dt channels[max_fms_size],
     }
 }
 
-void shift_segment_between_rows(fms_dt upper_row[dw_tile_d][max_dw_input_width],
-                                fms_dt lower_row[dw_tile_d][max_dw_input_width],
-                                const int tile_index_in_w, const int padding_left)
+void shift_segment_between_row_and_buffer(fms_dt upper_row[dw_tile_d][max_dw_input_width],
+                                fms_dt ifms_buffer[dw_tile_d][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
+                                const int tile_index_in_w, const int padding_left, const int filter_dim)
 {
 #pragma HLS INLINE
 
@@ -118,7 +121,7 @@ void shift_segment_between_rows(fms_dt upper_row[dw_tile_d][max_dw_input_width],
         for (int d = 0; d < dw_tile_d; d++)
         {
 #pragma HLS UNROLL
-            upper_row[d][w + starting_shift_index] = lower_row[d][w + starting_shift_index];
+            upper_row[d][w + starting_shift_index] = ifms_buffer[d][dw_max_v2_buffer_height - filter_dim + 1][w + padding_left];
         }
     }
 }
@@ -170,8 +173,7 @@ void dw_fill_ifms_buffer(fms_dt channels[max_fms_size],
             }
             else
             {
-                ifms_buffer[d][0][0] =
-                    ifms_buffer[d][0][last_col_to_fill];
+                ifms_buffer[d][0][0] = ifms_buffer[d][0][last_col_to_fill];
             }
             for (int w = use_left_col; w < dw_max_v2_buffer_width; w++)
             {
@@ -201,7 +203,9 @@ void dw_fill_ifms_buffer(fms_dt channels[max_fms_size],
             ifms_buffer[d][last_row_to_fill][w] =
                 lower_row[d][starting_fill_w_from_row_offset + w]; //-1 is padding top
             if (d == 0)
-                cout << starting_fill_w_from_row_offset + w << " >> " << lower_row[d][starting_fill_w_from_row_offset + w] << "\n";
+                cout << starting_fill_w_from_row_offset + w << " >> "
+                     << lower_row[d][starting_fill_w_from_row_offset + w]
+                     << "\n";
         }
     }
 
@@ -226,7 +230,8 @@ void dw_fill_ifms_buffer(fms_dt channels[max_fms_size],
         for (int h = 0; h < dw_tile_h; h++)
         {
 #pragma HLS UNROLL
-            ifms_buffer[d][h + use_upper_row][last_col_to_fill] = right_col_segment[d][h]; //-1 is padding left
+            ifms_buffer[d][h + use_upper_row][last_col_to_fill] =
+                right_col_segment[d][h]; //-1 is padding left
         }
     }
 
@@ -246,13 +251,16 @@ void dw_fill_ifms_buffer(fms_dt channels[max_fms_size],
         }
     }
 
-    for (int h = 0; h < dw_max_v2_buffer_height; h++)
+    if (ifms_tile_in_h == 1)
     {
-        for (int w = 0; w < dw_max_v2_buffer_width; w++)
+        for (int h = 0; h < dw_max_v2_buffer_height; h++)
         {
-            cout << ifms_buffer[0][h][w] << " ";
+            for (int w = 0; w < dw_max_v2_buffer_width; w++)
+            {
+                cout << ifms_buffer[0][h][w] << " ";
+            }
+            cout << "\n";
         }
-        cout << "\n";
     }
 }
 
@@ -333,9 +341,8 @@ void dw_conv_pipeline(fms_dt channels[max_fms_size],
 
     bool is_padding_row = ifm_tile_in_h == num_of_ifms_tiles_h - 1;
     fill_ifms_tile_depth_row_segment(channels, lower_row, ifm_tile_in_w + 1,
-                                     absolute_offset_in_ifms + (num_of_ifms_tiles_w * dw_tile_size) + dw_tile_size,
-                                     padding_left, padding_right, is_padding_row, ifm_width,
-                                     fms_zero_point, 0,
+                                     absolute_offset_in_ifms + (num_of_ifms_tiles_w * dw_tile_size) + dw_tile_size, padding_left, padding_right, is_padding_row,
+                                     ifm_width, fms_zero_point, 0,
                                      (ifm_tile_in_w + 1) >= num_of_ifms_tiles_w - 1);
 
     dw_fill_ifms_buffer(channels, ifms_buffer, upper_row, lower_row,
@@ -353,9 +360,13 @@ void dw_conv_pipeline(fms_dt channels[max_fms_size],
                        fused_zero_points);
     }
 
-    shift_col_segment(col_segment_left, ifms_buffer, strides == 1);
-    shift_segment_between_rows(upper_row, lower_row, ifm_tile_in_w,
-                               padding_left);
+    if (strides == 1)
+    {
+        shift_col_segment(col_segment_left, ifms_buffer, strides == 1,
+                          filter_dim);
+        shift_segment_between_row_and_buffer(upper_row, ifms_buffer, ifm_tile_in_w,
+                                   padding_left, filter_dim);
+    }
 }
 
 void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
