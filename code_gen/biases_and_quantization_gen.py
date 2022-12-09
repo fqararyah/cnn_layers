@@ -59,8 +59,10 @@ with open(h_file, 'w') as wf:
     wf.write("#define BIAS_QUANT\n")
 
     # for now, I am getting the average pooling quantization manually from netron
-    wf.write('const fused_scales_dt pooling_fused_scale = ' +
+    wf.write('const pooling_fused_scales_dt pooling_fused_scale = ' +
              str(0.0235294122248888 / 0.020379824563860893) + ';\n')
+    #assert(0.0235294122248888 / 0.020379824563860893 < 1)
+    #assert(0.0235294122248888 / 0.020379824563860893 > 0.1)
     wf.write('const biases_dt pooling_ifms_zero_point = -128;\n')
     wf.write('const biases_dt pooling_ofms_zero_point = -128;\n')
 
@@ -126,6 +128,7 @@ with open(h_file, 'w') as wf:
     for layer_index in range(len(layers_weights_shapes)):
         fused_zero_points = []
         fused_scales = []
+        fused_scales_log_2_shifts = []
         relu_6_fused_scales = []
         biases = []
         if layers_types[layer_index] == 'pw' and expansion_projection[layer_index] == 0:
@@ -173,17 +176,19 @@ with open(h_file, 'w') as wf:
                      if layer_index not in skip_connections_indices else add_layers_fms_scales[layer_index])
                 ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
                 fused_scales.append(ofm_ifm_weigh_fused_scale)
-                assert(ofm_ifm_weigh_fused_scale <= 1)
+                assert(ofm_ifm_weigh_fused_scale < 1)
                 assert(ofm_ifm_weigh_fused_scale > 0)
                 # assert(fused_scales[-1] <= 1)
                 # if layer_index == 0:
-                # current_log = math.log2(fused_scales[-1])
-                # abs_current_log_int = abs(int(current_log))
-                # decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
+                current_log = math.log2(fused_scales[-1]) + 1
+                abs_current_log_int = abs(int(current_log))
+                decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
                 # #print(fused_scales[-1], decomposed_val * (2 ** -abs_current_log_int))
-                # assert(abs_current_log_int > 0 and abs_current_log_int < 64)
-                # assert(fused_scales[-1] == decomposed_val * (2 ** -abs_current_log_int))
-                # fused_scales[-1] = decomposed_val
+                assert(abs_current_log_int >= 0 and abs_current_log_int < 64)
+                assert(decomposed_val > 0.1 and decomposed_val < 1)
+                assert(fused_scales[-1] == decomposed_val * (2 ** -abs_current_log_int))
+                fused_scales_log_2_shifts.append(abs_current_log_int)
+                fused_scales[-1] = decomposed_val
                 if  2** 31 - 1 < (6 / ifm_weight_fused_scale):
                     relu_6_fused_scales.append(2** 31 - 1)
                 else:
@@ -205,6 +210,10 @@ with open(h_file, 'w') as wf:
             layer_index)
         fused_scales_declaration_string += '{ ' + str(
             fused_scales).replace('[', '').replace(']', '') + '};\n'
+        fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt layer_{}_fused_scales_log_2_shifts[] ='.format(
+            layer_index)
+        fused_scales_log_2_shifts_declaration_string += '{ ' + str(
+            fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
         relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_relu_6_fused_scales[] ='.format(
             layer_index)
@@ -213,6 +222,7 @@ with open(h_file, 'w') as wf:
 
         wf.write(fused_zero_points_declaration_string)
         wf.write(fused_scales_declaration_string)
+        wf.write(fused_scales_log_2_shifts_declaration_string)
         wf.write(relu_6_fused_scales_declaration_string)
 
     weights_zero_points_declaration_string += '};\n'

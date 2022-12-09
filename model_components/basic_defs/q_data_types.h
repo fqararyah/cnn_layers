@@ -26,9 +26,10 @@ const int input_image_group_items = 512 / fms_dt_width;
 //scales, zero points, and biases
 const int scales_bit_width = 20;//48
 const int scales_integer_part_width = 0;
-const int fused_scales_bit_width = 36;//48
-const int fused_scales_integer_part_width = 1;
+const int fused_scales_bit_width = 16;//48
+const int fused_scales_integer_part_width = 0;
 const int relu_6_fused_scales_bit_width = 32;
+const int fused_scales_log_2_shifts_bit_width = 6;//2^6=64
 const int rec_scales_bit_width = 24;//48
 const int rec_scales_integer_part_width = 8;
 
@@ -63,6 +64,8 @@ typedef ap_int<fc_out_dt_width> fc_out_dt;
 typedef ap_ufixed<scales_bit_width, scales_integer_part_width> scales_dt;
 //typedef scales_dt fused_scales_dt;
 typedef ap_ufixed<fused_scales_bit_width, fused_scales_integer_part_width> fused_scales_dt;
+typedef ap_ufixed<4, 8>  pooling_fused_scales_dt;
+typedef ap_uint<fused_scales_log_2_shifts_bit_width> fused_scales_log_2_shifts_dt;
 typedef ap_int<relu_6_fused_scales_bit_width> relu_6_fused_scales_dt;
 //typedef scales_dt rec_scales_dt;
 typedef ap_ufixed<rec_scales_bit_width, rec_scales_integer_part_width> rec_scales_dt;
@@ -75,6 +78,7 @@ struct fms_quantization_scheme {
 	 scales_dt ofm_scale;
 	 biases_dt fused_zero_point;
 	 fused_scales_dt fused_scales;
+	 fused_scales_log_2_shifts_dt fused_scales_log_2_shift;
 	 relu_6_fused_scales_dt relu_6_fused_scale;
 	//const biases_dt bias;
 };

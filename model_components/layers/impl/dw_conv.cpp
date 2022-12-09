@@ -133,7 +133,9 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		fms_dt result[max_fms_size], int tile_index, const int starting_h,
 		int conv_depth, const int num_of_tiles_w, const int layer_ifm_width,
 		const int strides, const int padding_left, int layer,
-		const fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[],
+		const fused_scales_dt fused_scales[],
+		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		 relu_6_fused_scales_dt relu_6_fused_scales[],
 		 const biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 
@@ -163,6 +165,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 				}
 			}
 			normalization.fused_scales = fused_scales[conv_depth + d];
+			normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts[conv_depth + d];
 			normalization.relu_6_fused_scale = relu_6_fused_scales[conv_depth + d];
 			normalization.fused_zero_point = fused_zero_points[conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
@@ -181,6 +184,7 @@ void dw_conv_eng3x3(fms_dt channels_tile[dw_tile_d][3][max_dw_input_width],
 		dw_conv_eng3x3_g_pipe: for (int d = 0; d < dw_tile_d; d++) {
 #pragma HLS UNROLL
 			normalization.fused_scales = fused_scales[conv_depth + d];
+			normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts[conv_depth + d];
 			normalization.relu_6_fused_scale = relu_6_fused_scales[conv_depth + d];
 			normalization.fused_zero_point = fused_zero_points[conv_depth + d];
 			normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
@@ -248,7 +252,8 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 		const int layer_ifm_height, const int num_of_tiles_d,
 		const int num_of_tiles_h, const int num_of_tiles_w, const int strides,
 		const int padding_left, const int padding_top, const int direction,
-		fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[],
+		fused_scales_dt fused_scales[],
+		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[], relu_6_fused_scales_dt relu_6_fused_scales[],
 		 biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
 	fms_dt channels_tile_1[dw_tile_d][3][max_dw_input_width];
@@ -309,7 +314,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][max_conv_h][max_conv_w],
 						channels, //channels_tile_2
 						conv_tile_index, t_in_h, t_in_d * dw_tile_d,
 						num_of_tiles_w, layer_ifm_width, strides, padding_left,
-						layer, fused_scales, relu_6_fused_scales, fused_zero_points);
+						layer,  fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);
 //			} else {
 //				dw_fill_channels_buffer_3x3(channels, channels_tile_1, layer,
 //						fill_tile_index, t_in_h * strides, strides,

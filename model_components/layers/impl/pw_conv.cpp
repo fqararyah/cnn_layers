@@ -102,6 +102,7 @@ void scale_pss_tile(
 		pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		pss_f_dt pss_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		const int layer_relu, fused_scales_dt fused_scales[],
+		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		biases_dt fused_zero_points[], int starting_d, const int layer,
 		int read_write) {
@@ -118,10 +119,11 @@ void scale_pss_tile(
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out];
+	fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[pw_conv_parallelism_out];
 	relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out];
 	fill_fused_zero_points_buffer(fused_zero_points, fused_zero_points_buffer,
 			starting_d, layer);
-	fill_fused_scales_buffer(fused_scales, fused_scales_buffer,
+	fill_fused_scales_buffer(fused_scales, fused_scales_buffer, fused_scales_log_2_shifts, fused_scales_log_2_shifts_buffer,
 			relu_6_fused_scales, relu_6_fused_scales_buffer, starting_d, layer);
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
@@ -137,6 +139,7 @@ void scale_pss_tile(
 			normalization.fused_zero_point =
 					fused_zero_points_buffer[in_tile_index];
 			normalization.fused_scales = fused_scales_buffer[in_tile_index];
+			normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts_buffer[in_tile_index];
 			normalization.relu_6_fused_scale =
 					relu_6_fused_scales_buffer[in_tile_index];
 			tile_h: for (int t_h = 0; t_h < pw_tile_h; t_h++) {
@@ -337,6 +340,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		int read_write, const int num_of_weight_groups, const int direction,
 		const int layer_weights_offset, const int layer_relu,
 		fused_scales_dt fused_scales[],
+		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		biases_dt fused_zero_points[]) {
 #pragma HLS INLINE off
@@ -354,7 +358,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 
 	conv2_ots_loop: for (int td_o = 0; td_o < num_of_tiles_d_out; td_o++) {
 		fill_weights_tile_off_chip(weights, weights_tile,
-				td_o * pw_conv_parallelism_out, layer, layer_num_fils,
+				td_o * pw_conv_parallelism_out,
 				layer_conv_d, num_of_weight_groups, layer_weights_offset);
 		conv2_ith_loop: for (int t_in_h = 0; t_in_h < num_of_tiles_h;
 				t_in_h++) {
@@ -384,7 +388,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 						num_of_tiles_d_in);
 
 				scale_pss_tile(results_tile, scaled_result_tile, layer_relu,
-						fused_scales, relu_6_fused_scales, fused_zero_points,
+						fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
 						td_o * pw_conv_parallelism_out, layer, read_write);
 //
 				if (direction) {

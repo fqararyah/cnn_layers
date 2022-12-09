@@ -3,8 +3,8 @@
 #define PARALLELISM_AND_TILING
 
 const int pw_tile_d = 1;
-const int pw_tile_h = 4;
-const int pw_tile_w = 4;
+const int pw_tile_h = 8;
+const int pw_tile_w = 8;
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;
 const int pw_conv_parallelism_in = pw_tile_d;
@@ -28,6 +28,7 @@ const int fc_layer_parallelism = 128;
 const int fc_layer_weights_partitioning_factor = fc_layer_parallelism/2;
 
 const int num_of_weights_in_the_same_filter_and_group = weights_group_items / pw_conv_parallelism_out;
+const int num_of_weight_groups_in_the_largest_weight_tile = max_conv_d * pw_conv_parallelism_out / weights_group_items;
 const int pw_weights_tile_partitioning_factor = num_of_weights_in_the_same_filter_and_group;
 
 const int main_buffers_partitining_factor = max_tile_d * pw_tile_w * pw_tile_h;

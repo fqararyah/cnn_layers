@@ -8,7 +8,9 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
 		const int layer, const int layer_conv_d, const int layer_width,const int layer_height,
 		const int num_of_tiles_d, const int num_of_tiles_h,
 		const int num_of_tiles_w, const int strides, const int padding_left, const int padding_right, const int padding_top,
-		const int direction, fused_scales_dt fused_scales[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[]);
+		const int direction, fused_scales_dt fused_scales[],
+		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[]);
 
 void dw_conv_5x5(dw_weights_dt weights[max_conv_d][5][5],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
