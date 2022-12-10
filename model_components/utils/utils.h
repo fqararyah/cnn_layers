@@ -38,6 +38,18 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		int starting_filter, const int layer_depth,
 		const int num_of_weight_groups, const int layer_weights_offset);
 
+void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
+		weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+		int starting_filter,
+		const int layer_depth, const int num_of_weight_groups,
+		const int layer_weights_offset);
+		
+void fill_weights_tile_from_weight_groups_tile(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
+		int starting_filter,
+		const int layer_depth, const int num_of_weight_groups,
+		const int layer_weights_offset);
+
 void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
 		biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
 		int starting_d, int layer);

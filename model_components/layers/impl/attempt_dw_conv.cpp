@@ -89,13 +89,12 @@ void dw_fill_channels_buffer_from_single_tile(fms_dt channels[max_fms_size],
             for (int w = 0; w < dw_tile_w; w++)
             {
                 channels_tile[d][h + starting_row_in_dst_tile][w] =
-                    channels[absolute_tile_offset + top_offset + w]
+                    channels[absolute_tile_offset + top_offset + w];
             }
         }
     }
 }
 
-void dw_fill_
 
 void dw_fill_channels_buffer(fms_dt channels[max_fms_size],
                              fms_dt channels_tile[dw_tile_d][dw_tile_h][dw_tile_w],

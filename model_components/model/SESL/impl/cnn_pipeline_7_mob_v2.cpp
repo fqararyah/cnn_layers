@@ -40,6 +40,7 @@ void _7_layer_6_pw(
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
 						layer_6_fused_scales[o_o_d_offset + o_d];
+				normalization.fused_scales_log_2_shift = layer_6_fused_scales_log_2_shifts[o_o_d_offset + o_d];
 				normalization.relu_6_fused_scale =
 							layer_6_relu_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
@@ -176,6 +177,7 @@ void _7_layer_7_pw(
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
 				normalization.fused_scales =
 						layer_7_fused_scales[o_o_d_offset + o_d];
+				normalization.fused_scales_log_2_shift = layer_7_fused_scales_log_2_shifts[o_o_d_offset + o_d];
 				normalization.relu_6_fused_scale =
 							layer_7_relu_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =

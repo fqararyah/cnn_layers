@@ -24,21 +24,24 @@ const int fms_dt_offset = fms_dt_width - 1;
 const int input_image_group_items = 512 / fms_dt_width;
 
 //scales, zero points, and biases
-const int scales_bit_width = 20;//48
+const int scales_bit_width = 24;//48
 const int scales_integer_part_width = 0;
 const int fused_scales_bit_width = 16;//48
 const int fused_scales_integer_part_width = 0;
 const int relu_6_fused_scales_bit_width = 32;
-const int fused_scales_log_2_shifts_bit_width = 6;//2^6=64
+const int layer_0_relu_6_fused_scales_bit_width = 38;
+const int fused_scales_log_2_shifts_bit_width = 5;//2^5=32
 const int rec_scales_bit_width = 24;//48
 const int rec_scales_integer_part_width = 8;
 
 const int biases_bit_width = 32;
 
 //pss
-const int pss_dt_width = 32;//weights_dt_width + fms_dt_width + 10; // 10 is log(1024, 2) since 1024 is the depth of the deepest filter
+const int pss_dt_width = 34;//weights_dt_width + fms_dt_width + 10; // 10 is log(1024, 2) since 1024 is the depth of the deepest filter
+const int norm_act_pss_dt_width = relu_6_fused_scales_bit_width + 2;//+ 2 not + 1 because relu_6_fused_scales_bit_width is uint not int
+const int layer_0_norm_act_pss_dt_width = layer_0_relu_6_fused_scales_bit_width + 2;//+2 look the comment in previous line
 const int pss_dt_offset = pss_dt_width - 1;
-const int first_conv_pss_width = fms_dt_width + layer_0_weights_dt_width + 4;
+const int first_conv_pss_width = pss_dt_width;
 const int dw_pss_dt_width = 32;//dw_weights_dt_width + fms_dt_width + 4; // 4 is ceil(log(9, 2))
 const int dw_pss_dt_offset = dw_pss_dt_width - 1;					// 11;
 const int fc_weights_dt_width = 8;
@@ -49,9 +52,11 @@ typedef ap_int<weights_dt_width> weights_dt;
 typedef ap_int<dw_weights_dt_width> dw_weights_dt;
 typedef ap_int<fms_dt_width> fms_dt;
 typedef ap_int<pss_dt_width> pss_dt;	   // partial sums
+typedef ap_int<norm_act_pss_dt_width> norm_act_pss_dt;
+typedef ap_int<layer_0_norm_act_pss_dt_width> layer_0_norm_act_pss_dt;
 typedef ap_fixed<pss_dt_width + 10, pss_dt_width> pss_f_dt; //+ 16
 typedef ap_int<dw_pss_dt_width> dw_pss_dt; // partial sums
-typedef ap_fixed<dw_pss_dt_width + 10, dw_pss_dt_width> dw_pss_f_dt; // + 16
+typedef ap_fixed<dw_pss_dt_width + 16, dw_pss_dt_width> dw_pss_f_dt; // + 16
 typedef ap_int<first_conv_pss_width> first_conv_pss_dt;
 typedef ap_uint<weights_group_items * weights_dt_width> weights_grp_dt;
 typedef ap_uint<input_image_group_items * fms_dt_width> fms_grp_dt;
@@ -64,9 +69,10 @@ typedef ap_int<fc_out_dt_width> fc_out_dt;
 typedef ap_ufixed<scales_bit_width, scales_integer_part_width> scales_dt;
 //typedef scales_dt fused_scales_dt;
 typedef ap_ufixed<fused_scales_bit_width, fused_scales_integer_part_width> fused_scales_dt;
-typedef ap_ufixed<4, 8>  pooling_fused_scales_dt;
+typedef ap_ufixed<24, 4>  pooling_fused_scales_dt;
 typedef ap_uint<fused_scales_log_2_shifts_bit_width> fused_scales_log_2_shifts_dt;
 typedef ap_int<relu_6_fused_scales_bit_width> relu_6_fused_scales_dt;
+typedef ap_int<layer_0_relu_6_fused_scales_bit_width> layer_0_relu_6_fused_scales_dt;
 //typedef scales_dt rec_scales_dt;
 typedef ap_ufixed<rec_scales_bit_width, rec_scales_integer_part_width> rec_scales_dt;
 
@@ -80,6 +86,7 @@ struct fms_quantization_scheme {
 	 fused_scales_dt fused_scales;
 	 fused_scales_log_2_shifts_dt fused_scales_log_2_shift;
 	 relu_6_fused_scales_dt relu_6_fused_scale;
+	 layer_0_relu_6_fused_scales_dt layer_0_relu_6_fused_scale;
 	//const biases_dt bias;
 };
 

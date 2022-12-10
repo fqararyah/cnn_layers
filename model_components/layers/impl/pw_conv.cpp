@@ -123,7 +123,8 @@ void scale_pss_tile(
 	relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out];
 	fill_fused_zero_points_buffer(fused_zero_points, fused_zero_points_buffer,
 			starting_d, layer);
-	fill_fused_scales_buffer(fused_scales, fused_scales_buffer, fused_scales_log_2_shifts, fused_scales_log_2_shifts_buffer,
+	fill_fused_scales_buffer(fused_scales, fused_scales_buffer,
+			fused_scales_log_2_shifts, fused_scales_log_2_shifts_buffer,
 			relu_6_fused_scales, relu_6_fused_scales_buffer, starting_d, layer);
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
@@ -139,7 +140,8 @@ void scale_pss_tile(
 			normalization.fused_zero_point =
 					fused_zero_points_buffer[in_tile_index];
 			normalization.fused_scales = fused_scales_buffer[in_tile_index];
-			normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts_buffer[in_tile_index];
+			normalization.fused_scales_log_2_shift =
+					fused_scales_log_2_shifts_buffer[in_tile_index];
 			normalization.relu_6_fused_scale =
 					relu_6_fused_scales_buffer[in_tile_index];
 			tile_h: for (int t_h = 0; t_h < pw_tile_h; t_h++) {
@@ -332,6 +334,72 @@ void pw_conv_pipeline(fms_dt channels[max_fms_size],
 	}
 }
 
+void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
+		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
+		const int layer, const int layer_conv_d, const int layer_num_fils,
+		const int num_of_tiles_d_in, const int num_of_tiles_d_out,
+		const int num_of_tiles_h, const int num_of_tiles_w,
+		fms_dt tmp_channels[max_tmp_fms_size], int read_write,
+		const int num_of_weight_groups, const int direction,
+		const int layer_weights_offset, const int layer_relu,
+		fused_scales_dt fused_scales[],
+		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		relu_6_fused_scales_dt relu_6_fused_scales[],
+		biases_dt fused_zero_points[], int td_o) {
+
+#pragma HLS INLINE off
+
+	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
+	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
+
+	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
+#pragma HLS ARRAY_PARTITION variable = tmp_channels_scaled_tile complete dim = 3
+
+	conv2_ith_loop: for (int t_in_h = 0; t_in_h < num_of_tiles_h; t_in_h++) {
+		//############width loop##############
+		conv2_itw_loop: for (int t_in_w = 0; t_in_w < num_of_tiles_w;
+				t_in_w++) {
+			pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
+			pss_f_dt scaled_result_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
+#pragma HLS ARRAY_PARTITION variable = results_tile complete dim = 0
+#pragma HLS ARRAY_PARTITION variable = scaled_result_tile complete dim = 0
+
+			//############depth loop##############
+			//conv2_otd_loop: for (int td_i_o = 0;
+			//		td_i_o < current_depth_to_median_depth; td_i_o++) {
+
+			int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d)
+					* num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w;
+
+			read_and_scale_tile_from_tmp_channels(tmp_channels,
+					tmp_channels_scaled_tile, td_o * pw_conv_parallelism_out,
+					layer_num_fils, num_of_tiles_hw, tile_index, read_write,
+					layer);
+
+			pw_conv_pipeline(channels, result, weights_tile, results_tile,
+					layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
+					num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
+					num_of_tiles_d_in);
+
+			scale_pss_tile(results_tile, scaled_result_tile, layer_relu,
+					fused_scales, fused_scales_log_2_shifts,
+					relu_6_fused_scales, fused_zero_points,
+					td_o * pw_conv_parallelism_out, layer, read_write);
+			//
+			if (direction) {
+				pw_write_results_tile(scaled_result_tile, channels, tile_index,
+						tmp_channels, tmp_channels_scaled_tile,
+						td_o * pw_conv_parallelism_out, layer_num_fils,
+						read_write, layer_relu, layer, num_of_tiles_hw);
+			} else {
+				pw_write_results_tile(scaled_result_tile, result, tile_index,
+						tmp_channels, tmp_channels_scaled_tile,
+						td_o * pw_conv_parallelism_out, layer_num_fils,
+						read_write, layer_relu, layer, num_of_tiles_hw);
+			}
+		}
+	}
+}
 void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		fms_dt result[max_fms_size], const int layer, const int layer_conv_d,
 		const int layer_num_fils, const int num_of_tiles_d_in,
@@ -343,66 +411,41 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		biases_dt fused_zero_points[]) {
+
 #pragma HLS INLINE off
+
+	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor= num_of_weights_in_the_same_filter_and_group
 
-	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
-
-	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
-#pragma HLS ARRAY_PARTITION variable = tmp_channels_scaled_tile complete dim = 3
-
-	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
+	fill_layer_weight_groups_tile_off_chip(weights,
+			weight_groups_buffer, 0, layer_conv_d, num_of_weight_groups,
+			layer_weights_offset);
 
 	conv2_ots_loop: for (int td_o = 0; td_o < num_of_tiles_d_out; td_o++) {
-		fill_weights_tile_off_chip(weights, weights_tile,
+//		fill_weights_tile_off_chip(weights, weights_tile,
+//				td_o * pw_conv_parallelism_out, layer_conv_d,
+//				num_of_weight_groups, layer_weights_offset);
+
+		fill_weights_tile_from_weight_groups_tile(
+				weight_groups_buffer,
+				weights_tile,
 				td_o * pw_conv_parallelism_out,
-				layer_conv_d, num_of_weight_groups, layer_weights_offset);
-		conv2_ith_loop: for (int t_in_h = 0; t_in_h < num_of_tiles_h;
-				t_in_h++) {
-			//############width loop##############
-			conv2_itw_loop: for (int t_in_w = 0; t_in_w < num_of_tiles_w;
-					t_in_w++) {
-				pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
-				pss_f_dt scaled_result_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
-#pragma HLS ARRAY_PARTITION variable = results_tile complete dim = 0
-#pragma HLS ARRAY_PARTITION variable = scaled_result_tile complete dim = 0
+				layer_conv_d, num_of_weight_groups,
+				layer_weights_offset);
 
-				//############depth loop##############
-				//conv2_otd_loop: for (int td_i_o = 0;
-				//		td_i_o < current_depth_to_median_depth; td_i_o++) {
+		fill_layer_weight_groups_tile_off_chip(weights,
+					weight_groups_buffer, 0, layer_conv_d, num_of_weight_groups,
+					layer_weights_offset);
 
-				int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d)
-						* num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w;
+		do_conv(weights_tile, channels, result, layer, layer_conv_d,
+				layer_num_fils, num_of_tiles_d_in, num_of_tiles_d_out,
+				num_of_tiles_h, num_of_tiles_w, tmp_channels, read_write,
+				num_of_weight_groups, direction, layer_weights_offset,
+				layer_relu, fused_scales, fused_scales_log_2_shifts,
+				relu_6_fused_scales, fused_zero_points, td_o);
 
-				read_and_scale_tile_from_tmp_channels(tmp_channels,
-						tmp_channels_scaled_tile,
-						td_o * pw_conv_parallelism_out, layer_num_fils,
-						num_of_tiles_hw, tile_index, read_write, layer);
-
-				pw_conv_pipeline(channels, result, weights_tile, results_tile,
-						layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
-						num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
-						num_of_tiles_d_in);
-
-				scale_pss_tile(results_tile, scaled_result_tile, layer_relu,
-						fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-						td_o * pw_conv_parallelism_out, layer, read_write);
-//
-				if (direction) {
-					pw_write_results_tile(scaled_result_tile, channels,
-							tile_index, tmp_channels, tmp_channels_scaled_tile,
-							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, layer_relu, layer, num_of_tiles_hw);
-				} else {
-					pw_write_results_tile(scaled_result_tile, result,
-							tile_index, tmp_channels, tmp_channels_scaled_tile,
-							td_o * pw_conv_parallelism_out, layer_num_fils,
-							read_write, layer_relu, layer, num_of_tiles_hw);
-				}
-			}
-		}
 	}
 }

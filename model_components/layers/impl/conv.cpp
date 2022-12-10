@@ -63,7 +63,7 @@ void layer_0_conv_engine(
 		normalization.fused_zero_point = fused_zero_points[f];
 		normalization.fused_scales = fused_scales[f];
 		normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts[f];
-		normalization.relu_6_fused_scale = relu_6_fused_scales[f];
+		normalization.layer_0_relu_6_fused_scale = relu_6_fused_scales[f];
 		for (int w = 0; w < layer_0_ofm_width; w++) {
 			pss_dt tmp = 0;
 			for (int d = 0; d < layer_0_depth; d++) {

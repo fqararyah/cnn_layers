@@ -96,7 +96,9 @@ with open(h_file, 'w') as wf:
             add_layers_fms_scales[layer_index -
                                   skip_connection_current_index - 1] = float(scale)
             assert(add_layers_fms_scales[layer_index -
-                                         skip_connection_current_index - 1] < 2)
+                                         skip_connection_current_index - 1] < 1 and \
+                                             add_layers_fms_scales[layer_index -
+                                         skip_connection_current_index - 1] > 0.001)
             add_layers_fms_zero_points[layer_index -
                                        skip_connection_current_index - 1] = int(zero_point)
 
@@ -143,6 +145,7 @@ with open(h_file, 'w') as wf:
         with open(biases_file_format.format(layer_index), 'r') as f:
             for line in f:
                 bias = line.replace(' ', '').replace('\n', '')
+                assert(int(bias) < 2**31-1)
                 biases.append(int(bias))
 
         weights = np.reshape(weights,
@@ -152,11 +155,12 @@ with open(h_file, 'w') as wf:
             # if layer_index == 2:
             #     print(weights[i, :, :, :])
             #     print('*****')
-            fused_zero_points.append(np.sum(weights[i, :, :, :]) *
+            fused_zero_point = np.sum(weights[i, :, :, :]) * \
                                      (-conv_fms_zero_points[layer_index] if layer_index not in skip_connections_indices
-                                      else -add_layers_fms_zero_points[layer_index])
+                                      else -add_layers_fms_zero_points[layer_index]) \
                                      + biases[i]
-                                     )
+            assert(fused_zero_point < 2** 31 -1 and fused_zero_point > - 2**31)
+            fused_zero_points.append(fused_zero_point)
             # if fused_zero_points[-1] < -2**29 or fused_zero_points[-1] >= 2**29:
             #     print(layer_index, 'XXXXXXXXXXXXXXXXXXXX', fused_zero_points[-1])
             # if layer_index == 3:
@@ -184,15 +188,16 @@ with open(h_file, 'w') as wf:
                 abs_current_log_int = abs(int(current_log))
                 decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
                 # #print(fused_scales[-1], decomposed_val * (2 ** -abs_current_log_int))
-                assert(abs_current_log_int >= 0 and abs_current_log_int < 64)
+                assert(abs_current_log_int >= 0 and abs_current_log_int < 32)
                 assert(decomposed_val > 0.1 and decomposed_val < 1)
                 assert(fused_scales[-1] == decomposed_val * (2 ** -abs_current_log_int))
                 fused_scales_log_2_shifts.append(abs_current_log_int)
                 fused_scales[-1] = decomposed_val
-                if  2** 31 - 1 < (6 / ifm_weight_fused_scale):
-                    relu_6_fused_scales.append(2** 31 - 1)
-                else:
-                    relu_6_fused_scales.append( round(6 / ifm_weight_fused_scale) )
+                # if(6 / ifm_weight_fused_scale > 2**31 -1):
+                #     print(layer_index, 6 / ifm_weight_fused_scale)
+                relu_6_fused_scale = round(6 / ifm_weight_fused_scale)
+                assert(relu_6_fused_scale < 2**32 -1 or (layer_index == 0 and relu_6_fused_scale < 2**38 -1) )
+                relu_6_fused_scales.append(relu_6_fused_scale)
                 
                 assert(relu_6_fused_scales[-1] > 0)   
 
@@ -216,7 +221,7 @@ with open(h_file, 'w') as wf:
             fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
         relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_relu_6_fused_scales[] ='.format(
-            layer_index)
+            layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_relu_6_fused_scales[] ='
         relu_6_fused_scales_declaration_string += '{ ' + str(
             relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 

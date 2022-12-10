@@ -17,7 +17,10 @@ void mob_v2_bottleneck_pipeline(fms_dt bottleneck_input[],
                                 int starting_h,
                                 int starting_w,
                                 const int bottleneck_expansion_parallelism_h,
-                                const int bottleneck_expansion_parallelism_w)
+                                const int bottleneck_expansion_parallelism_w,
+                                const int expansion_layer_index,
+                                const int dw_layer_index,
+                                const int projection_layer_index)
 {
     for (int d_in_out = 0; d_in_out < expanded_ifms_depth; d_in_out++)
     {
@@ -69,37 +72,35 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
                        const weights_dt projection_layer_weights[max_of_bottlenecks_projection_filters][],
                        int starting_h,
                        const int bottleneck_expansion_parallelism_h,
-                       const int bottleneck_expansion_parallelism_w)
+                       const int bottleneck_expansion_parallelism_w,
+                       const int bottleneck_expansion_layer_index,
+                       const int bottleneck_dw_layer_index,
+                       const int bottleneck_projection_layer_index)
 {
 
 #pragma HLS INLINE off
 
-    const int expansion_layer_fused_parameters_offsets =
-        layers_fused_parameters_offsets[4];
-    const fms_dt expansion_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_1_expansion_layer_index + 1];
-    const rec_scales_dt expansion_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_1_expansion_layer_index + 1];
-    const rec_scales_dt expansion_layer_ofms_scale = conv_fms_scales[bottleneck_1_expansion_layer_index + 1];
+    const fms_dt expansion_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_expansion_layer_index + 1];
+    const rec_scales_dt expansion_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_expansion_layer_index + 1];
+    const rec_scales_dt expansion_layer_ofms_scale = conv_fms_scales[bottleneck_expansion_layer_index + 1];
 
-    const int dw_layer_fused_parameters_offsets =
-        layers_fused_parameters_offsets[bottleneck_1_dw_layer_index];
-    const fms_dt dw_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_1_dw_layer_index + 1];
-    const rec_scales_dt dw_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_1_dw_layer_index + 1];
-    const rec_scales_dt dw_layer_ofms_scale = conv_fms_scales[bottleneck_1_dw_layer_index + 1];
-    const fms_dt current_dw_ifms_zero_point = conv_fms_zero_points[bottleneck_1_dw_layer_index];
+    const fms_dt dw_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_dw_layer_index + 1];
+    const rec_scales_dt dw_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_dw_layer_index + 1];
+    const rec_scales_dt dw_layer_ofms_scale = conv_fms_scales[bottleneck_dw_layer_index + 1];
+    const fms_dt current_dw_ifms_zero_point = conv_fms_zero_points[bottleneck_dw_layer_index];
 
-    const int projection_layer_fused_parameters_offsets =
-        layers_fused_parameters_offsets[bottleneck_1_projection_layer_index];
-    const fms_dt projection_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_1_projection_layer_index + 1];
-    const rec_scales_dt projection_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_1_projection_layer_index + 1];
-    const rec_scales_dt projection_layer_ofms_scale = conv_fms_scales[bottleneck_1_projection_layer_index + 1];
+    const fms_dt projection_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_projection_layer_index + 1];
+    const rec_scales_dt projection_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_projection_layer_index + 1];
+    const rec_scales_dt projection_layer_ofms_scale = conv_fms_scales[bottleneck_projection_layer_index + 1];
 
-    for (int h = 0; h < bottleneck_1_input_buffer_height / bottleneck_1_expansion_parallelism_h; h++)
+    for (int h = 0; h < bottleneck_input_buffer_height / bottleneck_expansion_parallelism_h; h++)
     {
-        for (int w = 0; w < bottleneck_1_ofms_width; w++)
+        for (int w = 0; w < bottleneck_ofms_width; w++)
         {
             fms_dt dw_input_buffer[max_of_bottlenecks_layers_depths][dw_filter_dim * dw_filter_dim]; // depth = 1
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
-            mob_v2_bottleneck_pipeline(bottleneck_ifms_depth,
+            mob_v2_bottleneck_pipeline(bottleneck_input,
+                                       bottleneck_ifms_depth,
                                        bottleneck_input_buffer_height,
                                        bottleneck_ifms_width,
                                        bottleneck_ofms_depth,
@@ -113,7 +114,11 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
                                        dw_weights,
                                        projection_layer_weights,
                                        starting_h,
-                                       w);
+                                       w,
+                                       bottleneck_expansion_parallelism_h,
+                                       bottleneck_expansion_parallelism_w,
+                                       bottleneck_expansion_layer_index,
+                                       bottleneck_projection_layer_index);
         }
     }
 }
