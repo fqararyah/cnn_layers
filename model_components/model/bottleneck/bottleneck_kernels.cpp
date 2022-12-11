@@ -54,7 +54,7 @@ void shift_dw_ifms_buffer_horizontally(fms_dt ifms_buffer[max_of_bottlenecks_lay
 
 void fill_dw_ifms_buffer_upper_part(fms_dt ifms_buffer[max_of_bottlenecks_layers_depths][],
                                     fms_dt *filling_src, const int strides, const int filter_dim,
-                                    int ifms_w_offset, const int ifms_width, const int ifms_depth, int filling_d)
+                                    int ifms_w_offset, const int ifms_width, const int ifms_depth, int filling_d, const int padding_left)
 {
 #pragma HLS INLINE
 
@@ -126,16 +126,40 @@ void projection_kernel(fms_dt ifms_val, const int ofms_depth,
     }
 }
 //*************************
-void normalize_projection_kernel_output(pss_dt pss_buffer[], fms_dt normalized_buffer, const int ofms_depth,
-                                        fms_quantization_scheme normalization, const int layer_relu)
+void normalize_projection_kernel_output(pss_dt pss_buffer[], fms_dt normalized_buffer[],
+                                        const fused_scales_dt projection_layer_fused_scales[],
+                                        const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
+                                        const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
+                                        const biases_dt projection_layer_fused_zero_points[],
+                                        const int ofms_depth,
+                                        const int layer_relu,
+                                        int bottleneck_projection_layer_index)
 {
+
+    const fms_dt projection_layer_ofms_zero_point = conv_fms_zero_points[bottleneck_projection_layer_index + 1];
+    const rec_scales_dt projection_layer_ofms_scale_rec = conv_fms_scales_rec[bottleneck_projection_layer_index + 1];
+    const rec_scales_dt projection_layer_ofms_scale = conv_fms_scales[bottleneck_projection_layer_index + 1];
+
 #pragma HLS INLINE
 
     pss_dt pss = 0;
     for (int i = 0; i < ofms_depth; i++)
     {
 #pragma HLS UNROLL
-        normalized_buffer[i] += pw_relu_norm(pss_buffer[i], normalization, layer_relu);
+        fms_quantization_scheme projection_layer_normalization;
+        projection_layer_normalization.ofm_zero_point = projection_layer_ofms_zero_point;
+        projection_layer_normalization.ofm_scale_rec = projection_layer_ofms_scale_rec;
+        projection_layer_normalization.ofm_scale = projection_layer_ofms_scale;
+
+        projection_layer_normalization.fused_scales =
+            projection_layer_fused_scales[i];
+        projection_layer_normalization.fused_scales_log_2_shift =
+            projection_layer_fused_scales_log_2_shifts[i];
+        projection_layer_normalization.relu_6_fused_scale =
+            projection_layer_relu_6_fused_scales[i];
+        projection_layer_normalization.fused_zero_point =
+            projection_layer_fused_zero_points[i];
+        normalized_buffer[i] += pw_relu_norm(pss_buffer[i], projection_layer_normalization, layer_relu);
     }
 }
 //*************************

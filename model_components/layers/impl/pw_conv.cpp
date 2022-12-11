@@ -67,8 +67,8 @@ void read_and_scale_tile_from_tmp_channels(
 			const int current_tile_indx = (tile_index
 					+ tile_offset * num_of_tiles_hw) * pw_tile_size;
 			pw_write_results_tile_d: for (int t_d = 0; t_d < pw_tile_d; t_d++) {
-				if (t_d + starting_d < layer_num_filters) {
 #pragma HLS PIPELINE II=2
+				if (t_d + starting_d < layer_num_filters) {
 					const int in_tile_index = tile_offset * pw_tile_d + t_d;
 					read_a_tile_from_tmp_channels_tile_h: for (int t_h = 0;
 							t_h < pw_tile_h; t_h++) {
