@@ -40,16 +40,16 @@ void shift_dw_ifms_buffer_horizontally(fms_dt ifms_buffer[max_of_bottlenecks_lay
 {
 #pragma HLS INLINE
 
-for(int d-0;d<)
-    for (int h = 0; h < filter_dim; h++)
-    {
-#pragma HLS UNROLL
-        for (int w = 0; w < filter_dim - strides; w++)
+    for (int d - 0; d <)
+        for (int h = 0; h < filter_dim; h++)
         {
 #pragma HLS UNROLL
-            ifms_buffer[conv_d][h * filter_dim + w] = ifms_buffer[conv_d][h * filter_dim + w + strides];
+            for (int w = 0; w < filter_dim - strides; w++)
+            {
+#pragma HLS UNROLL
+                ifms_buffer[conv_d][h * filter_dim + w] = ifms_buffer[conv_d][h * filter_dim + w + strides];
+            }
         }
-    }
 }
 
 void fill_dw_ifms_buffer_upper_part(fms_dt ifms_buffer[max_of_bottlenecks_layers_depths][],
@@ -108,8 +108,9 @@ dw_pss_dt dw_kernel(fms_dt ifms_buffer[max_of_bottlenecks_layers_depths][], weig
 //*************************
 
 //*************************
-void projection_kernel(fms_dt ifms_val, const int ofms_depth, const weights_dt weights[max_of_bottlenecks_projection_filters][], pss_dt pss_buffer[],
-int conv_d)
+void projection_kernel(fms_dt ifms_val, const int ofms_depth,
+                       const weights_dt weights[max_of_bottlenecks_projection_filters][], pss_dt pss_buffer[],
+                       int conv_d)
 {
 #pragma HLS INLINE
 
@@ -117,10 +118,24 @@ int conv_d)
     for (int i = 0; i < ofms_depth; i++)
     {
 #pragma HLS UNROLL
-    if(conv_d == 0){
-        pss_buffer[i] = 0;
-    }
+        if (conv_d == 0)
+        {
+            pss_buffer[i] = 0;
+        }
         pss_buffer[i] += weights[i][conv_d] * ifms_val;
+    }
+}
+//*************************
+void normalize_projection_kernel_output(pss_dt pss_buffer[], fms_dt normalized_buffer, const int ofms_depth,
+                                        fms_quantization_scheme normalization, const int layer_relu)
+{
+#pragma HLS INLINE
+
+    pss_dt pss = 0;
+    for (int i = 0; i < ofms_depth; i++)
+    {
+#pragma HLS UNROLL
+        normalized_buffer[i] += pw_relu_norm(pss_buffer[i], normalization, layer_relu);
     }
 }
 //*************************

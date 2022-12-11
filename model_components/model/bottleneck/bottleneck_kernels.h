@@ -13,3 +13,6 @@ dw_pss_dt dw_kernel(fms_dt ifms_buffer[max_of_bottlenecks_layers_depths][], weig
 
 void projection_kernel(fms_dt ifms_val, const int ofms_depth, const weights_dt weights[max_of_bottlenecks_projection_filters][], pss_dt pss_buffer[],
 int conv_d);
+
+void normalize_projection_kernel_output(pss_dt pss_buffer[], fms_dt normalized_buffer, const int ofms_depth,
+                                        fms_quantization_scheme normalization, const int layer_relu);

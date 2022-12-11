@@ -9,24 +9,30 @@ using namespace std;
 
 void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 		weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
-		int starting_filter,
-		const int layer_depth, const int num_of_weight_groups,
-		const int layer_weights_offset) {
+		int starting_filter, const int layer_depth,
+		const int num_of_weight_groups, const int layer_weights_offset,
+		const int layer_num_fils) {
+#pragma HLS INLINE off
 
 	const int current_fill_offset = layer_weights_offset
 			+ starting_filter * layer_depth / weights_group_items;
 
-	fill_weights_loop: for (int weight_grp_index = 0;
-			weight_grp_index < num_of_weight_groups; weight_grp_index++) {
-		weights_grp_dt chunck = weights[current_fill_offset + weight_grp_index];
+	if (starting_filter < layer_num_fils) {
+		fill_weights_loop: for (int weight_grp_index = 0;
+				weight_grp_index < num_of_weight_groups; weight_grp_index++) {
+			weight_groups_buffer[weight_grp_index] = weights[current_fill_offset
+					+ weight_grp_index];
+		}
 	}
 }
 
-void fill_weights_tile_from_weight_groups_tile(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+void fill_weights_tile_from_weight_groups_tile(
+		weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
 		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
-		int starting_filter,
-		const int layer_depth, const int num_of_weight_groups,
-		const int layer_weights_offset) {
+		int starting_filter, const int layer_depth,
+		const int num_of_weight_groups, const int layer_weights_offset) {
+#pragma HLS INLINE off
+
 //assumes pw_parallelism_out * filter depth is divisable by weight group number
 
 	fill_weights_loop: for (int weight_grp_index = 0;
@@ -55,9 +61,8 @@ void fill_weights_tile_from_weight_groups_tile(weights_grp_dt weight_groups_buff
 
 void fill_weights_tile_off_chip(weights_grp_dt *weights,
 		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
-		int starting_filter,
-		const int layer_depth, const int num_of_weight_groups,
-		const int layer_weights_offset) {
+		int starting_filter, const int layer_depth,
+		const int num_of_weight_groups, const int layer_weights_offset) {
 //assumes pw_parallelism_out * filter depth is divisable by weight group number
 	const int current_fill_offset = layer_weights_offset
 			+ starting_filter * layer_depth / weights_group_items;
@@ -137,7 +142,8 @@ void fill_fused_scales_buffer(const fused_scales_dt fused_scales[],
 	//const int starting_index = layers_fused_parameters_offsets[layer];
 	for (int i = 0; i < pw_conv_parallelism_out; i++) {
 		fused_scales_buffer[i] = fused_scales[starting_d + i];
-		fused_scales_log_2_shifts_buffer[i] = fused_scales_log_2_shifts[starting_d + i];
+		fused_scales_log_2_shifts_buffer[i] =
+				fused_scales_log_2_shifts[starting_d + i];
 		relu_6_fused_scales_buffer[i] = relu_6_fused_scales[starting_d + i];
 	}
 }

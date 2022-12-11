@@ -420,25 +420,22 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor= num_of_weights_in_the_same_filter_and_group
 
-	fill_layer_weight_groups_tile_off_chip(weights,
-			weight_groups_buffer, 0, layer_conv_d, num_of_weight_groups,
-			layer_weights_offset);
+	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
+			layer_conv_d, num_of_weight_groups, layer_weights_offset,
+			layer_num_fils);
 
 	conv2_ots_loop: for (int td_o = 0; td_o < num_of_tiles_d_out; td_o++) {
 //		fill_weights_tile_off_chip(weights, weights_tile,
 //				td_o * pw_conv_parallelism_out, layer_conv_d,
 //				num_of_weight_groups, layer_weights_offset);
 
-		fill_weights_tile_from_weight_groups_tile(
-				weight_groups_buffer,
-				weights_tile,
-				td_o * pw_conv_parallelism_out,
-				layer_conv_d, num_of_weight_groups,
-				layer_weights_offset);
+		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
+				weights_tile, td_o * pw_conv_parallelism_out, layer_conv_d,
+				num_of_weight_groups, layer_weights_offset);
 
-		fill_layer_weight_groups_tile_off_chip(weights,
-					weight_groups_buffer, 0, layer_conv_d, num_of_weight_groups,
-					layer_weights_offset);
+		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
+				(td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
+				num_of_weight_groups, layer_weights_offset, layer_num_fils);
 
 		do_conv(weights_tile, channels, result, layer, layer_conv_d,
 				layer_num_fils, num_of_tiles_d_in, num_of_tiles_d_out,

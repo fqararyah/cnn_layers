@@ -39,12 +39,35 @@ void shift_col_segment(fms_dt left_col_segment[dw_tile_d][dw_tile_h],
 	}
 }
 
+void padd_ifms_tile_depth_row(fms_dt row[dw_tile_d][max_dw_input_width],
+		const fms_dt zero_point, const int padding_left, const int padding_right, const int layer_ifm_width) {
+
+	// padding left
+	for (int w = 0; w < padding_left; w++) {
+#pragma HLS UNROLL
+		for (int d = 0; d < dw_tile_d; d++) {
+#pragma HLS UNROLL
+			row[d][w] = zero_point;
+		}
+	}
+
+	// padding right
+	for (int w = 0; w < padding_right;
+			w++) {
+#pragma HLS UNROLL
+		for (int d = 0; d < dw_tile_d; d++) {
+#pragma HLS UNROLL
+			row[d][w + layer_ifm_width + padding_left] = zero_point;
+		}
+	}
+
+}
+
 void fill_ifms_tile_depth_row_segment(fms_dt channels[max_fms_size],
 		fms_dt row[dw_tile_d][max_dw_input_width], const int tile_index_in_w,
 		int absolute_offset, const int padding_left, const int padding_right,
 		const bool is_padding_row, const int ifms_width,
-		const fms_dt zero_point, bool first_segment_in_row,
-		bool last_segment_in_row) {
+		const fms_dt zero_point) {
 #pragma HLS INLINE
 
 	const int starting_fill_w_offset = tile_index_in_w * dw_tile_w;
@@ -62,28 +85,6 @@ void fill_ifms_tile_depth_row_segment(fms_dt channels[max_fms_size],
 //							<< "\n";
 			} else {
 				row[d][w + starting_fill_w_offset + padding_left] = zero_point;
-			}
-		}
-	}
-
-	if (first_segment_in_row) {
-		// padding left
-		for (int w = 0; w < padding_left; w++) {
-#pragma HLS UNROLL
-			for (int d = 0; d < dw_tile_d; d++) {
-#pragma HLS UNROLL
-				row[d][w] = zero_point;
-			}
-		}
-	}
-	if (last_segment_in_row) {
-		// padding right
-		for (int w = max_dw_input_width - padding_right; w < max_dw_input_width;
-				w++) {
-#pragma HLS UNROLL
-			for (int d = 0; d < dw_tile_d; d++) {
-#pragma HLS UNROLL
-				row[d][w] = zero_point;
 			}
 		}
 	}
@@ -122,8 +123,7 @@ void fill_ifms_tile_depth_row(fms_dt channels[max_fms_size],
 	fill_row: for (int tile_in_w = 0; tile_in_w < num_of_tiles_w; tile_in_w++) {
 		fill_ifms_tile_depth_row_segment(channels, ifms_row, tile_in_w,
 				absolute_offset, padding_left, padding_right, is_padding_row,
-				ifms_width, zero_point, tile_in_w == 0,
-				tile_in_w == num_of_tiles_w - 1);
+				ifms_width, zero_point);
 		absolute_offset += dw_tile_size;
 	}
 }
@@ -314,8 +314,7 @@ void dw_conv_pipeline(fms_dt channels[max_fms_size],
 		fill_ifms_tile_depth_row_segment(channels, lower_row, ifm_tile_in_w + 1,
 				absolute_offset_in_ifms + (num_of_ifms_tiles_w * dw_tile_size)
 						+ dw_tile_size, padding_left, padding_right,
-				is_padding_row, ifm_width, fms_zero_point, 0,
-				(ifm_tile_in_w + 1) == num_of_ifms_tiles_w - 1);
+				is_padding_row, ifm_width, fms_zero_point);
 	}
 
 	dw_fill_ifms_buffer(channels, ifms_buffer, upper_row, lower_row,
@@ -378,6 +377,9 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
 
 	const fms_dt current_layer_fms_zero_point = conv_fms_zero_points[layer];
 
+	padd_ifms_tile_depth_row(upper_row, current_layer_fms_zero_point, padding_left, padding_right, layer_ifm_width);
+	padd_ifms_tile_depth_row(lower_row, current_layer_fms_zero_point, padding_left, padding_right, layer_ifm_width);
+
 	for (int tile_in_d = 0; tile_in_d < num_of_tiles_d; tile_in_d++) {
 		fill_ifms_tile_depth_row(channels, upper_row, layer_ifm_width,
 				num_of_ifms_tiles_w, num_of_ifms_tiles_hw, layer_ifm_height,
@@ -409,7 +411,7 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
 						absolute_offset_in_ifms
 								+ (num_of_ifms_tiles_w * dw_tile_size),
 						padding_left, padding_right, is_padding_row,
-						layer_ifm_width, current_layer_fms_zero_point, 1, 0);
+						layer_ifm_width, current_layer_fms_zero_point);
 
 				for (int ofm_tile_in_w = 0; ofm_tile_in_w < num_of_ofms_tiles_w;
 						ofm_tile_in_w++) {
