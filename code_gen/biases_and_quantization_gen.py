@@ -178,6 +178,7 @@ with open(h_file, 'w') as wf:
                 ifm_weight_fused_scale = weight_scale * \
                     (conv_fms_scales[layer_index]
                      if layer_index not in skip_connections_indices else add_layers_fms_scales[layer_index])
+                assert(ifm_weight_fused_scale < 0.02)
                 ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
                 fused_scales.append(ofm_ifm_weigh_fused_scale)
                 assert(ofm_ifm_weigh_fused_scale < 1)

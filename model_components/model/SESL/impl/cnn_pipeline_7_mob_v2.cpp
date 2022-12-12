@@ -15,7 +15,8 @@ void _7_layer_6_pw(
 			layers_fused_parameters_offsets[6];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[6 + 1];
-	const rec_scales_dt current_layer_ofms_scale_rec = conv_fms_scales_rec[6 + 1];
+	const rec_scales_dt current_layer_ofms_scale_rec =
+			conv_fms_scales_rec[6 + 1];
 	const scales_dt current_layer_ofms_scale = conv_fms_scales[6 + 1];
 
 	// rows for next DW
@@ -38,11 +39,12 @@ void _7_layer_6_pw(
 							* weights[o_o_d_offset + o_d][d];
 				}
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
-				normalization.fused_scales =
-						layer_6_fused_scales[o_o_d_offset + o_d];
-				normalization.fused_scales_log_2_shift = layer_6_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+				normalization.fused_scales = layer_6_fused_scales[o_o_d_offset
+						+ o_d];
+				normalization.fused_scales_log_2_shift =
+						layer_6_fused_scales_log_2_shifts[o_o_d_offset + o_d];
 				normalization.relu_6_fused_scale =
-							layer_6_relu_6_fused_scales[o_o_d_offset + o_d];
+						layer_6_relu_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
 						layer_6_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
@@ -123,7 +125,8 @@ void _7_layer_7_pw(
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[7 + 1];
 
-	const rec_scales_dt current_layer_ofms_scale_rec = conv_fms_scales_rec[7 + 1];
+	const rec_scales_dt current_layer_ofms_scale_rec =
+			conv_fms_scales_rec[7 + 1];
 	const scales_dt current_layer_ofms_scale = conv_fms_scales[7 + 1];
 
 	const int num_tiles_hw = layer_7_pw_num_of_tiles_h
@@ -175,11 +178,12 @@ void _7_layer_7_pw(
 				}
 
 				fms_quantization_scheme normalization = { 0, 0, 0, 0 };
-				normalization.fused_scales =
-						layer_7_fused_scales[o_o_d_offset + o_d];
-				normalization.fused_scales_log_2_shift = layer_7_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+				normalization.fused_scales = layer_7_fused_scales[o_o_d_offset
+						+ o_d];
+				normalization.fused_scales_log_2_shift =
+						layer_7_fused_scales_log_2_shifts[o_o_d_offset + o_d];
 				normalization.relu_6_fused_scale =
-							layer_7_relu_6_fused_scales[o_o_d_offset + o_d];
+						layer_7_relu_6_fused_scales[o_o_d_offset + o_d];
 				normalization.fused_zero_point =
 						layer_7_fused_zero_points[o_o_d_offset + o_d];
 				normalization.ofm_zero_point = current_layer_ofms_zero_point;
@@ -201,9 +205,9 @@ void _7_layer_7_pw(
 	}
 }
 
-void fill_row(fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_groups_in_width],
-		fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
-				+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width],
+void fill_row(
+		fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_groups_in_width],
+		fms_dt channels_buffer_0[input_image_depth][_7_layer_0_in_buffer_height][input_image_width],
 		const int input_image_num_fms_groups_in_width, int row) {
 
 #pragma HLS INLINE OFF
@@ -225,7 +229,8 @@ void fill_row(fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_group
 }
 
 void _7_stages_fill_channels_buffer(
-		fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
+		fms_grp_dt channels[input_image_depth
+				* input_image_num_fms_groups_in_a_channel],
 		fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
 				+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width],
 		int starting_h) {
@@ -238,8 +243,7 @@ void _7_stages_fill_channels_buffer(
 
 	const int filling_starting_offset =
 			starting_h == 0 ?
-					input_image_num_fms_groups_in_width
-							* rows_to_shift :
+					input_image_num_fms_groups_in_width * rows_to_shift :
 					starting_h * input_image_num_fms_groups_in_width;
 
 	const int num_fms_groups_to_fitch = input_image_num_fms_groups_in_width
@@ -273,12 +277,14 @@ void _7_stages_fill_channels_buffer(
 		for (int h = 0; h < rows_to_shift; h++) {
 			const int h_offset = h * input_image_num_fms_groups_in_width;
 			for (int d = 0; d < input_image_depth; d++) {
-				const int d_offst = h_offset + d * input_image_num_fms_groups_in_a_channel;
+				const int d_offst = h_offset
+						+ d * input_image_num_fms_groups_in_a_channel;
 				for (int i = 0; i < input_image_num_fms_groups_in_width; i++) {
 					tmp_buffer[d][i] = channels[d_offst + i];
 				}
 			}
-			fill_row(tmp_buffer, channels_buffer_0, input_image_num_fms_groups_in_width, h);
+			fill_row(tmp_buffer, channels_buffer_0,
+					input_image_num_fms_groups_in_width, h);
 		}
 	}
 
@@ -289,12 +295,14 @@ void _7_stages_fill_channels_buffer(
 				+ (h - rows_to_shift) * input_image_num_fms_groups_in_width;
 		if ((h - rows_to_shift) + starting_h < input_image_height) {
 			for (int d = 0; d < input_image_depth; d++) {
-				const int d_offst = h_offset + d * input_image_num_fms_groups_in_a_channel;
+				const int d_offst = h_offset
+						+ d * input_image_num_fms_groups_in_a_channel;
 				for (int i = 0; i < input_image_num_fms_groups_in_width; i++) {
 					tmp_buffer[d][i] = channels[d_offst + i];
 				}
 			}
-			fill_row(tmp_buffer, channels_buffer_0, input_image_num_fms_groups_in_width, h);
+			fill_row(tmp_buffer, channels_buffer_0,
+					input_image_num_fms_groups_in_width, h);
 		} else {	//padding bottom
 			for (int d = 0; d < input_image_depth; d++) {
 				for (int w = 0; w < input_image_width; w++) {
@@ -313,8 +321,65 @@ void _7_stages_fill_channels_buffer(
 //	cout << "*********************\n";
 }
 
+//****************v2
+void _7_stages_fill_ifm_groups_buffer(
+		fms_grp_dt channels[input_image_depth
+				* input_image_num_fms_groups_in_a_channel],
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width],
+		int starting_h,
+		const int elements_to_fill_from_an_ifm) {//_7_layer_0_in_rows_at_once * input_image_num_fms_groups_in_width
+#pragma HLS INLINE off
+
+	const int start_filling_offset = starting_h * input_image_num_fms_groups_in_width;
+	for (int d = 0; d < input_image_depth; d++) {
+		const int d_offst = start_filling_offset
+				+ d * input_image_num_fms_groups_in_a_channel;
+		for (int i = 0; i < elements_to_fill_from_an_ifm; i++) {
+			fms_groups_buffer[d][i] = channels[d_offst + i];
+		}
+	}
+}
+
+void fill_row_from_groups_buffer(
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width],
+		fms_dt channels_buffer_0[input_image_depth][_7_layer_0_in_buffer_height][input_image_width],
+		int row, const int channels_buffer_start_filling_h) {
+#pragma HLS INLINE
+
+	const int start_filling_offset = row * input_image_num_fms_groups_in_width;
+
+	for (int o_w = 0; o_w < input_image_num_fms_groups_in_width; o_w++) {
+#pragma HLS PIPELINE off
+		const int o_w_offset = o_w * input_image_group_items;
+		for (int d = 0; d < input_image_depth; d++) {
+#pragma HLS UNROLL
+			fms_grp_dt chunck = fms_groups_buffer[d][start_filling_offset + o_w];
+			for (int w = 0; w < input_image_group_items; w++) {
+#pragma HLS PIPELINE
+				if (o_w_offset + w < input_image_width) {
+					channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt) chunck(
+							w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
+				}
+			}
+		}
+	}
+}
+
+void _7_stages_fill_channels_buffer_from_groups_buffer(
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width],
+		fms_dt channels_buffer_0[input_image_depth][_7_layer_0_in_buffer_height][input_image_width], int starting_h) {
+#pragma HLS INLINE off
+
+	const int channels_buffer_start_filling_h = starting_h == 0 ? layer_0_dw_padding_top: (_7_layer_0_in_buffer_height = _7_layer_0_in_rows_at_once);
+	for (int h = 0; h < _7_layer_0_in_rows_at_once; h++) {
+		fill_row_from_groups_buffer(fms_groups_buffer, channels_buffer_0, h, channels_buffer_start_filling_h);
+	}
+}
+//****************v2
+
 void cnn_pipeline_7_mob_v2(
-		fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
+		fms_grp_dt channels[input_image_depth
+				* input_image_num_fms_groups_in_a_channel],
 		fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]) {
 #pragma HLS INLINE off
 

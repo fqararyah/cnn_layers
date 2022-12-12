@@ -37,7 +37,7 @@ const int rec_scales_integer_part_width = 8;
 const int biases_bit_width = 32;
 
 //pss
-const int pss_dt_width = 34;//weights_dt_width + fms_dt_width + 10; // 10 is log(1024, 2) since 1024 is the depth of the deepest filter
+const int pss_dt_width = 32;//weights_dt_width + fms_dt_width + 10; // 10 is log(1024, 2) since 1024 is the depth of the deepest filter
 const int norm_act_pss_dt_width = relu_6_fused_scales_bit_width + 2;//+ 2 not + 1 because relu_6_fused_scales_bit_width is uint not int
 const int layer_0_norm_act_pss_dt_width = layer_0_relu_6_fused_scales_bit_width + 2;//+2 look the comment in previous line
 const int pss_dt_offset = pss_dt_width - 1;
