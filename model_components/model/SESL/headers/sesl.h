@@ -35,9 +35,9 @@ const int _6_stages_layer_6_rows_at_once = 1;
 //l7
 const int _7_stages_layer_7_rows_at_once = 1;
 
-const int _7_layer_0_in_rows_at_once = layer_0_strides
+const int _7_stages_layer_0_in_rows_at_once = layer_0_strides
 		* _7_stages_layer_0_rows_at_once;
-const int _7_layer_0_in_buffer_height = layer_0_filter_dim
+const int _7_stages_layer_0_in_buffer_height = layer_0_filter_dim
 		+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides;
 
 void pw_conv_pipeline(fms_dt channels[max_fms_size],

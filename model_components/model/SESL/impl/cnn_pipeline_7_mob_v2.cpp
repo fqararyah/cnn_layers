@@ -207,7 +207,7 @@ void _7_layer_7_pw(
 
 void fill_row(
 		fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_groups_in_width],
-		fms_dt channels_buffer_0[input_image_depth][_7_layer_0_in_buffer_height][input_image_width],
+		fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width],
 		const int input_image_num_fms_groups_in_width, int row) {
 
 #pragma HLS INLINE OFF
@@ -325,9 +325,9 @@ void _7_stages_fill_channels_buffer(
 void _7_stages_fill_ifm_groups_buffer(
 		fms_grp_dt channels[input_image_depth
 				* input_image_num_fms_groups_in_a_channel],
-		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width],
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width*_7_stages_layer_0_in_rows_at_once],
 		int starting_h,
-		const int elements_to_fill_from_an_ifm) {//_7_layer_0_in_rows_at_once * input_image_num_fms_groups_in_width
+		const int elements_to_fill_from_an_ifm) {//_7_stages_layer_0_in_rows_at_once * input_image_num_fms_groups_in_width
 #pragma HLS INLINE off
 
 	const int start_filling_offset = starting_h * input_image_num_fms_groups_in_width;
@@ -341,8 +341,8 @@ void _7_stages_fill_ifm_groups_buffer(
 }
 
 void fill_row_from_groups_buffer(
-		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width],
-		fms_dt channels_buffer_0[input_image_depth][_7_layer_0_in_buffer_height][input_image_width],
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * _7_stages_layer_0_in_rows_at_once],
+		fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width],
 		int row, const int channels_buffer_start_filling_h) {
 #pragma HLS INLINE
 
@@ -366,12 +366,12 @@ void fill_row_from_groups_buffer(
 }
 
 void _7_stages_fill_channels_buffer_from_groups_buffer(
-		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width],
-		fms_dt channels_buffer_0[input_image_depth][_7_layer_0_in_buffer_height][input_image_width], int starting_h) {
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * _7_stages_layer_0_in_rows_at_once],
+		fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width], int starting_h) {
 #pragma HLS INLINE off
 
-	const int channels_buffer_start_filling_h = starting_h == 0 ? layer_0_dw_padding_top: (_7_layer_0_in_buffer_height = _7_layer_0_in_rows_at_once);
-	for (int h = 0; h < _7_layer_0_in_rows_at_once; h++) {
+	const int channels_buffer_start_filling_h = starting_h == 0 ? layer_0_dw_padding_top: (_7_stages_layer_0_in_buffer_height - _7_stages_layer_0_in_rows_at_once);
+	for (int h = 0; h < _7_stages_layer_0_in_rows_at_once; h++) {
 		fill_row_from_groups_buffer(fms_groups_buffer, channels_buffer_0, h, channels_buffer_start_filling_h);
 	}
 }

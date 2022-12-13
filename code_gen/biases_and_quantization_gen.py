@@ -200,7 +200,7 @@ with open(h_file, 'w') as wf:
                 assert(relu_6_fused_scale < 2**32 -1 or (layer_index == 0 and relu_6_fused_scale < 2**38 -1) )
                 relu_6_fused_scales.append(relu_6_fused_scale)
                 
-                assert(relu_6_fused_scales[-1] > 0)   
+                assert(relu_6_fused_scales[-1] > 256)   
 
         with open(weights_zero_points_file_format.format(layer_index), 'r') as f:
             for line in f:

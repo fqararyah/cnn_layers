@@ -19,7 +19,7 @@ void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int ofms_size, const int ofms_h, const int ofms_w) {
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	const int size = 147456;
+	const int size = 32*32*192;
 	bool skip_vals[size];
 
 	int scaled_ofms_w = ((int) (((float) ofms_w / pw_tile_w) + 0.99))
@@ -126,4 +126,5 @@ void dump_ouput(string file_name, fms_dt out[], int size){
 	for(int i=0;i<size;i++){
 		myfile << out[i] << "\n";
 	}
+	myfile.close();
 }

@@ -276,15 +276,15 @@ void _6_layer_2_dw(
 						for (int c_w = 0; c_w < layer_2_dw_filter_size; c_w++) {
 							// conv width loop
 #pragma HLS UNROLL
-							tmp += intermediate_channels_buffer[o_d][c_h * layer_2_dw_filter_size + c_w]
+							tmp += intermediate_channels_buffer[o_d][c_h][c_w]
 									* dw_weights[o_o_d_offset + o_d][c_h * layer_2_dw_filter_size + c_w];
-//							if (o_o_d == 0 && o_d == 0
-//									&& w >= layer_2_dw_ifm_width - 1) {
-//								cout
-//										<< intermediate_channels_buffer[o_d][c_h][c_w]
-//										<< " * "
-//										<< dw_weights[o_o_d_offset + o_d][c_h][c_w];
-//							}
+							if (o_o_d == 0 && o_d == 0
+									&& w >= layer_2_dw_ifm_width - 1) {
+								cout
+										<< intermediate_channels_buffer[o_d][c_h][c_w]
+										<< " * "
+										<< dw_weights[o_o_d_offset + o_d][c_h * layer_2_dw_filter_size + c_w];
+							}
 						}
 					}
 
@@ -390,8 +390,21 @@ void _6_layer_2_dw(
 
 //	cout << "\n";
 //	for (int h = 0; h < _6_stages_layer_2_rows_at_once; h++) {
+//			for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+//				cout << upper[1][h][w] << " ";
+//			}
+//			cout << "\n";
+//		}
+//	for (int h = 0; h < _6_stages_layer_2_rows_at_once; h++) {
+//				for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+//					cout << channels_buffer[1][h][w] << " ";
+//				}
+//				cout << "\n";
+//			}
+//
+//	for (int h = 0; h < _6_stages_layer_2_rows_at_once; h++) {
 //		for (int w = 0; w < layer_2_dw_ifm_width; w++) {
-//			cout << result[17][h][w] << " ";
+//			cout << result[1][h][w] << " ";
 //		}
 //		cout << "\n";
 //	}

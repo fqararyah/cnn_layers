@@ -29,6 +29,8 @@ void top_func(
 		dump_layer_output(
 					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_7.txt",
 					result, 56*56*144, 56, 56);
+		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);
+
 //	int even_odd = 1;
 //	MIL: for (int i = 0; i < 10; i++) {
 ////	dump_layer_output(
@@ -49,6 +51,6 @@ void top_func(
 	//if (even_odd) {
 //		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
 //	} else {
-		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
+		//seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
 //	}
 }
