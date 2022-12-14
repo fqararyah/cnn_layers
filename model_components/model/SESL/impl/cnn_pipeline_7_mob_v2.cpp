@@ -325,12 +325,13 @@ void _7_stages_fill_channels_buffer(
 void _7_stages_fill_ifm_groups_buffer(
 		fms_grp_dt channels[input_image_depth
 				* input_image_num_fms_groups_in_a_channel],
-		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width*_7_stages_layer_0_in_rows_at_once],
-		int starting_h,
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width
+				* _7_stages_layer_0_in_rows_at_once], int starting_h,
 		const int elements_to_fill_from_an_ifm) {//_7_stages_layer_0_in_rows_at_once * input_image_num_fms_groups_in_width
 #pragma HLS INLINE off
 
-	const int start_filling_offset = starting_h * input_image_num_fms_groups_in_width;
+	const int start_filling_offset = starting_h
+			* input_image_num_fms_groups_in_width;
 	for (int d = 0; d < input_image_depth; d++) {
 		const int d_offst = start_filling_offset
 				+ d * input_image_num_fms_groups_in_a_channel;
@@ -341,7 +342,8 @@ void _7_stages_fill_ifm_groups_buffer(
 }
 
 void fill_row_from_groups_buffer(
-		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * _7_stages_layer_0_in_rows_at_once],
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width
+				* _7_stages_layer_0_in_rows_at_once],
 		fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width],
 		int row, const int channels_buffer_start_filling_h) {
 #pragma HLS INLINE
@@ -357,7 +359,8 @@ void fill_row_from_groups_buffer(
 			for (int w = 0; w < input_image_group_items; w++) {
 #pragma HLS PIPELINE
 				if (o_w_offset + w < input_image_width) {
-					channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt) chunck(
+					channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset
+							+ w] = (fms_dt) chunck(
 							w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
 				}
 			}
@@ -366,13 +369,32 @@ void fill_row_from_groups_buffer(
 }
 
 void _7_stages_fill_channels_buffer_from_groups_buffer(
-		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * _7_stages_layer_0_in_rows_at_once],
-		fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width], int starting_h) {
+		fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width
+				* _7_stages_layer_0_in_rows_at_once],
+		fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width],
+		int starting_h, bool shift) {
 #pragma HLS INLINE off
 
-	const int channels_buffer_start_filling_h = starting_h == 0 ? layer_0_dw_padding_top: (_7_stages_layer_0_in_buffer_height - _7_stages_layer_0_in_rows_at_once);
+	const int rows_to_shift = _7_stages_layer_0_in_buffer_height - _7_stages_layer_0_in_rows_at_once;
+	if (shift) {
+		for (int w = 0; w < input_image_width; w++) {
+#pragma HLS PIPELINE
+			for (int d = 0; d < input_image_depth; d++) {
+#pragma HLS UNROLL
+				for (int h = 0; h < rows_to_shift; h++) {
+#pragma HLS UNROLL
+					channels_buffer_0[d][h][w] = channels_buffer_0[d][h
+							+ _7_stages_layer_0_in_rows_at_once][w];
+
+				}
+			}
+		}
+	}
+
+	const int channels_buffer_start_filling_h = starting_h == 0 ? layer_0_dw_padding_top: rows_to_shift;
 	for (int h = 0; h < _7_stages_layer_0_in_rows_at_once; h++) {
-		fill_row_from_groups_buffer(fms_groups_buffer, channels_buffer_0, h, channels_buffer_start_filling_h);
+		fill_row_from_groups_buffer(fms_groups_buffer, channels_buffer_0, h,
+				channels_buffer_start_filling_h);
 	}
 }
 //****************v2
@@ -386,8 +408,7 @@ void cnn_pipeline_7_mob_v2(
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
 
 //#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
-			+ (_7_stages_layer_0_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_0[input_image_depth][_7_stages_layer_0_in_buffer_height][input_image_width];
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 2
 	fms_dt _6_layer_0_3x3_conv_out_0[layer_2_dw_depth][_7_stages_layer_0_rows_at_once][layer_2_dw_ifm_width] =
@@ -464,52 +485,68 @@ void cnn_pipeline_7_mob_v2(
 
 //###########################################################
 // pipeline filling##########################################
-	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 0);
-	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-			_6_layer_0_3x3_conv_out_0);
-//****************************
-//	const int _6_layer_2_dw_upper_height = layer_2_dw_filter_size
-//			- layer_2_dw_strides;
-//	const fms_dt layer_2_ifms_zero_point = conv_fms_zero_points[2];
-//	for (int d = 0; d < layer_2_dw_depth; d++) {
-//		for (int h = 0; h < layer_2_dw_padding_top; h++) {
-//			for (int w = 0; w < layer_2_dw_ifm_width; w++) {
-//				_6_layer_2_dw_upper[d][h][w] = layer_2_ifms_zero_point;
-//			}
+	//_7_stages_fill_channels_buffer(channels, channels_buffer_0, 0);
+//	cout << "\n*******1*********\n";
+//	for (int h = 0; h < _7_stages_layer_0_in_buffer_height; h++) {
+//		for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+//			cout << channels_buffer_0[0][h][w] << " ";
 //		}
-//		for (int h = layer_2_dw_padding_top; h < _6_layer_2_dw_upper_height;
-//				h++) {
-//			for (int w = 0; w < layer_2_dw_ifm_width; w++) {
-//				_6_layer_2_dw_upper[d][h][w] = _6_layer_0_3x3_conv_out_0[d][h
-//						- layer_2_dw_padding_top][w];
-//			}
-//		}
+//		cout << "\n";
 //	}
-//	//****************************
+//	cout << "\n*********1*******\n";
+//
+	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width
+			* _7_stages_layer_0_in_rows_at_once];
+
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 0,
+			input_image_num_fms_groups_in_width);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 0, false);
+
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 1,
+			input_image_num_fms_groups_in_width
+					* _7_stages_layer_0_in_rows_at_once);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 1, false);
 //
 //	cout << "\n*******1*********\n";
-//	for (int h = 0; h < _6_stages_layer_0_rows_at_once; h++) {
+//	for (int h = 0; h < _7_stages_layer_0_in_buffer_height; h++) {
 //		for (int w = 0; w < layer_2_dw_ifm_width; w++) {
-//			cout << _6_layer_2_dw_upper[0][h][w] << " ";
+//			cout << channels_buffer_0[0][h][w] << " ";
 //		}
 //		cout << "\n";
 //	}
 //	cout << "\n*********1*******\n";
 
-//##########
-//	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 3);
-//	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-//			_6_layer_0_3x3_conv_out_0);
-//	cout << "\n*******2*********\n";
-//	for (int h = 0; h < _6_stages_layer_0_rows_at_once; h++) {
-//		for (int w = 0; w < layer_2_dw_ifm_width; w++) {
-//			cout << _6_layer_0_3x3_conv_out_0[0][h][w] << " ";
-//		}
-//		cout << "\n";
-//	}
-//	cout << "\n*********2*******\n";
+	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
+			_6_layer_0_3x3_conv_out_0);
+//****************************
 //##########
 	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 5);
+		cout << "\n*******5*********\n";
+		for (int h = 0; h < _7_stages_layer_0_in_buffer_height; h++) {
+			for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+				cout << channels_buffer_0[0][h][w] << " ";
+			}
+			cout << "\n";
+		}
+		cout << "\n*********5*******\n";
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 5,
+			input_image_num_fms_groups_in_width
+					* _7_stages_layer_0_in_rows_at_once);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 1, true);
+	cout << "\n*******5*********\n";
+			for (int h = 0; h < _7_stages_layer_0_in_buffer_height; h++) {
+				for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+					cout << channels_buffer_0[0][h][w] << " ";
+				}
+				cout << "\n";
+			}
+			cout << "\n*********5*******\n";
+
+
+
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 
@@ -527,7 +564,12 @@ void cnn_pipeline_7_mob_v2(
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
 			_6_layer_2_dw_out_0, 1);
 //##########
-	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 9);
+//	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 9);
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 9,
+			input_image_num_fms_groups_in_width
+					* _7_stages_layer_0_in_rows_at_once);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 1, true);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_0);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_2_dw_upper,
@@ -542,7 +584,12 @@ void cnn_pipeline_7_mob_v2(
 //	}
 //	cout << "\n*********3*******\n";
 //##########
-	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 13);
+//	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 13);
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 13,
+			input_image_num_fms_groups_in_width
+					* _7_stages_layer_0_in_rows_at_once);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 1, true);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
@@ -552,15 +599,12 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_0,
 			0);
 //##########//_6_layer_4_pw_5_dw first run does not produce any valid output
-//	cout << "\n*******3-2*********\n";
-//	for (int h = 0; h < _6_stages_layer_3_rows_at_once; h++) {
-//		for (int w = 0; w < layer_3_pw_ofm_width; w++) {
-//			cout << _6_layer_3_pw_out_1[0][h][w] << " ";
-//		}
-//		cout << "\n";
-//	}
-//	cout << "\n*********3-2*******\n";
-	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 17);
+//	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 17);
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 17,
+			input_image_num_fms_groups_in_width
+					* _7_stages_layer_0_in_rows_at_once);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 1, true);
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_0);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_2_dw_upper,
@@ -570,7 +614,28 @@ void cnn_pipeline_7_mob_v2(
 			_6_layer_5_dw_upper, _6_layer_5_dw_lower, _6_layer_4_5_pw_dw_out_1,
 			1);	//first call of _6_layer_4_pw_5_dw the pw part produces only 1 valid row, that is why the increment is 1 not 2
 //##########
-	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 21);
+//	_7_stages_fill_channels_buffer(channels, channels_buffer_0, 21);
+//	cout << "\n*******21*********\n";
+//	for (int h = 0; h < _7_stages_layer_0_in_buffer_height; h++) {
+//		for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+//			cout << channels_buffer_0[0][h][w] << " ";
+//		}
+//		cout << "\n";
+//	}
+//	cout << "\n*********21*******\n";
+	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer, 21,
+			input_image_num_fms_groups_in_width
+					* _7_stages_layer_0_in_rows_at_once);
+	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+			channels_buffer_0, 1, true);
+//	cout << "\n*******21*********\n";
+//	for (int h = 0; h < _7_stages_layer_0_in_buffer_height; h++) {
+//		for (int w = 0; w < layer_2_dw_ifm_width; w++) {
+//			cout << channels_buffer_0[0][h][w] << " ";
+//		}
+//		cout << "\n";
+//	}
+//	cout << "\n*********21*******\n";
 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 			_6_layer_0_3x3_conv_out_1);
 	_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_2_dw_upper,
@@ -607,9 +672,16 @@ void cnn_pipeline_7_mob_v2(
 
 	main_pipeline_loop: for (; h < switch_point_fms_height; h++) {
 		if (odd_even) {
-			_7_stages_fill_channels_buffer(channels, channels_buffer_0,
+//			_7_stages_fill_channels_buffer(channels, channels_buffer_0,
+//					h * channels_buffer_0_rows_filled_each_time
+//							+ extra_rows_filled_first_time);
+			_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 					h * channels_buffer_0_rows_filled_each_time
-							+ extra_rows_filled_first_time);
+							+ extra_rows_filled_first_time,
+					input_image_num_fms_groups_in_width
+							* _7_stages_layer_0_in_rows_at_once);
+			_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+					channels_buffer_0, 1, true);
 			_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 					_6_layer_0_3x3_conv_out_1);
 			_6_layer_2_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2,
@@ -626,9 +698,16 @@ void cnn_pipeline_7_mob_v2(
 			_7_layer_7_pw(_6_layer_6_pw_out_0, pw_weights_7, result,
 					h - pipeline_filling_stages);
 		} else {
-			_7_stages_fill_channels_buffer(channels, channels_buffer_0,
+//			_7_stages_fill_channels_buffer(channels, channels_buffer_0,
+//					h * channels_buffer_0_rows_filled_each_time
+//							+ extra_rows_filled_first_time);
+			_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 					h * channels_buffer_0_rows_filled_each_time
-							+ extra_rows_filled_first_time);
+							+ extra_rows_filled_first_time,
+					input_image_num_fms_groups_in_width
+							* _7_stages_layer_0_in_rows_at_once);
+			_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+					channels_buffer_0, 1, true);
 			_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
 					_6_layer_0_3x3_conv_out_0);
 			_6_layer_2_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2,

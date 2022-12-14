@@ -17,7 +17,10 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 //			result2[i] = i % 127;
 //		}
 //		begin_code_generation
-
+fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/fms_8_144_56_56.txt",
+ result2, 56, 56);
+verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_8.txt",
+ result2, 451584, 56, 56);
 fill_fused_scales_and_zero_points(layer_8_fused_scales,fused_scales, 
     layer_8_fused_scales_log_2_shifts, fused_scales_log_2_shifts, layer_8_relu_6_fused_scales,
      relu_6_fused_scales, layer_8_fused_zero_points,

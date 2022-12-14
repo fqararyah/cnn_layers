@@ -278,13 +278,13 @@ void _6_layer_2_dw(
 #pragma HLS UNROLL
 							tmp += intermediate_channels_buffer[o_d][c_h][c_w]
 									* dw_weights[o_o_d_offset + o_d][c_h * layer_2_dw_filter_size + c_w];
-							if (o_o_d == 0 && o_d == 0
-									&& w >= layer_2_dw_ifm_width - 1) {
-								cout
-										<< intermediate_channels_buffer[o_d][c_h][c_w]
-										<< " * "
-										<< dw_weights[o_o_d_offset + o_d][c_h * layer_2_dw_filter_size + c_w];
-							}
+//							if (o_o_d == 0 && o_d == 0
+//									&& w >= layer_2_dw_ifm_width - 1) {
+//								cout
+//										<< intermediate_channels_buffer[o_d][c_h][c_w]
+//										<< " * "
+//										<< dw_weights[o_o_d_offset + o_d][c_h * layer_2_dw_filter_size + c_w];
+//							}
 						}
 					}
 

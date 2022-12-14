@@ -24,10 +24,10 @@ void top_func(
 
 	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
 		dump_layer_output(
-				"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_6.txt",
+				"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
 				tmp_channels, 56*56*24, 56, 56);
 		dump_layer_output(
-					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_7.txt",
+					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
 					result, 56*56*144, 56, 56);
 		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);
 
