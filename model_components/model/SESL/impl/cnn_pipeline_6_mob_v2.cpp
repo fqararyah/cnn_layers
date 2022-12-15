@@ -597,7 +597,7 @@ void _6_layer_4_pw_5_dw(
 
 		layer_4_pw_pipeline: for (int w = 0;
 				w < layer_5_dw_ofm_width + pw_iterations_before_first_dw; w++) {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE II=2
 			//###################PW#######################
 			const int pw_starting_point = w * layer_5_dw_strides;
 			if (w < layer_5_dw_ofm_width) {
@@ -967,6 +967,7 @@ void cnn_pipeline_6_mob_v2(
 #pragma HLS ARRAY_PARTITION variable = _6_layer_0_3x3_conv_out_0 complete dim = 2
 
 #pragma HLS ARRAY_PARTITION variable = _6_layer_3_pw_out_0 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = _6_layer_3_pw_out_0 complete dim = 2
 
 #pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_0 cyclic factor = layer_4_pw_parallelism_in/2 dim = 1
 //###########################################################
@@ -999,6 +1000,7 @@ void cnn_pipeline_6_mob_v2(
 #pragma HLS ARRAY_PARTITION variable = _6_layer_2_dw_out_1 complete dim = 1
 
 #pragma HLS ARRAY_PARTITION variable = _6_layer_3_pw_out_1 complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = _6_layer_3_pw_out_1 complete dim = 2
 
 #pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_1 cyclic factor = layer_4_pw_parallelism_in/2 dim = 1
 

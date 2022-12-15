@@ -217,15 +217,15 @@ void dw_fill_ifms_buffer(fms_dt channels[max_fms_size],
 		}
 	}
 
-	if (ifms_tile_in_h == 0) {
-		for (int h = 0; h < dw_max_v2_buffer_height; h++) {
-			for (int w = 0; w < dw_max_v2_buffer_width; w++) {
-				cout << ifms_buffer[0][h][w] << " ";
-			}
-			cout << "\n";
-		}
-		cout << "*******";
-	}
+	// if (ifms_tile_in_h == 0) {
+	// 	for (int h = 0; h < dw_max_v2_buffer_height; h++) {
+	// 		for (int w = 0; w < dw_max_v2_buffer_width; w++) {
+	// 			cout << ifms_buffer[0][h][w] << " ";
+	// 		}
+	// 		cout << "\n";
+	// 	}
+	// 	cout << "*******";
+	// }
 }
 
 void dw_conv_engine(
@@ -316,15 +316,15 @@ void dw_conv_pipeline(fms_dt channels[max_fms_size],
 
 	bool is_padding_row = ifm_tile_in_h == num_of_ifms_tiles_h - 1;
 
-	if (ifm_tile_in_h == 0 && tile_d_offset == 0) {
-		cout << "before ";
-		cout<<(ifm_tile_in_w + 1) <<", "<<  num_of_ifms_tiles_w <<", "<<absolute_offset_in_ifms + (num_of_ifms_tiles_w + 1)
-								* dw_tile_size << "\n";
-		for (int i = 0; i < ifm_width; i++) {
-			cout << lower_row[0][i] << " ";
-		}
-		cout << "\n";
-	}
+	// if (ifm_tile_in_h == 0 && tile_d_offset == 0) {
+	// 	cout << "before ";
+	// 	cout<<(ifm_tile_in_w + 1) <<", "<<  num_of_ifms_tiles_w <<", "<<absolute_offset_in_ifms + (num_of_ifms_tiles_w + 1)
+	// 							* dw_tile_size << "\n";
+	// 	for (int i = 0; i < ifm_width; i++) {
+	// 		cout << lower_row[0][i] << " ";
+	// 	}
+	// 	cout << "\n";
+	// }
 
 	if ((ifm_tile_in_w + 1) < num_of_ifms_tiles_w) {
 		fill_ifms_tile_depth_row_segment(channels, lower_row, ifm_tile_in_w + 1,
@@ -333,13 +333,13 @@ void dw_conv_pipeline(fms_dt channels[max_fms_size],
 				is_padding_row, ifm_width, fms_zero_point);
 	}
 
-	if (ifm_tile_in_h == 0 && tile_d_offset == 0) {
-		cout << "after\n";
-		for (int i = 0; i < ifm_width; i++) {
-			cout << lower_row[0][i] << " ";
-		}
-		cout << "\n";
-	}
+	// if (ifm_tile_in_h == 0 && tile_d_offset == 0) {
+	// 	cout << "after\n";
+	// 	for (int i = 0; i < ifm_width; i++) {
+	// 		cout << lower_row[0][i] << " ";
+	// 	}
+	// 	cout << "\n";
+	// }
 
 	dw_fill_ifms_buffer(channels, ifms_buffer, upper_row, lower_row,
 			col_segment_left, col_segment_right, absolute_offset_in_ifms,
