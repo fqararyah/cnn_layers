@@ -86,7 +86,7 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
             for (int p_w = 0; p_w < bottleneck_expansion_parallelism_w; p_w++)
             {
 #pragma HLS UNROLL
-                if (starting_h + p_h >= padding_top && starting_h + p_h < bottleneck_ifms_height + padding_top)
+                if (starting_h + p_h < bottleneck_ifms_height + padding_top)
                 {
                     expansion_results_buffer[p_h * bottleneck_expansion_parallelism_w + p_w] = pw_relu_norm(
                         expansion_kernel(bottleneck_input, bottleneck_ifms_depth,
