@@ -19,15 +19,16 @@ void fill_expansion_kernel_input_buffer(fms_dt bottleneck_input[],
 }
 
 pss_dt expansion_kernel(fms_dt ifms_buffer[], const int ifms_depth, const weights_dt weights[max_of_bottlenecks_layers_depths][],
-                        int filter_index)
+                        int filter_index, int h, int w, const int parallelism_h, const int parallelism_w)
 {
 #pragma HLS INLINE
 
+    const int starting_index = (h * parallelism_w + w) * ifms_depth;  
     pss_dt pss = 0;
     for (int i = 0; i < ifms_depth; i++)
     {
 #pragma HLS UNROLL
-        pss += weights[filter_index][i] * ifms_buffer[i];
+        pss += weights[filter_index][i] * ifms_buffer[starting_index + i];
     }
 
     return pss;
@@ -69,6 +70,40 @@ void fill_dw_ifms_buffer_upper_part(fms_dt ifms_buffer[max_of_bottlenecks_layers
 #pragma HLS UNROLL
             ifms_buffer[filling_d][h * filter_dim + w] = filling_src[h * ifms_dw +
                                                                      (ifms_w_offset + w - start_filling_offset_w) * ifms_depth + filling_d];
+        }
+    }
+}
+
+void update_dw_ifms_buffer_upper_part(fms_dt *dw_ifms_buffer_upper_part, fms_dt *filling_src, const int strides, const int filter_dim,
+                                      int ifms_w_offset, const int ifms_width, const int ifms_depth, int filling_d, const int padding_left)
+{
+#pragma HLS INLINE
+
+    const int rows_to_shift = (filter_dim - strides) - strides < 0 ? 0 : (filter_dim - strides) - strides;
+    const int ifms_dw = ifms_depth * ifms_width;
+    const int end_filling_offset_h = filter_dim - strides;
+
+    for (int h = 0; h < rows_to_shift; h++)
+    {
+#pragma HLS UNROLL
+        for (int w = 0; w < strides; w++)
+        {
+#pragma HLS UNROLL
+            dw_ifms_buffer_upper_part[h * ifms_dw +
+                                      (ifms_w_offset + w) * ifms_depth + filling_d] =
+                dw_ifms_buffer_upper_part[(h + strides) * ifms_dw +
+                                          (ifms_w_offset + w) * ifms_depth + filling_d]
+        }
+    }
+
+    for (int h = rows_to_shift; h < end_filling_offset_h; h++)
+    {
+#pragma HLS UNROLL
+        for (int w = 0; w < strides; w++)
+        {
+#pragma HLS UNROLL
+            dw_ifms_buffer_upper_part[h * ifms_dw +
+                                      (ifms_w_offset + w) * ifms_depth + filling_d] = filling_src[h * strides + w];
         }
     }
 }

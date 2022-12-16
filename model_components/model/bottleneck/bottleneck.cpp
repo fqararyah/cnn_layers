@@ -1,16 +1,8 @@
 #include "bottleneck.h"
 
 void mob_v2_bottleneck(fms_dt bottleneck_input[],
-                       const int bottleneck_ifms_depth,
-                       const int bottleneck_input_buffer_height,
-                       const int bottleneck_ifms_width,
-                       const int bottleneck_ofms_depth,
-                       const int bottleneck_ofms_width,
-                       const int expanded_ifms_depth,
-                       const int dw_filter_dim,
-                       const int strides,
-                       fms_dt bottleneck_output[],    // bottleneck_1_ofms_depth*bottleneck_1_ofms_width
-                       fms_dt previous_pass_output[], // bottleneck_1_expanded_ifms_depth*bottleneck_1_ifms_width, height=1
+                       fms_dt bottleneck_output[],
+                       fms_dt previous_pass_dw_input[],
                        const weights_dt expansion_layer_weights[max_of_bottlenecks_layers_depths][],
                        const dw_weights_dt dw_weights[max_of_bottlenecks_layers_depths][],
                        const weights_dt projection_layer_weights[max_of_bottlenecks_projection_filters][],
@@ -26,6 +18,14 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
                        const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
                        const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
                        const biases_dt projection_layer_fused_zero_points[],
+                       const int bottleneck_ifms_depth,
+                       const int bottleneck_ifms_height,
+                       const int bottleneck_ifms_width,
+                       const int bottleneck_ofms_depth,
+                       const int bottleneck_ofms_width,
+                       const int expanded_ifms_depth,
+                       const int dw_filter_dim,
+                       const int strides,
                        int starting_h,
                        int starting_w,
                        const int bottleneck_expansion_parallelism_h,
@@ -40,8 +40,7 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
 {
 
 #pragma HLS INLINE off
-    //TODO
-    //define new buffer to fill previous_pass_output from at the end of the pipeline (after normalizing the bottleneck outputs)
+
     fms_dt dw_input_buffer[max_of_bottlenecks_layers_depths][dw_filter_dim * dw_filter_dim]; // depth = 1
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
@@ -83,20 +82,30 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
         for (int p_h = 0; p_h < bottleneck_expansion_parallelism_h; p_h++)
         {
 #pragma HLS UNROLL
+    //TODO first column, do not run dw
             for (int p_w = 0; p_w < bottleneck_expansion_parallelism_w; p_w++)
             {
 #pragma HLS UNROLL
-                expansion_results_buffer[p_h * bottleneck_expansion_parallelism_w + p_w] = pw_relu_norm(
-                    expansion_kernel(bottleneck_input, bottleneck_ifms_depth,
-                                     expansion_layer_weights, d_in_out),
-                    expansion_layer_normalization, expansion_layer_relu);
+                if (starting_h + p_h >= padding_top && starting_h + p_h < bottleneck_ifms_height + padding_top)
+                {
+                    expansion_results_buffer[p_h * bottleneck_expansion_parallelism_w + p_w] = pw_relu_norm(
+                        expansion_kernel(bottleneck_input, bottleneck_ifms_depth,
+                                         expansion_layer_weights, d_in_out),
+                        expansion_layer_normalization, expansion_layer_relu);
+                }
+                else
+                {
+                    expansion_results_buffer[p_h * bottleneck_expansion_parallelism_w + p_w] = current_dw_ifms_zero_point;
+                }
             }
         }
 
-        fill_dw_ifms_buffer_upper_part(dw_input_buffer, previous_pass_output, strides, dw_filter_dim, starting_w * strides,
+        fill_dw_ifms_buffer_upper_part(dw_input_buffer, previous_pass_dw_input, strides, dw_filter_dim, starting_w * strides,
                                        bottleneck_ifms_width, d_in_out, padding_left);
         fill_dw_ifms_buffer_lower_part(dw_input_buffer,
                                        expansion_results_buffer, strides, dw_filter_dim, d_in_out);
+        update_dw_ifms_buffer_upper_part(previous_pass_dw_input, expansion_results_buffer, strides, dw_filter_dim,
+                                         starting_w * strides, bottleneck_ifms_width, d_in_out, d_in_out, padding_left);
 
         dw_layer_normalization.fused_scales =
             dw_layer_fused_scales[d_in_out];
