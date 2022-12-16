@@ -1,6 +1,6 @@
-#include "bottlenecks_chain.h"
-#include "bottlenecks_parallelism.h"
 #include "bottleneck_kernels.h"
+#include "bottlenecks_chain.h"
+
 // padding left and right
 // padding top: just do not fill
 
@@ -23,7 +23,7 @@ void fill_first_bottleneck_input(fms_dt chain_input[],
 						&& starting_w * bottleneck_1_dw_strides
 								+ first_fill_offset
 								- chain_specs.first_dw_padding_left
-								< chain_specs.chain_input_width) {
+								< chain_specs.chain_ifms_width) {
 					first_bottleneck_input[h * bottleneck_1_input_wd
 							+ w * bottleneck_1_ifms_depth + d] =
 							chain_input[start_filling_index_in_chain_input
@@ -50,7 +50,7 @@ void save_chain_output(fms_dt chain_output[], fms_dt result[max_fms_size],
 	const int tile_in_w = w / pw_tile_w;
 	const int in_tile_w = w % pw_tile_w;
 
-	for (int d = 0; d < chain_specs.chain_output_depth; d++) {
+	for (int d = 0; d < chain_specs.chain_ofms_depth; d++) {
 		const int tile_in_d = d / pw_tile_d;
 		const int in_tile_d = d % pw_tile_d;
 		const int tile_index = tile_in_d * num_of_tiles_hw
@@ -74,7 +74,7 @@ void _1_bottlenecks_chain(
 	fms_dt previous_pass_dw_input[bottlenck_1_inter_pass_dw_input_size];
 
 	for (int w = 0; w < chain_specs.chain_ofms_width; w++) {
-		fill_first_bottleneck_input(chain_input, bottleneck_1_input, w);
+		fill_first_bottleneck_input(chain_input, bottleneck_1_input, _1_chain_specs, w);
 		mob_v2_bottleneck(bottleneck_1_input, bottleneck_1_output,
 				previous_pass_dw_input, pw_weights_4, dw_weights_5,
 				pw_weights_6, layer_4_fused_scales,

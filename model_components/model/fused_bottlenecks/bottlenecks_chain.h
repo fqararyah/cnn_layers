@@ -1,5 +1,6 @@
 #ifndef BOTTLENECKS_CHAIN
 #define BOTTLENECKS_CHAIN
+#include "bottlenecks_parallelism.h"
 
 struct bottlenecks_chain_specs
 {

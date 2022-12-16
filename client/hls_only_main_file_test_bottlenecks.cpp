@@ -1,6 +1,6 @@
 #include "hls_only_main_file.h"
 #include "../tests/test_utils.h"
-#include "../model_components/model/bottleneck/bottlenecks_chain.h"
+#include "../model_components/model/fused_bottlenecks/bottlenecks_chain.h"
 
 void top_func(
 		fms_grp_dt input_image[input_image_depth
@@ -25,7 +25,7 @@ void top_func(
 			result2, 200704, 112, 112);
 
 	fms_dt chain_input[_1_chain_specs.chain_input_size];
-	fms_dt chain_output[_1_chain_specs.bottlenck_1_output_buffer_size];
+	fms_dt chain_output[_1_chain_specs.chain_output_size];
 	_1_bottlenecks_chain(chain_input, // chain_input_height*chain_input_width*chain_input_depth
 			result, _1_chain_specs, 0);
 

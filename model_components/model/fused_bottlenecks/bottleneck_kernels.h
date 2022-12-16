@@ -2,7 +2,6 @@
 
 pss_dt expansion_kernel(fms_dt ifms_buffer[], const int ifms_depth, weights_dt filter[]);
 
-conv_kernel(fms_dt ifms_buffer[], const int ifms_depth, weights_dt filter[]);
 
 void fill_dw_ifms_buffer_upper_part(fms_dt ifms_buffer[max_of_bottlenecks_layers_depths][],
                                     fms_dt *filling_src, const int strides, const int filter_dim,
