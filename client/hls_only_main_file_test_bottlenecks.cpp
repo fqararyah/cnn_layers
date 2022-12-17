@@ -1,6 +1,5 @@
-#include "hls_only_main_file.h"
+#include "hls_only_main_file_test_bottlenecks.h"
 #include "../tests/test_utils.h"
-#include "../model_components/model/fused_bottlenecks/bottlenecks_chain.h"
 
 void top_func(
 		fms_grp_dt input_image[input_image_depth

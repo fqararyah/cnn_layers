@@ -1,4 +1,3 @@
-#include "bottleneck_kernels.h"
 #include "bottlenecks_chain.h"
 
 // padding left and right
@@ -6,7 +5,7 @@
 
 void fill_first_bottleneck_input(fms_dt chain_input[],
 		fms_dt first_bottleneck_input[],
-		const bottlenecks_chain_specs chain_specs, int starting_w) {
+		const bottlenecks_chain_specs chain_specs, int starting_w, fms_dt zero_point) {
 
 	const int cols_filled_first_time = chain_specs.first_filter_dim;
 	const int first_fill_offset = cols_filled_first_time * (starting_w != 0);
@@ -73,8 +72,10 @@ void _1_bottlenecks_chain(
 	fms_dt bottleneck_1_output[bottleneck_1_ofms_depth];
 	fms_dt previous_pass_dw_input[bottlenck_1_inter_pass_dw_input_size];
 
+	const fms_dt first_dw_layer_in_the_chain_zero_point = conv_fms_zero_points[chain_specs.first_dw_layer_in_the_chain];
+	 
 	for (int w = 0; w < chain_specs.chain_ofms_width; w++) {
-		fill_first_bottleneck_input(chain_input, bottleneck_1_input, _1_chain_specs, w);
+		fill_first_bottleneck_input(chain_input, bottleneck_1_input, _1_chain_specs, w, first_dw_layer_in_the_chain_zero_point);
 		mob_v2_bottleneck(bottleneck_1_input, bottleneck_1_output,
 				previous_pass_dw_input, pw_weights_4, dw_weights_5,
 				pw_weights_6, layer_4_fused_scales,

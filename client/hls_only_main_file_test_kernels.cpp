@@ -22,7 +22,7 @@ void top_func(
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h * max_conv_w];
 
-	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
+//	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
 //		dump_layer_output(
 //				"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
 //				tmp_channels, 56*56*24, 56, 56);
@@ -30,26 +30,7 @@ void top_func(
 //					"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
 //					result, 56*56*144, 56, 56);
 
-//	int even_odd = 1;
-//	MIL: for (int i = 0; i < 10; i++) {
-////	dump_layer_output(
-////			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_6.txt",
-////			tmp_channels, 56*56*24, 56, 56);
-////	dump_layer_output(
-////				"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/tmp_ofms_7.txt",
-////				result2, 56*56*144, 56, 56);
-//		if (even_odd) {
-//			cnn_pipeline_7_mob_v2(input_image, result2, tmp_channels2);
-//			seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);
-//		} else {
-//			seml(off_chip_weights, channels, result2, tmp_channels2, weights_0, dw_weights_buffer,
-//					fc_input);
-//			cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
-//		}
-//	}
-	//if (even_odd) {
-//		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
-//	} else {
-		//seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
-//	}
+
+		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
+
 }

@@ -134,7 +134,7 @@ void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
 
 void fill_fused_scales_buffer(const fused_scales_dt fused_scales[],
 		fused_scales_dt fused_scales_buffer[],
-		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[],
 		const relu_6_fused_scales_dt relu_6_fused_scales[],
 		relu_6_fused_scales_dt relu_6_fused_scales_buffer[], int starting_d,
@@ -157,6 +157,8 @@ void fill_fused_scales_and_zero_points(
 		relu_6_fused_scales_dt relu_6_fused_scales[],
 		const biases_dt layer_fused_zero_points[],
 		biases_dt fused_zero_points[], const int layer_num_filters) {
+#pragma HLS INLINE off
+
 	for (int i = 0; i < max_conv_d; i++) {
 		if (i >= layer_num_filters) {
 			break;

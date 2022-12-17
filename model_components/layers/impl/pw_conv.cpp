@@ -101,10 +101,10 @@ void read_and_scale_tile_from_tmp_channels(
 void scale_pss_tile(
 		pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 		pss_f_dt pss_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
-		const int layer_relu, fused_scales_dt fused_scales[],
-		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-		relu_6_fused_scales_dt relu_6_fused_scales[],
-		biases_dt fused_zero_points[], int starting_d, const int layer,
+		const int layer_relu, const fused_scales_dt fused_scales[],
+		const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		const relu_6_fused_scales_dt relu_6_fused_scales[],
+		const biases_dt fused_zero_points[], int starting_d, const int layer,
 		int read_write) {
 #pragma HLS INLINE
 
@@ -342,10 +342,10 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 		fms_dt tmp_channels[max_tmp_fms_size], int read_write,
 		const int num_of_weight_groups, const int direction,
 		const int layer_weights_offset, const int layer_relu,
-		fused_scales_dt fused_scales[],
-		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-		relu_6_fused_scales_dt relu_6_fused_scales[],
-		biases_dt fused_zero_points[], int td_o) {
+		const fused_scales_dt fused_scales[],
+		const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		const relu_6_fused_scales_dt relu_6_fused_scales[],
+		const biases_dt fused_zero_points[], int td_o) {
 
 #pragma HLS INLINE off
 
@@ -407,10 +407,10 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 		const int num_of_tiles_w, fms_dt tmp_channels[max_tmp_fms_size],
 		int read_write, const int num_of_weight_groups, const int direction,
 		const int layer_weights_offset, const int layer_relu,
-		fused_scales_dt fused_scales[],
-		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-		relu_6_fused_scales_dt relu_6_fused_scales[],
-		biases_dt fused_zero_points[]) {
+		const fused_scales_dt fused_scales[],
+		const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+		const relu_6_fused_scales_dt relu_6_fused_scales[],
+		const biases_dt fused_zero_points[]) {
 
 #pragma HLS INLINE off
 

@@ -15,33 +15,33 @@ ifms_file_format = 'fms_{}_{}_{}_{}.txt'
 
 debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
-fill_quantization_parameters_block = 'fill_fused_scales_and_zero_points(layer_*i*_fused_scales,fused_scales, \n\
-    layer_*i*_fused_scales_log_2_shifts, fused_scales_log_2_shifts, layer_*i*_relu_6_fused_scales,\n\
-     relu_6_fused_scales, layer_*i*_fused_zero_points,\n\
-    fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
+# fill_quantization_parameters_block = 'fill_fused_scales_and_zero_points(layer_*i*_fused_scales,fused_scales, \n\
+#     layer_*i*_fused_scales_log_2_shifts, fused_scales_log_2_shifts, layer_*i*_relu_6_fused_scales,\n\
+#      relu_6_fused_scales, layer_*i*_fused_zero_points,\n\
+#     fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
 
-layer_0_block = 'layer_0_3x3(weights_0, input_image, result2, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);\n'
+layer_0_block = 'layer_0_3x3(weights_0, input_image, result2, layer_0_fused_scales, layer_0_fused_scales_log_2_shifts, layer_0_relu_6_fused_scales, layer_0_fused_zero_points);\n'
 
 expansion_projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
-    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);\n'
+    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_relu, layer_*i*_fused_scales, layer_*i*_fused_scales_log_2_shifts, layer_*i*_relu_6_fused_scales, layer_*i*_fused_zero_points);\n'
 
 dw_block_0 = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
     dw_conv_3x3(dw_weights_buffer, channels, result2, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);\n'
+    *DIRECTION*, layer_*i*_fused_scales, layer_*i*_fused_scales_log_2_shifts, layer_*i*_relu_6_fused_scales, layer_*i*_fused_zero_points);\n'
 
 dw_block_1 = 'fill_dw_layer_weights(dw_weights_*i*, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
     dw_conv_3x3(dw_weights_buffer, result2, channels, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);\n'
+    *DIRECTION*, layer_*i*_fused_scales, layer_*i*_fused_scales_log_2_shifts, layer_*i*_relu_6_fused_scales, layer_*i*_fused_zero_points);\n'
 
 # projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
 #     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
@@ -139,7 +139,7 @@ for i in range(layers_to_generate[0], layers_to_generate[1]):
 print(max_fms_size_in_seml, max_fms_size_in_seml_layer_index)
 
 for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
-    target_block = fill_quantization_parameters_block
+    target_block = ''#fill_quantization_parameters_block
     replacement_dict = {}
     replacement_dict['*i*'] = layer_index
     replacement_dict['*DIRECTION*'] = direction

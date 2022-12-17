@@ -1,7 +1,7 @@
-#include "bottlenecks_sesl_specs.h"
 
 #ifndef BOTTLENECK_PARALLELISM
 #define BOTTLENECK_PARALLELISM
+#include "bottlenecks_sesl_specs.h"
 
 const int bottleneck_1_expansion_parallelism_ifms = bottleneck_1_ifms_depth;
 const int bottleneck_1_expansion_parallelism_ofms = 1;

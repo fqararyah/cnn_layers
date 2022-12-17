@@ -1,6 +1,9 @@
 #ifndef BOTTLENECKS_CHAIN
 #define BOTTLENECKS_CHAIN
 #include "bottlenecks_parallelism.h"
+#include "bottleneck_kernels.h"
+#include "bottleneck.h"
+
 
 struct bottlenecks_chain_specs
 {
@@ -25,6 +28,7 @@ struct bottlenecks_chain_specs
     int chain_input_height;
     int chain_input_size;
     int chain_output_size;
+    int first_dw_layer_in_the_chain;
 };
 
 const bottlenecks_chain_specs _1_chain_specs = {
@@ -48,7 +52,8 @@ const bottlenecks_chain_specs _1_chain_specs = {
     1,
     2, // chain_max_rows_at_once * chain_max_strides
     bottlenck_1_input_buffer_size,
-	bottlenck_1_output_buffer_size
+	bottlenck_1_output_buffer_size,
+    5
 };
 
 void _1_bottlenecks_chain(fms_dt chain_input[], // chain_input_height*chain_input_width*chain_input_depth
