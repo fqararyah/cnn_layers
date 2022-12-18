@@ -16,21 +16,21 @@ void top_func(
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h * max_conv_w];
 
-	fill_layer_input(
-			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/fms_4_16_112_112.txt",
-			result2, 112, 112);
-	verify_fill_layer_input(
-			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_4.txt",
-			result2, 200704, 112, 112);
+//	fill_layer_input(
+//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/fms_4_16_112_112.txt",
+//			result2, 112, 112);
+//	verify_fill_layer_input(
+//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_4.txt",
+//			result2, 200704, 112, 112);
 
 	fms_dt chain_input[_1_chain_specs.chain_input_size];
 	fms_dt chain_output[_1_chain_specs.chain_output_size];
 	_1_bottlenecks_chain(chain_input, // chain_input_height*chain_input_width*chain_input_depth
 			result, _1_chain_specs, 0);
 
-	dump_layer_output(
-			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
-			result, 75264, 56, 56);
+//	dump_layer_output(
+//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
+//			result, 75264, 56, 56);
 
 	avgpool(result, fc_input);
 }

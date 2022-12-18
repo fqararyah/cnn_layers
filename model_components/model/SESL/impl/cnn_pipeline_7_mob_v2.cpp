@@ -11,9 +11,6 @@ void _7_layer_6_pw(
 
 #pragma HLS INLINE off
 
-	const int current_layer_fused_parameters_offsets =
-			layers_fused_parameters_offsets[6];
-
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[6 + 1];
 	const rec_scales_dt current_layer_ofms_scale_rec =
 			conv_fms_scales_rec[6 + 1];
@@ -120,8 +117,6 @@ void _7_layer_7_pw(
 //		cout << "******\n";
 //	}
 
-	const int current_layer_fused_parameters_offsets =
-			layers_fused_parameters_offsets[7];
 
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[7 + 1];
 

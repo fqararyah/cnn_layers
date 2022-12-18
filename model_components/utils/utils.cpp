@@ -125,10 +125,11 @@ void fill_dw_layer_weights(
 }
 
 void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
-		biases_dt fused_zero_points_buffer[], int starting_d, int layer) {
-	//const int starting_index = layers_fused_parameters_offsets[layer];
+		biases_dt fused_zero_points_buffer[], int starting_d, int layer,
+		const int current_layer_fused_parameters_offset) {
+	const int absolute_current_layer_fused_parameters_offset = current_layer_fused_parameters_offset + starting_d;
 	for (int i = 0; i < pw_conv_parallelism_out; i++) {
-		fused_zero_points_buffer[i] = fused_zero_points[starting_d + i];
+		fused_zero_points_buffer[i] = fused_zero_points[absolute_current_layer_fused_parameters_offset + i];
 	}
 }
 
@@ -138,13 +139,13 @@ void fill_fused_scales_buffer(const fused_scales_dt fused_scales[],
 		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[],
 		const relu_6_fused_scales_dt relu_6_fused_scales[],
 		relu_6_fused_scales_dt relu_6_fused_scales_buffer[], int starting_d,
-		int layer) {
-	//const int starting_index = layers_fused_parameters_offsets[layer];
+		int layer, const int current_layer_fused_parameters_offset) {
+	const int absolute_current_layer_fused_parameters_offset = current_layer_fused_parameters_offset + starting_d;
 	for (int i = 0; i < pw_conv_parallelism_out; i++) {
-		fused_scales_buffer[i] = fused_scales[starting_d + i];
+		fused_scales_buffer[i] = fused_scales[absolute_current_layer_fused_parameters_offset + i];
 		fused_scales_log_2_shifts_buffer[i] =
-				fused_scales_log_2_shifts[starting_d + i];
-		relu_6_fused_scales_buffer[i] = relu_6_fused_scales[starting_d + i];
+				fused_scales_log_2_shifts[absolute_current_layer_fused_parameters_offset + i];
+		relu_6_fused_scales_buffer[i] = relu_6_fused_scales[absolute_current_layer_fused_parameters_offset + i];
 	}
 }
 

@@ -13,7 +13,8 @@ void fill_dw_ifms_buffer_lower_part(fms_dt ifms_buffer[], fms_dt *filling_src,
 void update_dw_ifms_buffer_upper_part(fms_dt *dw_ifms_buffer_upper_part,
 		fms_dt *filling_src, const int strides, const int filter_dim,
 		int ifms_w_offset, const int ifms_width, const int ifms_depth,
-		int filling_d, const int padding_left);
+		int filling_d, const int padding_left,
+		const int first_fill_from_left_offset);
 void shift_dw_ifms_buffer_horizontally(fms_dt ifms_buffer[], const int strides,
 		const int filter_dim, int conv_d);
 dw_pss_dt dw_kernel(fms_dt ifms_buffer[],

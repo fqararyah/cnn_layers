@@ -11,9 +11,11 @@ biases_bit_width = 32
 
 from_files = True
 weights_scales_biases_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
-    'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
+    'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
+        cgc.MODEL_NAME)
 fms_scales_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
-    'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(cgc.MODEL_NAME)
+    'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
+        cgc.MODEL_NAME)
 
 fms_scales_file_format = fms_scales_files_location + 'fms_{}_scales.txt'
 fms_zero_points_file_format = fms_scales_files_location + 'fms_{}_zero_points.txt'
@@ -41,11 +43,11 @@ add_layers_fms_scales_rec_declaration_string = 'const static rec_scales_dt add_l
 add_layers_fms_scales_declaration_string = 'const static scales_dt add_layers_fms_scales[] = {'
 conv_fms_zero_points = []
 
-layers_fused_parameters_offsets = []
+layers_fused_parameters_offsets = [0]
 conv_fms_zero_pointsdeclaration_string = 'const static fms_dt conv_fms_zero_points[] = {'
 add_layers_fms_zero_points = [0] * len(layers_types)
 add_layers_fms_zero_points_declaration_string = 'const static fms_dt add_layers_fms_zero_points[] = {'
-layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = {0, \n'
+layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = { \n'
 
 weights_zero_points_declaration_string = 'const static fms_dt weights_zero_points[] = {'
 
@@ -96,8 +98,8 @@ with open(h_file, 'w') as wf:
             add_layers_fms_scales[layer_index -
                                   skip_connection_current_index - 1] = float(scale)
             assert(add_layers_fms_scales[layer_index -
-                                         skip_connection_current_index - 1] < 1 and \
-                                             add_layers_fms_scales[layer_index -
+                                         skip_connection_current_index - 1] < 1 and
+                   add_layers_fms_scales[layer_index -
                                          skip_connection_current_index - 1] > 0.001)
             add_layers_fms_zero_points[layer_index -
                                        skip_connection_current_index - 1] = int(zero_point)
@@ -127,6 +129,10 @@ with open(h_file, 'w') as wf:
     wf.write(conv_fms_scales_rec_declaration_string +
              str(conv_fms_scales_rec).replace('[', '').replace(']', '};\n'))
     # writing weights scales and zero_points
+    seml_fused_zero_points = []
+    seml_fused_scales = []
+    seml_fused_scales_log_2_shifts = []
+    seml_relu_6_fused_scales = []
     for layer_index in range(len(layers_weights_shapes)):
         fused_zero_points = []
         fused_scales = []
@@ -158,16 +164,16 @@ with open(h_file, 'w') as wf:
             fused_zero_point = np.sum(weights[i, :, :, :]) * \
                                      (-conv_fms_zero_points[layer_index] if layer_index not in skip_connections_indices
                                       else -add_layers_fms_zero_points[layer_index]) \
-                                     + biases[i]
-            assert(fused_zero_point < 2** 31 -1 and fused_zero_point > - 2**31)
+                + biases[i]
+            assert(fused_zero_point < 2 ** 31 -
+                   1 and fused_zero_point > - 2**31)
             fused_zero_points.append(fused_zero_point)
             # if fused_zero_points[-1] < -2**29 or fused_zero_points[-1] >= 2**29:
             #     print(layer_index, 'XXXXXXXXXXXXXXXXXXXX', fused_zero_points[-1])
             # if layer_index == 3:
             #     print(np.sum(weights[i,:,:,:]) * -conv_fms_zero_points[layer_index] , biases[i])
-        if len(layers_fused_parameters_offsets) == 0:
-            layers_fused_parameters_offsets.append(
-                layers_weights_shapes[layer_index].num_of_filters)
+        if (cgc.PIPELINE == True and layer_index <= cgc.PILELINE_LEN) or layer_index == 0:
+            layers_fused_parameters_offsets.append(0)
         else:
             layers_fused_parameters_offsets.append(layers_weights_shapes[layer_index].num_of_filters +
                                                    layers_fused_parameters_offsets[-1])
@@ -179,7 +185,8 @@ with open(h_file, 'w') as wf:
                     (conv_fms_scales[layer_index]
                      if layer_index not in skip_connections_indices else add_layers_fms_scales[layer_index])
                 assert(ifm_weight_fused_scale < 0.02)
-                ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
+                ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / \
+                    conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
                 fused_scales.append(ofm_ifm_weigh_fused_scale)
                 assert(ofm_ifm_weigh_fused_scale < 1)
                 assert(ofm_ifm_weigh_fused_scale > 0)
@@ -191,51 +198,79 @@ with open(h_file, 'w') as wf:
                 # #print(fused_scales[-1], decomposed_val * (2 ** -abs_current_log_int))
                 assert(abs_current_log_int >= 0 and abs_current_log_int < 32)
                 assert(decomposed_val > 0.1 and decomposed_val < 1)
-                assert(fused_scales[-1] == decomposed_val * (2 ** -abs_current_log_int))
+                assert(fused_scales[-1] == decomposed_val *
+                       (2 ** -abs_current_log_int))
                 fused_scales_log_2_shifts.append(abs_current_log_int)
                 fused_scales[-1] = decomposed_val
                 # if(6 / ifm_weight_fused_scale > 2**31 -1):
                 #     print(layer_index, 6 / ifm_weight_fused_scale)
                 relu_6_fused_scale = round(6 / ifm_weight_fused_scale)
-                assert(relu_6_fused_scale < 2**32 -1 or (layer_index == 0 and relu_6_fused_scale < 2**38 -1) )
+                assert(relu_6_fused_scale < 2**32 - 1 or (layer_index ==
+                       0 and relu_6_fused_scale < 2**38 - 1))
                 relu_6_fused_scales.append(relu_6_fused_scale)
-                
-                assert(relu_6_fused_scales[-1] > 256)   
 
-        with open(weights_zero_points_file_format.format(layer_index), 'r') as f:
-            for line in f:
-                weights_zero_points_declaration_string += line.replace(
-                    ' ', '').replace('\n', '') + ', '
+                assert(relu_6_fused_scales[-1] > 256)
 
-        fused_zero_points_declaration_string = 'const static biases_dt layer_{}_fused_zero_points[] = \n'.format(
-            layer_index)
-        fused_zero_points_declaration_string += '{ ' + str(
-            fused_zero_points).replace('[', '').replace(']', '') + '};\n'
+        if cgc.PIPELINE == True and layer_index <= cgc.PILELINE_LEN:
+            fused_zero_points_declaration_string = 'const static biases_dt layer_{}_fused_zero_points[] = \n'.format(
+                layer_index)
+            fused_zero_points_declaration_string += '{ ' + str(
+                fused_zero_points).replace('[', '').replace(']', '') + '};\n'
 
-        fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_fused_scales[] ='.format(
-            layer_index)
-        fused_scales_declaration_string += '{ ' + str(
-            fused_scales).replace('[', '').replace(']', '') + '};\n'
-        fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt layer_{}_fused_scales_log_2_shifts[] ='.format(
-            layer_index)
-        fused_scales_log_2_shifts_declaration_string += '{ ' + str(
-            fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
+            fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_fused_scales[] ='.format(
+                layer_index)
+            fused_scales_declaration_string += '{ ' + str(
+                fused_scales).replace('[', '').replace(']', '') + '};\n'
 
-        relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_relu_6_fused_scales[] ='.format(
-            layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_relu_6_fused_scales[] ='
-        relu_6_fused_scales_declaration_string += '{ ' + str(
-            relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
+            fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt layer_{}_fused_scales_log_2_shifts[] ='.format(
+                layer_index)
+            fused_scales_log_2_shifts_declaration_string += '{ ' + str(
+                fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
-        wf.write(fused_zero_points_declaration_string)
-        wf.write(fused_scales_declaration_string)
-        wf.write(fused_scales_log_2_shifts_declaration_string)
-        wf.write(relu_6_fused_scales_declaration_string)
+            relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_relu_6_fused_scales[] ='.format(
+                layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_relu_6_fused_scales[] ='
+            relu_6_fused_scales_declaration_string += '{ ' + str(
+                relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
-    weights_zero_points_declaration_string += '};\n'
+            wf.write(fused_zero_points_declaration_string)
+            wf.write(fused_scales_declaration_string)
+            wf.write(fused_scales_log_2_shifts_declaration_string)
+            wf.write(relu_6_fused_scales_declaration_string)
+        else:
+            seml_fused_scales.append(fused_scales)
+            seml_fused_scales_log_2_shifts.append(fused_scales_log_2_shifts)
+            seml_relu_6_fused_scales.append(relu_6_fused_scales)
+            seml_fused_zero_points.append(fused_zero_points)
 
     wf.write(layers_fused_parameters_offsets_declaration_string +
              str(layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
-    # wf.write(weights_zero_points_declaration_string)
+
+    seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = \n'.format(
+        layer_index)
+    seml_fused_zero_points_declaration_string += '{ ' + str(
+        seml_fused_zero_points).replace('[', '').replace(']', '') + '};\n'
+
+    seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales[] ='.format(
+        layer_index)
+    seml_fused_scales_declaration_string += '{ ' + str(
+        seml_fused_scales).replace('[', '').replace(']', '') + '};\n'
+
+    seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[] ='.format(
+        layer_index)
+    seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
+        seml_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
+
+    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] ='.format(
+        layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_relu_6_fused_scales[] ='
+    seml_relu_6_fused_scales_declaration_string += '{ ' + str(
+        seml_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
+
+    if cgc.LAST_LAYER_TO_GENERATE > cgc.PILELINE_LEN or cgc.PIPELINE == False:
+        wf.write(seml_fused_zero_points_declaration_string)
+        wf.write(seml_fused_scales_declaration_string)
+        wf.write(seml_fused_scales_log_2_shifts_declaration_string)
+        wf.write(seml_relu_6_fused_scales_declaration_string)
+
     wf.write("#endif\n")
 
 

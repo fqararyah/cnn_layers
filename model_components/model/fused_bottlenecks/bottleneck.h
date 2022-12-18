@@ -39,6 +39,6 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[],
                        const int expansion_layer_relu,
                        const int dw_layer_relu,
                        const int projection_layer_relu,
-                       const int padding_left, const int padding_right, const int padding_top, const int padding_bottom);
+                       const int padding_left, const int padding_right, const int padding_top, const int padding_bottom, const int first_fill_from_left_offset);
 
 #endif

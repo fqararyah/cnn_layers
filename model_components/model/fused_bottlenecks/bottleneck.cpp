@@ -29,7 +29,7 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[], fms_dt bottleneck_output[],
 		const int expansion_layer_relu, const int dw_layer_relu,
 		const int projection_layer_relu, const int padding_left,
 		const int padding_right, const int padding_top,
-		const int padding_bottom) {
+		const int padding_bottom, const int first_fill_from_left_offset) {
 
 #pragma HLS INLINE off
 
@@ -85,7 +85,7 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[], fms_dt bottleneck_output[],
 			//TODO first column, do not run dw
 			for (int p_w = 0; p_w < bottleneck_expansion_parallelism_w; p_w++) {
 #pragma HLS UNROLL
-				if (starting_h + p_h < bottleneck_ifms_height + padding_top) {
+				if (starting_h + p_h < bottleneck_ifms_height + padding_top && starting_w + p_w >= padding_left) {
 					expansion_results_buffer[p_h
 							* bottleneck_expansion_parallelism_w + p_w] =
 							pw_relu_norm(
@@ -114,7 +114,7 @@ void mob_v2_bottleneck(fms_dt bottleneck_input[], fms_dt bottleneck_output[],
 		update_dw_ifms_buffer_upper_part(previous_pass_dw_input,
 				expansion_results_buffer, strides, dw_filter_dim,
 				starting_w * strides, bottleneck_ifms_width, d_in_out, d_in_out,
-				padding_left);
+				padding_left, first_fill_from_left_offset);
 
 		dw_layer_normalization.fused_scales = dw_layer_fused_scales[d_in_out];
 		dw_layer_normalization.fused_scales_log_2_shift =

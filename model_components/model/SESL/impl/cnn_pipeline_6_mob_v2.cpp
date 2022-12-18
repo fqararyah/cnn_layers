@@ -190,8 +190,6 @@ void _6_layer_2_dw(
 			conv_fms_scales_rec[2 + 1];
 	const scales_dt current_layer_ofms_scale = conv_fms_scales[2 + 1];
 
-	const int current_layer_fused_parameters_offsets =
-			layers_fused_parameters_offsets[2];
 	const int first_fill_width_offset = layer_2_dw_filter_size
 			- layer_2_dw_padding_left;
 	const int first_fill_top_offset = first_row * layer_2_dw_padding_top;
@@ -443,9 +441,6 @@ void _6_layer_3_pw(
 
 #pragma HLS INLINE off
 
-	const int current_layer_fused_parameters_offsets =
-			layers_fused_parameters_offsets[3];
-
 	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[3 + 1];
 	const rec_scales_dt current_layer_ofms_scale_rec =
 			conv_fms_scales_rec[3 + 1];
@@ -521,15 +516,10 @@ void _6_layer_4_pw_5_dw(
 	fms_dt intermediate_channels_buffer[layer_4_pw_parallelism_out][layer_5_dw_filter_size][layer_5_dw_filter_size];
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
-	const int current_pw_fused_parameters_offsets =
-			layers_fused_parameters_offsets[4];
-
 	const fms_dt current_pw_ofms_zero_point = conv_fms_zero_points[4 + 1];
 	const rec_scales_dt current_pw_ofms_scale_rec = conv_fms_scales_rec[4 + 1];
 	const rec_scales_dt current_pw_ofms_scale = conv_fms_scales[4 + 1];
 
-	const int current_dw_fused_parameters_offsets =
-			layers_fused_parameters_offsets[5];
 
 	const fms_dt current_dw_ofms_zero_point = conv_fms_zero_points[5 + 1];
 	const rec_scales_dt current_dw_ofms_scale_rec = conv_fms_scales_rec[5 + 1];
