@@ -3,7 +3,7 @@
 
 #include "../../basic_defs/basic_defs_glue.h"
 
-void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
+void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 		const int layer, const int layer_conv_d, const int layer_width,const int layer_height,
 		const int num_of_tiles_d, const int num_of_tiles_h,

@@ -361,40 +361,49 @@ void dw_conv_pipeline(fms_dt channels[max_fms_size],
 	}
 }
 
-void fill_dw_weights_and_scales_tiles(dw_weights_dt weights[max_conv_d][3 * 3],
+void fill_dw_weights_and_scales_tiles(const dw_weights_dt weights[][3 * 3],
 		dw_weights_dt weights_tile[dw_tile_d][3 * 3],
-		const fused_scales_dt fused_scales[], fused_scales_dt fused_scales_tile[],
+		const fused_scales_dt fused_scales[],
+		fused_scales_dt fused_scales_tile[],
 		const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 		fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_tile[],
 		const relu_6_fused_scales_dt relu_6_fused_scales[],
 		relu_6_fused_scales_dt relu_6_fused_scales_tile[],
 		const biases_dt fused_zero_points[], biases_dt fused_zero_points_tile[],
-		int starting_d, const int current_layer_fused_parameters_offset) {
+		int starting_d, const int current_dw_layer_weights_offset,
+		const int current_layer_fused_parameters_offset) {
 #pragma HLS INLINE
 
-	const int absolute_current_layer_fused_parameters_offset = current_layer_fused_parameters_offset + starting_d;
+	const int absolute_current_layer_fused_parameters_offset =
+			current_layer_fused_parameters_offset + starting_d;
+	const int absolute_current_layer_weights_offset = current_dw_layer_weights_offset + starting_d;
 	for (int d = 0; d < dw_tile_d; d++) {
 #pragma HLS PIPELINE
 		for (int i = 0; i < 3 * 3; i++) {
 #pragma HLS UNROLL
-			weights_tile[d][i] = weights[starting_d + d][i];
+			weights_tile[d][i] = weights[absolute_current_layer_weights_offset + d][i];
 		}
-		fused_scales_tile[d] = fused_scales[absolute_current_layer_fused_parameters_offset + d];
-		fused_scales_log_2_shifts_tile[d] = fused_scales_log_2_shifts[absolute_current_layer_fused_parameters_offset
-				+ d];
-		relu_6_fused_scales_tile[d] = relu_6_fused_scales[absolute_current_layer_fused_parameters_offset + d];
-		fused_zero_points_tile[d] = fused_zero_points[absolute_current_layer_fused_parameters_offset + d];
+		fused_scales_tile[d] =
+				fused_scales[absolute_current_layer_fused_parameters_offset + d];
+		fused_scales_log_2_shifts_tile[d] =
+				fused_scales_log_2_shifts[absolute_current_layer_fused_parameters_offset
+						+ d];
+		relu_6_fused_scales_tile[d] =
+				relu_6_fused_scales[absolute_current_layer_fused_parameters_offset
+						+ d];
+		fused_zero_points_tile[d] =
+				fused_zero_points[absolute_current_layer_fused_parameters_offset
+						+ d];
 	}
 }
 
-void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
-		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
-		const int layer, const int layer_conv_d, const int layer_ifm_width,
-		const int layer_ifm_height, const int num_of_tiles_d,
-		const int num_of_ofms_tiles_h, const int num_of_ofms_tiles_w,
-		const int strides, const int padding_left, const int padding_right,
-		const int padding_top, const int direction,
-		const fused_scales_dt fused_scales[],
+void dw_conv_3x3(const dw_weights_dt weights[][3 * 3], fms_dt channels[max_fms_size],
+		fms_dt result[max_fms_size], const int layer, const int layer_conv_d,
+		const int layer_ifm_width, const int layer_ifm_height,
+		const int num_of_tiles_d, const int num_of_ofms_tiles_h,
+		const int num_of_ofms_tiles_w, const int strides,
+		const int padding_left, const int padding_right, const int padding_top,
+		const int direction, const fused_scales_dt fused_scales[],
 		const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 		const relu_6_fused_scales_dt relu_6_fused_scales[],
 		const biases_dt fused_zero_points[]) {
@@ -423,7 +432,10 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
 	const int num_of_ofms_tiles_hw = num_of_ofms_tiles_h * num_of_ofms_tiles_w;
 
 	fms_quantization_scheme normalization = { 0, 0, 0, 0 };
-	const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
+
+	const int current_dw_layer_weights_offset = dw_layers_weights_offsets[layer];
+	const int current_layer_fused_parameters_offset =
+			layers_fused_parameters_offsets[layer];
 
 	dw_weights_dt weights_tile[dw_tile_d][3 * 3];
 #pragma HLS ARRAY_PARTITION variable=weights_tile type=complete dim = 0
@@ -454,7 +466,9 @@ void dw_conv_3x3(dw_weights_dt weights[max_conv_d][3 * 3],
 				fused_scales_tile, fused_scales_log_2_shifts,
 				fused_scales_log_2_shifts_tile, relu_6_fused_scales,
 				relu_6_fused_scales_tile, fused_zero_points,
-				fused_zero_points_tile, tile_in_d * dw_tile_d, current_layer_fused_parameters_offset);
+				fused_zero_points_tile, tile_in_d * dw_tile_d,
+				current_dw_layer_weights_offset,
+				current_layer_fused_parameters_offset);
 
 		for (int ofm_tile_in_h = 0; ofm_tile_in_h < num_of_ofms_tiles_h;
 				ofm_tile_in_h++) {

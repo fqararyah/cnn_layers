@@ -3,10 +3,16 @@
 #include "bottlenecks_sesl_specs.h"
 #include "bottleneck_kernels.h"
 
+void mob_v2_bottleneck_0(fms_dt bottleneck_input[],
+                       fms_dt bottleneck_output[],
+					   fms_dt r_previous_pass_dw_input[],
+					   fms_dt w_previous_pass_dw_input[], int starting_h, int starting_w);
+
 void mob_v2_bottleneck(fms_dt bottleneck_input[],
                        fms_dt bottleneck_output[],
-                       fms_dt previous_pass_dw_input[],
-                       const weights_dt expansion_layer_weights[][16],//TODO
+					   fms_dt r_previous_pass_dw_input[],
+					   fms_dt w_previous_pass_dw_input[],
+                       const weights_dt expansion_layer_weights[][max_of_bottlenecks_expansion_layers_depths],
                        const dw_weights_dt dw_weights[][max_dw_filter_area_in_a_chain],
                        const weights_dt projection_layer_weights[][max_of_bottlenecks_layers_depths],
                        const fused_scales_dt expansion_layer_fused_scales[],

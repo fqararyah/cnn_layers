@@ -8,7 +8,7 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
-on_chip_conv_and_layers = 7
+on_chip_conv_and_layers = 8
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 weights_file_format = {'c':'weights_{}_c.txt', 'pw': 'weights_{}_pw.txt'}
 conv_pw_weights_h_file = '../model_components/model/headers/on_chip_conv_pw_weights.h' #'./out/dw_weights.h'
@@ -32,7 +32,7 @@ with open(conv_pw_weights_h_file, 'w') as f:
         if layers_types[ii] == 'dw' or layers_types[ii] == 'pw' and expansion_projection[ii] == 0:
             continue
 
-        if num_of_generated_layers > on_chip_conv_and_layers:
+        if ii > on_chip_conv_and_layers:
             break
         
         num_of_generated_layers += 1

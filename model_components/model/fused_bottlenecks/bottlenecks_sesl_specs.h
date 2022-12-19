@@ -7,6 +7,30 @@ const int max_of_bottlenecks_projection_filters = 24;
 const int max_of_bottlenecks_layers_depths = 96;
 const int max_of_bottlenecks_expansion_layers_depths = 24;
 
+//******************************************
+const int bottleneck_0_dw_filter_dim = layer_2_dw_filter_size;
+const int bottleneck_0_dw_strides = layer_2_dw_strides;
+const int bottleneck_0_dw_padding_left = layer_2_dw_padding_left;
+const int bottleneck_0_dw_padding_right = layer_2_dw_padding_right;
+const int bottleneck_0_dw_padding_top = layer_2_dw_padding_top;
+const int bottleneck_0_dw_padding_bottom = layer_2_dw_padding_bottom;
+
+const int bottleneck_0_ifms_depth = input_image_depth;
+const int bottleneck_0_ifms_height = input_image_height;
+const int bottleneck_0_ifms_width = input_image_width;
+const int bottleneck_0_expanded_ifms_depth = layer_0_num_fils;
+const int bottleneck_0_ofms_depth = layer_3_pw_num_fils;
+const int bottleneck_0_ofms_height = bottleneck_0_ifms_height / layer_0_strides;
+const int bottleneck_0_ofms_width = bottleneck_0_ifms_width / layer_0_strides;
+
+const int bottleneck_0_expansion_layer_index = 0;
+const int bottleneck_0_dw_layer_index = 2;
+const int bottleneck_0_projection_layer_index = 3;
+
+const int bottleneck_0_expansion_layer_relu = 6;
+const int bottleneck_0_dw_layer_relu = 6;
+const int bottleneck_0_projection_layer_relu = layer_3_relu;
+//******************************************
 const int bottleneck_1_dw_filter_dim = layer_5_dw_filter_size;
 const int bottleneck_1_dw_strides = layer_5_dw_strides;
 const int bottleneck_1_dw_padding_left = layer_5_dw_padding_left;
@@ -29,6 +53,7 @@ const int bottleneck_1_projection_layer_index = bottleneck_1_expansion_layer_ind
 const int bottleneck_1_expansion_layer_relu = layer_4_relu;
 const int bottleneck_1_dw_layer_relu = 6;
 const int bottleneck_1_projection_layer_relu = layer_6_relu;
+//************************************************
 
 const int bottleneck_2_ifms_depth = layer_7_pw_depth;
 const int bottleneck_2_ifms_height = layer_7_pw_ifm_height;
