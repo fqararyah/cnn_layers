@@ -55,6 +55,6 @@ const bottlenecks_chain_specs _1_chain_specs = { bottleneck_1_ifms_depth,
 void _1_bottlenecks_chain(
 		fms_dt chain_input[], // chain_input_height*chain_input_width*chain_input_depth
 		fms_dt result[max_fms_size], const bottlenecks_chain_specs chain_specs,
-		int starting_h);
+		int starting_h, int filling_row);
 
 #endif
