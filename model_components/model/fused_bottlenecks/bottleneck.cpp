@@ -46,13 +46,13 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[],
 		fms_dt expansion_results_buffer[bottleneck_0_rows_at_once * bottleneck_0_rows_at_once];
 
 		expansion_layer_normalization.fused_scales =
-			layer_0_fused_scales[d_in_out];
+			layer_0_s_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_scales_log_2_shift =
 			expansion_layer_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.relu_6_fused_scale =
-			layer_0_fused_scales_log_2_shifts[d_in_out];
+			layer_0_s_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.fused_zero_point =
-			layer_0_fused_zero_points[d_in_out];
+			layer_0_s_fused_zero_points[d_in_out];
 
 		for (int p_h = 0; p_h < bottleneck_0_expansion_parallelism_h; p_h++)
 		{
@@ -64,7 +64,7 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[],
 				if (starting_h + p_h < bottleneck_0_ifms_height + bottleneck_0_dw_padding_top &&
 					starting_w + p_w >= bottleneck_0_dw_padding_left)
 				{
-					pss_dt expansion_pss = conv_kernel(bottleneck_input, weights_0, layer_0_filter_dim,
+					pss_dt expansion_pss = conv_kernel(bottleneck_input, weights_0, layer_0_s_filter_dim,
 													   d_in_out);
 
 					expansion_results_buffer[p_h * bottleneck_0_expansion_parallelism_w + p_w] =

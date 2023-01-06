@@ -92,15 +92,15 @@ void _6_layer_5_pw(
 //		fms_dt result[max_fms_size]);
 //
 //void _5_layer_0_3x3_conv(
-//		fms_dt channels_buffer[layer_0_depth][3 + _5_stages_layer_1_rows_at_once
+//		fms_dt channels_buffer[layer_0_s_depth][3 + _5_stages_layer_1_rows_at_once
 //				- 1][layer_0_ifm_width],
-//		layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][3][3],
+//		layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][3][3],
 //		fms_dt result[layer_2_dw_depth][layer_1_pw_ifm_width]);
 //
 //void _7_layer_0_3x3_conv(
-//		fms_dt channels_buffer[input_image_depth][layer_0_filter_dim
+//		fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim
 //				+ (_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-//		layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+//		layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 //		fms_dt result[layer_1_pw_depth][_7_stages_layer_1_rows_at_once][layer_1_pw_ifm_width]);
 //
 //void _4_layer_3_pw(
@@ -133,13 +133,13 @@ void _6_layer_5_pw(
 //
 //void _5_stages_fill_channels_buffer(
 //		fms_dt channels[input_image_depth][input_image_height][input_image_width],
-//		fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
+//		fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim
 //				+ (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
 //		int starting_h);
 //
 //void _7_stages_fill_channels_buffer(
 //		fms_dt channels[input_image_depth][input_image_height][input_image_width],
-//		fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim
+//		fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim
 //				+ (_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
 //		int starting_h);
 //
@@ -163,9 +163,9 @@ void _6_layer_5_pw(
 //		int active_row);
 //
 //void _7_layer_0_3x3_conv(
-//		fms_dt channels_buffer[input_image_depth][layer_0_filter_dim
+//		fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim
 //				+ _7_stages_layer_1_rows_at_once - 1][input_image_width],
-//		layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+//		layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 //		fms_dt result[layer_1_pw_depth][_7_stages_layer_1_rows_at_once][layer_1_pw_ifm_width]);
 //
 //void _7_layer_4_pw(

@@ -16,8 +16,8 @@ const int bottleneck_0_projection_parallelism_ofms = bottleneck_0_ofms_depth;
 const int bottleneck_0_projection_parallelism_h = 1;
 const int bottleneck_0_projection_parallelism_w = 1;
 
-const int bottlenck_0_input_buffer_height = layer_0_filter_dim + (bottleneck_0_expansion_parallelism_h - 1) * layer_0_strides;
-const int bottlenck_0_input_buffer_width = layer_0_filter_dim + (bottleneck_0_expansion_parallelism_w - 1) * layer_0_strides;
+const int bottlenck_0_input_buffer_height = layer_0_s_filter_dim + (bottleneck_0_expansion_parallelism_h - 1) * layer_0_strides;
+const int bottlenck_0_input_buffer_width = layer_0_s_filter_dim + (bottleneck_0_expansion_parallelism_w - 1) * layer_0_strides;
 
 const int bottleneck_0_fill_each_time = bottleneck_0_rows_at_once * layer_0_strides;
 

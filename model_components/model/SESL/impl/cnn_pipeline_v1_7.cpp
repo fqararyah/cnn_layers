@@ -368,7 +368,7 @@ void mobilenet_v1_pipeline_7(
 {
 #pragma HLS INLINE off
 
-	layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim];
+	layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim];
 	dw_weights_dt dw_weights_1[v1_layer_1_dw_depth][v1_layer_3_dw_filter_size][v1_layer_3_dw_filter_size];
 	dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size];
 	dw_weights_dt dw_weights_3[v1_layer_3_dw_depth][v1_layer_3_dw_filter_size][v1_layer_3_dw_filter_size];
@@ -383,7 +383,7 @@ void mobilenet_v1_pipeline_7(
 	v1_7_fill_layers_weights(weights_0, dw_weights_1, dw_weights_2, dw_weights_3, pw_weights_2, pw_weights_3, pw_weights_4);
 
 	//#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_0_filter_dim + (v1_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
+	fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim + (v1_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
 
 	fms_dt v1_7_layer_0_3x3_conv_out_0[v1_layer_2_pw_depth][v1_7_stages_layer_1_rows_at_once][v1_layer_2_pw_ifm_width] =
 		{0};
@@ -420,7 +420,7 @@ void mobilenet_v1_pipeline_7(
 	//###########################################################
 
 	//#########################odd###############################
-	fms_dt channels_buffer_1[input_image_depth][layer_0_filter_dim + (v1_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
+	fms_dt channels_buffer_1[input_image_depth][layer_0_s_filter_dim + (v1_7_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
 
 	fms_dt v1_7_layer_0_3x3_conv_out_1[v1_layer_2_pw_depth][v1_7_stages_layer_1_rows_at_once][v1_layer_2_pw_ifm_width] =
 		{0};

@@ -318,7 +318,7 @@ with open(h_file, 'w') as wf:
         seml_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
     seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] ='.format(
-        layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_relu_6_fused_scales[] ='
+        layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_s_relu_6_fused_scales[] ='
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
         seml_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 

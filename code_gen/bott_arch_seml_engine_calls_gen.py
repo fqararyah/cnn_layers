@@ -20,7 +20,7 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 #      relu_6_fused_scales, fused_zero_points,\n\
 #     fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
 
-layer_0_s_block = 'layer_0_s_3x3(weights_0, input_image, result, layer_0_s_fused_scales, layer_0_s_fused_scales_log_2_shifts, layer_0_s_relu_6_fused_scales, layer_0_s_fused_zero_points);\n'
+layer_0_s_block = 'layer_0_s_3x3(weights_0, input_image, result, layer_0_s_fused_scales, layer_0_s_fused_scales_log_2_shifts, layer_0_relu_6_fused_scales, layer_0_s_fused_zero_points);\n'
 
 expansion_projection_block = 'pw_conv(off_chip_weights, channels, result, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\

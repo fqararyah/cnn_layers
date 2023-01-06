@@ -5,9 +5,9 @@
 using namespace std;
 
 void _6_layer_0_s_3x3_conv(
-    fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_0_s_strides][input_image_width],
-    const layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
-    fms_dt result[layer_1_dw_depth][_6_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width])
+	fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_0_s_strides][input_image_width],
+	const layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+	fms_dt result[layer_1_dw_depth][_6_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width])
 {
 #pragma HLS INLINE off
 
@@ -98,7 +98,7 @@ layer_0_s_ofms:
 					normalization.fused_scales =
 						layer_0_s_fused_scales[o_o_d_offset + o_d];
 					normalization.fused_scales_log_2_shift = layer_0_s_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-					normalization.layer_0_s_relu_6_fused_scale =
+					normalization.layer_0_relu_6_fused_scale =
 						layer_0_s_relu_6_fused_scales[o_o_d_offset + o_d];
 					result[o_o_d_offset + o_d][row][w / layer_0_s_strides] =
 						conv_relu_norm(tmp, normalization, 6);
@@ -195,16 +195,16 @@ void _6_layer_1_dw(
 #pragma HLS INLINE off
 
 	const int current_layer = 1;
-    const int upper_height = layer_1_dw_filter_size - layer_1_dw_strides;
-    const fms_dt current_layer_zero_point = conv_fms_zero_points[current_layer];
+	const int upper_height = layer_1_dw_filter_size - layer_1_dw_strides;
+	const fms_dt current_layer_zero_point = conv_fms_zero_points[current_layer];
 
-    const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[current_layer + 1];
-    const rec_scales_dt current_layer_ofms_scale_rec =
-        conv_fms_scales_rec[current_layer + 1];
-    const scales_dt current_layer_ofms_scale = conv_fms_scales[current_layer + 1];
+	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[current_layer + 1];
+	const rec_scales_dt current_layer_ofms_scale_rec =
+		conv_fms_scales_rec[current_layer + 1];
+	const scales_dt current_layer_ofms_scale = conv_fms_scales[current_layer + 1];
 
-    const int current_layer_fused_parameters_offsets =
-        layers_fused_parameters_offsets[current_layer];
+	const int current_layer_fused_parameters_offsets =
+		layers_fused_parameters_offsets[current_layer];
 	const int first_fill_width_offset = layer_1_dw_filter_size - layer_1_dw_padding_left;
 	const int first_fill_top_offset = first_row * layer_1_dw_padding_top;
 	const int num_cols_to_shift = layer_1_dw_filter_size - layer_1_dw_strides;
@@ -319,12 +319,12 @@ layer_1_dw_main_loop:
 
 					fms_quantization_scheme normalization = {0, 0, 0, 0};
 					normalization.fused_scales =
-                        layer_1_dw_fused_scales[o_o_d_offset + o_d];
-                    normalization.fused_scales_log_2_shift = layer_1_dw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-                    normalization.relu_6_fused_scale =
-                        layer_1_dw_relu_6_fused_scales[o_o_d_offset + o_d];
-                    normalization.fused_zero_point =
-                        layer_1_dw_fused_zero_points[o_o_d_offset + o_d];
+						layer_1_dw_fused_scales[o_o_d_offset + o_d];
+					normalization.fused_scales_log_2_shift = layer_1_dw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+					normalization.relu_6_fused_scale =
+						layer_1_dw_relu_6_fused_scales[o_o_d_offset + o_d];
+					normalization.fused_zero_point =
+						layer_1_dw_fused_zero_points[o_o_d_offset + o_d];
 					normalization.ofm_zero_point =
 						current_layer_ofms_zero_point;
 					normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
@@ -477,13 +477,13 @@ void _6_layer_2_pw(
 #pragma HLS INLINE off
 
 	const int current_layer = 2;
-    const int current_layer_fused_parameters_offsets =
-        layers_fused_parameters_offsets[current_layer];
+	const int current_layer_fused_parameters_offsets =
+		layers_fused_parameters_offsets[current_layer];
 
-    const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[current_layer + 1];
-    const rec_scales_dt current_layer_ofms_scale_rec =
-        conv_fms_scales_rec[current_layer + 1];
-    const scales_dt current_layer_ofms_scale = conv_fms_scales[current_layer + 1];
+	const fms_dt current_layer_ofms_zero_point = conv_fms_zero_points[current_layer + 1];
+	const rec_scales_dt current_layer_ofms_scale_rec =
+		conv_fms_scales_rec[current_layer + 1];
+	const scales_dt current_layer_ofms_scale = conv_fms_scales[current_layer + 1];
 
 	// rows for next DW
 	for (int o_o_d = 0;
@@ -508,7 +508,7 @@ void _6_layer_2_pw(
 					for (int d = 0; d < layer_2_pw_parallelism_in; d++)
 					{ // assumption: layer_2_pw_parallelism_in = the depth of layer3 FMs
 #pragma HLS UNROLL
-						// parallelized depth loop
+					  // parallelized depth loop
 						tmp += channels_buffer[d][row][w] * weights[o_o_d_offset + o_d][d];
 						//						if (o_o_d_offset + o_d == 13 && w < 3) {
 						//							cout << d << " " << row << " " << w << " "
@@ -520,20 +520,20 @@ void _6_layer_2_pw(
 					//						cout << "\n" << tmp << "\n";
 					//					}
 					fms_quantization_scheme normalization;
-                    normalization.fused_scales =
-                        layer_2_pw_fused_scales[o_o_d_offset + o_d];
-                    normalization.fused_scales_log_2_shift = layer_2_pw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-                    normalization.relu_6_fused_scale =
-                        layer_2_pw_relu_6_fused_scales[o_o_d_offset + o_d];
-                    normalization.fused_zero_point =
-                        layer_2_pw_fused_zero_points[o_o_d_offset + o_d];
-                    normalization.ofm_zero_point =
-                        current_layer_ofms_zero_point;
-                    normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
-                    normalization.ofm_scale = current_layer_ofms_scale;
-                    result[o_o_d_offset + o_d][row][w] = pw_relu_norm(tmp,
-                                                                      normalization, layer_2_activation);
-                }
+					normalization.fused_scales =
+						layer_2_pw_fused_scales[o_o_d_offset + o_d];
+					normalization.fused_scales_log_2_shift = layer_2_pw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+					normalization.relu_6_fused_scale =
+						layer_2_pw_relu_6_fused_scales[o_o_d_offset + o_d];
+					normalization.fused_zero_point =
+						layer_2_pw_fused_zero_points[o_o_d_offset + o_d];
+					normalization.ofm_zero_point =
+						current_layer_ofms_zero_point;
+					normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
+					normalization.ofm_scale = current_layer_ofms_scale;
+					result[o_o_d_offset + o_d][row][w] = pw_relu_norm(tmp,
+																	  normalization, layer_2_activation);
+				}
 			}
 		}
 	}
@@ -547,7 +547,7 @@ void _6_layer_2_pw(
 	//	}
 }
 
-void _6_layer_3_pw_5_dw(
+void _6_layer_3_pw_4_dw(
 	fms_dt channels_buffer[layer_3_pw_depth][layer_4_dw_strides][layer_4_dw_ifm_width],
 	const weights_dt weights[layer_3_pw_num_fils][layer_3_pw_depth],
 	const dw_weights_dt dw_weights[layer_4_dw_depth][layer_4_dw_filter_size * layer_4_dw_filter_size],
@@ -562,21 +562,21 @@ void _6_layer_3_pw_5_dw(
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
 	const int current_pw_layer = 3;
-    const int current_dw_layer = 4;
-    const int current_pw_fused_parameters_offsets =
-        layers_fused_parameters_offsets[current_pw_layer];
+	const int current_dw_layer = 4;
+	const int current_pw_fused_parameters_offsets =
+		layers_fused_parameters_offsets[current_pw_layer];
 
-    const fms_dt current_pw_ofms_zero_point = conv_fms_zero_points[current_pw_layer + 1];
-    const rec_scales_dt current_pw_ofms_scale_rec = conv_fms_scales_rec[current_pw_layer + 1];
-    const rec_scales_dt current_pw_ofms_scale = conv_fms_scales[current_pw_layer + 1];
+	const fms_dt current_pw_ofms_zero_point = conv_fms_zero_points[current_pw_layer + 1];
+	const rec_scales_dt current_pw_ofms_scale_rec = conv_fms_scales_rec[current_pw_layer + 1];
+	const rec_scales_dt current_pw_ofms_scale = conv_fms_scales[current_pw_layer + 1];
 
-    const int current_dw_fused_parameters_offsets =
-        layers_fused_parameters_offsets[current_dw_layer];
+	const int current_dw_fused_parameters_offsets =
+		layers_fused_parameters_offsets[current_dw_layer];
 
-    const fms_dt current_dw_ofms_zero_point = conv_fms_zero_points[current_dw_layer + 1];
-    const rec_scales_dt current_dw_ofms_scale_rec = conv_fms_scales_rec[current_dw_layer + 1];
-    const rec_scales_dt current_dw_ofms_scale = conv_fms_scales[current_dw_layer + 1];
-    const fms_dt current_dw_ifms_zero_point = conv_fms_zero_points[current_dw_layer];
+	const fms_dt current_dw_ofms_zero_point = conv_fms_zero_points[current_dw_layer + 1];
+	const rec_scales_dt current_dw_ofms_scale_rec = conv_fms_scales_rec[current_dw_layer + 1];
+	const rec_scales_dt current_dw_ofms_scale = conv_fms_scales[current_dw_layer + 1];
+	const fms_dt current_dw_ifms_zero_point = conv_fms_zero_points[current_dw_layer];
 
 	const int filter_shift_rows = layer_4_dw_filter_size - layer_4_dw_strides;
 	const int filter_shift_offset = filter_shift_rows;
@@ -662,7 +662,7 @@ layer_3_pw_4_dw_main_loop:
 					{
 #pragma HLS UNROLL
 						// parallelized filters loop
-						for (int row = 0; row < _6_stages_layer_4_rows_at_once;
+						for (int row = 0; row < _6_stages_layer_3_rows_at_once;
 							 row++)
 						{
 #pragma HLS UNROLL
@@ -681,20 +681,20 @@ layer_3_pw_4_dw_main_loop:
 
 								fms_quantization_scheme normalization = {0, 0,
 																		 0, 0};
- normalization.fused_scales =
-                                    layer_3_pw_fused_scales[o_o_d_offset + o_d];
-                                normalization.fused_scales_log_2_shift = layer_3_pw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-                                normalization.relu_6_fused_scale =
-                                    layer_3_pw_relu_6_fused_scales[o_o_d_offset + o_d];
-                                normalization.fused_zero_point =
-                                    layer_3_pw_fused_zero_points[o_o_d_offset + o_d];
-                                normalization.ofm_zero_point =
-                                    current_pw_ofms_zero_point;
-                                normalization.ofm_scale_rec =
-                                    current_pw_ofms_scale_rec;
-                                normalization.ofm_scale = current_pw_ofms_scale;
-                                fms_dt scaled_val = pw_relu_norm(tmp,
-                                                                 normalization, layer_3_activation);
+								normalization.fused_scales =
+									layer_3_pw_fused_scales[o_o_d_offset + o_d];
+								normalization.fused_scales_log_2_shift = layer_3_pw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+								normalization.relu_6_fused_scale =
+									layer_3_pw_relu_6_fused_scales[o_o_d_offset + o_d];
+								normalization.fused_zero_point =
+									layer_3_pw_fused_zero_points[o_o_d_offset + o_d];
+								normalization.ofm_zero_point =
+									current_pw_ofms_zero_point;
+								normalization.ofm_scale_rec =
+									current_pw_ofms_scale_rec;
+								normalization.ofm_scale = current_pw_ofms_scale;
+								fms_dt scaled_val = pw_relu_norm(tmp,
+																 normalization, layer_3_activation);
 
 								lower[o_o_d_offset + o_d][row][pw_w_index] =
 									scaled_val;
@@ -797,22 +797,17 @@ layer_3_pw_4_dw_main_loop:
 				}
 
 				fms_quantization_scheme normalization = {0, 0, 0, 0};
-                normalization.fused_scales = layer_4_dw_fused_scales[o_o_d_offset + o_d];
-                normalization.fused_scales_log_2_shift = layer_4_dw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-                normalization.relu_6_fused_scale =
-                    layer_4_dw_relu_6_fused_scales[o_o_d_offset + o_d];
-                normalization.fused_zero_point =
-                    layer_4_dw_fused_zero_points[o_o_d_offset + o_d];
-                normalization.ofm_zero_point = current_dw_ofms_zero_point;
-                normalization.ofm_scale_rec = current_dw_ofms_scale_rec;
-                normalization.ofm_scale = current_dw_ofms_scale;
-                result[o_o_d_offset + o_d][w - pw_iterations_before_first_dw] =
-                    dw_relu_norm(tmp, normalization, 6);
-
-				//				if (o_o_d == 0 && o_d == 0 && w < 3) {
-				//					cout << "\n" << tmp << " >> "
-				//							<< dw_relu_norm(tmp, normalization, 6) << "\n";
-				//				}
+				normalization.fused_scales = layer_4_dw_fused_scales[o_o_d_offset + o_d];
+				normalization.fused_scales_log_2_shift = layer_4_dw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+				normalization.relu_6_fused_scale =
+					layer_4_dw_relu_6_fused_scales[o_o_d_offset + o_d];
+				normalization.fused_zero_point =
+					layer_4_dw_fused_zero_points[o_o_d_offset + o_d];
+				normalization.ofm_zero_point = current_dw_ofms_zero_point;
+				normalization.ofm_scale_rec = current_dw_ofms_scale_rec;
+				normalization.ofm_scale = current_dw_ofms_scale;
+				result[o_o_d_offset + o_d][w - pw_iterations_before_first_dw] =
+					dw_relu_norm(tmp, normalization, 6);
 
 				//#####################end DW################
 				//#####################shift and fill intermediate#################
@@ -849,22 +844,6 @@ layer_3_pw_4_dw_main_loop:
 			} // o_d
 		}	  // w
 	}
-	//	cout << "\nupper\n";
-	//	for (int w = 0; w < layer_3_pw_ifm_width; w++) {
-	//		cout << upper[13][w] << " ";
-	//	}
-	//	cout << "\nlower\n";
-	//	for (int h = 0; h < _7_stages_layer_4_rows_at_once; h++) {
-	//		for (int w = 0; w < layer_3_pw_ifm_width; w++) {
-	//			cout << lower[13][h][w] << " ";
-	//		}
-	//		cout << "\n";
-	//	}
-	//	cout << "\nresult\n";
-	//	for (int w = 0; w < layer_5_pw_ifm_width; w++) {
-	//		cout << result[13][w] << " ";
-	//	}
-	//	cout << "\n";
 
 layer_3_pw_dw_shift_loop:
 	for (int o_o_d = 0;
@@ -876,7 +855,7 @@ layer_3_pw_dw_shift_loop:
 		{
 #pragma HLS UNROLL factor = 4
 		//###################PW#######################
-		layer_1_shift_loops:
+		layer_3_shift_loops:
 			for (int o_d = 0;
 				 o_d < layer_3_pw_parallelism_out; o_d++)
 			{
@@ -923,17 +902,17 @@ void _6_layer_5_pw(
 					tmp += ((fms_dt)channels_buffer[d][w]) * weights[o_d][d];
 				}
 				fms_quantization_scheme normalization = {0, 0, 0, 0};
-                normalization.fused_scales = layer_5_pw_fused_scales[o_o_d_offset + o_d];
-                normalization.fused_scales_log_2_shift = layer_5_pw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-                normalization.relu_6_fused_scale =
-                    layer_5_pw_relu_6_fused_scales[o_o_d_offset + o_d];
-                normalization.fused_zero_point =
-                    layer_5_pw_fused_zero_points[o_o_d_offset + o_d];
-                normalization.ofm_zero_point = conv_fms_zero_points[6 + 1];
-                normalization.ofm_scale_rec = conv_fms_scales_rec[6 + 1];
-                normalization.ofm_scale = conv_fms_scales[6 + 1];
-                result[offset_in_result] = pw_relu_norm(tmp, normalization,
-                                                        layer_5_activation);
+				normalization.fused_scales = layer_5_pw_fused_scales[o_o_d_offset + o_d];
+				normalization.fused_scales_log_2_shift = layer_5_pw_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+				normalization.relu_6_fused_scale =
+					layer_5_pw_relu_6_fused_scales[o_o_d_offset + o_d];
+				normalization.fused_zero_point =
+					layer_5_pw_fused_zero_points[o_o_d_offset + o_d];
+				normalization.ofm_zero_point = conv_fms_zero_points[6 + 1];
+				normalization.ofm_scale_rec = conv_fms_scales_rec[6 + 1];
+				normalization.ofm_scale = conv_fms_scales[6 + 1];
+				result[offset_in_result] = pw_relu_norm(tmp, normalization,
+														layer_5_activation);
 			}
 		}
 	}
@@ -1000,213 +979,5 @@ void cnn_pipeline_6_mob_v2(
 	fms_dt channels[input_image_depth][input_image_height][input_image_width],
 	fms_dt result[max_fms_size])
 {
-// #pragma HLS INLINE off
-
-// #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
-
-// 	//#########################even###############################
-// 	fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_0_s_strides][input_image_width];
-// #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 1
-// #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 2
-// 	fms_dt _6_layer_0_3x3_conv_out_0[layer_1_dw_depth][_6_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width] =
-// 		{0};
-
-// 	//##############
-// 	fms_dt _6_layer_1_dw_upper[layer_1_dw_depth][layer_1_dw_filter_size - layer_1_dw_strides][layer_1_dw_ifm_width];
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_1_dw_upper complete dim = 3
-
-// 	fms_dt _6_layer_1_dw_out_0[layer_2_pw_depth][_6_stages_layer_2_rows_at_once][layer_2_pw_ifm_width] =
-// 		{0};
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_1_dw_out_0 complete dim = 1
-// 	//##############
-
-// 	fms_dt _6_layer_2_pw_out_0[layer_3_pw_depth][_6_stages_layer_3_rows_at_once][layer_4_dw_ifm_width] =
-// 		{0};
-
-// 	fms_dt _6_layer_4_dw_upper[layer_4_dw_depth][layer_4_dw_ifm_width];
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_dw_upper cyclic factor = layer_3_pw_parallelism_out dim = 1
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_dw_upper cyclic factor = 6 dim = 2
-
-// 	fms_dt _6_layer_4_dw_lower[layer_4_dw_depth][layer_4_dw_strides][layer_4_dw_ifm_width];
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_dw_lower cyclic factor = 2 dim = 1
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_dw_lower complete dim = 2
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_dw_lower cyclic factor = 12 dim = 3
-
-// 	fms_dt _6_layer_4_5_pw_dw_out_0[layer_5_pw_depth][layer_5_pw_ifm_width] = {
-// 		0};
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_0_3x3_conv_out_0 complete dim = 1
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_0_3x3_conv_out_0 complete dim = 2
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_2_pw_out_0 complete dim = 1
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_2_pw_out_0 complete dim = 2
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_0 cyclic factor = layer_3_pw_parallelism_in / 2 dim = 1
-// 	//###########################################################
-
-// 	//#########################odd###############################
-// 	fms_dt channels_buffer_1[input_image_depth][layer_0_s_filter_dim + (_6_stages_layer_2_rows_at_once - 1) * layer_0_s_strides][input_image_width];
-// #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 1
-// #pragma HLS ARRAY_PARTITION variable = channels_buffer_1 complete dim = 2
-
-// 	fms_dt _6_layer_0_3x3_conv_out_1[layer_1_dw_depth][_6_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width] =
-// 		{0};
-
-// 	fms_dt _6_layer_1_dw_out_1[layer_1_dw_depth][layer_1_dw_ifm_width] = {0};
-
-// 	//##############
-
-// 	fms_dt _6_layer_1_dw_out_1[layer_2_pw_depth][_6_stages_layer_2_rows_at_once][layer_2_pw_ifm_width] =
-// 		{0};
-// 	//##############
-// 	fms_dt _6_layer_2_pw_out_1[layer_3_pw_depth][_6_stages_layer_3_rows_at_once][layer_4_dw_ifm_width] =
-// 		{0};
-
-// 	fms_dt _6_layer_4_5_pw_dw_out_1[layer_5_pw_depth][layer_5_pw_ifm_width] = {
-// 		0};
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_0_3x3_conv_out_1 complete dim = 1
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_0_3x3_conv_out_1 complete dim = 2
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_1_dw_out_1 complete dim = 1
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_2_pw_out_1 complete dim = 1
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_2_pw_out_1 complete dim = 2
-
-// #pragma HLS ARRAY_PARTITION variable = _6_layer_4_5_pw_dw_out_1 cyclic factor = layer_3_pw_parallelism_in / 2 dim = 1
-
-// 	//###########################################################
-// 	// pipeline filling##########################################
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_0, 0);
-// 	//##########
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_1, 2);
-// 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-// 						_6_layer_0_3x3_conv_out_0);
-// 	//##########
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_0, 6);
-// 	_6_layer_0_3x3_conv(channels_buffer_1, weights_0,
-// 						_6_layer_0_3x3_conv_out_1);
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_0, 1);
-// 	//##########
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_1, 10);
-// 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-// 						_6_layer_0_3x3_conv_out_0);
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_1, 0);
-// 	//##########
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_0, 14);
-// 	_6_layer_0_3x3_conv(channels_buffer_1, weights_0,
-// 						_6_layer_0_3x3_conv_out_1);
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_0, 0);
-// 	_6_layer_2_pw(_6_layer_1_dw_out_1, pw_weights_3, _6_layer_2_pw_out_1);
-// 	//##########
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_1, 18);
-// 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-// 						_6_layer_0_3x3_conv_out_0);
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_1, 0);
-// 	_6_layer_2_pw(_6_layer_1_dw_out_0, pw_weights_3, _6_layer_2_pw_out_0);
-// 	_6_layer_3_pw_5_dw(_6_layer_2_pw_out_1, pw_weights_4, dw_weights_5,
-// 					   _6_layer_4_dw_upper, _6_layer_4_dw_lower, _6_layer_4_5_pw_dw_out_1,
-// 					   0);
-// 	//##########
-// 	int even_odd = 1;
-// 	int h = 6;
-// main_pipeline_loop:
-// 	for (; h < switch_point_fms_height; h++)
-// 	{
-// 		if (even_odd)
-// 		{
-// 			_6_stages_fill_channels_buffer(channels, channels_buffer_0,
-// 										   (h * _6_stages_layer_0_s_rows_at_once - 1) * layer_0_s_strides);
-// 			_6_layer_0_3x3_conv(channels_buffer_1, weights_0,
-// 								_6_layer_0_3x3_conv_out_1);
-// 			_6_layer_1_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2,
-// 						  _6_layer_1_dw_upper, _6_layer_1_dw_out_0, 0);
-// 			_6_layer_2_pw(_6_layer_1_dw_out_1, pw_weights_3,
-// 						  _6_layer_2_pw_out_1);
-// 			_6_layer_3_pw_5_dw(_6_layer_2_pw_out_0, pw_weights_4, dw_weights_5,
-// 							   _6_layer_4_dw_upper, _6_layer_4_dw_lower,
-// 							   _6_layer_4_5_pw_dw_out_0, 1);
-// 			_6_layer_5_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, result,
-// 						  h - 6);
-// 		}
-// 		else
-// 		{
-// 			_6_stages_fill_channels_buffer(channels, channels_buffer_1,
-// 										   (h * _6_stages_layer_0_s_rows_at_once - 1) * layer_0_s_strides);
-// 			_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-// 								_6_layer_0_3x3_conv_out_0);
-// 			_6_layer_1_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2,
-// 						  _6_layer_1_dw_upper, _6_layer_1_dw_out_1, 0);
-// 			_6_layer_2_pw(_6_layer_1_dw_out_0, pw_weights_3,
-// 						  _6_layer_2_pw_out_0);
-// 			_6_layer_3_pw_5_dw(_6_layer_2_pw_out_1, pw_weights_4, dw_weights_5,
-// 							   _6_layer_4_dw_upper, _6_layer_4_dw_lower,
-// 							   _6_layer_4_5_pw_dw_out_1, 1);
-// 			_6_layer_5_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, result,
-// 						  h - 6);
-// 		}
-// 		even_odd = 1 - even_odd;
-// 	}
-// 	//###########################################################
-// 	// pipeline flushing##########################################
-// 	_6_layer_5_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, result,
-// 				  switch_point_fms_height - 6);
-// 	//##########
-// 	_6_layer_3_pw_5_dw(_6_layer_2_pw_out_0, pw_weights_4, dw_weights_5,
-// 					   _6_layer_4_dw_upper, _6_layer_4_dw_lower, _6_layer_4_5_pw_dw_out_0,
-// 					   1);
-// 	_6_layer_5_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, result,
-// 				  switch_point_fms_height - 5);
-// 	//##########
-// 	_6_layer_2_pw(_6_layer_1_dw_out_1, pw_weights_3, _6_layer_2_pw_out_1);
-// 	_6_layer_3_pw_5_dw(_6_layer_2_pw_out_1, pw_weights_4, dw_weights_5,
-// 					   _6_layer_4_dw_upper, _6_layer_4_dw_lower, _6_layer_4_5_pw_dw_out_1,
-// 					   1);
-// 	_6_layer_5_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, result,
-// 				  switch_point_fms_height - 4);
-// 	//##########
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_0, 0);
-// 	_6_layer_2_pw(_6_layer_1_dw_out_0, pw_weights_3, _6_layer_2_pw_out_0);
-// 	_6_layer_3_pw_5_dw(_6_layer_2_pw_out_0, pw_weights_4, dw_weights_5,
-// 					   _6_layer_4_dw_upper, _6_layer_4_dw_lower, _6_layer_4_5_pw_dw_out_0,
-// 					   1);
-// 	_6_layer_5_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, result,
-// 				  switch_point_fms_height - 3);
-// 	//##########
-// 	_6_layer_0_3x3_conv(channels_buffer_1, weights_0,
-// 						_6_layer_0_3x3_conv_out_1);
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_1, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_1, 0);
-// 	_6_layer_2_pw(_6_layer_1_dw_out_1, pw_weights_3, _6_layer_2_pw_out_1);
-// 	_6_layer_3_pw_5_dw(_6_layer_2_pw_out_1, pw_weights_4, dw_weights_5,
-// 					   _6_layer_4_dw_upper, _6_layer_4_dw_lower, _6_layer_4_5_pw_dw_out_1,
-// 					   1);
-// 	_6_layer_5_pw(_6_layer_4_5_pw_dw_out_1, pw_weights_6, result,
-// 				  switch_point_fms_height - 2);
-// 	//#########
-// 	_6_stages_fill_channels_buffer(channels, channels_buffer_0,
-// 								   (switch_point_fms_height * _6_stages_layer_0_s_rows_at_once - 1) * layer_0_s_strides);
-// 	_6_layer_0_3x3_conv(channels_buffer_0, weights_0,
-// 						_6_layer_0_3x3_conv_out_0);
-// 	_6_layer_1_dw(_6_layer_0_3x3_conv_out_0, dw_weights_2, _6_layer_1_dw_upper,
-// 				  _6_layer_1_dw_out_0, 0);
-// 	// padding bottom
-// 	for (int d = 0; d < layer_2_pw_depth; d++)
-// 	{
-// 		for (int w = 0; w < layer_2_pw_ifm_width; w++)
-// 		{
-// 			_6_layer_1_dw_out_0[d][_6_stages_layer_0_s_rows_at_once - 1][w] = 0;
-// 		}
-// 	}
-// 	_6_layer_2_pw(_6_layer_1_dw_out_0, pw_weights_3, _6_layer_2_pw_out_0);
-// 	_6_layer_3_pw_5_dw(_6_layer_2_pw_out_0, pw_weights_4, dw_weights_5,
-// 					   _6_layer_4_dw_upper, _6_layer_4_dw_lower, _6_layer_4_5_pw_dw_out_0,
-// 					   1);
-// 	_6_layer_5_pw(_6_layer_4_5_pw_dw_out_0, pw_weights_6, result,
-// 				  switch_point_fms_height - 1);
+#pragma HLS INLINE off
 }

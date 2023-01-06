@@ -10,14 +10,14 @@
 using namespace std;
 
 void _5_fill_layers_weights(
-		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+		layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 		dw_weights_dt dw_weights_1[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
 		weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth],
 		weights_dt pw_weights_2[layer_3_pw_num_fils][layer_3_pw_depth],
 		weights_dt pw_weights_3[layer_3_pw_num_fils][layer_3_pw_depth]);
 
 void _7_fill_layers_weights(
-		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+		layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 		dw_weights_dt dw_weights_1[layer_2_dw_depth][layer_2_dw_filter_size][layer_2_dw_filter_size],
 		dw_weights_dt dw_weights_3[layer_5_dw_depth][layer_5_dw_filter_size][layer_5_dw_filter_size],
 		weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth],
@@ -26,7 +26,7 @@ void _7_fill_layers_weights(
 		weights_dt pw_weights_4[layer_4_pw_num_fils][layer_4_pw_depth]);
 
 void fill_layer_0_weights(
-		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3]);
+		layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][3][3]);
 
 void fill_dw_layer_weights(
 		const dw_weights_dt src[max_conv_d][max_conv_h * max_conv_w],
@@ -73,16 +73,16 @@ void fill_fused_scales_and_zero_points(
 		const biases_dt layer_fused_zero_points[],
 		biases_dt fused_zero_points[], const int layer_num_filters);
 
-//void v1_3_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+//void v1_3_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 //                         dw_weights_dt dw_weights_1[layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
 //                         weights_dt pw_weights_2[v1_layer_3_pw_num_fils][v1_layer_3_pw_depth]);
 //
-//void v1_4_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+//void v1_4_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 //                         dw_weights_dt dw_weights_1[layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
 //                         dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
 //                         weights_dt pw_weights_2[v1_layer_3_pw_num_fils][v1_layer_3_pw_depth]);
 
-//void v1_7_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][layer_0_filter_dim][layer_0_filter_dim],
+//void v1_7_fill_layers_weights(layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 //	dw_weights_dt dw_weights_1[v1_layer_2_dw_depth][v1_layer_5_dw_filter_size][v1_layer_5_dw_filter_size],
 //	dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size],
 //	dw_weights_dt dw_weights_3[v1_layer_5_dw_depth][v1_layer_5_dw_filter_size][v1_layer_5_dw_filter_size],

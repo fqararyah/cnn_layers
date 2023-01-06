@@ -35,15 +35,15 @@ void fill_channels_buffer(
 }
 
 void _5_layer_0_3x3_conv_half(
-	fms_dt channels_buffer[layer_0_depth][3 + _5_stages_layer_1_rows_at_once - 1][_5_stages_input_image_width],
-	layer_0_weights_dt weights[layer_0_num_fils][layer_0_depth][3][3],
+	fms_dt channels_buffer[layer_0_s_depth][3 + _5_stages_layer_1_rows_at_once - 1][_5_stages_input_image_width],
+	layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][3][3],
 	fms_dt result[layer_1_pw_depth][_5_stages_layer_1_pw_input_width])
 {
 #pragma HLS INLINE off
 
 layer_0_ofms:
 	for (int o_o_d = 0;
-		 o_o_d < layer_0_num_fils / sesl_layer_0_parallelism_ofms; o_o_d++)
+		 o_o_d < layer_0_s_num_fils / sesl_layer_0_parallelism_ofms; o_o_d++)
 	{
 		// depth loop
 		int o_o_d_offset = o_o_d * sesl_layer_0_parallelism_ofms;
@@ -62,7 +62,7 @@ layer_0_ofms:
 #pragma HLS UNROLL
 			// parallelized filters loop
 			layer_0_d_loops:
-				for (int d = 0; d < layer_0_depth; d++)
+				for (int d = 0; d < layer_0_s_depth; d++)
 				{
 #pragma HLS UNROLL
 				// parallelized depth loop
@@ -355,7 +355,7 @@ void _5_conv_pipeline(
 
 #pragma HLS ARRAY_PARTITION variable = dw_weights_1 type = complete dim = 1
 
-	layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3];
+	layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][3][3];
 
 	weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth];
 	weights_dt pw_weights_2[layer_2_pw_num_fils][layer_2_pw_depth];
@@ -432,7 +432,7 @@ width_loop_division:
 		{
 			if (odd_even)
 			{
-				fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width);
+				fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_s_filter_dim - layer_0_strides)), 1- part_in_width);
 				if (h >= 1)
 				{
 					_5_layer_0_3x3_conv_half(channels_buffer_1, weights_0,
@@ -461,7 +461,7 @@ width_loop_division:
 			}
 			else
 			{
-				fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
+				fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_s_filter_dim - layer_0_strides)), 1- part_in_width );
 				if (h >= 1)
 				{
 					_5_layer_0_3x3_conv_half(channels_buffer_0, weights_0,
@@ -497,7 +497,7 @@ width_loop_division:
 			{
 				if (odd_even)
 				{
-					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_s_filter_dim - layer_0_strides)), 1- part_in_width );
 					_5_layer_0_3x3_conv_half(channels_buffer_1, weights_0,
 										_5_layer_0_3x3_conv_out_1);
 					_5_layer_1_pw(_5_layer_0_3x3_conv_out_0, pw_weights_1,
@@ -515,7 +515,7 @@ width_loop_division:
 				}
 				else
 				{
-					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_s_filter_dim - layer_0_strides)), 1- part_in_width );
 					_5_layer_0_3x3_conv_half(channels_buffer_0, weights_0,
 										_5_layer_0_3x3_conv_out_0);
 					_5_layer_1_pw(_5_layer_0_3x3_conv_out_1, pw_weights_1,
@@ -542,7 +542,7 @@ width_loop_division:
 			{
 				if (odd_even)
 				{
-					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_0, h, part_in_width * (_5_stages_input_image_width - (layer_0_s_filter_dim - layer_0_strides)), 1- part_in_width );
 					if (h >= 1)
 					{
 						_5_layer_0_3x3_conv_half(channels_buffer_1, weights_0,
@@ -578,7 +578,7 @@ width_loop_division:
 				}
 				else
 				{
-					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_filter_dim - layer_0_strides)), 1- part_in_width );
+					fill_channels_buffer(channels, channels_buffer_1, h, part_in_width * (_5_stages_input_image_width - (layer_0_s_filter_dim - layer_0_strides)), 1- part_in_width );
 					if (h >= 1)
 					{
 						_5_layer_0_3x3_conv_half(channels_buffer_0, weights_0,
