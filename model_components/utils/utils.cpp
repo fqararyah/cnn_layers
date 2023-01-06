@@ -92,9 +92,9 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 }
 
 void fill_layer_0_weights(
-		layer_0_weights_dt weights_0[layer_0_num_fils][layer_0_depth][3][3]) {
-	for (int i = 0; i < layer_0_num_fils; i++) {
-		for (int j = 0; j < layer_0_depth; j++) {
+		layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][3][3]) {
+	for (int i = 0; i < layer_0_s_num_fils; i++) {
+		for (int j = 0; j < layer_0_s_depth; j++) {
 			for (int k = 0; k < 3; k++) {
 				for (int l = 0; l < 3; l++) {
 					weights_0[i][j][k][l] = i * j * k * l % 8;

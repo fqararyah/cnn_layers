@@ -30,9 +30,9 @@ const int fused_scales_bit_width = 16;//48
 const int fused_scales_integer_part_width = 0;
 const int relu_6_fused_scales_bit_width = 32;
 const int layer_0_relu_6_fused_scales_bit_width = 38;
-const int fused_scales_log_2_shifts_bit_width = 5;//2^5=32
+const int fused_scales_log_2_shifts_bit_width = 6;//2^6=64
 const int rec_scales_bit_width = 24;//48
-const int rec_scales_integer_part_width = 8;
+const int rec_scales_integer_part_width = 10;
 
 const int biases_bit_width = 32;
 

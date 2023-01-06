@@ -20,7 +20,7 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = cyclic factor = main_buffers_partitining_factor
 //#pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
-//	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
+	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
 //		dump_layer_output(
 //				"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
 //				tmp_channels, 56*56*24, 56, 56);

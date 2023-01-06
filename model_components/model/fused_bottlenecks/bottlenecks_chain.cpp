@@ -187,9 +187,10 @@ void save_chain_output(fms_dt chain_output[], fms_dt result[max_fms_size],
 	}
 }
 
-void _1_bottlenecks_chain(fms_dt channels[max_fms_size], fms_dt chain_input[], // chain_input_height*chain_input_width*chain_input_depth
-						  fms_dt result[max_fms_size], const bottlenecks_chain_specs chain_specs,
-						  int starting_h, int filling_row)
+void _0_1_bottlenecks_chain(fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
+							fms_dt chain_input[], // chain_input_height*chain_input_width*chain_input_depth
+							fms_dt result[max_fms_size], const bottlenecks_chain_specs chain_specs,
+							int starting_h, int filling_row)
 {
 #pragma HLS INLINE off
 
@@ -220,7 +221,7 @@ void _1_bottlenecks_chain(fms_dt channels[max_fms_size], fms_dt chain_input[], /
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0, filling_row, false,
 													  layer_0_fms_zero_point);
-
+	filling_row++;
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 filling_row, num_of_ifm_groups_read_each_time);
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,

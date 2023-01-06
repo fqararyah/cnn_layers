@@ -8,18 +8,17 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
-on_chip_conv_and_layers = 8
+on_chip_conv_and_layers = cgc.PILELINE_LEN
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
-weights_file_format = {'c':'weights_{}_c.txt', 'pw': 'weights_{}_pw.txt'}
+weights_file_format = {'s':'conv2d_{}_s_weights.txt', 'pw': 'conv2d_{}_pw_weights.txt'}
 conv_pw_weights_h_file = '../model_components/model/headers/on_chip_conv_pw_weights.h' #'./out/dw_weights.h'
 
-weights_declaration_string = {'c':'const static layer_0_weights_dt weights_*i*[layer_*i*_num_fils][layer_*i*_depth]'+\
-    '[layer_*i*_filter_dim][layer_*i*_filter_dim]' \
+weights_declaration_string = {'s':'const static layer_0_weights_dt weights_*i*[layer_*i*_s_num_fils][layer_*i*_s_depth]'+\
+    '[layer_*i*_s_filter_dim][layer_*i*_s_filter_dim]' \
         ,'pw': 'const static weights_dt pw_weights_*i*[layer_*i*_pw_num_fils][layer_*i*_pw_depth]'}
 
 layers_types = utils.read_layers_types()
 layers_weights = utils.read_layers_weight_shapes(layers_types)
-expansion_projection = utils.read_expansion_projection()
 
 num_of_generated_layers = 0
 with open(conv_pw_weights_h_file, 'w') as f:
@@ -29,11 +28,10 @@ with open(conv_pw_weights_h_file, 'w') as f:
     f.write("#define CONV_PW_WEIGHTS\n")
 
     for ii in range(len(layers_weights)):
-        if layers_types[ii] == 'dw' or layers_types[ii] == 'pw' and expansion_projection[ii] == 0:
-            continue
-
-        if ii > on_chip_conv_and_layers:
+        if ii >= on_chip_conv_and_layers:
             break
+        if layers_types[ii] == 'dw':
+            continue
         
         num_of_generated_layers += 1
         weights_file = weights_files_location +  weights_file_format[layers_types[ii]].format(str(ii))

@@ -8,7 +8,7 @@ bit_width = 8
 from_files = True
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
     cgc.MODEL_NAME)
-reading_weights_file_format = 'weights_{}_dw.txt'
+reading_weights_file_format = 'conv2d_{}_dw_weights.txt'
 # './out/dw_weights.h'
 dw_weights_h_file = '../model_components/model/headers/dw_weights.h'
 
@@ -24,7 +24,7 @@ last_layer = cgc.LAST_LAYER_TO_GENERATE + 1 if \
     cgc.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
 first_layer = cgc.FIRST_LAYER_TO_GENERATE
 
-last_pipeline_layer = cgc.PILELINE_LEN + 1 if cgc.PIPELINE == True else 0
+last_pipeline_layer = cgc.PILELINE_LEN if cgc.PIPELINE == True else 0
 first_pipeline_layer = 0
 
 for i in range(first_layer):

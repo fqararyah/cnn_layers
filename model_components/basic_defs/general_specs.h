@@ -27,8 +27,10 @@ const int start_with_pw = 1;
 
 //maxs for buffers
 const int max_conv_d = 1280 / alpha; //to_automate
-const int max_conv_h = 3;
-const int max_conv_w = 3;
+const int max_filter_hw_dim = 3;
+const int max_padding = 1;
+const int max_conv_h = max_filter_hw_dim;
+const int max_conv_w = max_filter_hw_dim;
 const int max_fms_size =
 	DF ? switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth: 112 * 112 * 96;
 const int max_tmp_fms_size = 56 * 56 * 24;
