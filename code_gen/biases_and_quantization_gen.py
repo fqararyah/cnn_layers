@@ -196,7 +196,7 @@ with open(h_file, 'w') as wf:
     seml_fused_scales = []
     seml_fused_scales_log_2_shifts = []
     seml_relu_6_fused_scales = []
-    for layer_index in range(len(layers_weights_shapes)):
+    for layer_index in range(cgc.LAST_LAYER_TO_GENERATE):
         fused_zero_points = []
         fused_scales = []
         fused_scales_log_2_shifts = []
@@ -302,23 +302,21 @@ with open(h_file, 'w') as wf:
     wf.write(layers_fused_parameters_offsets_declaration_string +
              str(layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
 
-    seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = \n'.format(
-        layer_index)
+    seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = \n'
+
     seml_fused_zero_points_declaration_string += '{ ' + str(
         seml_fused_zero_points).replace('[', '').replace(']', '') + '};\n'
 
-    seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales[] ='.format(
-        layer_index)
+    seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales[] ='
     seml_fused_scales_declaration_string += '{ ' + str(
         seml_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
-    seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[] ='.format(
-        layer_index)
+    seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[] ='
     seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
         seml_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
-    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] ='.format(
-        layer_index) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_s_relu_6_fused_scales[] ='
+    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] ='\
+         if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_s_relu_6_fused_scales[] ='
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
         seml_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
