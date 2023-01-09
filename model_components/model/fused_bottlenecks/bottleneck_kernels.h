@@ -1,39 +1,40 @@
 #include "bottlenecks_parallelism.h"
 
-pss_dt conv_kernel(fms_dt ifms_buffer[][layer_0_s_filter_dim * layer_0_s_filter_dim],
-					  const static layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
-					  const int filter_dim, int conv_d);
-					  
+pss_dt conv_kernel(fms_dt ifms_buffer[],
+				   const layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+				   const int filter_dim, int conv_d);
+
 pss_dt expansion_kernel(fms_dt ifms_buffer[], const int ifms_depth,
-		const weights_dt weights[][16], int filter_index, int h, int w,
-		const int parallelism_w);
+						const weights_dt weights[], int filter_index, int h, int w,
+						const int parallelism_w);
 
 void fill_dw_ifms_buffer_upper_part(fms_dt ifms_buffer[], fms_dt *filling_src,
-		const int strides, const int filter_dim, int ifms_w_offset,
-		const int ifms_width, const int ifms_depth, int filling_d,
-		const int padding_left);
+									const int strides, const int filter_dim, int ifms_w_offset,
+									const int ifms_width, const int ifms_depth, int filling_d,
+									const int padding_left);
 void fill_dw_ifms_buffer_lower_part(fms_dt ifms_buffer[], fms_dt *filling_src,
-		const int strides, const int filter_dim, int filling_d);
+									const int strides, const int filter_dim, int filling_d,
+									const int additional_offset_in_filling_src,
+									const int negative_shift_in_filling_dst);
 void update_dw_ifms_buffer_upper_part(fms_dt *dw_ifms_buffer_upper_part,
-		fms_dt *filling_src, const int strides, const int filter_dim,
-		int ifms_w_offset, const int ifms_width, const int ifms_depth,
-		int filling_d, const int padding_left,
-		const int first_fill_from_left_offset);
-void shift_dw_ifms_buffer_horizontally(fms_dt ifms_buffer[], const int strides,
-		const int filter_dim, int conv_d);
+									  fms_dt *filling_src, const int strides, const int filter_dim,
+									  int ifms_w_offset, const int ifms_width, const int ifms_depth,
+									  int filling_d, const int padding_left,
+									  const int first_fill_from_left_offset, bool do_shift);
+void shift_dw_ifms_buffer_horizontally_3x3_s1(fms_dt ifms_buffer[][3], const int strides, const int buffer_depth);
 dw_pss_dt dw_kernel(fms_dt ifms_buffer[],
-		const dw_weights_dt weights[][max_dw_filter_area_in_a_chain],
-		const int filter_dim, int conv_d);
+					const dw_weights_dt weights[][max_dw_filter_area_in_a_chain],
+					const int filter_dim, int conv_d);
 
 void projection_kernel(fms_dt ifms_val, const int ofms_depth,
-		const weights_dt weights[][max_of_bottlenecks_layers_depths],
-		pss_dt pss_buffer[], int conv_d);
+					   const weights_dt weights[],
+					   pss_dt pss_buffer[], int conv_d);
 
 void normalize_projection_kernel_output(pss_dt pss_buffer[],
-		fms_dt normalized_buffer[],
-		const fused_scales_dt projection_layer_fused_scales[],
-		const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
-		const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
-		const biases_dt projection_layer_fused_zero_points[],
-		const int ofms_depth, const int layer_relu,
-		int bottleneck_projection_layer_index);
+										fms_dt normalized_buffer[],
+										const fused_scales_dt projection_layer_fused_scales[],
+										const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
+										const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
+										const biases_dt projection_layer_fused_zero_points[],
+										const int ofms_depth, const int layer_relu,
+										int bottleneck_projection_layer_index);

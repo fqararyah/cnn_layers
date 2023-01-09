@@ -29,15 +29,11 @@ void top_func(
 //			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_4.txt",
 //			result, 200704, 112, 112);
 
-	//first time, only fill second row with valid data
-	fms_dt chain_input[_1_chain_specs.chain_input_size];
-	fms_dt chain_output[_1_chain_specs.chain_output_size];
-	_1_bottlenecks_chain(chain_input, // chain_input_height*chain_input_width*chain_input_depth
-			result, _1_chain_specs, 0);
+//first time, only fill second row with valid data
+	fms_dt chain_input[chain_0_1_input_size];
+	fms_dt chain_output[chain_0_1_output_size];
 
-//	dump_layer_output(
-//			"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
-//			result, 75264, 56, 56);
-
+	_0_1_bottlenecks_chain(input_image, result);
 	avgpool(result, fc_input);
+	//seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
 }

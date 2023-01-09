@@ -4,55 +4,45 @@
 #include "bottleneck_kernels.h"
 #include "bottleneck.h"
 
-struct bottlenecks_chain_specs
-{
-	int chain_ifms_depth;
-	int chain_ifms_height;
-	int chain_ifms_width;
-	int chain_ofms_depth;
-	int chain_ofms_height;
-	int chain_ofms_width;
-	int chain_output_num_tiles_d;
-	int chain_output_num_tiles_h;
-	int chain_output_num_tiles_w;
+const int chain_0_1_ifms_depth = bottleneck_0_ifms_depth;
+const int chain_0_1_ifms_height = bottleneck_0_ifms_height;
+const int chain_0_1_ifms_width = bottleneck_0_ifms_width;
+const int chain_0_1_ofms_depth = bottleneck_1_ofms_depth;
+const int chain_0_1_ofms_height = bottleneck_1_ofms_height;
+const int chain_0_1_ofms_width = bottleneck_1_ofms_width;
+const int chain_0_1_output_num_tiles_d = (bottleneck_1_ofms_depth / pw_tile_d)
+		+ ((layer_5_pw_num_fils / pw_tile_d) != 0);
+const int chain_0_1_output_num_tiles_h = (bottleneck_1_ofms_height / pw_tile_h)
+		+ ((layer_5_pw_ofm_height % pw_tile_h) != 0);
+const int chain_0_1_output_num_tiles_w = (bottleneck_1_ofms_width / pw_tile_w)
+		+ ((layer_5_pw_ofm_width % pw_tile_w) != 0);
 
-	int chain_max_filter_dim;
-	int first_filter_dim;
-	int chain_max_strides;
-	int first_strides;
-	int first_dw_padding_left;
-	int first_dw_padding_right;
-	int first_dw_padding_top;
-	int first_dw_padding_bottom;
-	int last_dw_padding_left;
-	int last_dw_padding_right;
-	int last_dw_padding_top;
-	int last_dw_padding_bottom;
-	int chain_max_rows_at_once;
-	int chain_input_height;
-	int chain_input_size;
-	int chain_output_size;
-	int first_dw_layer_in_the_chain;
-};
+const int chain_0_1_max_filter_dim = bottleneck_1_dw_filter_dim;
+const int chain_0_1_first_filter_dim = bottleneck_0_dw_filter_dim;
+const int chain_0_1_max_strides = layer_0_s_strides;
+const int chain_0_1_first_strides = layer_0_s_strides;
+const int chain_0_1_first_padding_left = 0;
+const int chain_0_1_max_rows_at_once =
+		bottleneck_0_rows_at_once > bottleneck_1_rows_at_once ?
+				bottleneck_0_rows_at_once : bottleneck_0_rows_at_once;
+const int chain_0_1_in_buffer_height = chain_0_1_max_filter_dim
+		+ (chain_0_1_max_rows_at_once - 1) * chain_0_1_max_strides;
+const int chain_0_1_rows_filled_each_time = chain_0_1_max_rows_at_once
+		* chain_0_1_max_strides;
+const int chain_0_1_extra_cols_filled_first_time = chain_0_1_in_buffer_height
+		- chain_0_1_rows_filled_each_time;
+const int chain_0_1_extra_rows_filled_first_time = chain_0_1_in_buffer_height
+		- chain_0_1_rows_filled_each_time;
+const int chain_0_1_input_size = bottlenck_0_input_buffer_size;
+const int chain_0_1_output_size = bottlenck_1_output_buffer_size;
+const int chain_0_1_first_dw_layer_in_the_chain = 1;
 
-const bottlenecks_chain_specs _1_chain_specs = {bottleneck_1_ifms_depth,
-												bottleneck_1_ifms_height, bottleneck_1_ifms_width,
-												bottleneck_1_ofms_depth, bottleneck_1_ofms_height,
-												bottleneck_1_ofms_width, (bottleneck_1_ofms_depth / pw_tile_d) + ((layer_6_pw_num_fils / pw_tile_d) != 0),
-												(bottleneck_1_ofms_height / pw_tile_h) + ((layer_6_pw_ofm_height % pw_tile_h) != 0),
-												(bottleneck_1_ofms_width / pw_tile_w) + ((layer_6_pw_ofm_width % pw_tile_w) != 0),
+const int chain_0_1_bottleneck_0_rows_at_once = 2;
+const int chain_0_1_bottleneck_1_rows_at_once = 1;
 
-												bottleneck_1_dw_filter_dim, bottleneck_1_dw_filter_dim,
-												bottleneck_1_dw_strides, bottleneck_1_dw_strides,
-												bottleneck_1_dw_padding_left, bottleneck_1_dw_padding_right,
-												bottleneck_1_dw_padding_top, bottleneck_1_dw_padding_bottom,
-												bottleneck_1_dw_padding_left, bottleneck_1_dw_padding_right,
-												bottleneck_1_dw_padding_top, bottleneck_1_dw_padding_bottom, 1, 2, // chain_max_rows_at_once * chain_max_strides
-												bottlenck_1_input_buffer_size, bottlenck_1_output_buffer_size, 5};
-
-void _0_1_bottlenecks_chain(fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
-							fms_dt chain_input[], // chain_input_height*chain_input_width*chain_input_depth
-							fms_dt result[max_fms_size], const bottlenecks_chain_specs chain_specs,
-							int starting_h, int filling_row);
+void _0_1_bottlenecks_chain(
+		fms_grp_dt channels[input_image_depth
+				* input_image_num_fms_groups_in_a_channel],
+		fms_dt result[max_fms_size]);
 
 #endif
