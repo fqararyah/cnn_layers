@@ -1,4 +1,5 @@
 #include "bottleneck.h"
+
 void bottleneck_0_fill_projection_kernel_weights(
 		const weights_dt layer_weights[][bottleneck_0_expanded_ifms_depth],
 		weights_dt kernel_weights[], int d) {
