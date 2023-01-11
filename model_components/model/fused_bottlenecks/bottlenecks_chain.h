@@ -34,11 +34,13 @@ const int chain_0_1_extra_cols_filled_first_time = chain_0_1_in_buffer_height
 const int chain_0_1_extra_rows_filled_first_time = chain_0_1_in_buffer_height
 		- chain_0_1_rows_filled_each_time;
 const int chain_0_1_input_size = bottlenck_0_input_buffer_size;
-const int chain_0_1_output_size = bottlenck_1_output_buffer_size;
+const int chain_0_1_output_size = bottleneck_1_output_buffer_size;
 const int chain_0_1_first_dw_layer_in_the_chain = 1;
 
 const int chain_0_1_bottleneck_0_rows_at_once = 2;
 const int chain_0_1_bottleneck_1_rows_at_once = 1;
+
+const int bottleneck_0_1_communication_buffer_partitioning_factor_in_d = 2;
 
 void _0_1_bottlenecks_chain(
 		fms_grp_dt channels[input_image_depth

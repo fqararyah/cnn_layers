@@ -46,7 +46,7 @@ const int bottleneck_1_ofms_depth = layer_5_pw_num_fils;
 const int bottleneck_1_ofms_height = bottleneck_1_ifms_height / bottleneck_1_dw_strides;
 const int bottleneck_1_ofms_width = bottleneck_1_ifms_width / bottleneck_1_dw_strides;
 
-const int bottleneck_1_expansion_layer_index = 4;
+const int bottleneck_1_expansion_layer_index = 3;
 const int bottleneck_1_dw_layer_index = bottleneck_1_expansion_layer_index + 1;
 const int bottleneck_1_projection_layer_index = bottleneck_1_expansion_layer_index + 2;
 
