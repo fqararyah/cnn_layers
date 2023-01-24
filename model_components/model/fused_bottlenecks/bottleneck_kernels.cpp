@@ -11,10 +11,13 @@ pss_dt conv_kernel(fms_dt ifms_buffer[],
 conv_kernel:
 	for (int d = 0; d < input_image_depth; d++)
 	{
+#pragma HLS UNROLL
 		for (int c_h = 0; c_h < filter_dim; c_h++)
 		{
+#pragma HLS UNROLL
 			for (int c_w = 0; c_w < filter_dim; c_w++)
 			{
+#pragma HLS UNROLL
 				pss += ifms_buffer[d * ifms_buffer_hw + c_h * bottlenck_0_input_buffer_width + c_w] * weights_0[conv_d][d][c_h][c_w];
 			}
 		}
@@ -175,8 +178,8 @@ fill_dw_ifms_buffer_lower_part:
 }
 
 dw_pss_dt dw_kernel(fms_dt ifms_buffer[],
-					const dw_weights_dt weights[][max_dw_filter_area_in_a_chain],
-					const int filter_dim, int conv_d)
+					const dw_weights_dt weights[],
+					const int filter_dim)
 {
 #pragma HLS INLINE
 
@@ -184,9 +187,11 @@ dw_pss_dt dw_kernel(fms_dt ifms_buffer[],
 dw_kernel:
 	for (int c_h = 0; c_h < filter_dim; c_h++)
 	{
+#pragma HLS UNROLL
 		for (int c_w = 0; c_w < filter_dim; c_w++)
 		{
-			pss += ifms_buffer[c_h * filter_dim + c_w] * weights[conv_d][c_h * filter_dim + c_w];
+#pragma HLS UNROLL
+			pss += ifms_buffer[c_h * filter_dim + c_w] * weights[c_h * filter_dim + c_w];
 		}
 	}
 	return pss;
@@ -205,10 +210,6 @@ projection_kernel:
 	for (int i = 0; i < ofms_depth; i++)
 	{
 #pragma HLS UNROLL
-		if (conv_d == 0)
-		{
-			pss_buffer[i] = 0;
-		}
 		pss_buffer[i] += weights[i] * ifms_val;
 	}
 }
@@ -216,11 +217,14 @@ projection_kernel:
 void copy_projection_kernel_output_buffer(pss_dt projection_kernel_output_buffer[],
 										  pss_dt projection_kernel_output_buffer_prev[], const int ofms_depth)
 {
+#pragma HLS INLINE
+
 copy_projection_kernel_output_buffer:
 	for (int i = 0; i < ofms_depth; i++)
 	{
 #pragma HLS UNROLL
 		projection_kernel_output_buffer_prev[i] = projection_kernel_output_buffer[i];
+		projection_kernel_output_buffer[i] = 0;
 	}
 }
 //*************************

@@ -25,8 +25,8 @@ void update_dw_ifms_buffer_upper_part(fms_dt *dw_ifms_buffer_upper_part,
 void shift_dw_ifms_buffer_horizontally_3x3_s1(fms_dt ifms_buffer[][3], const int buffer_depth);
 void shift_dw_ifms_buffer_horizontally_3x3_s2(fms_dt ifms_buffer[][6], const int buffer_depth);
 dw_pss_dt dw_kernel(fms_dt ifms_buffer[],
-					const dw_weights_dt weights[][max_dw_filter_area_in_a_chain],
-					const int filter_dim, int conv_d);
+					const dw_weights_dt weights[],
+					const int filter_dim);
 
 void projection_kernel(fms_dt ifms_val, const int ofms_depth,
 					   const weights_dt weights[],

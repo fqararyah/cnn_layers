@@ -20,7 +20,7 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 #      relu_6_fused_scales, fused_zero_points,\n\
 #     fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
 
-layer_0_s_block = 'layer_0_s_3x3(weights_0, input_image, result, layer_0_s_fused_scales, layer_0_s_fused_scales_log_2_shifts, layer_0_relu_6_fused_scales, layer_0_s_fused_zero_points);\n'
+layer_0_s_block = 'layer_0_s_3x3(input_image, weights_0, result);\n'
 
 expansion_projection_block = 'pw_conv(off_chip_weights, channels, result, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
@@ -126,7 +126,8 @@ print(max_fms_size_in_seml, max_fms_size_in_seml_layer_index)
 def get_layer_index_in_execution_sequence(layers_execution_sequence, layer_index):
     index_in_execution = 0
     conv2d_layers_count = 0
-    assert(layer_index > 0)
+    if layer_index <=0:
+        return 0
     while conv2d_layers_count < layer_index:
         if 'conv2d' in layers_execution_sequence[index_in_execution]:
             conv2d_layers_count += 1

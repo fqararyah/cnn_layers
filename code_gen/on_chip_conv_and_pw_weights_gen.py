@@ -28,7 +28,7 @@ with open(conv_pw_weights_h_file, 'w') as f:
     f.write("#define CONV_PW_WEIGHTS\n")
 
     for ii in range(len(layers_weights)):
-        if ii >= on_chip_conv_and_layers:
+        if ii >= on_chip_conv_and_layers or ii > 0 and cgc.PIPELINE == False:
             break
         if layers_types[ii] == 'dw':
             continue

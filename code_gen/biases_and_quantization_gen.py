@@ -268,7 +268,7 @@ with open(h_file, 'w') as wf:
 
                 assert(relu_6_fused_scales[-1] > 256)
 
-        if cgc.PIPELINE == True and layer_index < cgc.PILELINE_LEN:
+        if cgc.PIPELINE == True and layer_index < cgc.PILELINE_LEN or layer_index == 0:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
                 layer_index, layers_types[layer_index])
             fused_zero_points_declaration_string += '{ ' + str(
