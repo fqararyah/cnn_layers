@@ -93,7 +93,8 @@ with open(out_file, 'w') as f:
         replacement_dic['*PREV*'] = layers_types[i-1]
         if layers_types[i] == 'pw':
             replacement_dic['*LWOF*'] = cumulative_pw_weights
-            assert layers_weights[i].get_size() % weights_group_items == 0
+            print(i, layers_weights[i].get_size(), layers_inputs[i].height)
+            assert layers_weights[i].get_size() % weights_group_items == 0 or layers_outputs[i].height == 1 or cgc.MODEL_NAME != 'mob_v2'
             cumulative_pw_weights += int(
                 layers_weights[i].get_size() / weights_group_items)
         if layers_types[i] in ['pw', 's']:

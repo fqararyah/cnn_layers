@@ -11,11 +11,11 @@ const int chain_0_1_ofms_depth = bottleneck_1_ofms_depth;
 const int chain_0_1_ofms_height = bottleneck_1_ofms_height;
 const int chain_0_1_ofms_width = bottleneck_1_ofms_width;
 const int chain_0_1_output_num_tiles_d = (bottleneck_1_ofms_depth / pw_tile_d)
-		+ ((layer_5_pw_num_fils / pw_tile_d) != 0);
+		+ ((bottleneck_1_ofms_depth / pw_tile_d) != 0);
 const int chain_0_1_output_num_tiles_h = (bottleneck_1_ofms_height / pw_tile_h)
-		+ ((layer_5_pw_ofm_height % pw_tile_h) != 0);
+		+ ((bottleneck_1_ofms_height % pw_tile_h) != 0);
 const int chain_0_1_output_num_tiles_w = (bottleneck_1_ofms_width / pw_tile_w)
-		+ ((layer_5_pw_ofm_width % pw_tile_w) != 0);
+		+ ((bottleneck_1_ofms_width % pw_tile_w) != 0);
 
 const int chain_0_1_max_filter_dim = bottleneck_1_dw_filter_dim;
 const int chain_0_1_first_filter_dim = bottleneck_0_dw_filter_dim;

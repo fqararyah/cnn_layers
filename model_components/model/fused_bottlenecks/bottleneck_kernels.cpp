@@ -229,13 +229,13 @@ copy_projection_kernel_output_buffer:
 }
 //*************************
 fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
-										const fused_scales_dt projection_layer_fused_scales[],
-										const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
-										const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
-										const biases_dt projection_layer_fused_zero_points[],
-										const int offset_d,
-										const int layer_relu,
-										int bottleneck_projection_layer_index)
+										  const fused_scales_dt projection_layer_fused_scales[],
+										  const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
+										  const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
+										  const biases_dt projection_layer_fused_zero_points[],
+										  const int offset_d,
+										  const int layer_relu,
+										  int bottleneck_projection_layer_index)
 {
 #pragma HLS INLINE
 
@@ -268,3 +268,26 @@ fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 	//	}
 }
 //*************************
+pss_f_dt normalize_projection_kernel_output_no_q(pss_dt pss_buffer[],
+												 const fused_scales_dt projection_layer_fused_scales[],
+												 const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
+												 const biases_dt projection_layer_fused_zero_points[],
+												 const int offset_d,
+												 const int layer_relu,
+												 int bottleneck_projection_layer_index)
+{
+
+	fms_quantization_scheme projection_layer_normalization;
+
+	projection_layer_normalization.ofm_scale =
+		conv_fms_scales[bottleneck_projection_layer_index + 1];
+
+	projection_layer_normalization.fused_scales =
+		projection_layer_fused_scales[offset_d];
+	projection_layer_normalization.fused_scales_log_2_shift =
+		projection_layer_fused_scales_log_2_shifts[offset_d];
+	projection_layer_normalization.fused_zero_point =
+		projection_layer_fused_zero_points[offset_d];
+		
+	return pw_relu_norm_no_q_no_relu(pss_buffer[offset_d], projection_layer_normalization, 0);
+}

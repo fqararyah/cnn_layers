@@ -8,7 +8,7 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
-on_chip_conv_and_layers = cgc.PILELINE_LEN
+on_chip_conv_and_layers = cgc.PILELINE_LEN if cgc.PIPELINE else 1
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 weights_file_format = {'s':'conv2d_{}_s_weights.txt', 'pw': 'conv2d_{}_pw_weights.txt'}
 conv_pw_weights_h_file = '../model_components/model/headers/on_chip_conv_pw_weights.h' #'./out/dw_weights.h'
@@ -28,7 +28,7 @@ with open(conv_pw_weights_h_file, 'w') as f:
     f.write("#define CONV_PW_WEIGHTS\n")
 
     for ii in range(len(layers_weights)):
-        if ii >= on_chip_conv_and_layers or ii > 0 and cgc.PIPELINE == False:
+        if ii >= on_chip_conv_and_layers:
             break
         if layers_types[ii] == 'dw':
             continue

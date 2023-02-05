@@ -1,5 +1,6 @@
 #include "bottlenecks_chain.h"
 
+#if CHAIN_LENGTH == 9
 // padding left and right
 // padding top: just do not fill
 void bottleneck_chain_0_1_2_fill_ifm_groups_buffer(
@@ -552,7 +553,7 @@ void bottleneck_2_within_pipeline_stage(
     pss_dt bottleneck_2_projection_kernel_output[bottleneck_2_ofms_depth],
     pss_dt bottleneck_2_projection_kernel_output_prev[bottleneck_2_ofms_depth],
     fms_dt bottleneck_1_2_communication_buffer[bottleneck_2_ifms_depth][bottleneck_2_ifms_width],
-    fms_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width],
+    pss_f_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width],
     fms_dt bottleneck_2_dw_lower_buffer[bottleneck_2_expanded_ifms_depth][bottleneck_2_dw_filter_dim * bottleneck_2_dw_strides],
     fms_dt bottleneck_2_previous_pass_dw_input_1
         [bottleneck_2_expanded_ifms_depth][bottleneck_2_inter_pass_dw_input_height][bottleneck_2_inter_pass_dw_input_width],
@@ -570,6 +571,7 @@ void bottleneck_2_within_pipeline_stage(
     mob_v2_bottleneck_2(bottleneck_2_input,
                         bottleneck_2_projection_kernel_output,
                         bottleneck_2_projection_kernel_output_prev,
+                        bottleneck_1_2_communication_buffer,
                         chain_seml_communication_buffer,
                         bottleneck_2_dw_lower_buffer,
                         bottleneck_2_previous_pass_dw_input_1,
@@ -584,30 +586,16 @@ void bottleneck_2_within_pipeline_stage(
             const int fill_input_index = w * bottleneck_2_dw_strides + bottleneck_2_first_fill_offset;
             fill_bottleneck_2_input(bottleneck_1_2_communication_buffer,
                                     bottleneck_2_input, fill_input_index);
-            // if (starting_h % 2 == 1)
-            // {
             mob_v2_bottleneck_2(bottleneck_2_input,
                                 bottleneck_2_projection_kernel_output,
                                 bottleneck_2_projection_kernel_output_prev,
+                                bottleneck_1_2_communication_buffer,
                                 chain_seml_communication_buffer,
                                 bottleneck_2_dw_lower_buffer,
                                 bottleneck_2_previous_pass_dw_input_1,
                                 bottleneck_2_previous_pass_dw_input_2,
                                 starting_h,
                                 fill_input_index);
-            // }
-            // else
-            // {
-            //     mob_v2_bottleneck_2(bottleneck_2_input,
-            //                         bottleneck_2_projection_kernel_output,
-            //                         bottleneck_2_projection_kernel_output_prev,
-            //                         chain_seml_communication_buffer,
-            //                         bottleneck_2_dw_lower_buffer,
-            //                         bottleneck_2_previous_pass_dw_input_2,
-            //                         bottleneck_2_previous_pass_dw_input_1,
-            //                         starting_h,
-            //                         fill_input_index);
-            // }
         }
     }
 
@@ -615,11 +603,10 @@ void bottleneck_2_within_pipeline_stage(
     {
 #pragma HLS PIPELINE
         chain_seml_communication_buffer[d][bottleneck_2_ofms_width - 1] =
-            normalize_projection_kernel_output(
+            normalize_projection_kernel_output_no_q(
                 bottleneck_2_projection_kernel_output_prev,
                 layer_8_pw_fused_scales,
                 layer_8_pw_fused_scales_log_2_shifts,
-                layer_8_pw_relu_6_fused_scales,
                 layer_8_pw_fused_zero_points, d, layer_8_activation,
                 bottleneck_2_projection_layer_index);
     }
@@ -680,8 +667,24 @@ void copy_bottleneck_1_2_communication_buffer(
     }
 }
 
+void write_to_tmp_channels_buffer(fms_dt bottleneck_1_2_communication_buffer[bottleneck_1_ofms_depth][bottleneck_1_ofms_width],
+                                  fms_dt tmp_channels_buffer[chain_0_1_2_ofms_depth][skip_connection_depth][chain_0_1_2_ofms_width],
+                                  const int starting_h)
+{
+#pragma HLS INLINE off
+
+    for (int d = 0; d < bottleneck_1_ofms_depth; d++)
+    {
+        for (int w = 0; w < bottleneck_1_ofms_width; w++)
+        {
+            tmp_channels_buffer[d][starting_h][w] = bottleneck_1_2_communication_buffer[d][w];
+        }
+    }
+}
+
 void write_chain_seml_communication_buffer(
-    fms_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width],
+    pss_f_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width],
+    fms_dt tmp_channels_buffer[chain_0_1_2_ofms_depth][skip_connection_depth][chain_0_1_2_ofms_width],
     fms_dt result[max_fms_size], const int starting_h)
 {
 #pragma HLS INLINE off
@@ -689,6 +692,15 @@ void write_chain_seml_communication_buffer(
     const int num_tiles_hw = layer_6_pw_num_of_tiles_h * layer_6_pw_num_of_tiles_w;
     const int tile_in_h = starting_h / pw_tile_h;
     const int in_tile_h = starting_h % pw_tile_h;
+
+    const int h_in_tmp_channels_buffer = starting_h % skip_connection_depth;
+
+    scales_dt skip_connection_other_layer_scale = conv_fms_scales[bottleneck_2_projection_layer_index - skip_connection_depth + 1];
+    biases_dt skip_connection_other_layer_zero_point = conv_fms_zero_points[bottleneck_2_projection_layer_index - skip_connection_depth + 1];
+
+    rec_scales_dt add_layer_scale_reciprocal =
+        add_layers_fms_scales_rec[bottleneck_2_projection_layer_index + 1];
+    biases_dt add_layer_zero_point = add_layers_fms_zero_points[bottleneck_2_projection_layer_index + 1];
 
     for (int d = 0; d < chain_0_1_2_ofms_depth; d++)
     {
@@ -705,7 +717,17 @@ void write_chain_seml_communication_buffer(
 
             const int index_in_result = tile_index * pw_tile_size + in_tile_index;
 
-            result[index_in_result] = chain_seml_communication_buffer[d][w];
+            pss_f_dt tmp_channels_scaled_val =
+                skip_connection_other_layer_scale *
+                (tmp_channels_buffer[d][h_in_tmp_channels_buffer][w] - skip_connection_other_layer_zero_point);
+
+            pss_f_dt addition_result = (chain_seml_communication_buffer[d][w] + tmp_channels_scaled_val) *
+                                           add_layer_scale_reciprocal +
+                                       add_layer_zero_point;
+            addition_result = addition_result + 0.5 - (addition_result < 0);
+            addition_result = clamp(addition_result);
+
+            result[index_in_result] = addition_result;
         }
     }
 }
@@ -722,7 +744,7 @@ void _0_1_2_bottlenecks_chain(
     fms_dt bottleneck_0_1_communication_buffer_prev[bottleneck_0_ofms_depth][chain_0_1_2_bottleneck_0_rows_at_once][bottleneck_0_ofms_width];
     fms_dt bottleneck_1_2_communication_buffer[bottleneck_1_ofms_depth][bottleneck_1_ofms_width];
     fms_dt bottleneck_1_2_communication_buffer_prev[bottleneck_1_ofms_depth][bottleneck_1_ofms_width];
-    fms_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width];
+    pss_f_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width];
 
 #pragma HLS ARRAY_PARTITION variable = bottleneck_0_1_communication_buffer type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = bottleneck_0_1_communication_buffer_prev type = cyclic factor = bottleneck_0_1_communication_buffer_partitioning_factor_in_d dim = 1
@@ -735,6 +757,8 @@ void _0_1_2_bottlenecks_chain(
 #pragma HLS ARRAY_PARTITION variable = chain_input complete dim = 2
 
     fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * chain_0_1_rows_filled_each_time];
+
+    fms_dt tmp_channels_buffer[chain_0_1_2_ofms_depth][skip_connection_depth][chain_0_1_2_ofms_width];
     //******************************************************************************************************************
     fms_dt bottleneck_0_input[bottleneck_0_input_buffer_size];
     pss_dt bottleneck_0_projection_kernel_output[bottleneck_0_ofms_depth];
@@ -802,16 +826,19 @@ void _0_1_2_bottlenecks_chain(
 
     //#######################################pipeline filling###########################################
     //-------------------------------------------------------------------------
-    // bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-    // 											chain_0_1_extra_rows_filled_first_time,
-    // 											input_image_num_fms_groups_in_width); // to do
-    // bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-    // 														 chain_input, chain_0_1_extra_rows_filled_first_time, false,
-    // 														 layer_0_s_ifms_zero_point);
+#if HW == FPGA
+    bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+                                                  chain_0_1_extra_rows_filled_first_time,
+                                                  input_image_num_fms_groups_in_width); // to do
+    bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+                                                             chain_input, chain_0_1_extra_rows_filled_first_time, false,
+                                                             layer_0_s_ifms_zero_point);
+#elif HW == CPU
     chain_0_1_2_fill_channels_buffer_cpu(channels, chain_input, 0, false, layer_0_s_ifms_zero_point);
     chain_0_1_2_fill_channels_buffer_cpu(channels,
                                          chain_input, chain_0_1_extra_rows_filled_first_time, false,
                                          layer_0_s_ifms_zero_point);
+#endif
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     bottleneck_0_pipeline_filling_stage(chain_input, bottleneck_0_input,
                                         bottleneck_0_projection_kernel_output,
@@ -829,13 +856,16 @@ void _0_1_2_bottlenecks_chain(
 
     int filling_row = filling_h * chain_0_1_rows_filled_each_time + chain_0_1_extra_rows_filled_first_time;
     //-------------------------------------------------------------------------
+#if HW == CPU
     chain_0_1_2_fill_channels_buffer_cpu(channels,
                                          chain_input, filling_row, true,
                                          layer_0_s_ifms_zero_point);
-    // bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-    // 											filling_row, num_of_ifm_groups_read_each_time);
-    // bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-    // 														 chain_input, filling_row, false, layer_0_s_ifms_zero_point);
+#elif HW == CPU
+    bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+                                                  filling_row, num_of_ifm_groups_read_each_time);
+    bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+                                                             chain_input, filling_row, false, layer_0_s_ifms_zero_point);
+#endif
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     filling_h++;
     // XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX
@@ -860,14 +890,17 @@ void _0_1_2_bottlenecks_chain(
 
     filling_row = filling_h * chain_0_1_rows_filled_each_time + chain_0_1_extra_rows_filled_first_time;
     //-------------------------------------------------------------------------
+#if HW == CPU
     chain_0_1_2_fill_channels_buffer_cpu(channels,
                                          chain_input, filling_row, true,
                                          layer_0_s_ifms_zero_point);
-    // bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-    // 											filling_row, num_of_ifm_groups_read_each_time);
-    // bottleneck_chain_fill_channels_buffer_from_groups_buffer(
-    // 	fms_groups_buffer, chain_input, filling_row, false,
-    // 	layer_0_s_ifms_zero_point);
+#elif HW == FPGA
+    bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+                                                  filling_row, num_of_ifm_groups_read_each_time);
+    bottleneck_chain_fill_channels_buffer_from_groups_buffer(
+        fms_groups_buffer, chain_input, filling_row, false,
+        layer_0_s_ifms_zero_point);
+#endif
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     filling_h++;
     bottleneck_0_h++;
@@ -898,17 +931,21 @@ void _0_1_2_bottlenecks_chain(
     copy_bottleneck_1_2_communication_buffer(
         bottleneck_1_2_communication_buffer,
         bottleneck_1_2_communication_buffer_prev);
+    write_to_tmp_channels_buffer(bottleneck_1_2_communication_buffer, tmp_channels_buffer, bottleneck_2_h % skip_connection_depth);
 
     filling_row = filling_h * chain_0_1_rows_filled_each_time + chain_0_1_extra_rows_filled_first_time;
     //-------------------------------------------------------------------------
+#if HW == CPU
     chain_0_1_2_fill_channels_buffer_cpu(channels,
                                          chain_input, filling_row, true,
                                          layer_0_s_ifms_zero_point);
-    // bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-    // 											filling_row, num_of_ifm_groups_read_each_time);
-    // bottleneck_chain_fill_channels_buffer_from_groups_buffer(
-    // 	fms_groups_buffer, chain_input, filling_row, false,
-    // 	layer_0_s_ifms_zero_point);
+#elif HW == FPGA
+    bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+                                                  filling_row, num_of_ifm_groups_read_each_time);
+    bottleneck_chain_fill_channels_buffer_from_groups_buffer(
+        fms_groups_buffer, chain_input, filling_row, false,
+        layer_0_s_ifms_zero_point);
+#endif
     //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
     filling_h++;
     bottleneck_0_h++;
@@ -925,6 +962,7 @@ void _0_1_2_bottlenecks_chain(
                                            bottleneck_2_previous_pass_dw_input_2,
                                            bottleneck_2_h, bottleneck_2_dw_ifms_zero_point);
         write_chain_seml_communication_buffer(chain_seml_communication_buffer,
+                                              tmp_channels_buffer,
                                               result, writing_to_result_h);
 
         bottleneck_1_within_pipeline_stage(bottleneck_1_input,
@@ -938,6 +976,7 @@ void _0_1_2_bottlenecks_chain(
         copy_bottleneck_1_2_communication_buffer(
             bottleneck_1_2_communication_buffer,
             bottleneck_1_2_communication_buffer_prev);
+        write_to_tmp_channels_buffer(bottleneck_1_2_communication_buffer, tmp_channels_buffer, (bottleneck_2_h + 1) % skip_connection_depth);
 
         bottleneck_0_within_pipeline_stage(chain_input, bottleneck_0_input,
                                            bottleneck_0_projection_kernel_output,
@@ -954,14 +993,17 @@ void _0_1_2_bottlenecks_chain(
 
         filling_row = filling_h * chain_0_1_rows_filled_each_time + chain_0_1_extra_rows_filled_first_time;
         //-------------------------------------------------------------------------
+#if HW == CPU
         chain_0_1_2_fill_channels_buffer_cpu(channels,
                                              chain_input, filling_row, true,
                                              layer_0_s_ifms_zero_point);
-        // bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-        // 											filling_row, num_of_ifm_groups_read_each_time);
-        // bottleneck_chain_fill_channels_buffer_from_groups_buffer(
-        // 	fms_groups_buffer, chain_input, filling_row, false,
-        // 	layer_0_s_ifms_zero_point);
+#elif HW == FPGA
+        bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+                                                      filling_row, num_of_ifm_groups_read_each_time);
+        bottleneck_chain_fill_channels_buffer_from_groups_buffer(
+            fms_groups_buffer, chain_input, filling_row, false,
+            layer_0_s_ifms_zero_point);
+#endif
         //+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
         bottleneck_0_h++;
@@ -978,6 +1020,7 @@ void _0_1_2_bottlenecks_chain(
                                        bottleneck_2_previous_pass_dw_input_2,
                                        bottleneck_2_h, bottleneck_2_dw_ifms_zero_point);
     write_chain_seml_communication_buffer(chain_seml_communication_buffer,
+                                          tmp_channels_buffer,
                                           result, writing_to_result_h);
     bottleneck_2_h++;
     writing_to_result_h = bottleneck_2_h - 1;
@@ -990,6 +1033,7 @@ void _0_1_2_bottlenecks_chain(
                                        bottleneck_1_previous_pass_dw_input_1,
                                        bottleneck_1_previous_pass_dw_input_2, bottleneck_1_h,
                                        bottleneck_1_dw_ifms_zero_point);
+    write_to_tmp_channels_buffer(bottleneck_1_2_communication_buffer, tmp_channels_buffer, (bottleneck_2_h + 1) % skip_connection_depth);
     bottleneck_2_within_pipeline_stage(bottleneck_2_input, bottleneck_2_projection_kernel_output,
                                        bottleneck_2_projection_kernel_output_prev,
                                        bottleneck_1_2_communication_buffer, chain_seml_communication_buffer,
@@ -998,7 +1042,9 @@ void _0_1_2_bottlenecks_chain(
                                        bottleneck_2_previous_pass_dw_input_2,
                                        bottleneck_2_h, bottleneck_2_dw_ifms_zero_point);
     write_chain_seml_communication_buffer(chain_seml_communication_buffer,
-                                          result, writing_to_result_h);
+                                          tmp_channels_buffer,
+                                          result,
+                                          writing_to_result_h);
     bottleneck_1_h++;
     bottleneck_2_h++;
     writing_to_result_h = bottleneck_2_h - 1;
@@ -1020,6 +1066,7 @@ void _0_1_2_bottlenecks_chain(
                                        bottleneck_1_previous_pass_dw_input_2,
                                        bottleneck_1_h,
                                        bottleneck_1_dw_ifms_zero_point);
+    write_to_tmp_channels_buffer(bottleneck_1_2_communication_buffer, tmp_channels_buffer, (bottleneck_2_h + 1) % skip_connection_depth);
     bottleneck_2_within_pipeline_stage(bottleneck_2_input, bottleneck_2_projection_kernel_output,
                                        bottleneck_2_projection_kernel_output_prev,
                                        bottleneck_1_2_communication_buffer, chain_seml_communication_buffer,
@@ -1028,6 +1075,8 @@ void _0_1_2_bottlenecks_chain(
                                        bottleneck_2_previous_pass_dw_input_2,
                                        bottleneck_2_h, bottleneck_2_dw_ifms_zero_point);
     write_chain_seml_communication_buffer(chain_seml_communication_buffer,
+                                          tmp_channels_buffer,
                                           result, writing_to_result_h);
     //#######################################end pipeline draining###########################################
 }
+#endif

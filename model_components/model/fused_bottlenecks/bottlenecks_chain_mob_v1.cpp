@@ -1,6 +1,6 @@
 #include "bottlenecks_chain.h"
 
-#if CHAIN_LENGTH == 6 && MODEL_ID == 2
+#if CHAIN_LENGTH == 6 && MODEL_ID == 1
 
 // padding left and right
 // padding top: just do not fill
@@ -58,10 +58,8 @@ void chain_0_1_fill_row_from_groups_buffer(
 #pragma HLS PIPELINE
 				if (o_w_offset + w < input_image_width)
 				{
-#if HW == FPGA
-					channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
-						w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
-#endif
+					// channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
+					// 	w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
 				}
 			}
 		}
@@ -447,8 +445,8 @@ void bottleneck_0_within_pipeline_stage(
 }
 
 void bottleneck_1_pipeline_filling_stage(
-	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width],
-	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width],
+	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_ifms_depth][bottleneck_1_inter_pass_dw_1_input_width],
+	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_ifms_depth][bottleneck_1_inter_pass_dw_1_input_width],
 	const fms_dt bottleneck_1_dw_ifms_zero_point)
 {
 	bottleneck_1_padding_right(bottleneck_1_previous_pass_dw_input_1,
@@ -463,17 +461,17 @@ void bottleneck_1_within_pipeline_stage(
 	pss_dt bottleneck_1_projection_kernel_output_prev[bottleneck_1_ofms_depth],
 	fms_dt bottleneck_0_1_communication_buffer[bottleneck_0_ofms_depth][chain_0_1_bottleneck_0_rows_at_once][bottleneck_0_ofms_width],
 	fms_dt chain_seml_communication_buffer[bottleneck_1_ofms_depth][bottleneck_1_ofms_width],
-	fms_dt bottleneck_1_dw_lower_buffer[bottleneck_1_expanded_ifms_depth][bottleneck_1_dw_filter_dim * bottleneck_1_dw_strides],
-	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width],
-	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width],
+	fms_dt bottleneck_1_dw_lower_buffer[bottleneck_1_ifms_depth][bottleneck_1_dw_1_filter_dim * bottleneck_1_dw_1_filter_dim],
+	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_ifms_depth][bottleneck_1_inter_pass_dw_1_input_width],
+	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_ifms_depth][bottleneck_1_inter_pass_dw_1_input_width],
 	const int starting_h, const fms_dt bottleneck_1_dw_ifms_zero_point)
 {
 #pragma HLS INLINE off
 
 	const int bottleneck_1_first_fill_offset = 1;
-	const int bottleneck_1_warm_up_rows = bottleneck_1_dw_filter_dim - bottleneck_1_dw_strides;
+	const int bottleneck_1_warm_up_rows = bottleneck_1_dw_1_filter_dim - bottleneck_1_dw_1_strides;
 	int bottleneck_1_h =
-		starting_h == 0 ? 0 : starting_h * bottleneck_1_rows_at_once * bottleneck_1_dw_strides - bottleneck_1_warm_up_rows;
+		starting_h == 0 ? 0 : starting_h * bottleneck_1_rows_at_once * bottleneck_1_dw_1_strides - bottleneck_1_warm_up_rows;
 
 	fill_bottleneck_1_input(bottleneck_0_1_communication_buffer,
 							bottleneck_1_input, 0);
@@ -491,7 +489,7 @@ void bottleneck_1_within_pipeline_stage(
 		for (int i_w = 0; i_w < chain_0_1_ofms_width; i_w++)
 		{
 			const int w = o_w * chain_0_1_ofms_width + i_w;
-			const int fill_input_index = w * bottleneck_1_dw_strides + bottleneck_1_first_fill_offset;
+			const int fill_input_index = w * bottleneck_1_dw_1_strides + bottleneck_1_first_fill_offset;
 			fill_bottleneck_1_input(bottleneck_0_1_communication_buffer,
 									bottleneck_1_input, fill_input_index);
 			if (starting_h % 2 == 1)
@@ -525,10 +523,10 @@ void bottleneck_1_within_pipeline_stage(
 		chain_seml_communication_buffer[d][bottleneck_1_ofms_width - 1] =
 			normalize_projection_kernel_output(
 				bottleneck_1_projection_kernel_output_prev,
-				layer_5_pw_fused_scales,
-				layer_5_pw_fused_scales_log_2_shifts,
-				layer_5_pw_relu_6_fused_scales,
-				layer_5_pw_fused_zero_points, d, layer_5_activation,
+				layer_5_dw_fused_scales,
+				layer_5_dw_fused_scales_log_2_shifts,
+				layer_5_dw_relu_6_fused_scales,
+				layer_5_dw_fused_zero_points, d, 6,
 				bottleneck_1_projection_layer_index);
 	}
 }
@@ -645,11 +643,11 @@ void _0_1_bottlenecks_chain(
 	pss_dt bottleneck_1_projection_kernel_output_prev[bottleneck_1_ofms_depth];
 #pragma HLS ARRAY_PARTITION variable = bottleneck_1_projection_kernel_output complete
 
-	fms_dt bottleneck_1_dw_lower_buffer[bottleneck_1_expanded_ifms_depth][bottleneck_1_dw_filter_dim * bottleneck_1_dw_strides];
+	fms_dt bottleneck_1_dw_lower_buffer[bottleneck_1_ifms_depth][bottleneck_1_dw_1_filter_dim * bottleneck_1_dw_1_strides];
 #pragma HLS ARRAY_PARTITION variable = bottleneck_1_dw_lower_buffer complete
 
-	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width];
-	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width];
+	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_ifms_depth][bottleneck_1_inter_pass_dw_1_input_width];
+	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_ifms_depth][bottleneck_1_inter_pass_dw_1_input_width];
 
 	const fms_dt bottleneck_1_dw_ifms_zero_point =
 		conv_fms_zero_points[bottleneck_1_dw_layer_index];
@@ -662,19 +660,16 @@ void _0_1_bottlenecks_chain(
 
 	//#######################################pipeline filling###########################################
 	//-------------------------------------------------------------------------
-#if HW == FPGA
-	bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-												chain_0_1_extra_rows_filled_first_time,
-												input_image_num_fms_groups_in_width); // to do
-	bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-															 chain_input, chain_0_1_extra_rows_filled_first_time, false,
-															 layer_0_s_ifms_zero_point);
-#elif HW == CPU
+	// bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+	// 											chain_0_1_extra_rows_filled_first_time,
+	// 											input_image_num_fms_groups_in_width); // to do
+	// bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+	// 														 chain_input, chain_0_1_extra_rows_filled_first_time, false,
+	// 														 layer_0_s_ifms_zero_point);
 	chain_0_1_fill_channels_buffer_cpu(channels, chain_input, 0, false, layer_0_s_ifms_zero_point);
 	chain_0_1_fill_channels_buffer_cpu(channels,
 									   chain_input, chain_0_1_extra_rows_filled_first_time, false,
 									   layer_0_s_ifms_zero_point);
-#endif
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	bottleneck_0_pipeline_filling_stage(chain_input, bottleneck_0_input,
 										bottleneck_0_projection_kernel_output,
@@ -694,16 +689,13 @@ void _0_1_bottlenecks_chain(
 
 	int filling_row = filling_h * chain_0_1_rows_filled_each_time + chain_0_1_extra_rows_filled_first_time;
 	//-------------------------------------------------------------------------
-#if HW == CPU
 	chain_0_1_fill_channels_buffer_cpu(channels,
 									   chain_input, filling_row, true,
 									   layer_0_s_ifms_zero_point);
-#elif HW == FPGA
-	bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-												filling_row, num_of_ifm_groups_read_each_time);
-	bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-															 chain_input, filling_row, false, layer_0_s_ifms_zero_point);
-#endif
+	// bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+	// 											filling_row, num_of_ifm_groups_read_each_time);
+	// bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+	// 														 chain_input, filling_row, false, layer_0_s_ifms_zero_point);
 	//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 	filling_h++;
 	//#######################################end pipeline filling###########################################
@@ -714,7 +706,7 @@ void _0_1_bottlenecks_chain(
 										   bottleneck_1_projection_kernel_output,
 										   bottleneck_1_projection_kernel_output_prev,
 										   bottleneck_0_1_communication_buffer_prev,
-										   chain_seml_communication_buffer, bottleneck_1_dw_lower_buffer,
+										   chain_seml_communication_buffer, bottleneck_1_dw_1_lower_buffer,
 										   bottleneck_1_previous_pass_dw_input_1,
 										   bottleneck_1_previous_pass_dw_input_2, bottleneck_1_h,
 										   bottleneck_1_dw_ifms_zero_point);
@@ -736,17 +728,14 @@ void _0_1_bottlenecks_chain(
 
 		filling_row = filling_h * chain_0_1_rows_filled_each_time + chain_0_1_extra_rows_filled_first_time;
 		//-------------------------------------------------------------------------
-#if HW == CPU
 		chain_0_1_fill_channels_buffer_cpu(channels,
 										   chain_input, filling_row, true,
 										   layer_0_s_ifms_zero_point);
-#elif HW == FPGA
-		bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
-													filling_row, num_of_ifm_groups_read_each_time);
-		bottleneck_chain_fill_channels_buffer_from_groups_buffer(
-			fms_groups_buffer, chain_input, filling_row, false,
-			layer_0_s_ifms_zero_point);
-#endif
+		// bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
+		// 											filling_row, num_of_ifm_groups_read_each_time);
+		// bottleneck_chain_fill_channels_buffer_from_groups_buffer(
+		// 	fms_groups_buffer, chain_input, filling_row, false,
+		// 	layer_0_s_ifms_zero_point);
 		//+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
 
 		bottleneck_0_h++;
@@ -758,7 +747,7 @@ void _0_1_bottlenecks_chain(
 									   bottleneck_1_projection_kernel_output,
 									   bottleneck_1_projection_kernel_output_prev,
 									   bottleneck_0_1_communication_buffer_prev,
-									   chain_seml_communication_buffer, bottleneck_1_dw_lower_buffer,
+									   chain_seml_communication_buffer, bottleneck_1_dw_1_lower_buffer,
 									   bottleneck_1_previous_pass_dw_input_1,
 									   bottleneck_1_previous_pass_dw_input_2, bottleneck_1_h,
 									   bottleneck_1_dw_ifms_zero_point);
@@ -779,7 +768,7 @@ void _0_1_bottlenecks_chain(
 									   bottleneck_1_projection_kernel_output,
 									   bottleneck_1_projection_kernel_output_prev,
 									   bottleneck_0_1_communication_buffer,
-									   chain_seml_communication_buffer, bottleneck_1_dw_lower_buffer,
+									   chain_seml_communication_buffer, bottleneck_1_dw_1_lower_buffer,
 									   bottleneck_1_previous_pass_dw_input_1,
 									   bottleneck_1_previous_pass_dw_input_2,
 									   bottleneck_1_h,

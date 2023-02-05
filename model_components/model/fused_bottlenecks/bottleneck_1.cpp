@@ -1,5 +1,6 @@
 #include "bottleneck.h"
 
+#if CHAIN_LENGTH >= 6 && MODEL_ID == 2
 
 void bottleneck_1_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_1_expanded_ifms_depth],
@@ -227,3 +228,5 @@ mob_v2_bottleneck_1:
 	bottleneck_1_copy_projection_kernel_output_buffer(projection_kernel_output_buffer,
 													  projection_kernel_output_buffer_prev);
 }
+
+#endif

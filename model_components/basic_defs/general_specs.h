@@ -1,6 +1,13 @@
 
 #ifndef GENERAL_SPECS
 #define GENERAL_SPECS
+
+#define CPU 0
+#define FPGA 1
+#define CHAIN_LENGTH 6
+#define MODEL_ID 2//1: mob_v1, 2: mob_v2, 3: mnasnet, 4: proxylessnas
+#define HW CPU//0 is 
+
 // switch point
 const int switch_point_fms_width = 56;
 const int switch_point_fms_height = 56;
@@ -27,7 +34,11 @@ const int start_with_pw = 1;
 
 //maxs for buffers
 const int max_conv_d = 1280 / alpha; //to_automate
+#if MODEL_ID == 1 || MODEL_ID == 2
 const int max_filter_hw_dim = 3;
+#elif MODEL_ID == 3 || MODEL_ID == 4
+const int max_filter_hw_dim = 5;
+#endif
 const int max_padding = 1;
 const int max_conv_h = max_filter_hw_dim;
 const int max_conv_w = max_filter_hw_dim;

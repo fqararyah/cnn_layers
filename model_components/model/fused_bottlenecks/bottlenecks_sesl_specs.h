@@ -31,6 +31,33 @@ const int bottleneck_0_expansion_layer_relu = 6;
 const int bottleneck_0_dw_layer_relu = 6;
 const int bottleneck_0_projection_layer_relu = layer_2_activation;
 //******************************************
+#if MODEL_ID == 1
+const int bottleneck_1_dw_1_filter_dim = layer_3_dw_filter_size;
+const int bottleneck_1_dw_1_strides = layer_3_dw_strides;
+const int bottleneck_1_dw_1_padding_left = layer_3_dw_padding_left;
+const int bottleneck_1_dw_1_padding_right = layer_3_dw_padding_right;
+const int bottleneck_1_dw_1_padding_top = layer_3_dw_padding_top;
+const int bottleneck_1_dw_1_padding_bottom = layer_3_dw_padding_bottom;
+
+const int bottleneck_1_dw_2_filter_dim = layer_5_dw_filter_size;
+const int bottleneck_1_dw_2_strides = layer_5_dw_strides;
+const int bottleneck_1_dw_2_padding_left = layer_5_dw_padding_left;
+const int bottleneck_1_dw_2_padding_right = layer_5_dw_padding_right;
+const int bottleneck_1_dw_2_padding_top = layer_5_dw_padding_top;
+const int bottleneck_1_dw_2_padding_bottom = layer_5_dw_padding_bottom;
+
+const int bottleneck_1_ifms_depth = layer_3_dw_depth;
+const int bottleneck_1_ifms_height = layer_3_dw_ifm_height;
+const int bottleneck_1_ifms_width = layer_3_dw_ifm_width;
+const int bottleneck_1_ofms_depth = layer_5_dw_num_fils;
+
+const int bottleneck_1_ofms_height = bottleneck_1_ifms_height / bottleneck_1_dw_1_strides;
+const int bottleneck_1_ofms_width = bottleneck_1_ifms_width / bottleneck_1_dw_1_strides;
+
+const int bottleneck_1_expansion_layer_relu = 6;
+const int bottleneck_1_dw_layer_relu = 6;
+const int bottleneck_1_projection_layer_relu = 6;
+#else
 const int bottleneck_1_dw_filter_dim = layer_4_dw_filter_size;
 const int bottleneck_1_dw_strides = layer_4_dw_strides;
 const int bottleneck_1_dw_padding_left = layer_4_dw_padding_left;
@@ -43,16 +70,19 @@ const int bottleneck_1_ifms_height = layer_3_pw_ifm_height;
 const int bottleneck_1_ifms_width = layer_3_pw_ifm_width;
 const int bottleneck_1_expanded_ifms_depth = layer_3_pw_num_fils;
 const int bottleneck_1_ofms_depth = layer_5_pw_num_fils;
+
 const int bottleneck_1_ofms_height = bottleneck_1_ifms_height / bottleneck_1_dw_strides;
 const int bottleneck_1_ofms_width = bottleneck_1_ifms_width / bottleneck_1_dw_strides;
+
+const int bottleneck_1_expansion_layer_relu = layer_3_activation;
+const int bottleneck_1_dw_layer_relu = 6;
+const int bottleneck_1_projection_layer_relu = layer_5_activation;
+#endif
 
 const int bottleneck_1_expansion_layer_index = 3;
 const int bottleneck_1_dw_layer_index = bottleneck_1_expansion_layer_index + 1;
 const int bottleneck_1_projection_layer_index = bottleneck_1_expansion_layer_index + 2;
 
-const int bottleneck_1_expansion_layer_relu = layer_3_activation;
-const int bottleneck_1_dw_layer_relu = 6;
-const int bottleneck_1_projection_layer_relu = layer_5_activation;
 //************************************************
 
 const int bottleneck_2_dw_filter_dim = layer_7_dw_filter_size;
@@ -76,8 +106,10 @@ const int bottleneck_2_projection_layer_index = bottleneck_2_dw_layer_index + 1;
 
 const int bottleneck_2_expansion_layer_relu = 6;
 const int bottleneck_2_dw_layer_relu = 6;
-const int bottleneck_2_projection_layer_relu = layer_3_activation;
+const int bottleneck_2_projection_layer_relu = layer_8_activation;
 
 const int max_dw_filter_dim_in_a_chain = 3;
+//***************************************************************************************
+//***************************************************************************************
 
 #endif

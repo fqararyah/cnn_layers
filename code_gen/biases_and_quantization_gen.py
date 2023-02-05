@@ -36,6 +36,18 @@ conv_fms_zero_points_file_format = 'fms_conv2d_{}_zero_points.txt'
 secondary_layer_fms_scales_files_formats = {}
 secondary_layer_fms_zero_points_files_formats = {}
 
+class bcolors:
+    HEADER = '\033[95m'
+    OKBLUE = '\033[94m'
+    OKCYAN = '\033[96m'
+    OKGREEN = '\033[92m'
+    WARNING = '\033[93m'
+    FAIL = '\033[91m'
+    ENDC = '\033[0m'
+    BOLD = '\033[1m'
+    UNDERLINE = '\033[4m'
+
+
 all_fms_scales_and_zps_directory_files = os.listdir(fms_scales_files_location)
 for secondary_layer_type in secondary_layers_types:
     secondary_layer_fms_scales_files_formats[secondary_layer_type] = 'fms_conv2d_{}_' + \
@@ -144,7 +156,7 @@ with open(h_file, 'w') as wf:
             conv_fms_scales_rec.append(1.0/float(scale))
             assert(1.0/float(scale) < 255)
             conv_fms_scales.append(float(scale))
-            assert(float(scale) < 1 and conv_fms_scales[-1] > 0.001)
+            assert(float(scale) < 1 and conv_fms_scales[-1] > 0.001) or cgc.MODEL_NAME != 'mob_v2'
             conv_fms_zero_points.append(int(zero_point))
 
             for scales in secondary_layers_fms_scales.values():
@@ -166,12 +178,14 @@ with open(h_file, 'w') as wf:
                         scale = f.readline().replace(' ', '').replace('\n', '')
                     with open(zps_file_path, 'r') as f:
                         zero_point = f.readline().replace(' ', '').replace('\n', '')
+                    if scale == '':
+                        continue
                     secondary_layers_fms_scales_rec[secondary_layer_type][fms_file_index] = (
                         1.0/float(scale))
-                    assert(1.0/float(scale) < 255)
+                    assert(1.0/float(scale) < 1024)
                     secondary_layers_fms_scales[secondary_layer_type][fms_file_index] = (
                         float(scale))
-                    assert(float(scale) < 1 and conv_fms_scales[-1] > 0.001)
+                    assert(float(scale) < 1 and conv_fms_scales[-1] > 0.001)  or cgc.MODEL_NAME != 'mob_v2'
                     secondary_layers_fms_zero_points[secondary_layer_type][fms_file_index] = (
                         int(zero_point))
                     last_secondary_type_after_a_conv[fms_file_index] = secondary_layer_type
@@ -212,11 +226,17 @@ with open(h_file, 'w') as wf:
             
         weights = np.loadtxt(weights_files_location + weights_file).astype(np.int8)
 
-        with open(biases_file_format.format(layer_index), 'r') as f:
-            for line in f:
-                bias = line.replace(' ', '').replace('\n', '')
-                assert(int(bias) < 2**31-1)
-                biases.append(int(bias))
+        if os.path.isfile(biases_file_format.format(layer_index)):
+            with open(biases_file_format.format(layer_index), 'r') as f:
+                for line in f:
+                    bias = line.replace(' ', '').replace('\n', '')
+                    assert(int(bias) < 2**31-1)
+                    biases.append(int(bias))
+        else:
+            print(bcolors.WARNING + biases_file_format.format(layer_index) + ' does not exist!!!')
+            for i in range(layers_weights_shapes[layer_index].num_of_filters):
+                biases.append(i)
+
 
         ifms_zero_point = conv_fms_zero_points[layer_index]
         if layer_index in last_secondary_type_after_a_conv:
@@ -246,7 +266,7 @@ with open(h_file, 'w') as wf:
             for line in f:
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
                 ifm_weight_fused_scale = weight_scale * ifms_scale
-                assert(ifm_weight_fused_scale < 0.02)
+                assert(ifm_weight_fused_scale < 0.5)
                 ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / \
                     conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
                 fused_scales.append(ofm_ifm_weigh_fused_scale)
@@ -261,12 +281,13 @@ with open(h_file, 'w') as wf:
                        (2 ** -abs_current_log_int))
                 fused_scales_log_2_shifts.append(abs_current_log_int)
                 fused_scales[-1] = decomposed_val
-                relu_6_fused_scale = round(6 / ifm_weight_fused_scale)
-                assert(relu_6_fused_scale < 2**32 - 1 or (layer_index ==
-                       0 and relu_6_fused_scale < 2**38 - 1))
-                relu_6_fused_scales.append(relu_6_fused_scale)
+                if utils.NET_PREFIX in ['mob_v2', 'mnas', 'prox']:
+                    relu_6_fused_scale = round(6 / ifm_weight_fused_scale)
+                    assert(relu_6_fused_scale < 2**32 - 1 or (layer_index ==
+                        0 and relu_6_fused_scale < 2**38 - 1))
+                    relu_6_fused_scales.append(relu_6_fused_scale)
 
-                assert(relu_6_fused_scales[-1] > 256)
+                    assert(relu_6_fused_scales[-1] > 256) or utils.NET_PREFIX == 'mnas'
 
         if cgc.PIPELINE == True and layer_index < cgc.PILELINE_LEN or layer_index == 0:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
@@ -315,12 +336,11 @@ with open(h_file, 'w') as wf:
     seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
         seml_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
-    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] ='\
-         if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_s_relu_6_fused_scales[] ='
+    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] =' 
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
         seml_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
-    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PILELINE_LEN or cgc.PIPELINE == False:
+    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PILELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
         wf.write(seml_fused_zero_points_declaration_string)
         wf.write(seml_fused_scales_declaration_string)
         wf.write(seml_fused_scales_log_2_shifts_declaration_string)

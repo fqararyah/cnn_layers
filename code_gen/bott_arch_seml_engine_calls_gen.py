@@ -20,9 +20,8 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 #      relu_6_fused_scales, fused_zero_points,\n\
 #     fused_zero_points, layer_*i*_*TYPE*_num_fils);\n'
 
-layer_0_s_block = 'layer_0_s_3x3(input_image, weights_0, result);\n'
-
-expansion_projection_block = 'pw_conv(off_chip_weights, channels, result, *i*, layer_*i*_pw_depth,\n\
+layer_0_s_block = 'layer_0_s_3x3(weights_0, input_image, result);\n'
+expansion_projection_block = 'pw_conv(off_chip_weights, *CHANNELS*, result, *i*, layer_*i*_pw_depth,\n\
     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
     layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
@@ -109,7 +108,7 @@ with open(in_out_file, 'r') as f:
 
 direction = 0
 code_to_insert = ''
-skip_connections_depths = {'mob_v2': 3, 'eff_b0': 5}
+skip_connections_depths = {'mob_v1': 0,'mob_v2': 3, 'eff_b0': 5, 'mnas': 3, 'prox': 3}
 skip_connections_depth = skip_connections_depths[cgc.MODEL_NAME]
 max_fms_size_in_seml = layers_inputs_shapes[layers_to_generate[0]].width * layers_inputs_shapes[layers_to_generate[0]].width *\
     layers_inputs_shapes[layers_to_generate[0]].depth
@@ -126,18 +125,19 @@ print(max_fms_size_in_seml, max_fms_size_in_seml_layer_index)
 def get_layer_index_in_execution_sequence(layers_execution_sequence, layer_index):
     index_in_execution = 0
     conv2d_layers_count = 0
-    if layer_index <=0:
+    if layer_index <= 0:
         return 0
-    while conv2d_layers_count < layer_index:
+    while conv2d_layers_count <= layer_index:
         if 'conv2d' in layers_execution_sequence[index_in_execution]:
             conv2d_layers_count += 1
         index_in_execution += 1
     
-    return index_in_execution
+    return index_in_execution - 1
 
 
 def get_secondary_input_layer(layers_execution_sequence, prev_conv2d_layer_index):
     secondary_input_layer = ''
+    print(prev_conv2d_layer_index)
     layer_index = prev_conv2d_layer_index + 1
     conv2d_layers_count = 0
     while conv2d_layers_count == 0:
@@ -169,6 +169,10 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         replacement_dict['*TYPE*_'] = ''
     if layers_types[layer_index] == 'pw':
         replacement_dict['*TYPE*'] = 'pw'
+        replacement_dict['*CHANNELS*'] = 'tmp_channels' if (layer_index - skip_connections_depth - 1 in skip_connections_indices \
+            or layer_index - 1 in skip_connections_indices or layer_index + skip_connections_depth - 1 in skip_connections_indices)\
+            and layer_index == cgc.PILELINE_LEN\
+            else 'channels'
         target_block += expansion_projection_block
         if layer_index + skip_connections_depth in skip_connections_indices:
             read_write += 2
@@ -183,7 +187,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         replacement_dict['*TYPE*'] = 'dw'
 
     replacement_dict['*RW*'] = read_write
-    if cgc.DEBUGGING and layer_index == cgc.LAYERS_TO_DEBUG[0]:
+    if cgc.DEBUGGING and layer_index == cgc.LAYERS_TO_DEBUG[0] and layer_index !=0:
         # file_name
         secondary_layer, prev_layer_index = get_secondary_input_layer(layers_execution_sequence, prev_layer_index)
         ifms_file = ifms_file_format.format(str(layer_index) + secondary_layer, layers_inputs_shapes[layer_index].depth,

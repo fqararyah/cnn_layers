@@ -1,5 +1,7 @@
 #include "bottleneck.h"
 
+#if CHAIN_LENGTH >= 9
+
 void bottleneck_2_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_2_expanded_ifms_depth],
 	weights_dt kernel_weights[], int d)
@@ -125,6 +127,7 @@ void mob_v2_bottleneck_2(fms_dt bottleneck_input[bottleneck_2_input_buffer_size]
 						 pss_dt projection_kernel_output_buffer[bottleneck_2_ofms_depth],
 						 pss_dt projection_kernel_output_buffer_prev[bottleneck_2_ofms_depth],
 						 fms_dt bottleneck_1_2_communication_buffer[bottleneck_2_ifms_depth][bottleneck_2_ifms_width],
+						 pss_f_dt chain_seml_communication_buffer[bottleneck_2_ofms_depth][bottleneck_2_ofms_width],
 						 fms_dt dw_lower_buffer[bottleneck_2_expanded_ifms_depth][bottleneck_2_dw_filter_dim * bottleneck_2_dw_strides],
 						 fms_dt previous_pass_dw_input_r
 							 [bottleneck_2_expanded_ifms_depth][bottleneck_2_inter_pass_dw_input_height][bottleneck_2_inter_pass_dw_input_width],
@@ -235,13 +238,14 @@ mob_v2_bottleneck_2:
 		if (prev_projection_kernel_starting_w >= 0 && d_in_out < bottleneck_2_ofms_depth)
 		{
 			// if(starting_h == 1 && d_in_out == 15)cout<<starting_w - 2<<"\n";
-			bottleneck_1_2_communication_buffer[d_in_out][prev_projection_kernel_starting_w] = normalize_projection_kernel_output(
+			pss_f_dt tm =  normalize_projection_kernel_output_no_q(
 				projection_kernel_output_buffer_prev,
 				layer_8_pw_fused_scales,
 				layer_8_pw_fused_scales_log_2_shifts,
-				layer_8_pw_relu_6_fused_scales,
 				layer_8_pw_fused_zero_points, d_in_out, layer_2_activation,
 				bottleneck_2_projection_layer_index);
+			chain_seml_communication_buffer[d_in_out][prev_projection_kernel_starting_w] = tm;
+			tm=0;
 		}
 	}
 
@@ -256,3 +260,5 @@ mob_v2_bottleneck_2:
 		projection_kernel_output_buffer,
 		projection_kernel_output_buffer_prev);
 }
+
+#endif
