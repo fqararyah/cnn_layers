@@ -1,5 +1,6 @@
 #ifndef SEML
 #define SEML
+#include "../../../../tests/test_utils.h"
 #include "../../../../client/prepare_weights_and_inputs.h"
 #include "../../../utils/utils.h"
 #include "../../../layers/headers/layers_glue.h"

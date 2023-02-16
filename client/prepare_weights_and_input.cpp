@@ -8,6 +8,42 @@ bool isNumber(string &str) {
 	return true;
 }
 
+int get_num_of_pw_weights(string file_name)
+{
+	std::ifstream infile(file_name);
+	int num_of_pw_weights = -1;
+	while (infile >> num_of_pw_weights)
+		;
+	return num_of_pw_weights;
+}
+
+void load_weights(string file_name,
+				  weights_dt weights[])
+{
+	int a;
+	std::ifstream infile(file_name);
+
+	int line_num = 0;
+	while (infile >> a)
+	{
+		weights[line_num] = a;
+		line_num++;
+	}
+}
+
+void load_image(string file_name,
+				  fms_dt image[]){
+	int a;
+	std::ifstream infile(file_name);
+
+	int line_num = 0;
+	while (infile >> a)
+	{
+		image[line_num] = a;
+		line_num++;
+	}				
+}
+
 #if FPGA
 void glue_weights(string file_name,
 		weights_grp_dt glued_weights[all_pw_weights]) {

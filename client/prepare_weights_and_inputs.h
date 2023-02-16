@@ -10,6 +10,14 @@
 
 using namespace std;
 
+int get_num_of_pw_weights(string file_name);
+
+void load_weights(string file_name,
+				  weights_dt weights[]);
+
+void load_image(string file_name,
+				  fms_dt image[]);
+
 void glue_weights(string file_name,
 		weights_grp_dt glued_weights[all_pw_weights]);
 
