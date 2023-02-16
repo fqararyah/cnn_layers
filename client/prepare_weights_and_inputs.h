@@ -3,7 +3,9 @@
 #include "../model_components/basic_defs/basic_defs_glue.h"
 #include "../model_components/model/headers/model_glue.h"
 #include <fstream>
+#if FPGA
 #include "ap_int.h"
+#endif
 #include <iostream>
 
 using namespace std;

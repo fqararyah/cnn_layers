@@ -22,10 +22,11 @@ int main() {
 
 	weights_grp_dt glued_weights[all_pw_weights];
 	fms_dt fc_input[fc_layer_input_size];
+	#if FPGA
 	glue_weights(weights_file, glued_weights);
-//	cout<<(weights_dt)glued_weights[0](7, 0)<<" @zero\n";
-//	cout<<(weights_dt)glued_weights[512](7, 0)<<" @512\n";
 	validate_weights(weights_file, glued_weights);
+	#elif CPU
+	#endif
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 
 	DIR *dir;
@@ -40,7 +41,10 @@ int main() {
 				continue;
 			}
 			cout << file_name << "\n";
+			#if FPGA
 			glue_input_image(file_name, input_image);
+			#elif CPU
+			#endif
 			//verify_glued_image(file_name, input_image);
 			//validate_weights(weights_file, glued_weights);
 			int ready_to_receive_new_input = 0;

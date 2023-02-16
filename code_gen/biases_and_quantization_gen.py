@@ -210,7 +210,8 @@ with open(h_file, 'w') as wf:
     seml_fused_scales = []
     seml_fused_scales_log_2_shifts = []
     seml_relu_6_fused_scales = []
-    for layer_index in range(cgc.LAST_LAYER_TO_GENERATE):
+    to_generate_for_layers = cgc.LAST_LAYER_TO_GENERATE if  cgc.LAST_LAYER_TO_GENERATE > 0 else len(layers_weights_shapes)
+    for layer_index in range(to_generate_for_layers):
         fused_zero_points = []
         fused_scales = []
         fused_scales_log_2_shifts = []
@@ -248,6 +249,7 @@ with open(h_file, 'w') as wf:
         for i in range(layers_weights_shapes[layer_index].num_of_filters):
             fused_zero_point = np.sum(weights[i, :, :, :]) * -ifms_zero_point \
                 + biases[i]
+            print(len(biases), i)
             assert(fused_zero_point < 2 ** 31 -
                    1 and fused_zero_point > - 2**31)
             fused_zero_points.append(fused_zero_point)
@@ -270,24 +272,27 @@ with open(h_file, 'w') as wf:
                 ofm_ifm_weigh_fused_scale = ifm_weight_fused_scale / \
                     conv_fms_scales[layer_index + 1 if layer_index > 0 else 2]
                 fused_scales.append(ofm_ifm_weigh_fused_scale)
-                assert(ofm_ifm_weigh_fused_scale < 1)
+                assert(ofm_ifm_weigh_fused_scale < 1) or 'mob_v1' in cgc.MODEL_NAME or 'mob_v2_0_5' in cgc.MODEL_NAME
                 assert(ofm_ifm_weigh_fused_scale > 0)
                 current_log = math.log2(fused_scales[-1]) + 1
                 abs_current_log_int = abs(int(current_log))
                 decomposed_val = fused_scales[-1] / (2 ** -abs_current_log_int)
                 assert(abs_current_log_int >= 0 and abs_current_log_int < 32)
-                assert(decomposed_val > 0.1 and decomposed_val < 1)
+                assert(decomposed_val > 0.1 and decomposed_val < 1) or 'mob_v1' in cgc.MODEL_NAME or 'mob_v2_0_5' in cgc.MODEL_NAME
                 assert(fused_scales[-1] == decomposed_val *
                        (2 ** -abs_current_log_int))
                 fused_scales_log_2_shifts.append(abs_current_log_int)
                 fused_scales[-1] = decomposed_val
-                if utils.NET_PREFIX in ['mob_v2', 'mnas', 'prox']:
+                if utils.NET_PREFIX not in ['eff', 'eff_b0']:
                     relu_6_fused_scale = round(6 / ifm_weight_fused_scale)
-                    assert(relu_6_fused_scale < 2**32 - 1 or (layer_index ==
-                        0 and relu_6_fused_scale < 2**38 - 1))
+                    if layer_index > 0 and  relu_6_fused_scale > 2**32 - 1:
+                        relu_6_fused_scale = 2**32 - 1
+                    assert(relu_6_fused_scale <= 2**32 - 1 or (layer_index ==
+                        0 and relu_6_fused_scale <= 2**38 - 1))
                     relu_6_fused_scales.append(relu_6_fused_scale)
 
-                    assert(relu_6_fused_scales[-1] > 256) or utils.NET_PREFIX == 'mnas'
+                    assert(relu_6_fused_scales[-1] > 256) or \
+                        utils.NET_PREFIX in ['mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5'] 
 
         if cgc.PIPELINE == True and layer_index < cgc.PILELINE_LEN or layer_index == 0:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(

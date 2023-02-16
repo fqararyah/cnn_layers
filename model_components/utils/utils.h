@@ -9,7 +9,11 @@
 
 using namespace std;
 
-
+void fill_layers_weights_cpu(weights_dt *weights,
+							 weights_dt weights_buffer[][max_conv_d],
+							 int starting_filter, const int layer_depth,
+							 const int layer_weights_offset,
+							 const int layer_num_fils);
 void fill_layers_weights_cpu(weights_dt *weights,
 							 weights_dt weights_buffer[][max_conv_d],
 							 int starting_filter, const int layer_depth,

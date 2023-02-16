@@ -26,6 +26,7 @@ void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 	}
 }
 
+#if FPGA
 void fill_weights_tile_from_weight_groups_tile(
 		weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
 		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
@@ -86,6 +87,27 @@ void fill_weights_tile_off_chip(weights_grp_dt *weights,
 								+ weights_dt_offset,
 						(within_filter_index * pw_conv_parallelism_out
 								+ filter_index) * weights_dt_width);
+			}
+		}
+	}
+}
+#endif
+
+void fill_layers_weights_cpu(weights_dt *weights,
+							 weights_dt weights_buffer[][max_conv_d],
+							 int starting_filter, const int layer_depth,
+							 const int layer_weights_offset,
+							 const int layer_num_fils)
+{
+	const int layer_Weights_offset_cpu = layer_weights_offset * weights_group_items;
+	const int current_fill_offset = layer_Weights_offset_cpu + starting_filter * layer_depth;
+	for (int filter_index = 0; filter_index < pw_conv_parallelism_out; filter_index++)
+	{
+		if (filter_index + starting_filter < layer_num_fils)
+		{
+			for (int d = 0; d < layer_depth; d++)
+			{
+				weights_buffer[filter_index][d] = weights[current_fill_offset + filter_index * layer_depth + d];
 			}
 		}
 	}

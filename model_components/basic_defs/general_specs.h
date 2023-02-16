@@ -2,12 +2,6 @@
 #ifndef GENERAL_SPECS
 #define GENERAL_SPECS
 
-#define CPU 0
-#define FPGA 1
-#define CHAIN_LENGTH 6
-#define MODEL_ID 2//1: mob_v1, 2: mob_v2, 3: mnasnet, 4: proxylessnas
-#define HW CPU//0 is 
-
 // switch point
 const int switch_point_fms_width = 56;
 const int switch_point_fms_height = 56;

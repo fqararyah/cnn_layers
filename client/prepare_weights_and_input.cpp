@@ -8,6 +8,7 @@ bool isNumber(string &str) {
 	return true;
 }
 
+#if FPGA
 void glue_weights(string file_name,
 		weights_grp_dt glued_weights[all_pw_weights]) {
 	int a;
@@ -113,6 +114,7 @@ void verify_glued_image(string file_name,
 				<< " input image items have been glued SUCESSFULLY!\n";
 	}
 }
+#endif
 
 void fill_input_image(string file_name,
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width]) {

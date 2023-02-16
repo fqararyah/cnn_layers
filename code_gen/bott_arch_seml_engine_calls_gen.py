@@ -108,7 +108,7 @@ with open(in_out_file, 'r') as f:
 
 direction = 0
 code_to_insert = ''
-skip_connections_depths = {'mob_v1': 0,'mob_v2': 3, 'eff_b0': 5, 'mnas': 3, 'prox': 3}
+skip_connections_depths = {'mob_v1': 0,'mob_v2': 3, 'eff_b0': 5, 'mnas': 3, 'prox': 3, 'mob_v1_0_5':0, 'mob_v2_0_5':3}
 skip_connections_depth = skip_connections_depths[cgc.MODEL_NAME]
 max_fms_size_in_seml = layers_inputs_shapes[layers_to_generate[0]].width * layers_inputs_shapes[layers_to_generate[0]].width *\
     layers_inputs_shapes[layers_to_generate[0]].depth
