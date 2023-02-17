@@ -95,7 +95,7 @@ string top_5_to_predictions_dict(int top5[5], string image_name)
     return dict;
 }
 
-void fc_layer(fms_dt in_vector[], weights_dt weights[], pss_dt weight_sums[], int top5[5], biases_dt biases[])
+void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int top5[5], int biases[])
 {
     double scaled_pss;
     double pss_vector[num_classes];

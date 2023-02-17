@@ -24,27 +24,34 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/cpu_out/";
 
 	string fc_weights_file =
-		"./off_chip_weights/fc_weights.txt";
+		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/fc_weights.txt";
 	string weight_sums_file =
-		"./off_chip_weights/fc_weight_sums.txt";
+		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/fc_weight_sums.txt";
 	string biases_file =
-		"./off_chip_weights/fc_biases.txt";
+		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/fc_biases.txt";
 	string predictions_file = "./predictions_2.json";
 
 	const int num_of_pw_weights = get_num_of_pw_weights(num_of_pw_weights_file);
+#if HW == FPGA
+	weights_grp_dt weights[num_of_pw_weights];
+	fms_grp_dt input_image[input_image_depth
+					* input_image_num_fms_groups_in_a_channel];
+#elif HW == CPU
 	weights_dt weights[num_of_pw_weights];
-	fms_dt fc_input[fc_layer_input_size];
 	fms_dt input_image[input_image_depth * input_image_hw];
+#endif
 
-	weights_dt fc_weights[fc_cols * fc_layer_input_size];
-	pss_dt weight_sums[num_classes];
-	biases_dt biases[num_classes];
+	fms_dt fc_input[fc_layer_input_size];
+
+	int8_t fc_weights[fc_cols * fc_layer_input_size];
+	int64_t weight_sums[num_classes];
+	int biases[num_classes];
 	string predictions_file_content = "[";
 	int top5[5];
 
 #if HW == FPGA
-	glue_weights(weights_file, glued_weights);
-	validate_weights(weights_file, glued_weights);
+//	glue_weights(weights_file, weights);
+//	validate_weights(weights_file, weights);
 #elif HW == CPU
 	load_weights(weights_file, weights);
 #endif
@@ -85,11 +92,16 @@ int main(int argc, char **argv)
 			// validate_weights(weights_file, glued_weights);
 			int ready_to_receive_new_input = 0;
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
+#if HW == FPGA
+//			krnl_fibha_v2(input_image, weights, fc_input,
+//					 ready_to_receive_new_input_ptr);
+#elif HW == CPU
 			top_func(input_image, weights, fc_input,
 					 ready_to_receive_new_input_ptr);
+#endif
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases);
-			dump_ouput(output_folder + ent->d_name, fc_input,
-					   fc_layer_input_size);
+//			dump_ouput(output_folder + ent->d_name, fc_input,
+//					   fc_layer_input_size);
 			predictions_file_content += top_5_to_predictions_dict(top5, formatted_file_name);
 			img_count++;
 			if (img_count == images_to_test)
