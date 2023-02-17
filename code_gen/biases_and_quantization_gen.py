@@ -6,6 +6,9 @@ import os
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
+first_quantization_arrays_elements_threshold = 4000
+first_quantization_arrays_num_of_elements = 0
+
 scales_bit_width = 18
 scales_integer_part_width = 1
 biases_bit_width = 32
@@ -249,7 +252,7 @@ with open(h_file, 'w') as wf:
         for i in range(layers_weights_shapes[layer_index].num_of_filters):
             fused_zero_point = np.sum(weights[i, :, :, :]) * -ifms_zero_point \
                 + biases[i]
-            print(len(biases), i)
+            #print(len(biases), i)
             assert(fused_zero_point < 2 ** 31 -
                    1 and fused_zero_point > - 2**31)
             fused_zero_points.append(fused_zero_point)
@@ -320,37 +323,64 @@ with open(h_file, 'w') as wf:
             wf.write(fused_scales_log_2_shifts_declaration_string)
             wf.write(relu_6_fused_scales_declaration_string)
         else:
-            seml_fused_scales.append(fused_scales)
-            seml_fused_scales_log_2_shifts.append(fused_scales_log_2_shifts)
-            seml_relu_6_fused_scales.append(relu_6_fused_scales)
-            seml_fused_zero_points.append(fused_zero_points)
+            if first_quantization_arrays_num_of_elements < first_quantization_arrays_elements_threshold:
+                first_quantization_arrays_num_of_elements += len(fused_scales)
+            seml_fused_scales.extend(fused_scales)
+            seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
+            seml_relu_6_fused_scales.extend(relu_6_fused_scales)
+            seml_fused_zero_points.extend(fused_zero_points)
+
+    print(first_quantization_arrays_num_of_elements)
 
     wf.write(layers_fused_parameters_offsets_declaration_string +
              str(layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
-
+########################################################################################################
     seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = \n'
 
     seml_fused_zero_points_declaration_string += '{ ' + str(
-        seml_fused_zero_points).replace('[', '').replace(']', '') + '};\n'
+        seml_fused_zero_points[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
 
     seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales[] ='
     seml_fused_scales_declaration_string += '{ ' + str(
-        seml_fused_scales).replace('[', '').replace(']', '') + '};\n'
+        seml_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
 
     seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[] ='
     seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
-        seml_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
+        seml_fused_scales_log_2_shifts[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
 
     seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] =' 
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
-        seml_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
+        seml_relu_6_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
 
     if cgc.LAST_LAYER_TO_GENERATE >= cgc.PILELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
         wf.write(seml_fused_zero_points_declaration_string)
         wf.write(seml_fused_scales_declaration_string)
         wf.write(seml_fused_scales_log_2_shifts_declaration_string)
         wf.write(seml_relu_6_fused_scales_declaration_string)
+########################################################################################################
+    seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points_part2[] = \n'
 
+    seml_fused_zero_points_declaration_string += '{ ' + str(
+        seml_fused_zero_points[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
+
+    seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales_part2[] ='
+    seml_fused_scales_declaration_string += '{ ' + str(
+        seml_fused_scales[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
+
+    seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[] ='
+    seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
+        seml_fused_scales_log_2_shifts[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
+
+    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales_part2[] =' 
+    seml_relu_6_fused_scales_declaration_string += '{ ' + str(
+        seml_relu_6_fused_scales[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
+
+    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PILELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
+        wf.write(seml_fused_zero_points_declaration_string)
+        wf.write(seml_fused_scales_declaration_string)
+        wf.write(seml_fused_scales_log_2_shifts_declaration_string)
+        wf.write(seml_relu_6_fused_scales_declaration_string)
+########################################################################################################
     wf.write("#endif\n")
 
 

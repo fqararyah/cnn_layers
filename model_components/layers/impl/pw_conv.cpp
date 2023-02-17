@@ -1,7 +1,6 @@
 #include "../headers/layers_imp_common_includes.h"
 #include "../headers/pw_conv.h"
 
-
 void pw_fill_channels_tile(fms_dt channels[max_fms_size],
 						   fms_dt channels_tile[pw_tile_h][pw_tile_w], const int starting_index,
 						   int starting_d, const int layer_conv_d)
@@ -118,7 +117,7 @@ void scale_pss_tile(fms_dt tmp_channels[max_fms_size],
 									normalization, layer_relu);
 
 							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal + add_layer_zero_point;
-							addition_result = addition_result + 0.5 - (addition_result<0);
+							addition_result = addition_result + quant_half - (addition_result < 0);
 							scaled_val = clamp(addition_result);
 						}
 
@@ -380,20 +379,25 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 			 const fused_scales_dt fused_scales[],
 			 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],
-			 const biases_dt fused_zero_points[])
+			 const biases_dt fused_zero_points[],
+			 const fused_scales_dt fused_scales_part2[],
+			 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
+			 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
+			 const biases_dt fused_zero_points_part2[])
 {
 
 #pragma HLS INLINE off
-
-	// weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
 
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor = num_of_weights_in_the_same_filter_and_group
 
-	// fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
-	// 		layer_conv_d, num_of_weight_groups, layer_weights_offset,
-	// 		layer_num_fils);
+#if HW == FPGA
+	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
+	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
+										   layer_conv_d, num_of_weight_groups, layer_weights_offset,
+										   layer_num_fils);
+#endif
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out];
@@ -405,26 +409,42 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 conv2_ots_loop:
 	for (int td_o = 0; td_o < num_of_tiles_d_out; td_o++)
 	{
-		fill_fused_zero_points_buffer(fused_zero_points,
-									  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
-									  layer, current_layer_fused_parameters_offset);
-		fill_fused_scales_buffer(fused_scales, fused_scales_buffer,
-								 fused_scales_log_2_shifts, fused_scales_log_2_shifts_buffer,
-								 relu_6_fused_scales, relu_6_fused_scales_buffer,
-								 td_o * pw_conv_parallelism_out, layer, current_layer_fused_parameters_offset);
+		if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
+		{
+			fill_fused_zero_points_buffer(fused_zero_points,
+										  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
+										  layer, current_layer_fused_parameters_offset);
+			fill_fused_scales_buffer(fused_scales, fused_scales_buffer,
+									 fused_scales_log_2_shifts, fused_scales_log_2_shifts_buffer,
+									 relu_6_fused_scales, relu_6_fused_scales_buffer,
+									 td_o * pw_conv_parallelism_out, layer, current_layer_fused_parameters_offset);
+		}
+		else
+		{
+			fill_fused_zero_points_buffer(fused_zero_points_part2,
+										  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
+										  layer, current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
+			fill_fused_scales_buffer(fused_scales_part2, fused_scales_buffer,
+									 fused_scales_log_2_shifts_part2, fused_scales_log_2_shifts_buffer,
+									 relu_6_fused_scales_part2, relu_6_fused_scales_buffer,
+									 td_o * pw_conv_parallelism_out, layer,
+									 current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
+		}
 
-		// fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
-		// 		weights_tile, td_o * pw_conv_parallelism_out, layer_conv_d,
-		// 		num_of_weight_groups, layer_weights_offset);
+#if HW == FPGA
+		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
+												  weights_tile, td_o * pw_conv_parallelism_out, layer_conv_d,
+												  num_of_weight_groups, layer_weights_offset);
 
-		// fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
-		// 		(td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
-		// 		num_of_weight_groups, layer_weights_offset, layer_num_fils);
-
+		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
+											   (td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
+											   num_of_weight_groups, layer_weights_offset, layer_num_fils);
+#elif HW == CPU
 		fill_layers_weights_cpu(weights,
 								weights_tile,
 								td_o * pw_conv_parallelism_out, layer_conv_d,
 								layer_weights_offset, layer_num_fils);
+#endif
 
 		do_conv(weights_tile, channels, result, layer, layer_conv_d,
 				layer_num_fils, num_of_tiles_d_in, num_of_tiles_d_out,

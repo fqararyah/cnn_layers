@@ -394,7 +394,11 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                  const fused_scales_dt fused_scales[],
                  const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
                  const relu_6_fused_scales_dt relu_6_fused_scales[],
-                 const biases_dt fused_zero_points[])
+                 const biases_dt fused_zero_points[],
+                 const fused_scales_dt fused_scales_part2[],
+                 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
+                 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
+                 const biases_dt fused_zero_points_part2[])
 {
 #pragma HLS INLINE off
 
@@ -438,13 +442,27 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
     for (int dw_pipeline_in_d = 0; dw_pipeline_in_d < num_of_tiles_d / dw_pipeline_depth; dw_pipeline_in_d++)
     {
         const int tile_in_d = dw_pipeline_in_d * dw_pipeline_depth;
-        fill_dw_weights_and_scales_tiles(weights, weights_tile, fused_scales,
-                                         fused_scales_tile, fused_scales_log_2_shifts,
-                                         fused_scales_log_2_shifts_tile, relu_6_fused_scales,
-                                         relu_6_fused_scales_tile, fused_zero_points,
-                                         fused_zero_points_tile, tile_in_d * dw_tile_d,
-                                         current_dw_layer_weights_offset,
-                                         current_layer_fused_parameters_offset);
+        if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
+        {
+            fill_dw_weights_and_scales_tiles(weights, weights_tile, fused_scales,
+                                             fused_scales_tile, fused_scales_log_2_shifts,
+                                             fused_scales_log_2_shifts_tile, relu_6_fused_scales,
+                                             relu_6_fused_scales_tile, fused_zero_points,
+                                             fused_zero_points_tile, tile_in_d * dw_tile_d,
+                                             current_dw_layer_weights_offset,
+                                             current_layer_fused_parameters_offset);
+        }
+        else
+        {
+            fill_dw_weights_and_scales_tiles(weights, weights_tile, fused_scales_part2,
+                                             fused_scales_tile, fused_scales_log_2_shifts_part2,
+                                             fused_scales_log_2_shifts_tile, relu_6_fused_scales_part2,
+                                             relu_6_fused_scales_tile, fused_zero_points_part2,
+                                             fused_zero_points_tile, tile_in_d * dw_tile_d,
+                                             current_dw_layer_weights_offset,
+                                             current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
+        }
+
         //     if (dw_pipeline_in_d == 0)
         // {
         //     for (int d_in_pipeline = 0; d_in_pipeline < dw_pipeline_depth; d_in_pipeline++)

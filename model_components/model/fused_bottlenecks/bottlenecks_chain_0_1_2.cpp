@@ -724,7 +724,7 @@ void write_chain_seml_communication_buffer(
             pss_f_dt addition_result = (chain_seml_communication_buffer[d][w] + tmp_channels_scaled_val) *
                                            add_layer_scale_reciprocal +
                                        add_layer_zero_point;
-            addition_result = addition_result + 0.5 - (addition_result < 0);
+            addition_result = addition_result + quant_half - (addition_result < 0);
             addition_result = clamp(addition_result);
 
             result[index_in_result] = addition_result;

@@ -2,6 +2,9 @@
 #ifndef GENERAL_SPECS
 #define GENERAL_SPECS
 
+//
+const int first_quantization_arrays_num_elements = 4344;
+
 // switch point
 const int switch_point_fms_width = 56;
 const int switch_point_fms_height = 56;
