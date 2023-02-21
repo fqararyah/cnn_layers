@@ -1,6 +1,7 @@
 import dw_weights_gen
 import biases_and_quantization_gen
 import prepare_off_chip_weights
+import prepare_off_chip_weights_fpga
 import bott_arch_layers_specs_gen
 import on_chip_conv_and_pw_weights_gen
 import bott_arch_seml_engine_calls_gen

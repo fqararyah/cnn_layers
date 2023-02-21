@@ -1,24 +1,11 @@
-#include <cstdint>
-#include <iostream>
-#include <fstream>
-#include <dirent.h>
-#include <chrono>
-
-using namespace std::chrono;
-using namespace std;
-
-const int num_classes = 1000;
-
-const double weights_scale = 1.873968634754419327e-03;
-const double ifms_scale = 0.020379824563860893;
-const double biases_scale = 3.819115227088332176e-05;
-int64_t ifm_zero_point = -128;
+#include "cpp_fc.h"
 
 void read_ifms(string file_name,
                int8_t ifms[])
 {
     int a;
     std::ifstream infile(file_name);
+    assert(!infile.fail());
     bool failed = false;
     int line_num = 0;
     while (infile >> a)
@@ -33,6 +20,7 @@ void read_fc_weights(string file_name,
 {
     int a;
     std::ifstream infile(file_name);
+    assert(!infile.fail());
     bool failed = false;
     int line_num = 0;
     while (infile >> a)
@@ -47,6 +35,7 @@ void read_weight_sums(string file_name,
 {
     int a;
     std::ifstream infile(file_name);
+    assert(!infile.fail());
     bool failed = false;
     int line_num = 0;
     while (infile >> a)
@@ -61,6 +50,7 @@ void read_biases(string file_name,
 {
     int a;
     std::ifstream infile(file_name);
+    assert(!infile.fail());
     bool failed = false;
     int line_num = 0;
     while (infile >> a)

@@ -11,6 +11,7 @@ bool isNumber(string &str) {
 int get_num_of_pw_weights(string file_name)
 {
 	std::ifstream infile(file_name);
+	assert(!infile.fail());
 	int num_of_pw_weights = -1;
 	while (infile >> num_of_pw_weights)
 		;
@@ -22,7 +23,7 @@ void load_weights(string file_name,
 {
 	int a;
 	std::ifstream infile(file_name);
-
+	assert(!infile.fail());
 	int line_num = 0;
 	while (infile >> a)
 	{
@@ -35,7 +36,7 @@ void load_image(string file_name,
 				  fms_dt image[]){
 	int a;
 	std::ifstream infile(file_name);
-
+	assert(!infile.fail());
 	int line_num = 0;
 	while (infile >> a)
 	{
@@ -49,7 +50,7 @@ void glue_weights(string file_name,
 		weights_grp_dt glued_weights[all_pw_weights]) {
 	int a;
 	std::ifstream infile(file_name);
-
+	assert(!infile.fail());
 	int line_num = 0;
 	while (infile >> a) {
 		weights_dt weight = (weights_dt) a;
@@ -66,6 +67,7 @@ void validate_weights(string file_name,
 		weights_grp_dt glued_weights[all_pw_weights]) {
 	int a;
 	std::ifstream infile(file_name);
+	assert(!infile.fail());
 	bool failed = false;
 	int line_num = 0;
 	while (infile >> a) {
@@ -96,6 +98,7 @@ void glue_input_image(string file_name,
 				* input_image_num_fms_groups_in_a_channel]) {
 	int a;
 	std::ifstream infile(file_name);
+	assert(!infile.fail());
 
 	int line_num = 0;
 	while (infile >> a) {
@@ -121,6 +124,7 @@ void verify_glued_image(string file_name,
 				* input_image_num_fms_groups_in_a_channel]) {
 	int a;
 	std::ifstream infile(file_name);
+	assert(!infile.fail());
 	bool failed = false;
 	int line_num = 0;
 	while (infile >> a) {
@@ -156,6 +160,7 @@ void fill_input_image(string file_name,
 		fms_dt input_image[input_image_depth][input_image_height][input_image_width]) {
 	int a;
 	std::ifstream infile(file_name);
+	assert(!infile.fail());
 	bool failed = false;
 	int line_num = 0;
 	const int input_image_hw = input_image_height * input_image_width;
@@ -174,6 +179,7 @@ void verify_input_image(string file_name,
 	ofstream myfile;
 	const int input_image_hw = input_image_height * input_image_width;
 	myfile.open(file_name);
+
 	for (int d = 0; d < input_image_depth; d++) {
 		for (int h = 0; h < input_image_height; h++) {
 			for (int w = 0; w < input_image_width; w++) {
@@ -199,6 +205,7 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 	int a;
 	int line = 0;
 	std::ifstream infile(file_name);
+	assert(!infile.fail());
 	while (infile >> a) {
 		int z = (line / ofms_hw);
 		int h = ((line % ofms_hw) / ifms_w);

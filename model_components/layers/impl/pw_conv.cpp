@@ -212,6 +212,10 @@ pw_conv_eng_loops:
 					results_tile[f_d][t_h][t_w] = 0;
 				}
 				results_tile[f_d][t_h][t_w] += channels_tile[t_h][t_w] * weights_tile[f_d][starting_conv_d];
+// #if DEBUGGING
+// 				if (t_h == 0 && t_w == 0)
+// 					cout << (int)channels_tile[t_h][t_w] << " * " << (int)weights_tile[f_d][starting_conv_d] << "\n";
+// #endif
 			}
 		}
 	}
@@ -328,6 +332,11 @@ conv2_ith_loop:
 							 layer, layer_num_fils, layer_conv_d, num_of_tiles_hw,
 							 num_of_tiles_w, td_o, t_in_h, t_in_w, direction,
 							 num_of_tiles_d_in);
+			// #if DEBUGGING
+			// if(t_in_h == 0 && t_in_w == 0){
+			// 	cout<<results_tile[0][0][0]<<"\n";
+			// }
+			// #endif
 			copy_pss_tile(results_tile, prev_results_tile);
 
 			//
@@ -397,6 +406,11 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
 										   layer_conv_d, num_of_weight_groups, layer_weights_offset,
 										   layer_num_fils);
+#elif HW == CPU
+	fill_layers_weights_cpu(weights,
+							weights_tile,
+							0 * pw_conv_parallelism_out, layer_conv_d,
+							layer_weights_offset, layer_num_fils);
 #endif
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
@@ -435,17 +449,7 @@ conv2_ots_loop:
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
 												  weights_tile, td_o * pw_conv_parallelism_out, layer_conv_d,
 												  num_of_weight_groups, layer_weights_offset);
-
-		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
-											   (td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
-											   num_of_weight_groups, layer_weights_offset, layer_num_fils);
-#elif HW == CPU
-		fill_layers_weights_cpu(weights,
-								weights_tile,
-								td_o * pw_conv_parallelism_out, layer_conv_d,
-								layer_weights_offset, layer_num_fils);
 #endif
-
 		do_conv(weights_tile, channels, result, layer, layer_conv_d,
 				layer_num_fils, num_of_tiles_d_in, num_of_tiles_d_out,
 				num_of_tiles_h, num_of_tiles_w, tmp_channels, read_write,
@@ -453,5 +457,15 @@ conv2_ots_loop:
 				layer_relu, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
 				fused_zero_points_buffer, td_o);
+#if HW == FPGA
+		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
+											   (td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
+											   num_of_weight_groups, layer_weights_offset, layer_num_fils);
+#elif HW == CPU
+		fill_layers_weights_cpu(weights,
+								weights_tile,
+								(td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
+								layer_weights_offset, layer_num_fils);
+#endif
 	}
 }

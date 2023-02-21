@@ -7,6 +7,7 @@
 #include "ap_int.h"
 #endif
 #include <iostream>
+#include <cassert>
 
 using namespace std;
 

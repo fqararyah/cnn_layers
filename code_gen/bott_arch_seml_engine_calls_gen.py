@@ -55,7 +55,7 @@ dw_block_1 = \
 #     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
 #     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_activation);\n'
 
-debugging_dump_ofms_block = 'dump_layer_output("{}",\n {}, {}, {}, {});\n'
+debugging_dump_ofms_block = '#if DEBUGGING\n dump_layer_output("{}",\n {}, {}, {}, {});\n#endif\n'
 debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
 debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
 
@@ -219,7 +219,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
 
     code_to_insert += replace(replacement_dict, target_block)
 
-    if cgc.DEBUGGING and layer_index in cgc.LAYERS_TO_DEBUG:
+    if layer_index in cgc.LAYERS_TO_DEBUG:
         code_to_insert += debugging_dump_ofms_block.format(ofms_file_path + 'ofms_' + str(layer_index)+'.txt',
                                                            'result' if direction == 0 else 'channels',
                                                            layers_output_shapes[layer_index].depth * layers_output_shapes[layer_index].height *
