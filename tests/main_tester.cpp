@@ -14,13 +14,13 @@ using namespace std;
 int main(int argc, char **argv)
 {
 	string num_of_pw_weights_file = "/media/SSD2TB/wd/cnn_layers/off_chip_weights/num_of_pw_weights_file.txt";
-	#if HW == CPU
+#if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/off_chip_weights.txt";
-	#elif HW== FPGA
+#elif HW == FPGA
 	string weights_file =
 		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/off_chip_weights_fpga.txt";
-	#endif
+#endif
 	string input_images_folder =
 		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
 	string input_image_v_file =
@@ -34,13 +34,15 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/fc_weight_sums.txt";
 	string biases_file =
 		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/fc_biases.txt";
+#if HW == FPGA
 	string predictions_file = "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_hls.json";
-
+#else
+	string predictions_file = "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_cpu.json";
+#endif
 	const int num_of_pw_weights = get_num_of_pw_weights(num_of_pw_weights_file);
 #if HW == FPGA
-	weights_grp_dt weights[num_of_pw_weights/weights_group_items];
-	fms_grp_dt input_image[input_image_depth
-					* input_image_num_fms_groups_in_a_channel];
+	weights_grp_dt weights[num_of_pw_weights / weights_group_items];
+	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
 	weights_dt weights[num_of_pw_weights];
 	fms_dt input_image[input_image_depth * input_image_hw];
@@ -99,14 +101,14 @@ int main(int argc, char **argv)
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 #if HW == FPGA
 			krnl_fibha_v2(input_image, weights, fc_input,
-					 ready_to_receive_new_input_ptr);
+						  ready_to_receive_new_input_ptr);
 #elif HW == CPU
 			top_func(input_image, weights, fc_input,
 					 ready_to_receive_new_input_ptr);
 #endif
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases);
-//			dump_ouput(output_folder + ent->d_name, fc_input,
-//					   fc_layer_input_size);
+			//			dump_ouput(output_folder + ent->d_name, fc_input,
+			//					   fc_layer_input_size);
 			predictions_file_content += top_5_to_predictions_dict(top5, formatted_file_name);
 			img_count++;
 			if (img_count == images_to_test)
