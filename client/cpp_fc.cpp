@@ -31,7 +31,7 @@ void read_fc_weights(string file_name,
 }
 
 void read_weight_sums(string file_name,
-                      int_fast64_t fc_weight_sums[])
+                      int64_t fc_weight_sums[])
 {
     int a;
     std::ifstream infile(file_name);
@@ -103,7 +103,7 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
             pss += (int64_t)weights[row_start_index + j] * in_vector[j];
         }
         // if(i==999)cout << pss <<" "<<weight_sums[i]<<" "<<biases[i]<<"\n";
-        pss_vector[i] = pss + (-weight_sums[i] * ifm_zero_point) + biases_scale * biases[i] / (weights_scale * ifms_scale);
+        pss_vector[i] = pss + (-weight_sums[i] * ifm_zero_point) + biases[i];
     }
     for (int i = 0; i < 5; i++)
     {

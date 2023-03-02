@@ -23,7 +23,7 @@ void read_fc_weights(string file_name,
                   int8_t fc_weights[]);
 
 void read_weight_sums(string file_name,
-                      int_fast64_t fc_weight_sums[]);
+                      int64_t fc_weight_sums[]);
 
 void read_biases(string file_name,
                  int fc_biases[]);
