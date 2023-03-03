@@ -5,6 +5,7 @@
 void fill_ifms_cols(fms_dt channels[max_fms_size],
                     fms_dt ifms_buffer[dw_pipeline_depth][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
                     const int offset_in_ifms_buffer_h, const int offset_in_ifms_buffer_w,
+                    const int last_to_fill_in_h,
                     const int tile_index_in_h, const int tile_index_in_w,
                     int absolute_offset, const int padding_top, const int padding_left,
                     const int padding_right, const int ifms_height, const int ifms_width,
@@ -26,6 +27,10 @@ fill_ifms_cols:
         for (int h = 0; h < dw_tile_h; h++)
         {
 #pragma HLS UNROLL
+            if (offset_in_ifms_buffer_h + h >= last_to_fill_in_h)
+            {
+                break;
+            }
             if (w + starting_fill_w_offset < ifms_width && tile_index_in_w >= 0)
             {
                 ifms_buffer[d_in_pipeline][h + offset_in_ifms_buffer_h][w + offset_in_ifms_buffer_w] = channels[absolute_offset + h * dw_tile_w + w];
@@ -41,6 +46,7 @@ fill_ifms_cols:
 void fill_ifms_rows(fms_dt channels[max_fms_size],
                     fms_dt ifms_buffer[dw_pipeline_depth][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
                     const int offset_in_ifms_buffer_h, const int offset_in_ifms_buffer_w,
+                    const int last_to_fill_in_w,
                     const int tile_index_in_h, const int tile_index_in_w,
                     int absolute_offset, const int padding_top, const int padding_bottom,
                     const int padding_left, const int ifms_height, const int ifms_width,
@@ -61,6 +67,10 @@ fill_ifms_rows:
         for (int w = 0; w < dw_tile_w; w++)
         {
 #pragma HLS UNROLL
+            if (offset_in_ifms_buffer_w + w >= last_to_fill_in_w)
+            {
+                break;
+            }
             if (h + starting_fill_h_offset < ifms_height && tile_index_in_h >= 0)
             {
                 ifms_buffer[d_in_pipeline][offset_in_ifms_buffer_h + h][offset_in_ifms_buffer_w + w] = channels[absolute_offset + h * dw_tile_w + w];
@@ -114,6 +124,7 @@ fill_ifms_corner:
 void dw_fill_channels_tile(fms_dt channels[max_fms_size],
                            fms_dt ifms_buffer[dw_pipeline_depth][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
                            const int ifms_buffer_offset_h, const int ifms_buffer_offset_w,
+                           const int last_to_fill_in_h, const int last_to_fill_in_w,
                            const int global_absolute_tile_offset_in_ifms, const int num_of_tiles_hw)
 {
 #pragma HLS INLINE
@@ -128,6 +139,10 @@ dw_fill_channels_tile:
             for (int t_w = 0; t_w < pw_tile_w; t_w++)
             {
 #pragma HLS UNROLL
+                if (t_h + ifms_buffer_offset_h >= last_to_fill_in_h || t_w + ifms_buffer_offset_w >= last_to_fill_in_w)
+                {
+                    break;
+                }
                 ifms_buffer[d_in_pipeline][t_h + ifms_buffer_offset_h][t_w + ifms_buffer_offset_w] =
                     channels[local_absolute_tile_offset_in_ifms + t_h * pw_tile_w + t_w];
             }
@@ -166,6 +181,12 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
 #pragma HLS INLINE
 
     const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
+    const int right_corners_offset_w = (ifm_tile_in_w == num_of_tiles_w - 1) ? padding_left +
+                                                                                   (ifm_width - dw_tile_w * ifm_tile_in_w)
+                                                                             : padding_left + dw_tile_w;
+    const int bottom_corners_offset_h = (ifm_tile_in_h == num_of_tiles_h - 1) ? padding_top +
+                                                                                    (ifm_height - dw_tile_h * ifm_tile_in_h)
+                                                                              : padding_top + dw_tile_h;
     for (int d_in_pipeline = 0; d_in_pipeline < dw_pipeline_depth; d_in_pipeline++)
     {
 #pragma HLS PIPELINE
@@ -188,20 +209,20 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
                              ifm_tile_in_w - 1, absolute_offset_padding_tl_corner,
                              padding_left, padding_top, padding_right, padding_bottom,
                              ifm_height, ifm_width, d_in_pipeline, fms_zero_point);
-            fill_ifms_corner(channels, ifms_buffer, 0, padding_left + dw_tile_w,
+            fill_ifms_corner(channels, ifms_buffer, 0, right_corners_offset_w,
                              ifm_tile_in_h - 1, ifm_tile_in_w + 1,
                              absolute_offset_padding_tr_corner, padding_left, padding_top,
                              padding_right, padding_bottom, ifm_height, ifm_width, d_in_pipeline,
                              fms_zero_point);
         }
-        fill_ifms_corner(channels, ifms_buffer, padding_top + dw_tile_h,
-                         padding_left + dw_tile_w, ifm_tile_in_h + 1, ifm_tile_in_w + 1,
+        fill_ifms_corner(channels, ifms_buffer, bottom_corners_offset_h,
+                         right_corners_offset_w, ifm_tile_in_h + 1, ifm_tile_in_w + 1,
                          absolute_offset_padding_br_corner, padding_left, padding_top,
                          padding_right, padding_bottom, ifm_height, ifm_width, d_in_pipeline,
                          fms_zero_point);
         if (padding_left > 0)
         {
-            fill_ifms_corner(channels, ifms_buffer, padding_top + dw_tile_h, 0,
+            fill_ifms_corner(channels, ifms_buffer, bottom_corners_offset_h, 0,
                              ifm_tile_in_h + 1, ifm_tile_in_w - 1,
                              absolute_offset_padding_bl_corner, padding_left, padding_top,
                              padding_right, padding_bottom, ifm_height, ifm_width, d_in_pipeline,
@@ -221,22 +242,22 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
         const int absolute_offset_padding_left = local_absolute_tile_offset_in_ifms - dw_tile_size + (dw_tile_w - padding_left);
         if (padding_top > 0)
         {
-            fill_ifms_rows(channels, ifms_buffer, 0, padding_left,
+            fill_ifms_rows(channels, ifms_buffer, 0, padding_left, right_corners_offset_w,
                            ifm_tile_in_h - 1, ifm_tile_in_w, absolute_offset_padding_top,
                            padding_top, padding_bottom, padding_left, ifm_height,
                            ifm_width, d_in_pipeline, fms_zero_point);
         }
-        fill_ifms_cols(channels, ifms_buffer, padding_top, dw_tile_w + padding_left,
+        fill_ifms_cols(channels, ifms_buffer, padding_top, right_corners_offset_w, bottom_corners_offset_h,
                        ifm_tile_in_h, ifm_tile_in_w + 1, absolute_offset_padding_right,
                        padding_top, padding_left, padding_right, ifm_height, ifm_width, d_in_pipeline,
                        fms_zero_point);
-        fill_ifms_rows(channels, ifms_buffer, dw_tile_h + padding_top, padding_left,
+        fill_ifms_rows(channels, ifms_buffer, bottom_corners_offset_h, padding_left, right_corners_offset_w,
                        ifm_tile_in_h + 1, ifm_tile_in_w, absolute_offset_padding_bottom,
                        padding_top, padding_bottom, padding_left, ifm_height, ifm_width, d_in_pipeline,
                        fms_zero_point);
         if (padding_left > 0)
         {
-            fill_ifms_cols(channels, ifms_buffer, padding_top, 0, ifm_tile_in_h,
+            fill_ifms_cols(channels, ifms_buffer, padding_top, 0, bottom_corners_offset_h, ifm_tile_in_h,
                            ifm_tile_in_w - 1, absolute_offset_padding_left, padding_top,
                            padding_left, padding_right, ifm_height, ifm_width, d_in_pipeline,
                            fms_zero_point);
@@ -244,6 +265,7 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
     }
 
     dw_fill_channels_tile(channels, ifms_buffer, padding_top, padding_left,
+                          bottom_corners_offset_h, right_corners_offset_w,
                           global_absolute_tile_offset_in_ifms, num_of_tiles_hw);
 }
 

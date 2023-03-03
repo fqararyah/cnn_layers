@@ -312,7 +312,7 @@ void verify_fill_layer_input(string file_name, fms_dt ifms[max_fms_size],
 	}
 	myfile.open(file_name);
 	for (int i = 0; i < ifms_size; i++) {
-		myfile << to_print_ofms[i] << "\n";
+		myfile << (int)to_print_ofms[i] << "\n";
 	}
 	myfile.close();
 

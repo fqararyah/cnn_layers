@@ -72,7 +72,7 @@ int main(int argc, char **argv) {
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 100;
+	int images_to_test = 1;
 
 	if (argc > 1) {
 		images_to_test = stoi(argv[1]);
