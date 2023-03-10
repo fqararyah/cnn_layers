@@ -189,7 +189,7 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
                                                                               : padding_top + dw_tile_h;
     for (int d_in_pipeline = 0; d_in_pipeline < dw_pipeline_depth; d_in_pipeline++)
     {
-#pragma HLS PIPELINE
+#pragma HLS PIPELINE off
 
         const int local_absolute_tile_offset_in_ifms = global_absolute_tile_offset_in_ifms + d_in_pipeline * num_of_tiles_hw * dw_tile_size;
         const int absolute_offset_padding_top = local_absolute_tile_offset_in_ifms - num_of_tiles_w * dw_tile_size +
@@ -228,18 +228,7 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
                              padding_right, padding_bottom, ifm_height, ifm_width, d_in_pipeline,
                              fms_zero_point);
         }
-    }
 
-    for (int d_in_pipeline = 0; d_in_pipeline < dw_pipeline_depth; d_in_pipeline++)
-    {
-#pragma HLS PIPELINE
-
-        const int local_absolute_tile_offset_in_ifms = global_absolute_tile_offset_in_ifms + d_in_pipeline * num_of_tiles_hw * dw_tile_size;
-        const int absolute_offset_padding_top = local_absolute_tile_offset_in_ifms - num_of_tiles_w * dw_tile_size +
-                                                ((dw_tile_h - padding_top) * dw_tile_w);
-        const int absolute_offset_padding_right = local_absolute_tile_offset_in_ifms + dw_tile_size;
-        const int absolute_offset_padding_bottom = local_absolute_tile_offset_in_ifms + num_of_tiles_w * dw_tile_size;
-        const int absolute_offset_padding_left = local_absolute_tile_offset_in_ifms - dw_tile_size + (dw_tile_w - padding_left);
         if (padding_top > 0)
         {
             fill_ifms_rows(channels, ifms_buffer, 0, padding_left, right_corners_offset_w,
@@ -268,6 +257,7 @@ void fill_dw_tile(fms_dt channels[max_fms_size],
                           bottom_corners_offset_h, right_corners_offset_w,
                           global_absolute_tile_offset_in_ifms, num_of_tiles_hw);
 }
+
 
 void dw_conv_engine(
     dw_weights_dt weights[][max_filter_hw_dim * max_filter_hw_dim],
