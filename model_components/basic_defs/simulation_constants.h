@@ -14,5 +14,5 @@
 #define ONLY_SESL 0
 #define ONLY_SEML 0
 #define USE_FIRB 1
-#define DEBUGGING 0
+#define DEBUGGING 1
 #endif

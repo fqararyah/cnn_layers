@@ -6,9 +6,15 @@
 const int first_quantization_arrays_num_elements = 4344;
 
 // switch point
+#if ONLY_SEML
+const int switch_point_fms_width = 112;
+const int switch_point_fms_height = 112;
+const int switch_point_fms_depth = 96; // not really, but the max of ...
+#else
 const int switch_point_fms_width = 56;
 const int switch_point_fms_height = 56;
 const int switch_point_fms_depth = 144; // not really, but the max of ...
+#endif
 
 //MobileNetsV1, but could be useful in future
 const int alpha = 1;
@@ -31,16 +37,18 @@ const int start_with_pw = 1;
 
 //maxs for buffers
 const int max_conv_d = 1280 / alpha; //to_automate
-#if MODEL_ID == 1 || MODEL_ID == 2
+const int min_strides = 1;
+const int max_strides = 2;
+#if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2
 const int max_filter_hw_dim = 3;
+const int max_padding_lr = 2;
 #elif MODEL_ID == 3 || MODEL_ID == 4
 const int max_filter_hw_dim = 5;
 #endif
 const int max_padding = 1;
 const int max_conv_h = max_filter_hw_dim;
 const int max_conv_w = max_filter_hw_dim;
-const int max_fms_size =
-	DF ? switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth: 112 * 112 * 96;
+const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
 const int max_tmp_fms_size = 56 * 56 * 24;
 
 const int median_depth = 96;
