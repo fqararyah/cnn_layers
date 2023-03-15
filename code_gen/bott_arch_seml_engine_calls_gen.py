@@ -56,8 +56,8 @@ dw_block_1 = \
 #     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_activation);\n'
 
 debugging_dump_ofms_block = '#if DEBUGGING\n dump_layer_output("{}",\n {}, {}, {}, {});\n#endif\n'
-debugging_fill_layer_input_block = 'fill_layer_input("{}",\n {}, {}, {});\n'
-debugging_verify_fill_layer_input_block = 'verify_fill_layer_input("{}",\n {}, {}, {}, {});\n'
+debugging_fill_layer_input_block = '#if DEBUGGING\n fill_layer_input("{}",\n {}, {}, {});\n#endif\n'
+debugging_verify_fill_layer_input_block = '#if DEBUGGING\n verify_fill_layer_input("{}",\n {}, {}, {}, {});\n#endif\n'
 
 # layers_to_debug = [2, 12, 13, 20, 21, 22, 23, 24,25,26,27,28,29,30,31, 32,33,34, 35, 36, 37, 38, 39, 40, 41,
 #layers_to_debug = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
