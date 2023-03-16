@@ -15,10 +15,13 @@ void dw_conv_fill_from_channels(fms_dt channels[max_fms_size],
 
 	const int start_filling_h = ifms_buffer_height - strides;
 
-	d: for (int d = 0; d < dw_pipeline_depth; d++) {
+	dw_shift_d:for (int d = 0; d < dw_pipeline_depth; d++) {
 #pragma HLS PIPELINE
-		w: for (int w = 0; w < num_of_tiles_w * dw_tile_w; w++) {
+		dw_shift_w: for (int w = 0; w < switch_point_fms_width + max_padding_lr; w++) {
 #pragma HLS UNROLL
+			if(w >= num_of_tiles_w * dw_tile_w){
+				break;
+			}
 			if (strides == 1) {
 				ifms_buffer[d][0][w + padding_left_or_right] = ifms_buffer[d][1][w + padding_left_or_right];
 				ifms_buffer[d][1][w + padding_left_or_right] = ifms_buffer[d][2][w + padding_left_or_right];
