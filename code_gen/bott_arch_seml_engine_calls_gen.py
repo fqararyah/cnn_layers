@@ -34,6 +34,7 @@ expansion_projection_block = 'pw_conv(off_chip_weights, *CHANNELS*, result, *i*,
 dw_block_0 = \
     'dw_conv_3x3(seml_dw_weights_3x3, channels, result, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
+    layer_*i*_dw_ifm_num_of_tiles_h, layer_*i*_dw_ifm_num_of_tiles_w, \n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
     *DIRECTION*, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
@@ -43,6 +44,7 @@ dw_block_0 = \
 dw_block_1 = \
     'dw_conv_3x3(seml_dw_weights_3x3, result, channels, *i*, layer_*i*_dw_depth,\n\
     layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
+    layer_*i*_dw_ifm_num_of_tiles_h, layer_*i*_dw_ifm_num_of_tiles_w, \n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
     *DIRECTION*, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\

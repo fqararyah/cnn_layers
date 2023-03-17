@@ -327,6 +327,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 				 fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 				 const int layer, const int layer_conv_d, const int layer_ifm_width,
 				 const int layer_ifm_height, const int num_of_tiles_d,
+				 const int num_of_ifms_tiles_h, const int num_of_ifms_tiles_w,
 				 const int num_of_ofms_tiles_h, const int num_of_ofms_tiles_w,
 				 const int strides, const int padding_left, const int padding_right,
 				 const int padding_top, const int direction,
@@ -342,10 +343,6 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 #pragma HLS INLINE off
 
 	const int padding_bottom = padding_right;
-	const int num_of_ifms_tiles_h =
-		(layer_ifm_height % dw_tile_h) == 0 ? layer_ifm_height / dw_tile_h : num_of_ofms_tiles_h * strides;
-	const int num_of_ifms_tiles_w =
-		(layer_ifm_width % dw_tile_w) == 0 ? layer_ifm_width / dw_tile_w : num_of_ofms_tiles_w * strides;
 
 	const int num_of_ifms_tiles_hw = num_of_ifms_tiles_h * num_of_ifms_tiles_w;
 	const int num_of_ofms_tiles_hw = num_of_ofms_tiles_h * num_of_ofms_tiles_w;
@@ -377,7 +374,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 	const int skip_padding_left = padding_left == 0 ? padding_right : 0;
 
 #pragma HLS ARRAY_PARTITION variable = ifms_buffer type = complete dim = 3
-#pragma HLS ARRAY_PARTITION variable = ifms_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = ifms_buffer_lower_part type = complete dim = 3
 #pragma HLS ARRAY_PARTITION variable = engine_result_tile type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = normalized_result_tile type = complete dim = 2
 
