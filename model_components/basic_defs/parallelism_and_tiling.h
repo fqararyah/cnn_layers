@@ -11,10 +11,11 @@ const int pw_conv_parallelism_in = pw_tile_d;
 //WARNING, when pw_conv_parallelism_out is changes, generate script should be run
 const int pw_conv_parallelism_out = 8; //>= tile_d and >=8: 16, 32, 64 (< 8 is not working for weight load)
 
-const int dw_pipeline_depth = 24;
 const int dw_tile_d = pw_tile_d;
 const int dw_tile_h = pw_tile_h;
 const int dw_tile_w = pw_tile_w;
+const int dw_pipeline_depth = 24;
+
 const int dw_tile_hw = dw_tile_h * dw_tile_w;
 const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;
 const int dw_max_v2_buffer_height = dw_tile_h + (max_filter_hw_dim - 1);//where 3 is max conv kernel dim and 1 is mi strides
