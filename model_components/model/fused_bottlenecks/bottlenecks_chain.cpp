@@ -567,7 +567,7 @@ void write_chain_seml_communication_buffer(
 void _0_1_bottlenecks_chain(
 		fms_grp_dt channels[input_image_depth
 				* input_image_num_fms_groups_in_a_channel],
-		fms_dt result[max_fms_size]) {
+		fms_dt result[max_tmp_fms_size]) {
 #pragma HLS INLINE off
 
 	fms_dt bottleneck_0_1_communication_buffer[bottleneck_0_ofms_depth][chain_0_1_bottleneck_0_rows_at_once][bottleneck_0_ofms_width];

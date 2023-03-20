@@ -6,6 +6,7 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 
 in_out_file = '../model_components/model/SEML/imp/seml.cpp'
+constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
 ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
@@ -235,4 +236,15 @@ file_replacement = file_replacement[:insert_index] + \
     code_to_insert + file_replacement[insert_index:]
 
 with open(in_out_file, 'w') as f:
+    f.write(file_replacement)
+
+file_replacement = ''
+with open(constants_header_file, 'r') as f:
+    for line in f:
+        if '#define CHAIN_LENGTH' in line:
+            file_replacement += '#define CHAIN_LENGTH ' + str(cgc.PILELINE_LEN) + '\n'
+        else:
+            file_replacement += line
+
+with open(constants_header_file, 'w') as f:
     f.write(file_replacement)

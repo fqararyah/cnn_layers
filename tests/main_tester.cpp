@@ -106,6 +106,11 @@ int main(int argc, char **argv) {
 			top_func(input_image, weights, fc_input,
 					 ready_to_receive_new_input_ptr);
 #endif
+			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
+			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "
+			// 		<< (int)fc_input[338] << " " << (int)fc_input[328] << " "
+			// 		<< (int)fc_input[327] << " " << (int)fc_input[335] << " "
+			// 		<< (int)fc_input[81] << " " << (int)fc_input[340] << " ";
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases);
 //			dump_ouput(output_folder + ent->d_name, fc_input,
 //					   fc_layer_input_size);
