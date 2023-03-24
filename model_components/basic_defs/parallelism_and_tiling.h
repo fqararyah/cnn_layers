@@ -2,8 +2,8 @@
 #ifndef PARALLELISM_AND_TILING
 #define PARALLELISM_AND_TILING
 
-const int pw_tile_d = 4;
-const int pw_tile_h = 4;
+const int pw_tile_d = 1;
+const int pw_tile_h = 8;
 const int pw_tile_w = 8;
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;

@@ -1,6 +1,6 @@
 #include "bottlenecks_chain.h"
 
-#if CHAIN_LENGTH == 9
+#if CHAIN_LENGTH == 9 && MODEL_ID != 1
 // padding left and right
 // padding top: just do not fill
 void bottleneck_chain_0_1_2_fill_ifm_groups_buffer(
@@ -12,14 +12,9 @@ void bottleneck_chain_0_1_2_fill_ifm_groups_buffer(
 
     const int start_filling_offset = starting_h * input_image_num_fms_groups_in_width;
     int elements_avaiable_in_input_image;
-    if (starting_h + bottleneck_0_fill_each_time >= input_image_height)
-    {
-        elements_avaiable_in_input_image = (input_image_height - starting_h) * input_image_num_fms_groups_in_width;
-        if (elements_avaiable_in_input_image < 0)
-        {
-            elements_avaiable_in_input_image = 0;
-        }
-    }
+    
+    elements_avaiable_in_input_image = (input_image_height - starting_h) * input_image_num_fms_groups_in_width;
+
     for (int d = 0; d < input_image_depth; d++)
     {
 #pragma HLS PIPELINE off
@@ -57,8 +52,10 @@ void chain_0_1_2_fill_row_from_groups_buffer(
 #pragma HLS PIPELINE
                 if (o_w_offset + w < input_image_width)
                 {
-                    // channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
-                    // 	w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
+#if HW == FPGA
+                    channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
+                        w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
+#endif
                 }
             }
         }
@@ -736,7 +733,7 @@ void write_chain_seml_communication_buffer(
 
 void _0_1_2_bottlenecks_chain(
     fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
-    fms_dt result[max_fms_size])
+    fms_dt result[max_tmp_fms_size])
 {
 #pragma HLS INLINE off
 
@@ -849,8 +846,10 @@ void _0_1_2_bottlenecks_chain(
                                         bottleneck_0_first_fill_offset, layer_0_s_ifms_zero_point,
                                         bottleneck_0_dw_ifms_zero_point);
 
-    bottleneck_1_pipeline_filling_stage(bottleneck_1_previous_pass_dw_input_1, bottleneck_1_previous_pass_dw_input_2,
-                                        bottleneck_1_dw_ifms_zero_point);
+    bottleneck_1_pipeline_filling_stage(
+        bottleneck_1_previous_pass_dw_input_1,
+        bottleneck_1_previous_pass_dw_input_2,
+        bottleneck_1_dw_ifms_zero_point);
     filling_h++;
     bottleneck_0_h++;
 
@@ -860,7 +859,7 @@ void _0_1_2_bottlenecks_chain(
     chain_0_1_2_fill_channels_buffer_cpu(channels,
                                          chain_input, filling_row, true,
                                          layer_0_s_ifms_zero_point);
-#elif HW == CPU
+#elif HW == FPGA
     bottleneck_chain_0_1_2_fill_ifm_groups_buffer(channels, fms_groups_buffer,
                                                   filling_row, num_of_ifm_groups_read_each_time);
     bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
