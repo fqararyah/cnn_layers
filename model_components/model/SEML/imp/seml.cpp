@@ -12,7 +12,7 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 //			result[i] = i % 127;
 //		}
 //		begin_code_generation
-pw_conv(off_chip_weights, tmp_channels, result, 6, layer_6_pw_depth,
+pw_conv(off_chip_weights, channels, result, 6, layer_6_pw_depth,
     layer_6_pw_num_fils, layer_6_pw_num_of_tiles_in_d,
     layer_6_pw_num_of_tiles_out_d, layer_6_pw_num_of_tiles_h,
     layer_6_pw_num_of_tiles_w, tmp_channels, 0,

@@ -27,12 +27,12 @@ void top_func(
 					  tmp_channels, 56 * 56 * 24, 56, 56);
 #elif CHAIN_LENGTH == 6 && MODEL_ID == 2
 	_0_1_bottlenecks_chain(input_image,
-						   tmp_channels);
+						   channels);
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_5.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
 #endif
 #endif
-
+	copy_channels_to_tmp_channels(channels, tmp_channels);
 	seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
 }

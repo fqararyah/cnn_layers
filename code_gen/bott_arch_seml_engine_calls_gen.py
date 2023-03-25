@@ -183,10 +183,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         replacement_dict['*TYPE*_'] = ''
     if layers_types[layer_index] == 'pw':
         replacement_dict['*TYPE*'] = 'pw'
-        replacement_dict['*CHANNELS*'] = 'tmp_channels' if (layer_index - skip_connections_depth - 1 in skip_connections_indices
-                                                            or layer_index - 1 in skip_connections_indices or layer_index + skip_connections_depth - 1 in skip_connections_indices)\
-            and layer_index == cgc.PILELINE_LEN\
-            else 'channels'
+        replacement_dict['*CHANNELS*'] = 'channels'
         target_block += expansion_projection_block
         if layer_index + skip_connections_depth in skip_connections_indices:
             read_write += 2
