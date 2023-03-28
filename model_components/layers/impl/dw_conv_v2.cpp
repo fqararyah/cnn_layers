@@ -1,6 +1,6 @@
 #include "../headers/layers_imp_common_includes.h"
 #include "../headers/dw_conv.h"
-#include "../headers/pw_conv.h"
+#include "../headers/conv_utils.h"
 
 void dw_conv_3x3_v2(const dw_weights_dt weights[][3 * 3],
                     fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
