@@ -76,11 +76,9 @@ void scale_pss_tile(fms_dt tmp_channels[max_fms_size],
 			 tile_offset < num_of_tiles_processed_in_parallel;
 			 tile_offset++)
 		{
-#pragma HLS PIPELINE
 		tile_d:
 			for (int t_d = 0; t_d < pw_tile_d; t_d++)
 			{
-#pragma HLS UNROLL
 				const int current_tile_indx = (tile_index + tile_offset * num_of_tiles_hw) * pw_tile_size;
 				const int in_tile_index = tile_offset * pw_tile_d + t_d;
 				normalization.fused_zero_point =
@@ -93,7 +91,7 @@ void scale_pss_tile(fms_dt tmp_channels[max_fms_size],
 			tile_h:
 				for (int t_h = 0; t_h < pw_tile_h; t_h++)
 				{
-#pragma HLS UNROLL
+#pragma HLS PIPELINE
 				tile_w:
 					for (int t_w = 0; t_w < pw_tile_w; t_w++)
 					{
