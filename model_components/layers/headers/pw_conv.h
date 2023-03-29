@@ -1,5 +1,5 @@
-#ifndef PW_CONV
-#define PW_CONV
+#ifndef PW_CONV_H
+#define PW_CONV_H
 
 #include "../../basic_defs/basic_defs_glue.h"
 
