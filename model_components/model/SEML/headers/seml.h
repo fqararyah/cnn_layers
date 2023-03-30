@@ -19,4 +19,11 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 		const layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
 		fms_dt fc_input[fc_layer_input_size]);
 
+void seml(weights_grp_dt off_chip_weights[all_pw_weights],
+		fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+		fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+		fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+		const layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+		fms_dt fc_input[fc_layer_input_size]);
+
 #endif

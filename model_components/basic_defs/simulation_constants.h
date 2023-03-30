@@ -15,4 +15,5 @@
 #define ONLY_SEML 0
 #define USE_FIRB 1
 #define DEBUGGING 0
+#define FIBHA_VERSION 2
 #endif

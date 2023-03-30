@@ -18,7 +18,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 				 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
 				 const biases_dt fused_zero_points_part2[]);
 
-void dw_conv_3x3_v2(const dw_weights_dt weights[][3 * 3],
+void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 					fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 					fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 					const int layer, const int layer_conv_d, const int layer_width, const int layer_height,

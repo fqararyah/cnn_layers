@@ -4,8 +4,7 @@ import utils
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-
-in_out_file = '../model_components/model/SEML/imp/seml.cpp'
+in_out_file = '../model_components/model/SEML/imp/seml{}.cpp'.format(cgc.FIBHA_VERSION_POSTFIX)
 constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
@@ -38,7 +37,7 @@ dw_block_0 = \
     layer_*i*_dw_ifm_num_of_tiles_h, layer_*i*_dw_ifm_num_of_tiles_w, \n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
@@ -48,7 +47,7 @@ dw_block_1 = \
     layer_*i*_dw_ifm_num_of_tiles_h, layer_*i*_dw_ifm_num_of_tiles_w, \n\
     layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
     layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 # projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\

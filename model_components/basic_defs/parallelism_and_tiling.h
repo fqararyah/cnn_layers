@@ -2,9 +2,21 @@
 #ifndef PARALLELISM_AND_TILING
 #define PARALLELISM_AND_TILING
 
+const int CHANNELS_PIPELINE_DEPTH = 32;
+const int CHANNELS_TILE_DEPTH = 1;
+const int CHANNELS_TILE_HEIGHT = MIN_FMS_HEIGHT;
+const int CHANNELS_TILE_WIDTH = MIN_FMS_WIDTH;
+const int CHANNELS_TILE_HEIGHT_PADDED = CHANNELS_TILE_HEIGHT + MAX_PADDING_TOP_LEFT + MAX_PADDING_BOTTOM_RIGHT;
+const int CHANNELS_TILE_WIDTH_PADDED = CHANNELS_TILE_WIDTH + MAX_PADDING_TOP_LEFT + MAX_PADDING_BOTTOM_RIGHT;
+
 const int pw_tile_d = 1;
+#if FIBHA_VERSION == 1
 const int pw_tile_h = 8;
 const int pw_tile_w = 8;
+#elif FIBHA_VERSION == 2
+const int pw_tile_h = CHANNELS_TILE_HEIGHT;
+const int pw_tile_w = CHANNELS_TILE_WIDTH;
+#endif
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;
 const int pw_conv_parallelism_in = pw_tile_d;
@@ -20,13 +32,6 @@ const int dw_tile_hw = dw_tile_h * dw_tile_w;
 const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;
 const int dw_max_v2_buffer_height = dw_tile_h + (max_filter_hw_dim - 1); // where 3 is max conv kernel dim and 1 is mi strides
 const int dw_max_v2_buffer_width = dw_max_v2_buffer_height;              // where 3 is max conv kernel dim and 1 is mi strides
-
-const int CHANNELS_PIPELINE_DEPTH = 32;
-const int CHANNELS_TILE_DEPTH = 1;
-const int CHANNELS_TILE_HEIGHT = MIN_FMS_HEIGHT;
-const int CHANNELS_TILE_WIDTH = MIN_FMS_WIDTH;
-const int CHANNELS_TILE_HEIGHT_PADDED = CHANNELS_TILE_HEIGHT + MAX_PADDING_TOP_LEFT + MAX_PADDING_BOTTOM_RIGHT;
-const int CHANNELS_TILE_WIDTH_PADDED = CHANNELS_TILE_WIDTH + MAX_PADDING_TOP_LEFT + MAX_PADDING_BOTTOM_RIGHT;
 
 const int max_dw_input_width = 112 + 1 + 1; // where 1 is max padding left and right
 const int max_tile_w = pw_tile_w;

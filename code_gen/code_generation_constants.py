@@ -1,6 +1,7 @@
 from fcntl import F_GETLEASE
 
-
+FIBHA_VERSION = 2
+FIBHA_VERSION_POSTFIX = '' if FIBHA_VERSION == 1 else '_v' + str(FIBHA_VERSION)
 MODEL_NAME = 'mob_v2'
 PIPELINE = True
 PILELINE_LEN = 6

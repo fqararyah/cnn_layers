@@ -8,6 +8,7 @@ void top_func(
 	int *ready_to_receive_a_new_input_ptr)
 {
 
+#if FIBHA_VERSION == 1
 	fms_dt channels[max_fms_size];
 	fms_dt result[max_fms_size];
 	// fms_dt result2[max_fms_size];
@@ -33,6 +34,22 @@ void top_func(
 					  tmp_channels, 56 * 56 * 24, 56, 56);
 #endif
 #endif
-	copy_channels_to_tmp_channels(channels, tmp_channels);
+
+#elif FIBHA_VERSION == 2
+	fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	// fms_dt result2[max_fms_size];
+	fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	// fms_dt tmp_channels2[max_tmp_fms_size];
+
+#pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = tmp_channels type = complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = tmp_channels type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = result type = complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
+
+	// copy_channels_to_tmp_channels(channels, tmp_channels);
 	seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
+#endif
 }
