@@ -76,7 +76,8 @@ void padd_left_right(
 }
 
 void dw_conv_fill_from_channels(fms_dt channels[max_fms_size],
-								fms_dt ifms_buffer_lower_part[dw_pipeline_depth][max_strides][switch_point_fms_width + max_padding_lr], const int ifms_buffer_height,
+								fms_dt ifms_buffer_lower_part[dw_pipeline_depth][max_strides][switch_point_fms_width + max_padding_lr],
+								const int ifms_buffer_height,
 								const int ifms_height, const int ifms_width,
 								const int ifms_buffer_offset_h,
 								const int global_absolute_tile_offset_in_ifms,
