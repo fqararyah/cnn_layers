@@ -29,9 +29,10 @@ const int MIN_FMS_HEIGHT = 7;
 const int MIN_FMS_WIDTH = 7;
 const int MAX_FILTER_DIM_STRIDE_1 = 3;
 const int MAX_FILTER_DIM_STRIDE_2 = 3;
+const int MAX_DW_LAYER_D = 960;
 
-const int MAX_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1);
-const int MAX_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
+const int MAX_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1) / 2;
+const int MAX_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 1;
 
 // MobileNetsV1, but could be useful in future
 const int alpha = 1;

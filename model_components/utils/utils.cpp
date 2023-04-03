@@ -223,3 +223,20 @@ void copy_channels_to_tmp_channels(fms_dt channels[max_fms_size], fms_dt tmp_cha
 		}
 	}
 }
+
+void copy_channels_to_tmp_channels(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+								   fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
+{
+	for (int d = 0; d < MAX_FMS_BUFFER_DEPTH; d++)
+	{
+		for (int h = 0; h < MIN_FMS_HEIGHT; h++)
+		{
+#pragma HLS PIPELINE
+			for (int w = 0; w < MIN_FMS_WIDTH; w++)
+			{
+#pragma HLS UNROLL
+				tmp_channels[d][h][w] = channels[d][h][w];
+			}
+		}
+	}
+}

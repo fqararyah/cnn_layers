@@ -2,6 +2,8 @@
 #include "../headers/dw_conv.h"
 #include "../headers/pw_conv.h"
 
+#if FIBHA_VERSION == 1
+
 void fill_first_rows(fms_dt channels[max_fms_size],
 					 fms_dt ifms_buffer[dw_pipeline_depth][max_filter_hw_dim][switch_point_fms_width + max_padding_lr], const int filter_dim,
 					 const int num_of_tiles_w, const int num_of_tiles_hw,
@@ -342,7 +344,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 				 const int num_of_ifms_tiles_h, const int num_of_ifms_tiles_w,
 				 const int num_of_ofms_tiles_h, const int num_of_ofms_tiles_w,
 				 const int strides, const int padding_left, const int padding_right,
-				 const int padding_top, const int direction,
+				 const int padding_top,
 				 const fused_scales_dt fused_scales[],
 				 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 				 const relu_6_fused_scales_dt relu_6_fused_scales[],
@@ -466,3 +468,5 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 		}
 	}
 }
+
+#endif
