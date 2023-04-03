@@ -26,7 +26,11 @@ const int pw_conv_parallelism_out = 8; //>= tile_d and >=8: 16, 32, 64 (< 8 is n
 const int dw_tile_d = pw_tile_d;
 const int dw_tile_h = pw_tile_h;
 const int dw_tile_w = pw_tile_w;
+#if FIBHA_VERSION == 1
 const int dw_pipeline_depth = 24;
+#elif FIBHA_VERSION == 2
+const int dw_pipeline_depth = CHANNELS_PIPELINE_DEPTH;
+#endif
 
 const int dw_tile_hw = dw_tile_h * dw_tile_w;
 const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;

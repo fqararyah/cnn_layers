@@ -282,7 +282,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
     const int current_layer_fused_parameters_offset =
         layers_fused_parameters_offsets[layer];
 
-    dw_weights_dt weights_tile[dw_pipeline_depth][3 * 3];
+    dw_weights_dt weights_tile[CHANNELS_PIPELINE_DEPTH][3 * 3];
 #pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 1
 
     fused_scales_dt fused_scales_tile[MAX_DW_LAYER_D];
@@ -342,7 +342,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                           relu_6_fused_scales_tile, fused_zero_points_part2,
                           fused_zero_points_tile,
                           layer_conv_d,
-                          current_layer_fused_parameters_offset);
+                          current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
     }
 
     for (int tile_in_h = 0; tile_in_h < num_of_ifms_tiles_h; tile_in_h++)
@@ -387,6 +387,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 const int prev_tile_in_d = (dw_pipeline_in_d - 1) >= 0
                                                ? (dw_pipeline_in_d - 1) * (dw_pipeline_depth / dw_tile_d)
                                                : 0;
+                const int next_tile_in_d = (dw_pipeline_in_d + 1) * (dw_pipeline_depth / dw_tile_d);
 
                 fill_dw_weights_tile(weights, weights_tile,
                                      tile_in_d,
@@ -425,14 +426,14 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 dw_conv_engine(weights_tile,
                                channels,
                                engine_result_tile,
-                               padding_top_buffer,
-                               padding_left_buffer,
-                               padding_top_left_buffer,
-                               padding_top_right_buffer,
-                               padding_bottom_left_buffer,
-                               padding_bottom_buffer,
-                               padding_right_buffer,
-                               padding_bottom_right_buffer,
+                               padding_top_buffer_copy,
+                               padding_left_buffer_copy,
+                               padding_top_left_buffer_copy,
+                               padding_top_right_buffer_copy,
+                               padding_bottom_left_buffer_copy,
+                               padding_bottom_buffer_copy,
+                               padding_right_buffer_copy,
+                               padding_bottom_right_buffer_copy,
                                3, strides,
                                layer_conv_d,
                                tile_in_d,
@@ -449,7 +450,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                        padding_top_left_buffer,
                                        padding_top_right_buffer,
                                        padding_bottom_left_buffer,
-                                       tile_in_d + 1,
+                                       next_tile_in_d,
                                        tile_in_h,
                                        tile_in_w,
                                        padding_top,
@@ -461,7 +462,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                            padding_bottom_buffer,
                                            padding_right_buffer,
                                            padding_bottom_right_buffer,
-                                           tile_in_d + 1,
+                                           next_tile_in_d,
                                            tile_in_h,
                                            tile_in_w,
                                            3 - padding_top,
@@ -476,7 +477,9 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                     relu_6_fused_scales_tile, fused_zero_points_tile,
                                                     layer_conv_d,
                                                     tile_in_h / strides, tile_in_w / strides,
-                                                    layer_conv_d - (layer_conv_d % CHANNELS_PIPELINE_DEPTH),
+                                                    layer_conv_d % CHANNELS_PIPELINE_DEPTH == 0
+                                                        ? layer_conv_d - CHANNELS_PIPELINE_DEPTH
+                                                        : layer_conv_d - (layer_conv_d % CHANNELS_PIPELINE_DEPTH),
                                                     in_tile_h, in_tile_w, strides,
                                                     num_of_ofms_tiles_h, num_of_ofms_tiles_w);
         }
