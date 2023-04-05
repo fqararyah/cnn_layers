@@ -1,6 +1,7 @@
 
 #include "../headers/conv_utils.h"
 
+
 void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                             fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
                             fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
@@ -18,7 +19,7 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                             const int ifms_width,
                             fms_dt fms_zero_point)
 {
-#pragma HLS INLINE
+#pragma HLS INLINE off
 
     const int num_of_tiles_hw = num_of_ifm_tiles_h * num_of_ifm_tiles_w;
 
@@ -173,7 +174,7 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
                                 const int ifms_width,
                                 fms_dt fms_zero_point)
 {
-#pragma HLS INLINE
+#pragma HLS INLINE off
 
     const int num_of_tiles_hw = num_of_ifm_tiles_h * num_of_ifm_tiles_w;
 
