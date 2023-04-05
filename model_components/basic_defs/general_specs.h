@@ -25,14 +25,17 @@ const int max_fms_size = switch_point_fms_width * switch_point_fms_height * swit
 const int max_tmp_fms_size = 56 * 56 * 24;
 
 const int MAX_FMS_BUFFER_DEPTH = 144 * 16;
-const int MIN_FMS_HEIGHT = 7;
-const int MIN_FMS_WIDTH = 7;
+const int MIN_FMS_HEIGHT = 8;
+const int MIN_FMS_WIDTH = 8;
 const int MAX_FILTER_DIM_STRIDE_1 = 3;
 const int MAX_FILTER_DIM_STRIDE_2 = 3;
 const int MAX_DW_LAYER_D = 960;
 
-const int MAX_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1) / 2;
-const int MAX_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 1;
+//assumptions
+//CHANNELS_TILE_WIDTH = CHANNELS_TILE_HEIGHT
+//CHANNELS_TILE_WIDTH is even
+const int MAX_TILE_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1) / 2;
+const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
 
 // MobileNetsV1, but could be useful in future
 const int alpha = 1;

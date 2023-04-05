@@ -8,14 +8,14 @@ void dw_conv_engine(
     dw_weights_dt weights[CHANNELS_PIPELINE_DEPTH][max_filter_hw_dim * max_filter_hw_dim],
     fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
     dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
-    fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
-    fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT],
-    fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-    fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-    fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-    fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
-    fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT],
-    fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT],
+    fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
+    fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
+    fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+    fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+    fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+    fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
+    fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+    fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
     const int filter_dim, const int strides,
     const int layer_d,
     const int starting_d,
@@ -23,50 +23,57 @@ void dw_conv_engine(
     const int tile_in_h,
     const int tile_in_w,
     const int num_of_ifm_tiles_h,
-    const int num_of_ifm_tiles_w)
+    const int num_of_ifm_tiles_w,
+    const int layer_ifm_height,
+    const int layer_ifm_width,
+    const fms_dt current_layer_zero_point)
 {
 #pragma HLS INLINE off
 
     fms_dt ifms_buffer[CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED];
+#pragma HLS ARRAY_PARTITION variable = ifms_buffer type = complete dim = 0
+
 dw_conv_engine:
     for (int d_in_pipeline = 0; d_in_pipeline < CHANNELS_PIPELINE_DEPTH;
          d_in_pipeline++)
     {
+#pragma HLS PIPELINE
+        fill_fms_tile(channels,
+                      padding_top_buffer,
+                      padding_left_buffer,
+                      padding_top_left_buffer,
+                      padding_top_right_buffer,
+                      padding_bottom_left_buffer,
+                      padding_bottom_buffer,
+                      padding_right_buffer,
+                      padding_bottom_right_buffer,
+                      ifms_buffer,
+                      starting_d + d_in_pipeline,
+                      tile_in_h,
+                      tile_in_w,
+                      num_of_ifm_tiles_h,
+                      num_of_ifm_tiles_w,
+                      layer_ifm_height,
+                      layer_ifm_width,
+                      padding_top_left,
+                      current_layer_zero_point);
         for (int c_h = 0; c_h < max_filter_hw_dim; c_h++)
         {
             for (int c_w = 0; c_w < max_filter_hw_dim; c_w++)
             {
-#pragma HLS PIPELINE
                 if (starting_d + d_in_pipeline >= layer_d)
                 {
                     break;
                 }
-                if (c_h == 0 && c_w == 0)
-                {
-                    fill_fms_tile(channels,
-                                  padding_top_buffer,
-                                  padding_left_buffer,
-                                  padding_top_left_buffer,
-                                  padding_top_right_buffer,
-                                  padding_bottom_left_buffer,
-                                  padding_bottom_buffer,
-                                  padding_right_buffer,
-                                  padding_bottom_right_buffer,
-                                  ifms_buffer,
-                                  starting_d + d_in_pipeline,
-                                  tile_in_h,
-                                  tile_in_w,
-                                  num_of_ifm_tiles_h,
-                                  num_of_ifm_tiles_w,
-                                  padding_top_left);
-                }
+
                 for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
                 {
 #pragma HLS UNROLL
                     for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                     {
 #pragma HLS UNROLL
-                        if (c_w >= filter_dim || c_h >= filter_dim || h >= dw_tile_h / strides || w >= dw_tile_w / strides)
+                        if (c_w >= filter_dim || c_h >= filter_dim || h >= dw_tile_h / strides || w >= dw_tile_w / strides ||
+                            tile_in_w * CHANNELS_TILE_WIDTH + w >= layer_ifm_width || tile_in_h * CHANNELS_TILE_HEIGHT + h >= layer_ifm_height)
                         {
                             break;
                         }
@@ -197,12 +204,6 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 #pragma HLS UNROLL
             const int d = o_d * CHANNELS_TILE_DEPTH + i_d;
             const int main_tile_index = (starting_d + d) * num_of_tiles_hw + tile_in_h * num_of_ofm_tiles_w + tile_in_w;
-            const int secondary_tile_index_h = main_tile_index + num_of_ofm_tiles_w;
-            const int secondary_tile_index_w = main_tile_index + 1;
-            const bool secondary_tile_h = in_tile_h != 0 && tile_in_h != num_of_ofm_tiles_h - 1 &&
-                                          in_tile_h + (CHANNELS_TILE_HEIGHT + 1) / strides > CHANNELS_TILE_HEIGHT;
-            const bool secondary_tile_w = in_tile_w != 0 && tile_in_w != num_of_ofm_tiles_w - 1 &&
-                                          in_tile_w + (CHANNELS_TILE_WIDTH + 1) / strides > CHANNELS_TILE_WIDTH;
             if (starting_d + d >= ifms_d)
             {
                 break;
@@ -214,26 +215,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                 relu_6_fused_scales_tile[starting_d + d];
             normalization.fused_zero_point =
                 fused_zero_points_tile[starting_d + d];
-            if (secondary_tile_h)
-            {
-                for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
-                {
-#pragma HLS UNROLL
-                    result[secondary_tile_index_h][0][w] = dw_relu_norm(
-                        result_tile[d][(CHANNELS_TILE_HEIGHT + 1) / strides][w], normalization,
-                        layer_relu);
-                }
-            }
-            if (secondary_tile_w)
-            {
-                for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
-                {
-#pragma HLS UNROLL
-                    result[secondary_tile_index_w][h][0] = dw_relu_norm(
-                        result_tile[d][h][(CHANNELS_TILE_WIDTH + 1) / strides], normalization,
-                        layer_relu);
-                }
-            }
+
             for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
             {
 #pragma HLS UNROLL
@@ -256,7 +238,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                  fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                  fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                 const int layer, const int layer_conv_d, const int layer_width, const int layer_height,
+                 const int layer, const int layer_conv_d, const int layer_ifm_width, const int layer_ifm_height,
                  const int num_of_tiles_d,
                  const int num_of_ifms_tiles_h, const int num_of_ifms_tiles_w,
                  const int num_of_ofms_tiles_h, const int num_of_ofms_tiles_w,
@@ -283,7 +265,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
         layers_fused_parameters_offsets[layer];
 
     dw_weights_dt weights_tile[CHANNELS_PIPELINE_DEPTH][3 * 3];
-#pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 2
 
     fused_scales_dt fused_scales_tile[MAX_DW_LAYER_D];
     fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_tile[MAX_DW_LAYER_D];
@@ -308,23 +290,57 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 #pragma HLS ARRAY_PARTITION variable = engine_result_tile_copy type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = engine_result_tile_copy type = complete dim = 3
 
-    fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH];
-    fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH];
-    fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT];
-    fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT];
+    fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH];
+    fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH];
+    fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT];
+    fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT];
 
-    fms_dt padding_top_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH];
-    fms_dt padding_left_buffer_copy[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_top_left_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_top_right_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_bottom_left_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT];
-    fms_dt padding_bottom_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH];
-    fms_dt padding_right_buffer_copy[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT];
-    fms_dt padding_bottom_right_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT];
+#pragma HLS ARRAY_PARTITION variable = padding_top_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_left_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_top_left_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_top_right_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_left_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_right_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_right_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_top_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_left_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_top_left_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_top_right_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_left_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_right_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_right_buffer type = complete dim = 3
+
+    fms_dt padding_top_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH];
+    fms_dt padding_left_buffer_copy[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_top_left_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_top_right_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_bottom_left_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT];
+    fms_dt padding_bottom_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH];
+    fms_dt padding_right_buffer_copy[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT];
+    fms_dt padding_bottom_right_buffer_copy[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT];
+
+#pragma HLS ARRAY_PARTITION variable = padding_top_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_left_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_top_left_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_top_right_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_left_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_right_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_right_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = padding_top_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_left_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_top_left_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_top_right_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_left_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_right_buffer_copy type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = padding_bottom_right_buffer_copy type = complete dim = 3
 
     if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
     {
@@ -347,10 +363,10 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 
     for (int tile_in_h = 0; tile_in_h < num_of_ifms_tiles_h; tile_in_h++)
     {
-        const int in_tile_h = (tile_in_h % strides) * (CHANNELS_TILE_HEIGHT + 1) / strides;
+        const int in_tile_h = (tile_in_h % strides) * CHANNELS_TILE_HEIGHT / strides;
         for (int tile_in_w = 0; tile_in_w < num_of_ifms_tiles_w; tile_in_w++)
         {
-            const int in_tile_w = (tile_in_w % strides) * (CHANNELS_TILE_WIDTH + 1) / strides;
+            const int in_tile_w = (tile_in_w % strides) * CHANNELS_TILE_WIDTH / strides;
 
             padd_fms_tile_top_left(channels,
                                    padding_top_buffer,
@@ -365,6 +381,8 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                    layer_conv_d,
                                    num_of_ifms_tiles_h,
                                    num_of_ifms_tiles_w,
+                                   layer_ifm_height,
+                                   layer_ifm_width,
                                    current_layer_fms_zero_point);
             padd_fms_tile_bottom_right(channels,
                                        padding_bottom_buffer,
@@ -377,6 +395,8 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                        layer_conv_d,
                                        num_of_ifms_tiles_h,
                                        num_of_ifms_tiles_w,
+                                       layer_ifm_height,
+                                       layer_ifm_width,
                                        current_layer_fms_zero_point);
 
             for (int dw_pipeline_in_d = 0;
@@ -439,7 +459,8 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                tile_in_d,
                                padding_top,
                                tile_in_h,
-                               tile_in_w, num_of_ifms_tiles_h, num_of_ifms_tiles_w);
+                               tile_in_w, num_of_ifms_tiles_h, num_of_ifms_tiles_w, layer_ifm_height, layer_ifm_width,
+                               current_layer_fms_zero_point);
 
                 dw_conv_copy_engine_result_tile(engine_result_tile,
                                                 engine_result_tile_copy, strides);
@@ -457,6 +478,8 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                        layer_conv_d,
                                        num_of_ifms_tiles_h,
                                        num_of_ifms_tiles_w,
+                                       layer_ifm_height,
+                                       layer_ifm_width,
                                        current_layer_fms_zero_point);
                 padd_fms_tile_bottom_right(channels,
                                            padding_bottom_buffer,
@@ -469,6 +492,8 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                            layer_conv_d,
                                            num_of_ifms_tiles_h,
                                            num_of_ifms_tiles_w,
+                                           layer_ifm_height,
+                                           layer_ifm_width,
                                            current_layer_fms_zero_point);
             }
             dw_normalize_and_write_back_result_tile(result,

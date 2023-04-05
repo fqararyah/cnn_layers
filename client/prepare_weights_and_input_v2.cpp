@@ -1,13 +1,12 @@
 #include "prepare_weights_and_inputs.h"
 
 void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					  const int ifms_h, const int ifms_w)
+					  const int ifms_h, const int ifms_w, const int num_of_tiles_h, const int num_of_tiles_w)
 {
 	int a;
 	int line = 0;
 	const int ifms_hw = ifms_h * ifms_w;
-	const int num_of_tiles_w = (ifms_w / pw_tile_w);
-	const int num_of_tiles_hw = (ifms_hw / pw_tile_hw);
+	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 
 	std::ifstream infile(file_name);
 	assert(!infile.fail());
@@ -27,12 +26,11 @@ void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH]
 }
 
 void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-							 const int ifms_size, const int ifms_h, const int ifms_w)
+							 const int ifms_size, const int ifms_h, const int ifms_w, const int num_of_tiles_h, const int num_of_tiles_w)
 {
 	ofstream myfile;
 	const int ifms_hw = ifms_h * ifms_w;
-	const int num_of_tiles_w = (ifms_w / pw_tile_w);
-	const int num_of_tiles_hw = (ifms_hw / pw_tile_hw);
+	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 
 	myfile.open(file_name);
 

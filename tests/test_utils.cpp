@@ -76,13 +76,12 @@ void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 }
 
 void dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					   int ofms_size, const int ofms_h, const int ofms_w)
+					   int ofms_size, const int ofms_h, const int ofms_w, const int num_of_tiles_h, const int num_of_tiles_w)
 {
 
 	ofstream myfile;
 	const int ofms_hw = ofms_h * ofms_w;
-	const int num_of_tiles_w = (ofms_w / pw_tile_w);
-	const int num_of_tiles_hw = (ofms_hw / pw_tile_hw);
+	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 
 	myfile.open(file_name);
 	for (int i = 0; i < ofms_size; i++)

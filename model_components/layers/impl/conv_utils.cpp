@@ -2,11 +2,11 @@
 #include "../headers/conv_utils.h"
 
 void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                            fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
-                            fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT],
-                            fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                            fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                            fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
+                            fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
+                            fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
+                            fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                            fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                            fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
                             const int starting_d,
                             const int tile_in_h,
                             const int tile_in_w,
@@ -14,6 +14,8 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                             const int ifms_d,
                             const int num_of_ifm_tiles_h,
                             const int num_of_ifm_tiles_w,
+                            const int ifms_height,
+                            const int ifms_width,
                             fms_dt fms_zero_point)
 {
 #pragma HLS INLINE
@@ -39,10 +41,10 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
             const int top_right_tile_index = top_tile_index + 1;
             const int bottom_left_tile_index = main_tile_index + num_of_ifm_tiles_w - 1;
             // top left corner
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     if (w >= padding_top_left || h >= padding_top_left)
@@ -62,10 +64,10 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                 }
             }
             // top right corner
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     if (w >= padding_top_left || h >= padding_top_left)
@@ -86,10 +88,10 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                 }
             }
             // bottom left corner
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     if (w >= padding_top_left || h >= padding_top_left)
@@ -109,7 +111,7 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                 }
             }
             // top
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
                 if (h >= padding_top_left)
@@ -119,7 +121,7 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    if (tile_in_h == 0)
+                    if (tile_in_h == 0 || tile_in_w * CHANNELS_TILE_WIDTH + w >= ifms_width)
                     {
                         padding_top_buffer[d][h][w] = fms_zero_point;
                     }
@@ -134,14 +136,14 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
             for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     if (w >= padding_top_left)
                     {
                         break;
                     }
-                    if (tile_in_w == 0)
+                    if (tile_in_w == 0 || tile_in_h * CHANNELS_TILE_HEIGHT + h >= ifms_height)
                     {
                         padding_left_buffer[d][h][w] = fms_zero_point;
                     }
@@ -157,9 +159,9 @@ void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
 }
 
 void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                                fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
-                                fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT],
-                                fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT],
+                                fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
+                                fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+                                fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
                                 const int starting_d,
                                 const int tile_in_h,
                                 const int tile_in_w,
@@ -167,6 +169,8 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
                                 const int ifms_d,
                                 const int num_of_ifm_tiles_h,
                                 const int num_of_ifm_tiles_w,
+                                const int ifms_height,
+                                const int ifms_width,
                                 fms_dt fms_zero_point)
 {
 #pragma HLS INLINE
@@ -190,10 +194,10 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
             const int right_tile_index = main_tile_index + 1;
             const int bottom_right_tile_index = bottom_tile_index + 1;
             // bottom right corner
-            for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
                 {
 #pragma HLS UNROLL
                     if (w >= padding_bottom_right || h >= padding_bottom_right)
@@ -212,7 +216,7 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
                 }
             }
             // bottom
-            for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
 #pragma HLS UNROLL
                 if (h >= padding_bottom_right)
@@ -222,7 +226,7 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    if (tile_in_h == num_of_ifm_tiles_h - 1)
+                    if (tile_in_h == num_of_ifm_tiles_h - 1 ||  tile_in_w * CHANNELS_TILE_WIDTH + w >= ifms_width)
                     {
                         padding_bottom_buffer[d][h][w] = fms_zero_point;
                     }
@@ -237,14 +241,14 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
             for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
                 {
 #pragma HLS UNROLL
                     if (w >= padding_bottom_right)
                     {
                         break;
                     }
-                    if (tile_in_w == num_of_ifm_tiles_w - 1)
+                    if (tile_in_w == num_of_ifm_tiles_w - 1 || tile_in_h * CHANNELS_TILE_HEIGHT + h >= ifms_height)
                     {
                         padding_right_buffer[d][h][w] = fms_zero_point;
                     }
@@ -260,30 +264,33 @@ void padd_fms_tile_bottom_right(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HE
 }
 
 void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                   fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
-                   fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT],
-                   fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                   fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                   fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                   fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
-                   fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT],
-                   fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT],
+                   fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
+                   fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
+                   fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                   fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                   fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                   fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
+                   fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+                   fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
                    fms_dt channels_tile[CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
                    const int tile_in_d,
                    const int tile_in_h,
                    const int tile_in_w,
                    const int num_of_ifm_tiles_h,
                    const int num_of_ifm_tiles_w,
-                   const int padding_top_left)
+                   const int layer_ifm_height,
+                   const int layer_ifm_width,
+                   const int padding_top_left,
+                   const fms_dt current_layer_zero_point)
 {
 #pragma HLS INLINE
 
     const int tile_in_pipeline_d = tile_in_d % CHANNELS_PIPELINE_DEPTH;
     // bottom right corner
-    for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+    for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
     {
 #pragma HLS UNROLL
-        for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+        for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
         {
 #pragma HLS UNROLL
             channels_tile[h + padding_top_left + CHANNELS_TILE_HEIGHT]
@@ -292,10 +299,10 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
         }
     }
     // other corners
-    for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+    for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
     {
 #pragma HLS UNROLL
-        for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+        for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
         {
 #pragma HLS UNROLL
             channels_tile[h][w] = padding_top_left_buffer[tile_in_pipeline_d][h][w];
@@ -306,7 +313,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
         }
     }
     // top and bottom
-    for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+    for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
     {
 #pragma HLS UNROLL
         for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
@@ -315,7 +322,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
             channels_tile[h][w + padding_top_left] = padding_top_buffer[tile_in_pipeline_d][h][w];
         }
     }
-    for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+    for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
     {
 #pragma HLS UNROLL
         for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
@@ -329,7 +336,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
     for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
     {
 #pragma HLS UNROLL
-        for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+        for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
         {
 #pragma HLS UNROLL
             channels_tile[h + padding_top_left][w] = padding_left_buffer[tile_in_pipeline_d][h][w];
@@ -338,7 +345,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
     for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
     {
 #pragma HLS UNROLL
-        for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+        for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
         {
 #pragma HLS UNROLL
             channels_tile[h + padding_top_left][w + padding_top_left + CHANNELS_TILE_WIDTH] =
@@ -354,21 +361,28 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
         for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
         {
 #pragma HLS UNROLL
-            channels_tile[h + padding_top_left][w + padding_top_left] =
-                channels[main_tile_index][h][w];
+            if (tile_in_h * CHANNELS_TILE_HEIGHT + h >= layer_ifm_height || tile_in_w * CHANNELS_TILE_WIDTH + w >= layer_ifm_width)
+            {
+                channels_tile[h + padding_top_left][w + padding_top_left] = current_layer_zero_point;
+            }
+            else
+            {
+                channels_tile[h + padding_top_left][w + padding_top_left] =
+                    channels[main_tile_index][h][w];
+            }
         }
     }
 }
 
 void fill_fms_tile_dw(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                      fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
-                      fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT],
-                      fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                      fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                      fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                      fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
-                      fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT],
-                      fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT],
+                      fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
+                      fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
+                      fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                      fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                      fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                      fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
+                      fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+                      fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
                       fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
                       conv_type layer_type,
                       const int starting_d,
@@ -395,53 +409,53 @@ void fill_fms_tile_dw(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_
                 break;
             }
             // bottom right corner
-            for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
                 {
 #pragma HLS UNROLL
-                    channels_tile[d][h + MAX_PADDING_TOP_LEFT + CHANNELS_TILE_HEIGHT]
-                                 [w + MAX_PADDING_TOP_LEFT + CHANNELS_TILE_WIDTH] =
+                    channels_tile[d][h + MAX_TILE_PADDING_TOP_LEFT + CHANNELS_TILE_HEIGHT]
+                                 [w + MAX_TILE_PADDING_TOP_LEFT + CHANNELS_TILE_WIDTH] =
                                      padding_bottom_right_buffer[d][h][w];
                 }
             }
             // other corners
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     channels_tile[d][h][w] = padding_top_left_buffer[d][h][w];
-                    channels_tile[d][h][w + MAX_PADDING_TOP_LEFT + CHANNELS_TILE_WIDTH] =
+                    channels_tile[d][h][w + MAX_TILE_PADDING_TOP_LEFT + CHANNELS_TILE_WIDTH] =
                         padding_top_right_buffer[d][h][w];
-                    channels_tile[d][h + MAX_PADDING_TOP_LEFT + CHANNELS_TILE_HEIGHT][w] =
+                    channels_tile[d][h + MAX_TILE_PADDING_TOP_LEFT + CHANNELS_TILE_HEIGHT][w] =
                         padding_bottom_left_buffer[d][h][w];
                 }
             }
             // top and bottom
-            for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
 #pragma HLS UNROLL
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    channels_tile[d][h][w] = padding_top_buffer[d][h][w + MAX_PADDING_TOP_LEFT];
-                    channels_tile[d][h][w] = padding_bottom_buffer[d][h + CHANNELS_TILE_HEIGHT + MAX_PADDING_TOP_LEFT]
-                                                                  [w + MAX_PADDING_TOP_LEFT];
+                    channels_tile[d][h][w] = padding_top_buffer[d][h][w + MAX_TILE_PADDING_TOP_LEFT];
+                    channels_tile[d][h][w] = padding_bottom_buffer[d][h + CHANNELS_TILE_HEIGHT + MAX_TILE_PADDING_TOP_LEFT]
+                                                                  [w + MAX_TILE_PADDING_TOP_LEFT];
                 }
             }
             // right and left
             for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
                 {
 #pragma HLS UNROLL
-                    channels_tile[d][h][w] = padding_left_buffer[d][h + MAX_PADDING_TOP_LEFT][w];
-                    channels_tile[d][h][w] = padding_right_buffer[d][h + MAX_PADDING_TOP_LEFT]
-                                                                 [w + MAX_PADDING_TOP_LEFT + CHANNELS_TILE_WIDTH];
+                    channels_tile[d][h][w] = padding_left_buffer[d][h + MAX_TILE_PADDING_TOP_LEFT][w];
+                    channels_tile[d][h][w] = padding_right_buffer[d][h + MAX_TILE_PADDING_TOP_LEFT]
+                                                                 [w + MAX_TILE_PADDING_TOP_LEFT + CHANNELS_TILE_WIDTH];
                 }
             }
 
@@ -451,7 +465,7 @@ void fill_fms_tile_dw(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    channels_tile[d][h + MAX_PADDING_TOP_LEFT][w + MAX_PADDING_TOP_LEFT] =
+                    channels_tile[d][h + MAX_TILE_PADDING_TOP_LEFT][w + MAX_TILE_PADDING_TOP_LEFT] =
                         channels[d][h][w];
                 }
             }
@@ -459,22 +473,22 @@ void fill_fms_tile_dw(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_
     }
 }
 
-void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
-                           fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
-                           fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT],
-                           fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT],
-                           fms_dt padding_top_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
-                           fms_dt padding_left_buffer_dst[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_top_left_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_top_right_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_bottom_left_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_TOP_LEFT][MAX_PADDING_TOP_LEFT],
-                           fms_dt padding_bottom_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
-                           fms_dt padding_right_buffer_dst[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_PADDING_BOTTOM_RIGHT],
-                           fms_dt padding_bottom_right_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_PADDING_BOTTOM_RIGHT][MAX_PADDING_BOTTOM_RIGHT],
+void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
+                           fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_top_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_top_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_bottom_left_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_bottom_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
+                           fms_dt padding_right_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+                           fms_dt padding_bottom_right_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+                           fms_dt padding_top_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
+                           fms_dt padding_left_buffer_dst[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_top_left_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_top_right_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_bottom_left_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][MAX_TILE_PADDING_TOP_LEFT],
+                           fms_dt padding_bottom_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][CHANNELS_TILE_WIDTH],
+                           fms_dt padding_right_buffer_dst[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
+                           fms_dt padding_bottom_right_buffer_dst[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_BOTTOM_RIGHT][MAX_TILE_PADDING_BOTTOM_RIGHT],
                            const int starting_d,
                            const int ifms_d,
                            const int padding_top_left,
@@ -495,10 +509,10 @@ void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MA
                 break;
             }
             // bottom right corner
-            for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
                 {
 #pragma HLS UNROLL
                     padding_bottom_right_buffer_dst[d][h][w] =
@@ -506,10 +520,10 @@ void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MA
                 }
             }
             // other corners
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     padding_top_left_buffer_dst[d][h][w] =
@@ -522,7 +536,7 @@ void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MA
             }
 
             // top and bottom
-            for (int h = 0; h < MAX_PADDING_TOP_LEFT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
 #pragma HLS UNROLL
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
@@ -531,7 +545,7 @@ void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MA
                     padding_top_buffer_dst[d][h][w] = padding_top_buffer[d][h][w];
                 }
             }
-            for (int h = 0; h < MAX_PADDING_BOTTOM_RIGHT; h++)
+            for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
 #pragma HLS UNROLL
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
@@ -544,12 +558,12 @@ void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MA
             for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < MAX_PADDING_BOTTOM_RIGHT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_BOTTOM_RIGHT; w++)
                 {
 #pragma HLS UNROLL
                     padding_right_buffer_dst[d][h][w] = padding_right_buffer[d][h][w];
                 }
-                for (int w = 0; w < MAX_PADDING_TOP_LEFT; w++)
+                for (int w = 0; w < MAX_TILE_PADDING_TOP_LEFT; w++)
                 {
 #pragma HLS UNROLL
                     padding_left_buffer_dst[d][h][w] = padding_left_buffer[d][h][w];

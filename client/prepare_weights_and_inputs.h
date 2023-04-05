@@ -3,7 +3,7 @@
 #include "../model_components/basic_defs/basic_defs_glue.h"
 #include "../model_components/model/headers/model_glue.h"
 #include <fstream>
-#if FPGA
+#if HW == FPGA
 #include "ap_int.h"
 #endif
 #include <iostream>
@@ -45,8 +45,9 @@ void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size], const 
 
 // V2
 void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					  const int ifms_h, const int ifms_w);
+					  const int ifms_h, const int ifms_w, const int num_of_tiles_h, const int num_of_tiles_w);
 
 void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-							 const int ifms_size, const int ifms_h, const int ifms_w);
+							 const int ifms_size, const int ifms_h, const int ifms_w, const int num_of_tiles_h, const int num_of_tiles_w);
+							 
 #endif

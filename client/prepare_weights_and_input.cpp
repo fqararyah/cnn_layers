@@ -48,7 +48,7 @@ void load_image(string file_name,
 	}
 }
 
-#if FPGA
+#if HW == FPGA
 void glue_weights(string file_name,
 				  weights_grp_dt glued_weights[all_pw_weights])
 {

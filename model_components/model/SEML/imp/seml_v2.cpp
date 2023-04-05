@@ -16,136 +16,29 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
     //			result[i] = i % 127;
     //		}
     //		begin_code_generation
-// pw_conv(off_chip_weights, channels, result, 6, layer_6_pw_depth,
-//     layer_6_pw_num_fils, layer_6_pw_num_of_tiles_in_d,
-//     layer_6_pw_num_of_tiles_out_d, layer_6_pw_num_of_tiles_h,
-//     layer_6_pw_num_of_tiles_w, tmp_channels, 0,
-//     layer_6_pw_num_of_weight_groups_for_one_pass,
-//     0, layer_6_pw_weights_offset, layer_6_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// dw_conv_3x3(seml_dw_weights_3x3, result, channels, 7, layer_7_dw_depth,
-//     layer_7_dw_ifm_width, layer_7_dw_ifm_height, layer_7_dw_num_of_tiles_in_d,
-//     layer_7_dw_ifm_num_of_tiles_h, layer_7_dw_ifm_num_of_tiles_w, 
-//     layer_7_dw_num_of_tiles_h, layer_7_dw_num_of_tiles_w,
-//     layer_7_dw_strides, layer_7_dw_padding_left, layer_7_dw_padding_right, layer_7_dw_padding_top,
-//     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 8, layer_8_pw_depth,
-//     layer_8_pw_num_fils, layer_8_pw_num_of_tiles_in_d,
-//     layer_8_pw_num_of_tiles_out_d, layer_8_pw_num_of_tiles_h,
-//     layer_8_pw_num_of_tiles_w, tmp_channels, 1,
-//     layer_8_pw_num_of_weight_groups_for_one_pass,
-//     0, layer_8_pw_weights_offset, layer_8_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 9, layer_9_pw_depth,
-//     layer_9_pw_num_fils, layer_9_pw_num_of_tiles_in_d,
-//     layer_9_pw_num_of_tiles_out_d, layer_9_pw_num_of_tiles_h,
-//     layer_9_pw_num_of_tiles_w, tmp_channels, 0,
-//     layer_9_pw_num_of_weight_groups_for_one_pass,
-//     1, layer_9_pw_weights_offset, layer_9_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// dw_conv_3x3(seml_dw_weights_3x3, channels, result, 10, layer_10_dw_depth,
-//     layer_10_dw_ifm_width, layer_10_dw_ifm_height, layer_10_dw_num_of_tiles_in_d,
-//     layer_10_dw_ifm_num_of_tiles_h, layer_10_dw_ifm_num_of_tiles_w, 
-//     layer_10_dw_num_of_tiles_h, layer_10_dw_num_of_tiles_w,
-//     layer_10_dw_strides, layer_10_dw_padding_left, layer_10_dw_padding_right, layer_10_dw_padding_top,
-//     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 11, layer_11_pw_depth,
-//     layer_11_pw_num_fils, layer_11_pw_num_of_tiles_in_d,
-//     layer_11_pw_num_of_tiles_out_d, layer_11_pw_num_of_tiles_h,
-//     layer_11_pw_num_of_tiles_w, tmp_channels, 2,
-//     layer_11_pw_num_of_weight_groups_for_one_pass,
-//     1, layer_11_pw_weights_offset, layer_11_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 12, layer_12_pw_depth,
-//     layer_12_pw_num_fils, layer_12_pw_num_of_tiles_in_d,
-//     layer_12_pw_num_of_tiles_out_d, layer_12_pw_num_of_tiles_h,
-//     layer_12_pw_num_of_tiles_w, tmp_channels, 0,
-//     layer_12_pw_num_of_weight_groups_for_one_pass,
-//     0, layer_12_pw_weights_offset, layer_12_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// dw_conv_3x3(seml_dw_weights_3x3, result, channels, 13, layer_13_dw_depth,
-//     layer_13_dw_ifm_width, layer_13_dw_ifm_height, layer_13_dw_num_of_tiles_in_d,
-//     layer_13_dw_ifm_num_of_tiles_h, layer_13_dw_ifm_num_of_tiles_w, 
-//     layer_13_dw_num_of_tiles_h, layer_13_dw_num_of_tiles_w,
-//     layer_13_dw_strides, layer_13_dw_padding_left, layer_13_dw_padding_right, layer_13_dw_padding_top,
-//     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 14, layer_14_pw_depth,
-//     layer_14_pw_num_fils, layer_14_pw_num_of_tiles_in_d,
-//     layer_14_pw_num_of_tiles_out_d, layer_14_pw_num_of_tiles_h,
-//     layer_14_pw_num_of_tiles_w, tmp_channels, 3,
-//     layer_14_pw_num_of_weight_groups_for_one_pass,
-//     0, layer_14_pw_weights_offset, layer_14_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 15, layer_15_pw_depth,
-//     layer_15_pw_num_fils, layer_15_pw_num_of_tiles_in_d,
-//     layer_15_pw_num_of_tiles_out_d, layer_15_pw_num_of_tiles_h,
-//     layer_15_pw_num_of_tiles_w, tmp_channels, 0,
-//     layer_15_pw_num_of_weight_groups_for_one_pass,
-//     1, layer_15_pw_weights_offset, layer_15_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// dw_conv_3x3(seml_dw_weights_3x3, channels, result, 16, layer_16_dw_depth,
-//     layer_16_dw_ifm_width, layer_16_dw_ifm_height, layer_16_dw_num_of_tiles_in_d,
-//     layer_16_dw_ifm_num_of_tiles_h, layer_16_dw_ifm_num_of_tiles_w, 
-//     layer_16_dw_num_of_tiles_h, layer_16_dw_num_of_tiles_w,
-//     layer_16_dw_strides, layer_16_dw_padding_left, layer_16_dw_padding_right, layer_16_dw_padding_top,
-//     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 17, layer_17_pw_depth,
-//     layer_17_pw_num_fils, layer_17_pw_num_of_tiles_in_d,
-//     layer_17_pw_num_of_tiles_out_d, layer_17_pw_num_of_tiles_h,
-//     layer_17_pw_num_of_tiles_w, tmp_channels, 1,
-//     layer_17_pw_num_of_weight_groups_for_one_pass,
-//     1, layer_17_pw_weights_offset, layer_17_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 18, layer_18_pw_depth,
-//     layer_18_pw_num_fils, layer_18_pw_num_of_tiles_in_d,
-//     layer_18_pw_num_of_tiles_out_d, layer_18_pw_num_of_tiles_h,
-//     layer_18_pw_num_of_tiles_w, tmp_channels, 0,
-//     layer_18_pw_num_of_weight_groups_for_one_pass,
-//     0, layer_18_pw_weights_offset, layer_18_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// dw_conv_3x3(seml_dw_weights_3x3, result, channels, 19, layer_19_dw_depth,
-//     layer_19_dw_ifm_width, layer_19_dw_ifm_height, layer_19_dw_num_of_tiles_in_d,
-//     layer_19_dw_ifm_num_of_tiles_h, layer_19_dw_ifm_num_of_tiles_w, 
-//     layer_19_dw_num_of_tiles_h, layer_19_dw_num_of_tiles_w,
-//     layer_19_dw_strides, layer_19_dw_padding_left, layer_19_dw_padding_right, layer_19_dw_padding_top,
-//     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 20, layer_20_pw_depth,
-//     layer_20_pw_num_fils, layer_20_pw_num_of_tiles_in_d,
-//     layer_20_pw_num_of_tiles_out_d, layer_20_pw_num_of_tiles_h,
-//     layer_20_pw_num_of_tiles_w, tmp_channels, 2,
-//     layer_20_pw_num_of_weight_groups_for_one_pass,
-//     0, layer_20_pw_weights_offset, layer_20_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
-// pw_conv(off_chip_weights, channels, result, 21, layer_21_pw_depth,
-//     layer_21_pw_num_fils, layer_21_pw_num_of_tiles_in_d,
-//     layer_21_pw_num_of_tiles_out_d, layer_21_pw_num_of_tiles_h,
-//     layer_21_pw_num_of_tiles_w, tmp_channels, 0,
-//     layer_21_pw_num_of_weight_groups_for_one_pass,
-//     1, layer_21_pw_weights_offset, layer_21_activation,
-//          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
-//          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+pw_conv(off_chip_weights, channels, result, 20, layer_20_pw_depth,
+    layer_20_pw_num_fils, layer_20_pw_num_of_tiles_in_d,
+    layer_20_pw_num_of_tiles_out_d, layer_20_pw_num_of_tiles_h,
+    layer_20_pw_num_of_tiles_w, tmp_channels, 2,
+    layer_20_pw_num_of_weight_groups_for_one_pass,
+    0, layer_20_pw_weights_offset, layer_20_activation,
+         fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+pw_conv(off_chip_weights, channels, result, 21, layer_21_pw_depth,
+    layer_21_pw_num_fils, layer_21_pw_num_of_tiles_in_d,
+    layer_21_pw_num_of_tiles_out_d, layer_21_pw_num_of_tiles_h,
+    layer_21_pw_num_of_tiles_w, tmp_channels, 0,
+    layer_21_pw_num_of_weight_groups_for_one_pass,
+    1, layer_21_pw_weights_offset, layer_21_activation,
+         fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
 #if DEBUGGING
  fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/fms_conv2d_22_384_14_14.txt",
- channels, 14, 14);
+ channels, 14, 14,layer_22_dw_ifm_num_of_tiles_h,layer_22_dw_ifm_num_of_tiles_w);
 #endif
 #if DEBUGGING
  verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_22.txt",
- channels, 75264, 14, 14);
+ channels, 75264, 14, 14,layer_22_dw_ifm_num_of_tiles_h,layer_22_dw_ifm_num_of_tiles_w);
 #endif
 dw_conv_3x3(seml_dw_weights_3x3, channels, result, 22, layer_22_dw_depth,
     layer_22_dw_ifm_width, layer_22_dw_ifm_height, layer_22_dw_num_of_tiles_in_d,
@@ -156,7 +49,7 @@ dw_conv_3x3(seml_dw_weights_3x3, channels, result, 22, layer_22_dw_depth,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
 #if DEBUGGING
  dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_22.txt",
- result, 75264, 14, 14);
+ result, 75264, 14, 14,layer_22_dw_num_of_tiles_h,layer_22_dw_num_of_tiles_w);
 #endif
 pw_conv(off_chip_weights, channels, result, 23, layer_23_pw_depth,
     layer_23_pw_num_fils, layer_23_pw_num_of_tiles_in_d,
