@@ -19,6 +19,29 @@ const int layer_0_s_padding_top = 0;
  const int layer_0_s_num_of_tiles_h = layer_0_s_ofm_height / pw_tile_h; 
  const int layer_0_s_num_of_tiles_d_in = layer_0_s_depth / pw_tile_d; 
  //****************************
+const layer_specs layer_0_s_specs = {
+                32,//layer_num_fils 
+                2,//strides;
+                3,//filter_size;
+                0,//padding_left;
+                1,//padding_right;
+                0,//padding_top;
+                1,//padding_bottom;
+                3,//layer_depth;
+                224,//layer_ifm_height;
+                224,//layer_ifm_width;
+                112,//layer_ofm_height;
+                112,//layer_ofm_width;
+                6,//layer_activation;
+                (3 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (224 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (224 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                3 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 const int layer_1_dw_num_fils = layer_0_s_num_fils / alpha;
  const int layer_1_dw_depth = layer_1_dw_num_fils;
  const int layer_1_dw_strides = 1;
@@ -37,6 +60,29 @@ const int layer_1_dw_num_fils = layer_0_s_num_fils / alpha;
  const int layer_1_dw_num_of_tiles_w = (int)(0.99 + (float)layer_1_dw_ofm_width / dw_tile_w); 
  const int layer_1_dw_num_of_tiles_h = (int)(0.99 + (float)layer_1_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_1_dw_specs = {
+                32,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                32,//layer_depth;
+                112,//layer_ifm_height;
+                112,//layer_ifm_width;
+                112,//layer_ofm_height;
+                112,//layer_ofm_width;
+                6,//layer_activation;
+                (32 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_2_pw_num_fils = 16 / alpha;
  const int layer_2_pw_depth = layer_1_dw_num_fils;
@@ -52,6 +98,29 @@ const int layer_1_dw_num_fils = layer_0_s_num_fils / alpha;
  const int layer_2_pw_weights_offset = 0; 
  const int layer_2_activation = 0;
 //****************************
+const layer_specs layer_2_pw_specs = {
+                16,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                32,//layer_depth;
+                112,//layer_ifm_height;
+                112,//layer_ifm_width;
+                112,//layer_ofm_height;
+                112,//layer_ofm_width;
+                0,//layer_activation;
+                (32 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (16 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                8,//layer_weights_offset;
+            };
 //****************************
  const int layer_3_pw_num_fils = 96 / alpha;
  const int layer_3_pw_depth = layer_2_pw_num_fils;
@@ -64,9 +133,32 @@ const int layer_1_dw_num_fils = layer_0_s_num_fils / alpha;
  const int layer_3_pw_num_of_tiles_w = (int)(0.99 + (float)layer_3_pw_ofm_width / pw_tile_w); 
  const int layer_3_pw_num_of_tiles_h = (int)(0.99 + (float)layer_3_pw_ofm_height / pw_tile_h); 
  const int layer_3_pw_num_of_weight_groups_for_one_pass = layer_3_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_3_pw_weights_offset = 8; 
+ const int layer_3_pw_weights_offset = 16; 
  const int layer_3_activation = 6;
 //****************************
+const layer_specs layer_3_pw_specs = {
+                96,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                16,//layer_depth;
+                112,//layer_ifm_height;
+                112,//layer_ifm_width;
+                112,//layer_ofm_height;
+                112,//layer_ofm_width;
+                6,//layer_activation;
+                (16 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                16 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                40,//layer_weights_offset;
+            };
 const int layer_4_dw_num_fils = layer_3_pw_num_fils / alpha;
  const int layer_4_dw_depth = layer_4_dw_num_fils;
  const int layer_4_dw_strides = 2;
@@ -85,6 +177,29 @@ const int layer_4_dw_num_fils = layer_3_pw_num_fils / alpha;
  const int layer_4_dw_num_of_tiles_w = (int)(0.99 + (float)layer_4_dw_ofm_width / dw_tile_w); 
  const int layer_4_dw_num_of_tiles_h = (int)(0.99 + (float)layer_4_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_4_dw_specs = {
+                96,//layer_num_fils 
+                2,//strides;
+                3,//filter_size;
+                0,//padding_left;
+                1,//padding_right;
+                0,//padding_top;
+                1,//padding_bottom;
+                96,//layer_depth;
+                112,//layer_ifm_height;
+                112,//layer_ifm_width;
+                56,//layer_ofm_height;
+                56,//layer_ofm_width;
+                6,//layer_activation;
+                (96 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (112 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (112 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_5_pw_num_fils = 24 / alpha;
  const int layer_5_pw_depth = layer_4_dw_num_fils;
@@ -97,9 +212,32 @@ const int layer_4_dw_num_fils = layer_3_pw_num_fils / alpha;
  const int layer_5_pw_num_of_tiles_w = (int)(0.99 + (float)layer_5_pw_ofm_width / pw_tile_w); 
  const int layer_5_pw_num_of_tiles_h = (int)(0.99 + (float)layer_5_pw_ofm_height / pw_tile_h); 
  const int layer_5_pw_num_of_weight_groups_for_one_pass = layer_5_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_5_pw_weights_offset = 32; 
+ const int layer_5_pw_weights_offset = 64; 
  const int layer_5_activation = 0;
 //****************************
+const layer_specs layer_5_pw_specs = {
+                24,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                96,//layer_depth;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
+                56,//layer_ofm_height;
+                56,//layer_ofm_width;
+                0,//layer_activation;
+                (96 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (24 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                100,//layer_weights_offset;
+            };
 //****************************
  const int layer_6_pw_num_fils = 144 / alpha;
  const int layer_6_pw_depth = layer_5_pw_num_fils;
@@ -112,9 +250,32 @@ const int layer_4_dw_num_fils = layer_3_pw_num_fils / alpha;
  const int layer_6_pw_num_of_tiles_w = (int)(0.99 + (float)layer_6_pw_ofm_width / pw_tile_w); 
  const int layer_6_pw_num_of_tiles_h = (int)(0.99 + (float)layer_6_pw_ofm_height / pw_tile_h); 
  const int layer_6_pw_num_of_weight_groups_for_one_pass = layer_6_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_6_pw_weights_offset = 68; 
+ const int layer_6_pw_weights_offset = 136; 
  const int layer_6_activation = 6;
 //****************************
+const layer_specs layer_6_pw_specs = {
+                144,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                24,//layer_depth;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
+                56,//layer_ofm_height;
+                56,//layer_ofm_width;
+                6,//layer_activation;
+                (24 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                190,//layer_weights_offset;
+            };
 const int layer_7_dw_num_fils = layer_6_pw_num_fils / alpha;
  const int layer_7_dw_depth = layer_7_dw_num_fils;
  const int layer_7_dw_strides = 1;
@@ -133,6 +294,29 @@ const int layer_7_dw_num_fils = layer_6_pw_num_fils / alpha;
  const int layer_7_dw_num_of_tiles_w = (int)(0.99 + (float)layer_7_dw_ofm_width / dw_tile_w); 
  const int layer_7_dw_num_of_tiles_h = (int)(0.99 + (float)layer_7_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_7_dw_specs = {
+                144,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                144,//layer_depth;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
+                56,//layer_ofm_height;
+                56,//layer_ofm_width;
+                6,//layer_activation;
+                (144 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_8_pw_num_fils = 24 / alpha;
  const int layer_8_pw_depth = layer_7_dw_num_fils;
@@ -145,9 +329,32 @@ const int layer_7_dw_num_fils = layer_6_pw_num_fils / alpha;
  const int layer_8_pw_num_of_tiles_w = (int)(0.99 + (float)layer_8_pw_ofm_width / pw_tile_w); 
  const int layer_8_pw_num_of_tiles_h = (int)(0.99 + (float)layer_8_pw_ofm_height / pw_tile_h); 
  const int layer_8_pw_num_of_weight_groups_for_one_pass = layer_8_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_8_pw_weights_offset = 122; 
+ const int layer_8_pw_weights_offset = 244; 
  const int layer_8_activation = 0;
 //****************************
+const layer_specs layer_8_pw_specs = {
+                24,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                144,//layer_depth;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
+                56,//layer_ofm_height;
+                56,//layer_ofm_width;
+                0,//layer_activation;
+                (144 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (24 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                298,//layer_weights_offset;
+            };
 //****************************
  const int layer_9_pw_num_fils = 144 / alpha;
  const int layer_9_pw_depth = layer_8_pw_num_fils;
@@ -160,9 +367,32 @@ const int layer_7_dw_num_fils = layer_6_pw_num_fils / alpha;
  const int layer_9_pw_num_of_tiles_w = (int)(0.99 + (float)layer_9_pw_ofm_width / pw_tile_w); 
  const int layer_9_pw_num_of_tiles_h = (int)(0.99 + (float)layer_9_pw_ofm_height / pw_tile_h); 
  const int layer_9_pw_num_of_weight_groups_for_one_pass = layer_9_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_9_pw_weights_offset = 176; 
+ const int layer_9_pw_weights_offset = 352; 
  const int layer_9_activation = 6;
 //****************************
+const layer_specs layer_9_pw_specs = {
+                144,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                24,//layer_depth;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
+                56,//layer_ofm_height;
+                56,//layer_ofm_width;
+                6,//layer_activation;
+                (24 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                406,//layer_weights_offset;
+            };
 const int layer_10_dw_num_fils = layer_9_pw_num_fils / alpha;
  const int layer_10_dw_depth = layer_10_dw_num_fils;
  const int layer_10_dw_strides = 2;
@@ -181,6 +411,29 @@ const int layer_10_dw_num_fils = layer_9_pw_num_fils / alpha;
  const int layer_10_dw_num_of_tiles_w = (int)(0.99 + (float)layer_10_dw_ofm_width / dw_tile_w); 
  const int layer_10_dw_num_of_tiles_h = (int)(0.99 + (float)layer_10_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_10_dw_specs = {
+                144,//layer_num_fils 
+                2,//strides;
+                3,//filter_size;
+                0,//padding_left;
+                1,//padding_right;
+                0,//padding_top;
+                1,//padding_bottom;
+                144,//layer_depth;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                6,//layer_activation;
+                (144 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (56 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_11_pw_num_fils = 32 / alpha;
  const int layer_11_pw_depth = layer_10_dw_num_fils;
@@ -193,9 +446,32 @@ const int layer_10_dw_num_fils = layer_9_pw_num_fils / alpha;
  const int layer_11_pw_num_of_tiles_w = (int)(0.99 + (float)layer_11_pw_ofm_width / pw_tile_w); 
  const int layer_11_pw_num_of_tiles_h = (int)(0.99 + (float)layer_11_pw_ofm_height / pw_tile_h); 
  const int layer_11_pw_num_of_weight_groups_for_one_pass = layer_11_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_11_pw_weights_offset = 230; 
+ const int layer_11_pw_weights_offset = 460; 
  const int layer_11_activation = 0;
 //****************************
+const layer_specs layer_11_pw_specs = {
+                32,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                144,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                0,//layer_activation;
+                (144 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                532,//layer_weights_offset;
+            };
 //****************************
  const int layer_12_pw_num_fils = 192 / alpha;
  const int layer_12_pw_depth = layer_11_pw_num_fils;
@@ -208,9 +484,32 @@ const int layer_10_dw_num_fils = layer_9_pw_num_fils / alpha;
  const int layer_12_pw_num_of_tiles_w = (int)(0.99 + (float)layer_12_pw_ofm_width / pw_tile_w); 
  const int layer_12_pw_num_of_tiles_h = (int)(0.99 + (float)layer_12_pw_ofm_height / pw_tile_h); 
  const int layer_12_pw_num_of_weight_groups_for_one_pass = layer_12_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_12_pw_weights_offset = 302; 
+ const int layer_12_pw_weights_offset = 604; 
  const int layer_12_activation = 6;
 //****************************
+const layer_specs layer_12_pw_specs = {
+                192,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                32,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                6,//layer_activation;
+                (32 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                700,//layer_weights_offset;
+            };
 const int layer_13_dw_num_fils = layer_12_pw_num_fils / alpha;
  const int layer_13_dw_depth = layer_13_dw_num_fils;
  const int layer_13_dw_strides = 1;
@@ -229,6 +528,29 @@ const int layer_13_dw_num_fils = layer_12_pw_num_fils / alpha;
  const int layer_13_dw_num_of_tiles_w = (int)(0.99 + (float)layer_13_dw_ofm_width / dw_tile_w); 
  const int layer_13_dw_num_of_tiles_h = (int)(0.99 + (float)layer_13_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_13_dw_specs = {
+                192,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                6,//layer_activation;
+                (192 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_14_pw_num_fils = 32 / alpha;
  const int layer_14_pw_depth = layer_13_dw_num_fils;
@@ -241,9 +563,32 @@ const int layer_13_dw_num_fils = layer_12_pw_num_fils / alpha;
  const int layer_14_pw_num_of_tiles_w = (int)(0.99 + (float)layer_14_pw_ofm_width / pw_tile_w); 
  const int layer_14_pw_num_of_tiles_h = (int)(0.99 + (float)layer_14_pw_ofm_height / pw_tile_h); 
  const int layer_14_pw_num_of_weight_groups_for_one_pass = layer_14_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_14_pw_weights_offset = 398; 
+ const int layer_14_pw_weights_offset = 796; 
  const int layer_14_activation = 0;
 //****************************
+const layer_specs layer_14_pw_specs = {
+                32,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                0,//layer_activation;
+                (192 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                892,//layer_weights_offset;
+            };
 //****************************
  const int layer_15_pw_num_fils = 192 / alpha;
  const int layer_15_pw_depth = layer_14_pw_num_fils;
@@ -256,9 +601,32 @@ const int layer_13_dw_num_fils = layer_12_pw_num_fils / alpha;
  const int layer_15_pw_num_of_tiles_w = (int)(0.99 + (float)layer_15_pw_ofm_width / pw_tile_w); 
  const int layer_15_pw_num_of_tiles_h = (int)(0.99 + (float)layer_15_pw_ofm_height / pw_tile_h); 
  const int layer_15_pw_num_of_weight_groups_for_one_pass = layer_15_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_15_pw_weights_offset = 494; 
+ const int layer_15_pw_weights_offset = 988; 
  const int layer_15_activation = 6;
 //****************************
+const layer_specs layer_15_pw_specs = {
+                192,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                32,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                6,//layer_activation;
+                (32 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1084,//layer_weights_offset;
+            };
 const int layer_16_dw_num_fils = layer_15_pw_num_fils / alpha;
  const int layer_16_dw_depth = layer_16_dw_num_fils;
  const int layer_16_dw_strides = 1;
@@ -277,6 +645,29 @@ const int layer_16_dw_num_fils = layer_15_pw_num_fils / alpha;
  const int layer_16_dw_num_of_tiles_w = (int)(0.99 + (float)layer_16_dw_ofm_width / dw_tile_w); 
  const int layer_16_dw_num_of_tiles_h = (int)(0.99 + (float)layer_16_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_16_dw_specs = {
+                192,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                6,//layer_activation;
+                (192 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_17_pw_num_fils = 32 / alpha;
  const int layer_17_pw_depth = layer_16_dw_num_fils;
@@ -289,9 +680,32 @@ const int layer_16_dw_num_fils = layer_15_pw_num_fils / alpha;
  const int layer_17_pw_num_of_tiles_w = (int)(0.99 + (float)layer_17_pw_ofm_width / pw_tile_w); 
  const int layer_17_pw_num_of_tiles_h = (int)(0.99 + (float)layer_17_pw_ofm_height / pw_tile_h); 
  const int layer_17_pw_num_of_weight_groups_for_one_pass = layer_17_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_17_pw_weights_offset = 590; 
+ const int layer_17_pw_weights_offset = 1180; 
  const int layer_17_activation = 0;
 //****************************
+const layer_specs layer_17_pw_specs = {
+                32,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                0,//layer_activation;
+                (192 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1276,//layer_weights_offset;
+            };
 //****************************
  const int layer_18_pw_num_fils = 192 / alpha;
  const int layer_18_pw_depth = layer_17_pw_num_fils;
@@ -304,9 +718,32 @@ const int layer_16_dw_num_fils = layer_15_pw_num_fils / alpha;
  const int layer_18_pw_num_of_tiles_w = (int)(0.99 + (float)layer_18_pw_ofm_width / pw_tile_w); 
  const int layer_18_pw_num_of_tiles_h = (int)(0.99 + (float)layer_18_pw_ofm_height / pw_tile_h); 
  const int layer_18_pw_num_of_weight_groups_for_one_pass = layer_18_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_18_pw_weights_offset = 686; 
+ const int layer_18_pw_weights_offset = 1372; 
  const int layer_18_activation = 6;
 //****************************
+const layer_specs layer_18_pw_specs = {
+                192,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                32,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                6,//layer_activation;
+                (32 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1468,//layer_weights_offset;
+            };
 const int layer_19_dw_num_fils = layer_18_pw_num_fils / alpha;
  const int layer_19_dw_depth = layer_19_dw_num_fils;
  const int layer_19_dw_strides = 2;
@@ -325,6 +762,29 @@ const int layer_19_dw_num_fils = layer_18_pw_num_fils / alpha;
  const int layer_19_dw_num_of_tiles_w = (int)(0.99 + (float)layer_19_dw_ofm_width / dw_tile_w); 
  const int layer_19_dw_num_of_tiles_h = (int)(0.99 + (float)layer_19_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_19_dw_specs = {
+                192,//layer_num_fils 
+                2,//strides;
+                3,//filter_size;
+                0,//padding_left;
+                1,//padding_right;
+                0,//padding_top;
+                1,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (192 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_20_pw_num_fils = 64 / alpha;
  const int layer_20_pw_depth = layer_19_dw_num_fils;
@@ -337,9 +797,32 @@ const int layer_19_dw_num_fils = layer_18_pw_num_fils / alpha;
  const int layer_20_pw_num_of_tiles_w = (int)(0.99 + (float)layer_20_pw_ofm_width / pw_tile_w); 
  const int layer_20_pw_num_of_tiles_h = (int)(0.99 + (float)layer_20_pw_ofm_height / pw_tile_h); 
  const int layer_20_pw_num_of_weight_groups_for_one_pass = layer_20_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_20_pw_weights_offset = 782; 
+ const int layer_20_pw_weights_offset = 1564; 
  const int layer_20_activation = 0;
 //****************************
+const layer_specs layer_20_pw_specs = {
+                64,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                192,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (192 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1756,//layer_weights_offset;
+            };
 //****************************
  const int layer_21_pw_num_fils = 384 / alpha;
  const int layer_21_pw_depth = layer_20_pw_num_fils;
@@ -352,9 +835,32 @@ const int layer_19_dw_num_fils = layer_18_pw_num_fils / alpha;
  const int layer_21_pw_num_of_tiles_w = (int)(0.99 + (float)layer_21_pw_ofm_width / pw_tile_w); 
  const int layer_21_pw_num_of_tiles_h = (int)(0.99 + (float)layer_21_pw_ofm_height / pw_tile_h); 
  const int layer_21_pw_num_of_weight_groups_for_one_pass = layer_21_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_21_pw_weights_offset = 974; 
+ const int layer_21_pw_weights_offset = 1948; 
  const int layer_21_activation = 6;
 //****************************
+const layer_specs layer_21_pw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                64,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (64 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                2332,//layer_weights_offset;
+            };
 const int layer_22_dw_num_fils = layer_21_pw_num_fils / alpha;
  const int layer_22_dw_depth = layer_22_dw_num_fils;
  const int layer_22_dw_strides = 1;
@@ -373,6 +879,29 @@ const int layer_22_dw_num_fils = layer_21_pw_num_fils / alpha;
  const int layer_22_dw_num_of_tiles_w = (int)(0.99 + (float)layer_22_dw_ofm_width / dw_tile_w); 
  const int layer_22_dw_num_of_tiles_h = (int)(0.99 + (float)layer_22_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_22_dw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_23_pw_num_fils = 64 / alpha;
  const int layer_23_pw_depth = layer_22_dw_num_fils;
@@ -385,9 +914,32 @@ const int layer_22_dw_num_fils = layer_21_pw_num_fils / alpha;
  const int layer_23_pw_num_of_tiles_w = (int)(0.99 + (float)layer_23_pw_ofm_width / pw_tile_w); 
  const int layer_23_pw_num_of_tiles_h = (int)(0.99 + (float)layer_23_pw_ofm_height / pw_tile_h); 
  const int layer_23_pw_num_of_weight_groups_for_one_pass = layer_23_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_23_pw_weights_offset = 1358; 
+ const int layer_23_pw_weights_offset = 2716; 
  const int layer_23_activation = 0;
 //****************************
+const layer_specs layer_23_pw_specs = {
+                64,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                3100,//layer_weights_offset;
+            };
 //****************************
  const int layer_24_pw_num_fils = 384 / alpha;
  const int layer_24_pw_depth = layer_23_pw_num_fils;
@@ -400,9 +952,32 @@ const int layer_22_dw_num_fils = layer_21_pw_num_fils / alpha;
  const int layer_24_pw_num_of_tiles_w = (int)(0.99 + (float)layer_24_pw_ofm_width / pw_tile_w); 
  const int layer_24_pw_num_of_tiles_h = (int)(0.99 + (float)layer_24_pw_ofm_height / pw_tile_h); 
  const int layer_24_pw_num_of_weight_groups_for_one_pass = layer_24_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_24_pw_weights_offset = 1742; 
+ const int layer_24_pw_weights_offset = 3484; 
  const int layer_24_activation = 6;
 //****************************
+const layer_specs layer_24_pw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                64,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (64 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                3868,//layer_weights_offset;
+            };
 const int layer_25_dw_num_fils = layer_24_pw_num_fils / alpha;
  const int layer_25_dw_depth = layer_25_dw_num_fils;
  const int layer_25_dw_strides = 1;
@@ -421,6 +996,29 @@ const int layer_25_dw_num_fils = layer_24_pw_num_fils / alpha;
  const int layer_25_dw_num_of_tiles_w = (int)(0.99 + (float)layer_25_dw_ofm_width / dw_tile_w); 
  const int layer_25_dw_num_of_tiles_h = (int)(0.99 + (float)layer_25_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_25_dw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_26_pw_num_fils = 64 / alpha;
  const int layer_26_pw_depth = layer_25_dw_num_fils;
@@ -433,9 +1031,32 @@ const int layer_25_dw_num_fils = layer_24_pw_num_fils / alpha;
  const int layer_26_pw_num_of_tiles_w = (int)(0.99 + (float)layer_26_pw_ofm_width / pw_tile_w); 
  const int layer_26_pw_num_of_tiles_h = (int)(0.99 + (float)layer_26_pw_ofm_height / pw_tile_h); 
  const int layer_26_pw_num_of_weight_groups_for_one_pass = layer_26_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_26_pw_weights_offset = 2126; 
+ const int layer_26_pw_weights_offset = 4252; 
  const int layer_26_activation = 0;
 //****************************
+const layer_specs layer_26_pw_specs = {
+                64,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                4636,//layer_weights_offset;
+            };
 //****************************
  const int layer_27_pw_num_fils = 384 / alpha;
  const int layer_27_pw_depth = layer_26_pw_num_fils;
@@ -448,9 +1069,32 @@ const int layer_25_dw_num_fils = layer_24_pw_num_fils / alpha;
  const int layer_27_pw_num_of_tiles_w = (int)(0.99 + (float)layer_27_pw_ofm_width / pw_tile_w); 
  const int layer_27_pw_num_of_tiles_h = (int)(0.99 + (float)layer_27_pw_ofm_height / pw_tile_h); 
  const int layer_27_pw_num_of_weight_groups_for_one_pass = layer_27_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_27_pw_weights_offset = 2510; 
+ const int layer_27_pw_weights_offset = 5020; 
  const int layer_27_activation = 6;
 //****************************
+const layer_specs layer_27_pw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                64,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (64 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                5404,//layer_weights_offset;
+            };
 const int layer_28_dw_num_fils = layer_27_pw_num_fils / alpha;
  const int layer_28_dw_depth = layer_28_dw_num_fils;
  const int layer_28_dw_strides = 1;
@@ -469,6 +1113,29 @@ const int layer_28_dw_num_fils = layer_27_pw_num_fils / alpha;
  const int layer_28_dw_num_of_tiles_w = (int)(0.99 + (float)layer_28_dw_ofm_width / dw_tile_w); 
  const int layer_28_dw_num_of_tiles_h = (int)(0.99 + (float)layer_28_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_28_dw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_29_pw_num_fils = 64 / alpha;
  const int layer_29_pw_depth = layer_28_dw_num_fils;
@@ -481,9 +1148,32 @@ const int layer_28_dw_num_fils = layer_27_pw_num_fils / alpha;
  const int layer_29_pw_num_of_tiles_w = (int)(0.99 + (float)layer_29_pw_ofm_width / pw_tile_w); 
  const int layer_29_pw_num_of_tiles_h = (int)(0.99 + (float)layer_29_pw_ofm_height / pw_tile_h); 
  const int layer_29_pw_num_of_weight_groups_for_one_pass = layer_29_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_29_pw_weights_offset = 2894; 
+ const int layer_29_pw_weights_offset = 5788; 
  const int layer_29_activation = 0;
 //****************************
+const layer_specs layer_29_pw_specs = {
+                64,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                6172,//layer_weights_offset;
+            };
 //****************************
  const int layer_30_pw_num_fils = 384 / alpha;
  const int layer_30_pw_depth = layer_29_pw_num_fils;
@@ -496,9 +1186,32 @@ const int layer_28_dw_num_fils = layer_27_pw_num_fils / alpha;
  const int layer_30_pw_num_of_tiles_w = (int)(0.99 + (float)layer_30_pw_ofm_width / pw_tile_w); 
  const int layer_30_pw_num_of_tiles_h = (int)(0.99 + (float)layer_30_pw_ofm_height / pw_tile_h); 
  const int layer_30_pw_num_of_weight_groups_for_one_pass = layer_30_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_30_pw_weights_offset = 3278; 
+ const int layer_30_pw_weights_offset = 6556; 
  const int layer_30_activation = 6;
 //****************************
+const layer_specs layer_30_pw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                64,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (64 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                6940,//layer_weights_offset;
+            };
 const int layer_31_dw_num_fils = layer_30_pw_num_fils / alpha;
  const int layer_31_dw_depth = layer_31_dw_num_fils;
  const int layer_31_dw_strides = 1;
@@ -517,6 +1230,29 @@ const int layer_31_dw_num_fils = layer_30_pw_num_fils / alpha;
  const int layer_31_dw_num_of_tiles_w = (int)(0.99 + (float)layer_31_dw_ofm_width / dw_tile_w); 
  const int layer_31_dw_num_of_tiles_h = (int)(0.99 + (float)layer_31_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_31_dw_specs = {
+                384,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_32_pw_num_fils = 96 / alpha;
  const int layer_32_pw_depth = layer_31_dw_num_fils;
@@ -529,9 +1265,32 @@ const int layer_31_dw_num_fils = layer_30_pw_num_fils / alpha;
  const int layer_32_pw_num_of_tiles_w = (int)(0.99 + (float)layer_32_pw_ofm_width / pw_tile_w); 
  const int layer_32_pw_num_of_tiles_h = (int)(0.99 + (float)layer_32_pw_ofm_height / pw_tile_h); 
  const int layer_32_pw_num_of_weight_groups_for_one_pass = layer_32_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_32_pw_weights_offset = 3662; 
+ const int layer_32_pw_weights_offset = 7324; 
  const int layer_32_activation = 0;
 //****************************
+const layer_specs layer_32_pw_specs = {
+                96,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (384 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                384 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                7900,//layer_weights_offset;
+            };
 //****************************
  const int layer_33_pw_num_fils = 576 / alpha;
  const int layer_33_pw_depth = layer_32_pw_num_fils;
@@ -544,9 +1303,32 @@ const int layer_31_dw_num_fils = layer_30_pw_num_fils / alpha;
  const int layer_33_pw_num_of_tiles_w = (int)(0.99 + (float)layer_33_pw_ofm_width / pw_tile_w); 
  const int layer_33_pw_num_of_tiles_h = (int)(0.99 + (float)layer_33_pw_ofm_height / pw_tile_h); 
  const int layer_33_pw_num_of_weight_groups_for_one_pass = layer_33_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_33_pw_weights_offset = 4238; 
+ const int layer_33_pw_weights_offset = 8476; 
  const int layer_33_activation = 6;
 //****************************
+const layer_specs layer_33_pw_specs = {
+                576,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                96,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (96 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                9340,//layer_weights_offset;
+            };
 const int layer_34_dw_num_fils = layer_33_pw_num_fils / alpha;
  const int layer_34_dw_depth = layer_34_dw_num_fils;
  const int layer_34_dw_strides = 1;
@@ -565,6 +1347,29 @@ const int layer_34_dw_num_fils = layer_33_pw_num_fils / alpha;
  const int layer_34_dw_num_of_tiles_w = (int)(0.99 + (float)layer_34_dw_ofm_width / dw_tile_w); 
  const int layer_34_dw_num_of_tiles_h = (int)(0.99 + (float)layer_34_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_34_dw_specs = {
+                576,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                576,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (576 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_35_pw_num_fils = 96 / alpha;
  const int layer_35_pw_depth = layer_34_dw_num_fils;
@@ -577,9 +1382,32 @@ const int layer_34_dw_num_fils = layer_33_pw_num_fils / alpha;
  const int layer_35_pw_num_of_tiles_w = (int)(0.99 + (float)layer_35_pw_ofm_width / pw_tile_w); 
  const int layer_35_pw_num_of_tiles_h = (int)(0.99 + (float)layer_35_pw_ofm_height / pw_tile_h); 
  const int layer_35_pw_num_of_weight_groups_for_one_pass = layer_35_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_35_pw_weights_offset = 5102; 
+ const int layer_35_pw_weights_offset = 10204; 
  const int layer_35_activation = 0;
 //****************************
+const layer_specs layer_35_pw_specs = {
+                96,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                576,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (576 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                11068,//layer_weights_offset;
+            };
 //****************************
  const int layer_36_pw_num_fils = 576 / alpha;
  const int layer_36_pw_depth = layer_35_pw_num_fils;
@@ -592,9 +1420,32 @@ const int layer_34_dw_num_fils = layer_33_pw_num_fils / alpha;
  const int layer_36_pw_num_of_tiles_w = (int)(0.99 + (float)layer_36_pw_ofm_width / pw_tile_w); 
  const int layer_36_pw_num_of_tiles_h = (int)(0.99 + (float)layer_36_pw_ofm_height / pw_tile_h); 
  const int layer_36_pw_num_of_weight_groups_for_one_pass = layer_36_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_36_pw_weights_offset = 5966; 
+ const int layer_36_pw_weights_offset = 11932; 
  const int layer_36_activation = 6;
 //****************************
+const layer_specs layer_36_pw_specs = {
+                576,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                96,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (96 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                12796,//layer_weights_offset;
+            };
 const int layer_37_dw_num_fils = layer_36_pw_num_fils / alpha;
  const int layer_37_dw_depth = layer_37_dw_num_fils;
  const int layer_37_dw_strides = 1;
@@ -613,6 +1464,29 @@ const int layer_37_dw_num_fils = layer_36_pw_num_fils / alpha;
  const int layer_37_dw_num_of_tiles_w = (int)(0.99 + (float)layer_37_dw_ofm_width / dw_tile_w); 
  const int layer_37_dw_num_of_tiles_h = (int)(0.99 + (float)layer_37_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_37_dw_specs = {
+                576,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                576,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (576 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_38_pw_num_fils = 96 / alpha;
  const int layer_38_pw_depth = layer_37_dw_num_fils;
@@ -625,9 +1499,32 @@ const int layer_37_dw_num_fils = layer_36_pw_num_fils / alpha;
  const int layer_38_pw_num_of_tiles_w = (int)(0.99 + (float)layer_38_pw_ofm_width / pw_tile_w); 
  const int layer_38_pw_num_of_tiles_h = (int)(0.99 + (float)layer_38_pw_ofm_height / pw_tile_h); 
  const int layer_38_pw_num_of_weight_groups_for_one_pass = layer_38_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_38_pw_weights_offset = 6830; 
+ const int layer_38_pw_weights_offset = 13660; 
  const int layer_38_activation = 0;
 //****************************
+const layer_specs layer_38_pw_specs = {
+                96,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                576,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                0,//layer_activation;
+                (576 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                14524,//layer_weights_offset;
+            };
 //****************************
  const int layer_39_pw_num_fils = 576 / alpha;
  const int layer_39_pw_depth = layer_38_pw_num_fils;
@@ -640,9 +1537,32 @@ const int layer_37_dw_num_fils = layer_36_pw_num_fils / alpha;
  const int layer_39_pw_num_of_tiles_w = (int)(0.99 + (float)layer_39_pw_ofm_width / pw_tile_w); 
  const int layer_39_pw_num_of_tiles_h = (int)(0.99 + (float)layer_39_pw_ofm_height / pw_tile_h); 
  const int layer_39_pw_num_of_weight_groups_for_one_pass = layer_39_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_39_pw_weights_offset = 7694; 
+ const int layer_39_pw_weights_offset = 15388; 
  const int layer_39_activation = 6;
 //****************************
+const layer_specs layer_39_pw_specs = {
+                576,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                96,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                6,//layer_activation;
+                (96 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                16252,//layer_weights_offset;
+            };
 const int layer_40_dw_num_fils = layer_39_pw_num_fils / alpha;
  const int layer_40_dw_depth = layer_40_dw_num_fils;
  const int layer_40_dw_strides = 2;
@@ -661,6 +1581,29 @@ const int layer_40_dw_num_fils = layer_39_pw_num_fils / alpha;
  const int layer_40_dw_num_of_tiles_w = (int)(0.99 + (float)layer_40_dw_ofm_width / dw_tile_w); 
  const int layer_40_dw_num_of_tiles_h = (int)(0.99 + (float)layer_40_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_40_dw_specs = {
+                576,//layer_num_fils 
+                2,//strides;
+                3,//filter_size;
+                0,//padding_left;
+                1,//padding_right;
+                0,//padding_top;
+                1,//padding_bottom;
+                576,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (576 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_41_pw_num_fils = 160 / alpha;
  const int layer_41_pw_depth = layer_40_dw_num_fils;
@@ -673,9 +1616,32 @@ const int layer_40_dw_num_fils = layer_39_pw_num_fils / alpha;
  const int layer_41_pw_num_of_tiles_w = (int)(0.99 + (float)layer_41_pw_ofm_width / pw_tile_w); 
  const int layer_41_pw_num_of_tiles_h = (int)(0.99 + (float)layer_41_pw_ofm_height / pw_tile_h); 
  const int layer_41_pw_num_of_weight_groups_for_one_pass = layer_41_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_41_pw_weights_offset = 8558; 
+ const int layer_41_pw_weights_offset = 17116; 
  const int layer_41_activation = 0;
 //****************************
+const layer_specs layer_41_pw_specs = {
+                160,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                576,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                0,//layer_activation;
+                (576 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (160 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                18556,//layer_weights_offset;
+            };
 //****************************
  const int layer_42_pw_num_fils = 960 / alpha;
  const int layer_42_pw_depth = layer_41_pw_num_fils;
@@ -688,9 +1654,32 @@ const int layer_40_dw_num_fils = layer_39_pw_num_fils / alpha;
  const int layer_42_pw_num_of_tiles_w = (int)(0.99 + (float)layer_42_pw_ofm_width / pw_tile_w); 
  const int layer_42_pw_num_of_tiles_h = (int)(0.99 + (float)layer_42_pw_ofm_height / pw_tile_h); 
  const int layer_42_pw_num_of_weight_groups_for_one_pass = layer_42_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_42_pw_weights_offset = 9998; 
+ const int layer_42_pw_weights_offset = 19996; 
  const int layer_42_activation = 6;
 //****************************
+const layer_specs layer_42_pw_specs = {
+                960,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                160,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (160 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                160 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                22396,//layer_weights_offset;
+            };
 const int layer_43_dw_num_fils = layer_42_pw_num_fils / alpha;
  const int layer_43_dw_depth = layer_43_dw_num_fils;
  const int layer_43_dw_strides = 1;
@@ -709,6 +1698,29 @@ const int layer_43_dw_num_fils = layer_42_pw_num_fils / alpha;
  const int layer_43_dw_num_of_tiles_w = (int)(0.99 + (float)layer_43_dw_ofm_width / dw_tile_w); 
  const int layer_43_dw_num_of_tiles_h = (int)(0.99 + (float)layer_43_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_43_dw_specs = {
+                960,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                960,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (960 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_44_pw_num_fils = 160 / alpha;
  const int layer_44_pw_depth = layer_43_dw_num_fils;
@@ -721,9 +1733,32 @@ const int layer_43_dw_num_fils = layer_42_pw_num_fils / alpha;
  const int layer_44_pw_num_of_tiles_w = (int)(0.99 + (float)layer_44_pw_ofm_width / pw_tile_w); 
  const int layer_44_pw_num_of_tiles_h = (int)(0.99 + (float)layer_44_pw_ofm_height / pw_tile_h); 
  const int layer_44_pw_num_of_weight_groups_for_one_pass = layer_44_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_44_pw_weights_offset = 12398; 
+ const int layer_44_pw_weights_offset = 24796; 
  const int layer_44_activation = 0;
 //****************************
+const layer_specs layer_44_pw_specs = {
+                160,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                960,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                0,//layer_activation;
+                (960 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (160 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                27196,//layer_weights_offset;
+            };
 //****************************
  const int layer_45_pw_num_fils = 960 / alpha;
  const int layer_45_pw_depth = layer_44_pw_num_fils;
@@ -736,9 +1771,32 @@ const int layer_43_dw_num_fils = layer_42_pw_num_fils / alpha;
  const int layer_45_pw_num_of_tiles_w = (int)(0.99 + (float)layer_45_pw_ofm_width / pw_tile_w); 
  const int layer_45_pw_num_of_tiles_h = (int)(0.99 + (float)layer_45_pw_ofm_height / pw_tile_h); 
  const int layer_45_pw_num_of_weight_groups_for_one_pass = layer_45_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_45_pw_weights_offset = 14798; 
+ const int layer_45_pw_weights_offset = 29596; 
  const int layer_45_activation = 6;
 //****************************
+const layer_specs layer_45_pw_specs = {
+                960,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                160,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (160 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                160 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                31996,//layer_weights_offset;
+            };
 const int layer_46_dw_num_fils = layer_45_pw_num_fils / alpha;
  const int layer_46_dw_depth = layer_46_dw_num_fils;
  const int layer_46_dw_strides = 1;
@@ -757,6 +1815,29 @@ const int layer_46_dw_num_fils = layer_45_pw_num_fils / alpha;
  const int layer_46_dw_num_of_tiles_w = (int)(0.99 + (float)layer_46_dw_ofm_width / dw_tile_w); 
  const int layer_46_dw_num_of_tiles_h = (int)(0.99 + (float)layer_46_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_46_dw_specs = {
+                960,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                960,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (960 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_47_pw_num_fils = 160 / alpha;
  const int layer_47_pw_depth = layer_46_dw_num_fils;
@@ -769,9 +1850,32 @@ const int layer_46_dw_num_fils = layer_45_pw_num_fils / alpha;
  const int layer_47_pw_num_of_tiles_w = (int)(0.99 + (float)layer_47_pw_ofm_width / pw_tile_w); 
  const int layer_47_pw_num_of_tiles_h = (int)(0.99 + (float)layer_47_pw_ofm_height / pw_tile_h); 
  const int layer_47_pw_num_of_weight_groups_for_one_pass = layer_47_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_47_pw_weights_offset = 17198; 
+ const int layer_47_pw_weights_offset = 34396; 
  const int layer_47_activation = 0;
 //****************************
+const layer_specs layer_47_pw_specs = {
+                160,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                960,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                0,//layer_activation;
+                (960 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (160 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                36796,//layer_weights_offset;
+            };
 //****************************
  const int layer_48_pw_num_fils = 960 / alpha;
  const int layer_48_pw_depth = layer_47_pw_num_fils;
@@ -784,9 +1888,32 @@ const int layer_46_dw_num_fils = layer_45_pw_num_fils / alpha;
  const int layer_48_pw_num_of_tiles_w = (int)(0.99 + (float)layer_48_pw_ofm_width / pw_tile_w); 
  const int layer_48_pw_num_of_tiles_h = (int)(0.99 + (float)layer_48_pw_ofm_height / pw_tile_h); 
  const int layer_48_pw_num_of_weight_groups_for_one_pass = layer_48_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_48_pw_weights_offset = 19598; 
+ const int layer_48_pw_weights_offset = 39196; 
  const int layer_48_activation = 6;
 //****************************
+const layer_specs layer_48_pw_specs = {
+                960,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                160,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (160 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                160 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                41596,//layer_weights_offset;
+            };
 const int layer_49_dw_num_fils = layer_48_pw_num_fils / alpha;
  const int layer_49_dw_depth = layer_49_dw_num_fils;
  const int layer_49_dw_strides = 1;
@@ -805,6 +1932,29 @@ const int layer_49_dw_num_fils = layer_48_pw_num_fils / alpha;
  const int layer_49_dw_num_of_tiles_w = (int)(0.99 + (float)layer_49_dw_ofm_width / dw_tile_w); 
  const int layer_49_dw_num_of_tiles_h = (int)(0.99 + (float)layer_49_dw_ofm_height / dw_tile_h); 
  //****************************
+const layer_specs layer_49_dw_specs = {
+                960,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                960,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (960 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                0,//layer_weights_offset;
+            };
 //****************************
  const int layer_50_pw_num_fils = 320 / alpha;
  const int layer_50_pw_depth = layer_49_dw_num_fils;
@@ -817,9 +1967,32 @@ const int layer_49_dw_num_fils = layer_48_pw_num_fils / alpha;
  const int layer_50_pw_num_of_tiles_w = (int)(0.99 + (float)layer_50_pw_ofm_width / pw_tile_w); 
  const int layer_50_pw_num_of_tiles_h = (int)(0.99 + (float)layer_50_pw_ofm_height / pw_tile_h); 
  const int layer_50_pw_num_of_weight_groups_for_one_pass = layer_50_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_50_pw_weights_offset = 21998; 
+ const int layer_50_pw_weights_offset = 43996; 
  const int layer_50_activation = 0;
 //****************************
+const layer_specs layer_50_pw_specs = {
+                320,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                960,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                0,//layer_activation;
+                (960 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (320 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                48796,//layer_weights_offset;
+            };
 //****************************
  const int layer_51_pw_num_fils = 1280 / alpha;
  const int layer_51_pw_depth = layer_50_pw_num_fils;
@@ -832,7 +2005,30 @@ const int layer_49_dw_num_fils = layer_48_pw_num_fils / alpha;
  const int layer_51_pw_num_of_tiles_w = (int)(0.99 + (float)layer_51_pw_ofm_width / pw_tile_w); 
  const int layer_51_pw_num_of_tiles_h = (int)(0.99 + (float)layer_51_pw_ofm_height / pw_tile_h); 
  const int layer_51_pw_num_of_weight_groups_for_one_pass = layer_51_pw_depth * pw_conv_parallelism_out / weights_group_items; 
- const int layer_51_pw_weights_offset = 26798; 
+ const int layer_51_pw_weights_offset = 53596; 
  const int layer_51_activation = 6;
 //****************************
+const layer_specs layer_51_pw_specs = {
+                1280,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                320,//layer_depth;
+                7,//layer_ifm_height;
+                7,//layer_ifm_width;
+                7,//layer_ofm_height;
+                7,//layer_ofm_width;
+                6,//layer_activation;
+                (320 + pw_tile_d) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (1280 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (7 + pw_tile_h) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (7 + pw_tile_w) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                320 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                59996,//layer_weights_offset;
+            };
 #endif

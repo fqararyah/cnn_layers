@@ -4,8 +4,9 @@ import utils
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-
-in_out_file = '../model_components/model/SEML/imp/seml.cpp'
+in_out_file = '../model_components/model/SEML/imp/seml{}.cpp'.format(
+    cgc.FIBHA_VERSION_POSTFIX)
+constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
 ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
@@ -27,26 +28,20 @@ expansion_projection_block = 'pw_conv(off_chip_weights, *CHANNELS*, result, *i*,
     layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_activation,\n\
-    layer_*i*_pw_fused_scales, layer_*i*_pw_fused_scales_log_2_shifts, layer_*i*_pw_relu_6_fused_scales,\n\
-    layer_*i*_pw_fused_zero_points);\n'
+         fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
+         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
 dw_block_0 = \
-    'dw_conv_3x3(dw_weights_*i*, channels, result, *i*, layer_*i*_dw_depth,\n\
-    layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
-    layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
-    layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, layer_*i*_dw_fused_scales, layer_*i*_dw_fused_scales_log_2_shifts, layer_*i*_dw_relu_6_fused_scales,\n\
-    layer_*i*_dw_fused_zero_points);\n'
+    'dw_conv_3x3(seml_dw_weights_3x3, channels, result, *i*,layer_*i*_dw_specs,\n\
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
 dw_block_1 = \
-    'dw_conv_3x3(dw_weights_*i*, result, channels, *i*, layer_*i*_dw_depth,\n\
-    layer_*i*_dw_ifm_width, layer_*i*_dw_ifm_height, layer_*i*_dw_num_of_tiles_in_d,\n\
-    layer_*i*_dw_num_of_tiles_h, layer_*i*_dw_num_of_tiles_w,\n\
-    layer_*i*_dw_strides, layer_*i*_dw_padding_left, layer_*i*_dw_padding_right, layer_*i*_dw_padding_top,\n\
-    *DIRECTION*, layer_*i*_dw_fused_scales, layer_*i*_dw_fused_scales_log_2_shifts, layer_*i*_dw_relu_6_fused_scales,\n\
-    layer_*i*_dw_fused_zero_points);\n'
+    'dw_conv_3x3(seml_dw_weights_3x3, result, channels, *i*, layer_*i*_dw_specs,\n\
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
+        fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 # projection_block = 'pw_conv(off_chip_weights, channels, result2, *i*, layer_*i*_pw_depth,\n\
 #     layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
@@ -55,9 +50,9 @@ dw_block_1 = \
 #     layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
 #     *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_activation);\n'
 
-debugging_dump_ofms_block = '#if DEBUGGING\ndump_layer_output("{}",\n {}, {}, {}, {});\n#endif\n'
-debugging_fill_layer_input_block = '#if DEBUGGING\nfill_layer_input("{}",\n {}, {}, {});\n#endif\n'
-debugging_verify_fill_layer_input_block = '#if DEBUGGING\nverify_fill_layer_input("{}",\n {}, {}, {}, {});\n#endif\n'
+debugging_dump_ofms_block = '#if DEBUGGING\n dump_layer_output("{}",\n {}, {}, {}, {},{},{});\n#endif\n'
+debugging_fill_layer_input_block = '#if DEBUGGING\n fill_layer_input("{}",\n {}, {}, {},{},{});\n#endif\n'
+debugging_verify_fill_layer_input_block = '#if DEBUGGING\n verify_fill_layer_input("{}",\n {}, {}, {}, {},{},{});\n#endif\n'
 
 # layers_to_debug = [2, 12, 13, 20, 21, 22, 23, 24,25,26,27,28,29,30,31, 32,33,34, 35, 36, 37, 38, 39, 40, 41,
 #layers_to_debug = [42, 43, 44, 45, 46, 47, 48, 49, 50, 51, 52]
@@ -180,10 +175,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         replacement_dict['*TYPE*_'] = ''
     if layers_types[layer_index] == 'pw':
         replacement_dict['*TYPE*'] = 'pw'
-        replacement_dict['*CHANNELS*'] = 'tmp_channels' if (layer_index - skip_connections_depth - 1 in skip_connections_indices
-                                                            or layer_index - 1 in skip_connections_indices or layer_index + skip_connections_depth - 1 in skip_connections_indices)\
-            and layer_index == cgc.PILELINE_LEN\
-            else 'channels'
+        replacement_dict['*CHANNELS*'] = 'channels'
         target_block += expansion_projection_block
         if layer_index + skip_connections_depth in skip_connections_indices:
             read_write += 2
@@ -209,13 +201,42 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
                                                                   'channels' if direction == 0 else 'result',
                                                                   str(
                                                                       layers_inputs_shapes[layer_index].height),
-                                                                  str(layers_inputs_shapes[layer_index].width))
+                                                                  str(
+                                                                      layers_inputs_shapes[layer_index].width),
+                                                                  'layer_' +
+                                                                  str(layer_index) +
+                                                                  '_dw_ifm_num_of_tiles_h'
+                                                                  if layers_types[layer_index] == 'dw' else
+                                                                  'layer_' +
+                                                                  str(layer_index) +
+                                                                  '_dw_ifm_num_of_tiles_h',
+                                                                  'layer_' +
+                                                                  str(layer_index) +
+                                                                  '_dw_ifm_num_of_tiles_w'
+                                                                  if layers_types[layer_index] == 'dw' else
+                                                                  'layer_' +
+                                                                  str(layer_index) +
+                                                                  '_dw_ifm_num_of_tiles_w')
         code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_index)+'.txt',
                                                                          'channels' if direction == 0 else 'result',
                                                                          layers_inputs_shapes[layer_index].depth * layers_inputs_shapes[layer_index].height *
                                                                          layers_inputs_shapes[layer_index].width, str(
             layers_inputs_shapes[layer_index].height),
-            str(layers_inputs_shapes[layer_index].width))
+            str(layers_inputs_shapes[layer_index].width),
+            'layer_' +
+            str(layer_index) +
+            '_dw_ifm_num_of_tiles_h'
+            if layers_types[layer_index] == 'dw' else
+            'layer_' +
+            str(layer_index) +
+            '_dw_ifm_num_of_tiles_h',
+            'layer_' +
+            str(layer_index) +
+            '_dw_ifm_num_of_tiles_w'
+            if layers_types[layer_index] == 'dw' else
+            'layer_' +
+            str(layer_index) +
+            '_dw_ifm_num_of_tiles_w')
 
     code_to_insert += replace(replacement_dict, target_block)
 
@@ -225,7 +246,22 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
                                                            layers_output_shapes[layer_index].depth * layers_output_shapes[layer_index].height *
                                                            layers_output_shapes[layer_index].width, str(
                                                                layers_output_shapes[layer_index].height),
-                                                           str(layers_output_shapes[layer_index].width))
+                                                           str(
+                                                               layers_output_shapes[layer_index].width),
+                                                           'layer_' +
+                                                           str(layer_index) +
+                                                           '_dw_num_of_tiles_h'
+                                                           if layers_types[layer_index] == 'dw' else
+                                                           'layer_' +
+                                                           str(layer_index) +
+                                                           '_dw_num_of_tiles_h',
+                                                           'layer_' +
+                                                           str(layer_index) +
+                                                           '_dw_num_of_tiles_w'
+                                                           if layers_types[layer_index] == 'dw' else
+                                                           'layer_' +
+                                                           str(layer_index) +
+                                                           '_dw_num_of_tiles_w')
 
     direction = 1 - direction
 
@@ -233,4 +269,16 @@ file_replacement = file_replacement[:insert_index] + \
     code_to_insert + file_replacement[insert_index:]
 
 with open(in_out_file, 'w') as f:
+    f.write(file_replacement)
+
+file_replacement = ''
+with open(constants_header_file, 'r') as f:
+    for line in f:
+        if '#define CHAIN_LENGTH' in line:
+            file_replacement += '#define CHAIN_LENGTH ' + \
+                str(cgc.PILELINE_LEN) + '\n'
+        else:
+            file_replacement += line
+
+with open(constants_header_file, 'w') as f:
     f.write(file_replacement)

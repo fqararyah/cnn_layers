@@ -31,9 +31,9 @@ const int MAX_FILTER_DIM_STRIDE_1 = 3;
 const int MAX_FILTER_DIM_STRIDE_2 = 3;
 const int MAX_DW_LAYER_D = 960;
 
-//assumptions
-//CHANNELS_TILE_WIDTH = CHANNELS_TILE_HEIGHT
-//CHANNELS_TILE_WIDTH is even
+// assumptions
+// CHANNELS_TILE_WIDTH = CHANNELS_TILE_HEIGHT
+// CHANNELS_TILE_WIDTH is even
 const int MAX_TILE_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1) / 2;
 const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
 
@@ -86,4 +86,28 @@ const int input_image_num_fms_groups_in_width =
 	(input_image_width % input_image_group_items) == 0 ? input_image_width / input_image_group_items : 1 + (input_image_width / input_image_group_items);
 const int input_image_num_fms_groups_in_a_channel = input_image_num_fms_groups_in_width * input_image_height;
 
+struct layer_specs
+{
+	int layer_num_fils;
+	int strides;
+	int filter_size;
+	int padding_left;
+	int padding_right;
+	int padding_top;
+	int padding_bottom;
+	int layer_depth;
+	int layer_ifm_height;
+	int layer_ifm_width;
+	int layer_ofm_height;
+	int layer_ofm_width;
+	int layer_activation;
+	int layer_num_of_tiles_in_d;
+	int layer_num_of_tiles_out_d;
+	int layer_num_of_ifm_tiles_h;
+	int layer_num_of_ifm_tiles_w;
+	int layer_num_of_ofm_tiles_h;
+	int layer_num_of_ofm_tiles_w;
+	int layer_num_of_weight_groups_for_one_pass;
+	int layer_weights_offset;
+};
 #endif
