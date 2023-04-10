@@ -45,9 +45,9 @@ void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size], const 
 
 // V2
 void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					  const int ifms_h, const int ifms_w, const int num_of_tiles_h, const int num_of_tiles_w);
+					  const layer_specs layer_specs_struct);
 
 void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-							 const int ifms_size, const int ifms_h, const int ifms_w, const int num_of_tiles_h, const int num_of_tiles_w);
+							 const layer_specs layer_specs_struct);
 							 
 #endif

@@ -2,21 +2,21 @@
 #include "./headers/cnn_functions_v1.h"
 
 void v1_4_layer_0_3x3_conv(
-	fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-	layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+	fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
 	fms_dt result[v1_layer_1_dw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ifm_width])
 {
 #pragma HLS INLINE off
 
-	fms_dt intermediate_channels_buffer[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][v1_layer_1_dw_filter_size] = {0};
+	fms_dt intermediate_channels_buffer[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][v1_layer_2_dw_specs.filter_size] = {0};
 #pragma hls array_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
 	// fill the intermediate_channels_buffer
 	for (int d = 0; d < input_image_depth; d++)
 	{
-		for (int h = 0; h < layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
+		for (int h = 0; h < layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
 		{
-			for (int w = 0; w < layer_0_s_filter_dim - layer_0_padding_left; w++)
+			for (int w = 0; w < layer_1_s_filter_dim - layer_0_padding_left; w++)
 			{
 				intermediate_channels_buffer[d][h][w + layer_0_padding_left] = channels_buffer[d][h][w];
 			}
@@ -26,7 +26,7 @@ void v1_4_layer_0_3x3_conv(
 
 layer_0_ofms:
 	for (int o_o_d = 0;
-		 o_o_d < layer_0_s_num_fils / sesl_layer_0_parallelism_ofms; o_o_d++)
+		 o_o_d < layer_1_s_num_fils / sesl_layer_0_parallelism_ofms; o_o_d++)
 	{
 		// outer filters loop
 		int o_o_d_offset = o_o_d * sesl_layer_0_parallelism_ofms; // for indexing in depth
@@ -53,12 +53,12 @@ layer_0_ofms:
 #pragma HLS UNROLL
 					// parallelized depth loop
 					layer_0_ch:
-						for (int h = 0; h < layer_0_s_filter_dim; h++)
+						for (int h = 0; h < layer_1_s_filter_dim; h++)
 						{
 #pragma HLS UNROLL
 						// conv height loop
 						layer_0_cw:
-							for (int c_w = 0; c_w < layer_0_s_filter_dim; c_w++)
+							for (int c_w = 0; c_w < layer_1_s_filter_dim; c_w++)
 							{
 #pragma HLS UNROLL
 								// conv width loop
@@ -80,19 +80,19 @@ layer_0_ofms:
 				for (int d = 0; d < input_image_depth; d++)
 				{
 #pragma HLS UNROLL
-					for (int c_h = 0; c_h < layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides; c_h++)
+					for (int c_h = 0; c_h < layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides; c_h++)
 					{
 #pragma HLS UNROLL
-						for (int c_w = 0; c_w < layer_0_s_filter_dim - layer_0_strides; c_w++)
+						for (int c_w = 0; c_w < layer_1_s_filter_dim - layer_0_strides; c_w++)
 						{
 #pragma HLS UNROLL
 							intermediate_channels_buffer[d][c_h][c_w] = intermediate_channels_buffer[d][c_h][c_w + layer_0_strides];
 						}
-						for (int c_w = layer_0_s_filter_dim - layer_0_strides; c_w < layer_0_s_filter_dim; c_w++)
+						for (int c_w = layer_1_s_filter_dim - layer_0_strides; c_w < layer_1_s_filter_dim; c_w++)
 						{
 #pragma HLS UNROLL
-							intermediate_channels_buffer[d][c_h][c_w] = channels_buffer[d][c_h][c_w - (layer_0_s_filter_dim - layer_0_strides) +
-																								(w + layer_0_s_filter_dim - layer_0_padding_left)];
+							intermediate_channels_buffer[d][c_h][c_w] = channels_buffer[d][c_h][c_w - (layer_1_s_filter_dim - layer_0_strides) +
+																								(w + layer_1_s_filter_dim - layer_0_padding_left)];
 						}
 					}
 				}
@@ -102,9 +102,9 @@ layer_0_ofms:
 	}
 }
 
-void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size - v1_layer_1_dw_strides][v1_layer_1_dw_ifm_width],
+void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides][v1_layer_1_dw_ifm_width],
 					 fms_dt lower[v1_layer_1_dw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ifm_width],
-					 dw_weights_dt dw_weights[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size * v1_layer_1_dw_filter_size],
+					 dw_weights_dt dw_weights[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size * v1_layer_2_dw_specs.filter_size],
 					 fms_dt result[v1_layer_1_dw_num_fils][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ofm_width], int active_row)
 {
 
@@ -115,7 +115,7 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 		for (int row = 0; row < v1_4_stages_layer_1_rows_at_once;
 			 row++)
 		{
-			fms_dt intermediate_pw_results[v1_layer_1_dw_parallelism][v1_layer_1_dw_filter_size][v1_layer_1_dw_filter_size];
+			fms_dt intermediate_pw_results[v1_layer_1_dw_parallelism][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size];
 #pragma hls array_PARTITION variable = intermediate_pw_results type = complete dim = 0
 
 			for (int o_d = 0; o_d < v1_layer_1_dw_depth / v1_layer_1_dw_parallelism;
@@ -127,35 +127,35 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 				for (int d = 0; d < v1_layer_1_dw_parallelism; d++)
 				{
 #pragma HLS UNROLL
-					for (int h = 0; h < v1_layer_1_dw_filter_size - v1_layer_1_dw_strides - row; h++)
+					for (int h = 0; h < v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides - row; h++)
 					{ // fill first two rows as the third will be filled by the pw results
 #pragma HLS UNROLL
 					  //  padding
 						intermediate_pw_results[d][h][0] = 0;
-						for (int w = v1_layer_1_dw_padding_left; w < v1_layer_1_dw_filter_size; w++)
+						for (int w = v1_layer_2_dw_specs.padding_left; w < v1_layer_2_dw_specs.filter_size; w++)
 						{
 #pragma HLS UNROLL
-							intermediate_pw_results[d][h][w] = upper[o_d_offset + d][h + row][w - v1_layer_1_dw_padding_left];
+							intermediate_pw_results[d][h][w] = upper[o_d_offset + d][h + row][w - v1_layer_2_dw_specs.padding_left];
 						}
 					}
-					for (int h = v1_layer_1_dw_filter_size - v1_layer_1_dw_strides - row; h < v1_layer_1_dw_filter_size; h++)
+					for (int h = v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides - row; h < v1_layer_2_dw_specs.filter_size; h++)
 					{ // fill first two rows as the third will be filled by the pw results
 #pragma HLS UNROLL
 					  //  padding
 						intermediate_pw_results[d][h][0] = 0;
-						for (int w = v1_layer_1_dw_padding_left; w < v1_layer_1_dw_filter_size; w++)
+						for (int w = v1_layer_2_dw_specs.padding_left; w < v1_layer_2_dw_specs.filter_size; w++)
 						{
 #pragma HLS UNROLL
-							intermediate_pw_results[d][h][w] = lower[o_d_offset + d][h - (v1_layer_1_dw_filter_size - v1_layer_1_dw_strides - row)]
-																	[w - v1_layer_1_dw_padding_left];
+							intermediate_pw_results[d][h][w] = lower[o_d_offset + d][h - (v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides - row)]
+																	[w - v1_layer_2_dw_specs.padding_left];
 						}
 					}
-					intermediate_pw_results[d][v1_layer_1_dw_filter_size - 1][0] = 0;
+					intermediate_pw_results[d][v1_layer_2_dw_specs.filter_size - 1][0] = 0;
 				}
 
 			layer_1_dw_pipeline:
 				for (int w = 0; w < v1_layer_1_dw_ifm_width; w +=
-															 layer_1_dw_strides)
+															 layer_2_dw_specs.strides)
 				{
 #pragma HLS PIPELINE
 				// FMs width loop
@@ -165,10 +165,10 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 #pragma HLS UNROLL
 						dw_pss_dt tmp = 0;
 						// parallelized depth loop
-						for (int c_h = 0; c_h < layer_1_dw_filter_size; c_h++)
+						for (int c_h = 0; c_h < layer_2_dw_specs.filter_size; c_h++)
 						{
 #pragma HLS UNROLL
-							for (int c_w = 0; c_w < layer_1_dw_filter_size; c_w++)
+							for (int c_w = 0; c_w < layer_2_dw_specs.filter_size; c_w++)
 							{
 								// conv width loop
 #pragma HLS UNROLL
@@ -178,7 +178,7 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size
 						fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);
 						if (scaled_val > 0)
 						{
-							result[o_d_offset + d][row][w / layer_1_dw_strides] =
+							result[o_d_offset + d][row][w / layer_2_dw_specs.strides] =
 								scaled_val;
 						}
 					}
@@ -210,7 +210,7 @@ layer_1_dw_shift_loops:
 
 void v1_4_layer_2_pw_dw(
 	fms_dt channels_buffer[v1_layer_2_pw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
-	weights_dt weights[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth],
+	weights_dt weights[v1_layer_3_pw_specs.num_fils][v1_layer_2_pw_depth],
 	dw_weights_dt dw_weights[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size * v1_layer_2_dw_filter_size],
 	fms_dt upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width],
 	fms_dt lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
@@ -223,7 +223,7 @@ void v1_4_layer_2_pw_dw(
 #pragma HLS INLINE off
 layer_1_2_pw_dw_main_loop:
 	for (int o_o_d = 0;
-		 o_o_d < v1_layer_2_pw_num_fils / v1_layer_2_pw_parallelism_out;
+		 o_o_d < v1_layer_3_pw_specs.num_fils / v1_layer_2_pw_parallelism_out;
 		 o_o_d++)
 	{
 		int o_o_d_offset = o_o_d * v1_layer_2_pw_parallelism_out;
@@ -275,7 +275,7 @@ layer_1_2_pw_dw_main_loop:
 						fms_dt scaled_val = (fms_dt)((((ap_fixed<17, 12>)tmp) - zero_point_dw) * ratio_dw_pss_to_fms);
 						if (scaled_val > 0)
 						{
-							if (w + 1 < layer_1_dw_filter_size)
+							if (w + 1 < layer_2_dw_specs.filter_size)
 							{
 								intermediate_pw_results[o_d][row + v1_layer_2_dw_filter_size - v1_layer_2_dw_strides][w + 1] = scaled_val;
 							}
@@ -362,13 +362,13 @@ layer_1_2_pw_dw_shift_loop:
 
 void v1_4_stages_fill_channels_buffer(
 	fms_dt channels[input_image_depth][input_image_height][input_image_width],
-	fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
 	int starting_h)
 {
 
 #pragma HLS INLINE off
 
-	int h_offset = starting_h < v1_4_stages_layer_1_rows_at_once * layer_0_strides ? layer_0_strides : layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides - (layer_0_s_filter_dim - layer_0_strides);
+	int h_offset = starting_h < v1_4_stages_layer_1_rows_at_once * layer_0_strides ? layer_0_strides : layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides - (layer_1_s_filter_dim - layer_0_strides);
 
 	for (int w = 0; w < input_image_width; w++)
 	{
@@ -376,7 +376,7 @@ void v1_4_stages_fill_channels_buffer(
 		for (int d = 0; d < input_image_depth; d++)
 		{
 #pragma HLS UNROLL
-			for (int h = 0; h < layer_0_s_filter_dim - layer_0_strides; h++)
+			for (int h = 0; h < layer_1_s_filter_dim - layer_0_strides; h++)
 			{
 #pragma HLS UNROLL
 				channels_buffer_0[d][h][w] = channels_buffer_0[d][h + h_offset][w];
@@ -390,12 +390,12 @@ void v1_4_stages_fill_channels_buffer(
 		for (int d = 0; d < input_image_depth; d++)
 		{
 #pragma HLS UNROLL
-			for (int h = layer_0_s_filter_dim - layer_0_strides; h < layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
+			for (int h = layer_1_s_filter_dim - layer_0_strides; h < layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides; h++)
 			{
 #pragma HLS UNROLL
-				if (starting_h + h - (layer_0_s_filter_dim - layer_0_strides) < input_image_height)
+				if (starting_h + h - (layer_1_s_filter_dim - layer_0_strides) < input_image_height)
 				{
-					channels_buffer_0[d][h][w] = channels[d][starting_h + h - (layer_0_s_filter_dim - layer_0_strides)][w];
+					channels_buffer_0[d][h][w] = channels[d][starting_h + h - (layer_1_s_filter_dim - layer_0_strides)][w];
 				}
 			}
 		}
@@ -408,25 +408,25 @@ void mobilenet_v1_pipeline_4(
 {
 #pragma HLS INLINE off
 
-	layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim];
+	layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim];
 
-	dw_weights_dt dw_weights_1[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size][v1_layer_1_dw_filter_size];
+	dw_weights_dt dw_weights_2[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size];
 	dw_weights_dt dw_weights_2[v1_layer_2_dw_depth][v1_layer_2_dw_filter_size][v1_layer_2_dw_filter_size];
-	weights_dt pw_weights_2[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth];
+	weights_dt pw_weights_3[v1_layer_3_pw_specs.num_fils][v1_layer_2_pw_depth];
 
 	//#pragma hls array_PARTITION variable = channels type = complete dim = 1
 
-	//#pragma hls array_PARTITION variable = dw_weights_1 type = complete dim = 1
+	//#pragma hls array_PARTITION variable = dw_weights_2 type = complete dim = 1
 
-	v1_4_fill_layers_weights(weights_0, dw_weights_1, dw_weights_2, pw_weights_2);
+	v1_4_fill_layers_weights(weights_1, dw_weights_2, dw_weights_2, pw_weights_3);
 
 	//#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
+	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
 
 	fms_dt v1_4_layer_0_3x3_conv_out_0[v1_layer_2_pw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_2_pw_ifm_width] =
 		{0};
 
-	fms_dt v1_4_layer_1_dw_upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size - v1_layer_1_dw_strides][v1_layer_1_dw_ifm_width] = {0};
+	fms_dt v1_4_layer_1_dw_upper[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides][v1_layer_1_dw_ifm_width] = {0};
 	fms_dt v1_4_layer_1_dw_out_0[v1_layer_2_pw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_2_pw_ifm_width] = {0};
 	fms_dt v1_4_layer_2_dw_upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width] = {0};
 	fms_dt v1_4_layer_2_dw_lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width] = {0};
@@ -451,7 +451,7 @@ void mobilenet_v1_pipeline_4(
 	//###########################################################
 
 	//#########################odd###############################
-	fms_dt channels_buffer_1[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
+	fms_dt channels_buffer_1[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width] = {0};
 
 	fms_dt v1_4_layer_0_3x3_conv_out_1[v1_layer_2_pw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_2_pw_ifm_width] = {0};
 
@@ -472,20 +472,20 @@ void mobilenet_v1_pipeline_4(
 	v1_4_stages_fill_channels_buffer(channels, channels_buffer_0, 0);
 	//##########
 	v1_4_stages_fill_channels_buffer(channels, channels_buffer_1, 2);
-	v1_4_layer_0_3x3_conv(channels_buffer_0, weights_0,
+	v1_4_layer_0_3x3_conv(channels_buffer_0, weights_1,
 						  v1_4_layer_0_3x3_conv_out_0);
 	// this sequence does not produce a valid _5_layer_1_dw_out_0 yet, as it needs 2
 	// rows but only 1 has been feed so far
 	//##########
 	v1_4_stages_fill_channels_buffer(channels, channels_buffer_0, 6);
-	v1_4_layer_0_3x3_conv(channels_buffer_1, weights_0,
+	v1_4_layer_0_3x3_conv(channels_buffer_1, weights_1,
 						  v1_4_layer_0_3x3_conv_out_1);
-	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_1, v1_4_layer_1_dw_out_0, 0);
+	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_2, v1_4_layer_1_dw_out_0, 0);
 	//##########
 	v1_4_stages_fill_channels_buffer(channels, channels_buffer_1, 10);
-	v1_4_layer_0_3x3_conv(channels_buffer_0, weights_0,
+	v1_4_layer_0_3x3_conv(channels_buffer_0, weights_1,
 						  v1_4_layer_0_3x3_conv_out_0);
-	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_1, dw_weights_1, v1_4_layer_1_dw_out_1, 1);
+	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_1, dw_weights_2, v1_4_layer_1_dw_out_1, 1);
 	//##########
 	int even_odd = 1;
 	int h = 4;
@@ -495,42 +495,42 @@ main_pipeline_loop:
 		if (even_odd)
 		{
 			v1_4_stages_fill_channels_buffer(channels, channels_buffer_0, (h * v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides);
-			v1_4_layer_0_3x3_conv(channels_buffer_1, weights_0,
+			v1_4_layer_0_3x3_conv(channels_buffer_1, weights_1,
 								  v1_4_layer_0_3x3_conv_out_1);
-			v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_1, v1_4_layer_1_dw_out_0, 1);
-			v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_1, pw_weights_2, dw_weights_2, v1_4_layer_2_dw_upper,
+			v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_2, v1_4_layer_1_dw_out_0, 1);
+			v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_1, pw_weights_3, dw_weights_2, v1_4_layer_2_dw_upper,
 							   v1_4_layer_2_dw_lower, result, h - 4, 1);
 		}
 		else
 		{
 			v1_4_stages_fill_channels_buffer(channels, channels_buffer_1, (h * v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides);
-			v1_4_layer_0_3x3_conv(channels_buffer_0, weights_0,
+			v1_4_layer_0_3x3_conv(channels_buffer_0, weights_1,
 								  v1_4_layer_0_3x3_conv_out_0);
-			v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_1, dw_weights_1, v1_4_layer_1_dw_out_1, 1);
-			v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_0, pw_weights_2, dw_weights_2, v1_4_layer_2_dw_upper,
+			v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_1, dw_weights_2, v1_4_layer_1_dw_out_1, 1);
+			v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_0, pw_weights_3, dw_weights_2, v1_4_layer_2_dw_upper,
 							   v1_4_layer_2_dw_lower, result, h - 4, 1);
 		}
 		even_odd = 1 - even_odd;
 	}
 	//###########################################################
 	// pipeline flushing##########################################
-	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_1, pw_weights_2, dw_weights_2, v1_4_layer_2_dw_upper,
+	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_1, pw_weights_3, dw_weights_2, v1_4_layer_2_dw_upper,
 					   v1_4_layer_2_dw_lower, result, switch_point_fms_height - 4, 1);
 	//##########
-	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_1, v1_4_layer_1_dw_out_0, 1);
-	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_0, pw_weights_2, dw_weights_2, v1_4_layer_2_dw_upper,
+	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_2, v1_4_layer_1_dw_out_0, 1);
+	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_0, pw_weights_3, dw_weights_2, v1_4_layer_2_dw_upper,
 					   v1_4_layer_2_dw_lower, result, switch_point_fms_height - 3, 1);
 	//##########
-	v1_4_layer_0_3x3_conv(channels_buffer_1, weights_0,
+	v1_4_layer_0_3x3_conv(channels_buffer_1, weights_1,
 						  v1_4_layer_0_3x3_conv_out_1);
-	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_1, dw_weights_1, v1_4_layer_1_dw_out_1, 1);
-	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_1, pw_weights_2, dw_weights_2, v1_4_layer_2_dw_upper,
+	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_1, dw_weights_2, v1_4_layer_1_dw_out_1, 1);
+	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_1, pw_weights_3, dw_weights_2, v1_4_layer_2_dw_upper,
 					   v1_4_layer_2_dw_lower, result, switch_point_fms_height - 2, 1);
 	//##########
 	v1_4_stages_fill_channels_buffer(channels, channels_buffer_0, (switch_point_fms_height * v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides);
-	v1_4_layer_0_3x3_conv(channels_buffer_0, weights_0,
+	v1_4_layer_0_3x3_conv(channels_buffer_0, weights_1,
 						  v1_4_layer_0_3x3_conv_out_0);
-	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_1, v1_4_layer_1_dw_out_0, 1);
+	v1_4_layer_1_dw(v1_4_layer_1_dw_upper, v1_4_layer_0_3x3_conv_out_0, dw_weights_2, v1_4_layer_1_dw_out_0, 1);
 	// padding bottom
 	for (int d = 0; d < layer_2_pw_depth; d++)
 	{
@@ -539,6 +539,6 @@ main_pipeline_loop:
 			v1_4_layer_1_dw_out_0[d][v1_4_stages_layer_1_rows_at_once - 1][w] = 0;
 		}
 	}
-	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_0, pw_weights_2, dw_weights_2, v1_4_layer_2_dw_upper,
+	v1_4_layer_2_pw_dw(v1_4_layer_1_dw_out_0, pw_weights_3, dw_weights_2, v1_4_layer_2_dw_upper,
 					   v1_4_layer_2_dw_lower, result, switch_point_fms_height - 1, 1);
 }

@@ -1,7 +1,7 @@
 #include "utils.h"
 //
 void fill_channels_buffer_v2(fms_dt channels[32][112][112],
-							 fms_dt dw_channels_buffer_1[layer_1_dw_depth][max_conv_h + layer_1_dw_strides][layer_1_dw_width], int starting_h)
+							 fms_dt dw_channels_buffer_1[layer_1_dw_depth][max_conv_h + layer_2_dw_specs.strides][layer_1_dw_width], int starting_h)
 {
 	for (int w = 0; w < 112; w++)
 	{
@@ -19,7 +19,7 @@ void fill_channels_buffer_v2(fms_dt channels[32][112][112],
 }
 
 void layer_1_dw_pw(
-	fms_dt channels_buffer[layer_1_dw_depth][max_conv_h + layer_1_dw_strides][layer_1_dw_width],
+	fms_dt channels_buffer[layer_1_dw_depth][max_conv_h + layer_2_dw_specs.strides][layer_1_dw_width],
 	dw_weights_dt dw_weights[layer_1_dw_depth][max_conv_h][max_conv_w],
 	weights_dt weights[layer_1_pw_num_fils][layer_1_pw_depth],
 	fms_dt result[layer_2_dw_depth][layer_2_dw_strides][layer_2_dw_width],
@@ -38,7 +38,7 @@ layer_1_dw_depth_loop:
 
 		layer_1_dw_pipeline:
 			for (int w = 0; w < layer_1_dw_width - 2; w +=
-													  layer_1_dw_strides)
+													  layer_2_dw_specs.strides)
 			{
 #pragma HLS PIPELINE
 
@@ -108,7 +108,7 @@ void layer_2_dw_pw(
 	fms_dt upper_dw_channels_buffer_2[layer_2_dw_depth][layer_2_dw_width],
 	fms_dt lower_dw_channels_buffer_2[layer_2_dw_depth][layer_2_dw_strides][layer_2_dw_width],
 	dw_weights_dt dw_weights[layer_2_dw_depth][max_conv_h][max_conv_w],
-	weights_dt weights[layer_2_pw_num_fils][layer_2_pw_depth],
+	weights_dt weights[layer_3_pw_specs.num_fils][layer_2_pw_depth],
 	fms_dt result[layer_3_pw_depth][layer_3_pw_width], int h_index)
 {
 
@@ -185,17 +185,17 @@ void conv_pipeline_v2(fms_dt channels[32][112][112],
 
 #pragma HLS ARRAY_PARTITION variable = channels complete dim = 1
 
-	dw_weights_dt dw_weights_1[layer_1_dw_depth][max_conv_h][max_conv_w];
+	dw_weights_dt dw_weights_2[layer_1_dw_depth][max_conv_h][max_conv_w];
 	dw_weights_dt dw_weights_2[layer_2_dw_depth][max_conv_h][max_conv_w];
 	dw_weights_dt dw_weights_3[layer_3_dw_depth][max_conv_h][max_conv_w];
 
 	weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth];
-	weights_dt pw_weights_2[layer_2_pw_num_fils][layer_2_pw_depth];
+	weights_dt pw_weights_3[layer_3_pw_specs.num_fils][layer_2_pw_depth];
 	weights_dt pw_weights_3[layer_3_pw_num_fils][layer_3_pw_depth];
-	fill_layers_weights(dw_weights_1, dw_weights_2, dw_weights_3, pw_weights_1,
-						pw_weights_2, pw_weights_3);
+	fill_layers_weights(dw_weights_2, dw_weights_2, dw_weights_3, pw_weights_1,
+						pw_weights_3, pw_weights_3);
 
-	fms_dt dw_channels_buffer_1[layer_1_dw_depth][max_conv_h + layer_1_dw_strides][layer_1_dw_width];
+	fms_dt dw_channels_buffer_1[layer_1_dw_depth][max_conv_h + layer_2_dw_specs.strides][layer_1_dw_width];
 	fms_dt upper_dw_channels_buffer_2[layer_2_dw_depth][layer_2_dw_width];
 	fms_dt lower_dw_channels_buffer_2[layer_2_dw_depth][layer_2_dw_strides][layer_2_dw_width] =
 		{0};
@@ -213,7 +213,7 @@ void conv_pipeline_v2(fms_dt channels[32][112][112],
 #pragma HLS ARRAY_PARTITION variable = upper_dw_channels_buffer_3 complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = lower_dw_channels_buffer_3 complete dim = 1
 
-	fms_dt dw_channels_buffer_b1[layer_1_dw_depth][max_conv_h + layer_1_dw_strides][layer_1_dw_width];
+	fms_dt dw_channels_buffer_b1[layer_1_dw_depth][max_conv_h + layer_2_dw_specs.strides][layer_1_dw_width];
 	fms_dt upper_dw_channels_buffer_b2[layer_2_dw_depth][layer_2_dw_width];
 	fms_dt lower_dw_channels_buffer_b2[layer_2_dw_depth][layer_2_dw_strides][layer_2_dw_width] =
 		{0};
@@ -233,7 +233,7 @@ void conv_pipeline_v2(fms_dt channels[32][112][112],
 
 	int odd_even = 0;
 	//	fill_channels_buffer_v2(channels, dw_channels_buffer_1, 0);
-	//	layer_1_dw_pw(dw_channels_buffer_1, dw_weights_1, pw_weights_1,
+	//	layer_1_dw_pw(dw_channels_buffer_1, dw_weights_2, pw_weights_1,
 	//			lower_dw_channels_buffer_b2, 0);
 
 	fill_channels_buffer_v2(channels, dw_channels_buffer_b1, 1);
@@ -243,13 +243,13 @@ main_pipeline_loop:
 	{
 		if (odd_even)
 		{
-			layer_1_dw_pw(dw_channels_buffer_1, dw_weights_1, pw_weights_1,
+			layer_1_dw_pw(dw_channels_buffer_1, dw_weights_2, pw_weights_1,
 						  lower_dw_channels_buffer_b2, h > 2);
 			layer_2_dw_pw(
 				upper_dw_channels_buffer_2,
 				lower_dw_channels_buffer_2,
 				dw_weights_2,
-				pw_weights_2,
+				pw_weights_3,
 				lower_dw_channels_buffer_b3, h > 2);
 			fill_channels_buffer_v2(channels, dw_channels_buffer_b1, h);
 			for (int i = 0; i < 7; i++)
@@ -259,13 +259,13 @@ main_pipeline_loop:
 		}
 		else
 		{
-			layer_1_dw_pw(dw_channels_buffer_b1, dw_weights_1, pw_weights_1,
+			layer_1_dw_pw(dw_channels_buffer_b1, dw_weights_2, pw_weights_1,
 						  lower_dw_channels_buffer_2, h > 2);
 			layer_2_dw_pw(
 				upper_dw_channels_buffer_b2,
 				lower_dw_channels_buffer_b2,
 				dw_weights_2,
-				pw_weights_2,
+				pw_weights_3,
 				lower_dw_channels_buffer_3, h > 2);
 			fill_channels_buffer_v2(channels, dw_channels_buffer_1, h);
 

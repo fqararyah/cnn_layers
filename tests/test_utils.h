@@ -12,7 +12,7 @@ void fill_layer_input_from_file(string file_name, int input_size);
 
 void dump_layer_output(string file_name, fms_dt ofms[max_fms_size], int ofms_size, const int ofms_h, const int ofms_w);
 void dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					   int ofms_size, const int ofms_h, const int ofms_w, const int num_of_tiles_h, const int num_of_tiles_w);
+					   const layer_specs layer_specs_struct);
 void dump_layer_output_no_tiling(string file_name, fms_dt ofms[max_fms_size],
 								 int ofms_size, const int ofms_h, const int ofms_w);
 

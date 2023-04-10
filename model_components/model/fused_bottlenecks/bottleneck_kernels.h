@@ -1,7 +1,7 @@
 #include "bottlenecks_parallelism.h"
 
 pss_dt conv_kernel(fms_dt ifms_buffer[],
-				   const layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+				   const layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
 				   const int filter_dim, int conv_d);
 
 pss_dt expansion_kernel(fms_dt ifms_buffer[],

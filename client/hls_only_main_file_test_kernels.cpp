@@ -31,6 +31,6 @@ void top_func(
 //					result, 56*56*144, 56, 56);
 
 
-		seml(off_chip_weights, channels, result, tmp_channels, weights_0, dw_weights_buffer, fc_input);//10 is a dummy value
+		seml(off_chip_weights, channels, result, tmp_channels, weights_1, dw_weights_buffer, fc_input);//10 is a dummy value
 
 }

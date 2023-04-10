@@ -257,7 +257,7 @@ with open(h_file, 'w') as wf:
                    1 and fused_zero_point > - 2**31)
             fused_zero_points.append(fused_zero_point)
             
-        if (cgc.PIPELINE == True and layer_index < cgc.PILELINE_LEN) or layer_index == 0:
+        if (cgc.PIPELINE == True and layer_index < cgc.PIPELINE_LEN) or layer_index == 0:
             layers_fused_parameters_offsets.append(0)
         else:
             layers_fused_parameters_offsets.append(layers_weights_shapes[layer_index].num_of_filters +
@@ -297,7 +297,7 @@ with open(h_file, 'w') as wf:
                     assert(relu_6_fused_scales[-1] > 256) or \
                         utils.NET_PREFIX in ['mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5'] 
 
-        if cgc.PIPELINE == True and layer_index < cgc.PILELINE_LEN or layer_index == 0:
+        if cgc.PIPELINE == True and layer_index < cgc.PIPELINE_LEN or layer_index == 0:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
                 layer_index, layers_types[layer_index])
             fused_zero_points_declaration_string += '{ ' + str(
@@ -314,7 +314,7 @@ with open(h_file, 'w') as wf:
                 fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
             relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_{}_relu_6_fused_scales[] ='.format(
-                layer_index, layers_types[layer_index]) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_0_s_relu_6_fused_scales[] ='
+                layer_index, layers_types[layer_index]) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_1_s_relu_6_fused_scales[] ='
             relu_6_fused_scales_declaration_string += '{ ' + str(
                 relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
@@ -352,7 +352,7 @@ with open(h_file, 'w') as wf:
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
         seml_relu_6_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
 
-    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PILELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
+    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PIPELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
         wf.write(seml_fused_zero_points_declaration_string)
         wf.write(seml_fused_scales_declaration_string)
         wf.write(seml_fused_scales_log_2_shifts_declaration_string)
@@ -375,7 +375,7 @@ with open(h_file, 'w') as wf:
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
         seml_relu_6_fused_scales[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
 
-    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PILELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
+    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PIPELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
         wf.write(seml_fused_zero_points_declaration_string)
         wf.write(seml_fused_scales_declaration_string)
         wf.write(seml_fused_scales_log_2_shifts_declaration_string)

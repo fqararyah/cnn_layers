@@ -24,7 +24,7 @@ last_layer = cgc.LAST_LAYER_TO_GENERATE + 1 if \
     cgc.LAST_LAYER_TO_GENERATE != -1 else len(layers_types)
 first_layer = cgc.FIRST_LAYER_TO_GENERATE
 
-last_pipeline_layer = cgc.PILELINE_LEN if cgc.PIPELINE == True else 0
+last_pipeline_layer = cgc.PIPELINE_LEN if cgc.PIPELINE == True else 0
 first_pipeline_layer = 0
 
 for i in range(first_layer):
@@ -58,5 +58,7 @@ with open(dw_weights_h_file, 'w') as f:
                 f.write('},\n')
             f.write('};\n')
 
+        f.write(dw_layers_weights_offsets_declaration_string +
+                str(dw_layers_weights_offsets).replace('[', '').replace(']', '') + '};\n')
         #print(dw_layers_weights_offsets[44], dw_layers_weights_offsets[47], dw_layers_weights_offsets[50])
     f.write('#endif\n')

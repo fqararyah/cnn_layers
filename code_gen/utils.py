@@ -1,12 +1,12 @@
-import classes
 from multiprocessing.dummy import active_children
 import sys
 import pathlib
-
+import json
 
 current_dir = str(pathlib.Path(__file__).parent.resolve())
 sys.path.append(current_dir)
 print(current_dir)
+import classes
 
 DELIMITER = '::'
 
@@ -25,11 +25,11 @@ LAYERS_RELUS_FILE = input_folder + 'layers_relus.txt'
 LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
 LAYERS_ACTIVATIONS_FILE = input_folder + 'layers_activations.txt'
 LAYERS_EXECUTION_SEQUENCE = input_folder + 'layers_execution_sequence.txt'
-
+MODEL_DAG_FILE = input_folder + 'model_dag.json'
 
 def set_globals(prefix, full_name):
     global NET_PREFIX, NET_FULL_NAME, input_folder, IFMS_FILE, OFMS_FILE, LAYERS_TYPES_FILE, LAYERS_WEIGHTS_FILE, LAYERS_STRIDES_FILE, EXPANSION_PROJECTION_FILE, LAYERS_RELUS_FILE, LAYERS_SKIP_CONNECTIONS_FILE, SECONDARY_LAYERS_TYPES_FILE, LAYERS_ACTIVATIONS_FILE,\
-        LAYERS_EXECUTION_SEQUENCE
+        LAYERS_EXECUTION_SEQUENCE, MODEL_DAG_FILE
     NET_PREFIX = prefix
     NET_FULL_NAME = full_name
     input_folder = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/models_archs/models/'\
@@ -45,6 +45,7 @@ def set_globals(prefix, full_name):
     LAYERS_ACTIVATIONS_FILE = input_folder + 'layers_activations.txt'
     LAYERS_SKIP_CONNECTIONS_FILE = input_folder + 'skip_connections_indices.txt'
     LAYERS_EXECUTION_SEQUENCE = input_folder + 'layers_execution_sequence.txt'
+    MODEL_DAG_FILE = input_folder + 'model_dag.json'
 
 
 def clean_line(line):
@@ -190,3 +191,7 @@ def read_layers_execution_sequence():
                 line.replace('\n', '').replace(' ', ''))
 
     return layers_execution_sequence
+
+def read_model_dag():
+    f = open(MODEL_DAG_FILE)
+    return json.load(f)

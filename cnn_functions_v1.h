@@ -5,16 +5,16 @@
 #define V1_FIRST
 //*********UK*********
 //*****layer_1 (first layer to apply UK from)*****
-const int v1_layer_1_dw_num_fils = layer_0_s_num_fils * alpha;
+const int v1_layer_1_dw_num_fils = layer_1_s_num_fils * alpha;
 const int v1_layer_1_dw_depth = v1_layer_1_dw_num_fils;
-const int v1_layer_1_dw_strides = 1;
+const int v1_layer_2_dw_specs.strides = 1;
 const int v1_layer_1_dw_ifm_height = layer_0_ofm_height;
 const int v1_layer_1_dw_ifm_width = layer_0_ofm_width;
-const int v1_layer_1_dw_ofm_height = v1_layer_1_dw_ifm_height / v1_layer_1_dw_strides;
-const int v1_layer_1_dw_ofm_width = v1_layer_1_dw_ifm_width / v1_layer_1_dw_strides;
-const int v1_layer_1_dw_padding_left = 1;
-const int v1_layer_1_dw_padding_right = 1;
-const int v1_layer_1_dw_filter_size = 3;
+const int v1_layer_1_dw_ofm_height = v1_layer_1_dw_ifm_height / v1_layer_2_dw_specs.strides;
+const int v1_layer_1_dw_ofm_width = v1_layer_1_dw_ifm_width / v1_layer_2_dw_specs.strides;
+const int v1_layer_2_dw_specs.padding_left = 1;
+const int v1_layer_2_dw_specs.padding_right = 1;
+const int v1_layer_2_dw_specs.filter_size = 3;
 
 const int v1_layer_1_pw_num_fils = 192 / alpha;
 const int v1_layer_1_pw_depth = v1_layer_1_dw_depth;
@@ -36,7 +36,7 @@ const int v1_layer_2_dw_padding_left = 1;
 const int v1_layer_2_dw_padding_right = 1;
 const int v1_layer_2_dw_filter_size = 3;
 
-const int v1_layer_2_pw_num_fils = 32 / alpha;
+const int v1_layer_3_pw_specs.num_fils = 32 / alpha;
 const int v1_layer_2_pw_depth = v1_layer_1_dw_depth;
 const int v1_layer_2_pw_ifm_height = v1_layer_1_dw_ofm_height;
 const int v1_layer_2_pw_ifm_width = v1_layer_1_dw_ofm_width;
@@ -45,7 +45,7 @@ const int v1_layer_2_pw_ofm_width = v1_layer_2_pw_ifm_width;
 //*****end layer_2*****
 
 //*****layer_3*****
-const int v1_layer_3_dw_num_fils = v1_layer_2_pw_num_fils / alpha;
+const int v1_layer_3_dw_num_fils = v1_layer_3_pw_specs.num_fils / alpha;
 const int v1_layer_3_dw_depth = v1_layer_3_dw_num_fils;
 const int v1_layer_3_dw_strides = 1;
 const int v1_layer_3_dw_ifm_height = v1_layer_2_pw_ofm_height;
@@ -58,9 +58,9 @@ const int v1_layer_3_dw_filter_size = 3;
 
 const int v1_layer_3_pw_num_fils = 32 / alpha;
 const int v1_layer_3_pw_depth = v1_layer_2_dw_depth;
-const int v1_layer_3_pw_ifm_height = v1_layer_2_dw_ofm_height;
+const int v1_layer_4_pw_specs.layer_ifm_height = v1_layer_2_dw_ofm_height;
 const int v1_layer_3_pw_ifm_width = v1_layer_2_dw_ofm_width;
-const int v1_layer_3_pw_ofm_height = v1_layer_3_pw_ifm_height;
+const int v1_layer_3_pw_ofm_height = v1_layer_4_pw_specs.layer_ifm_height;
 const int v1_layer_3_pw_ofm_width = v1_layer_3_pw_ifm_width;
 //*****end layer_3*****
 
@@ -117,23 +117,23 @@ const int v1_max_tmp_fms_size = 2;//negligable, ther is actually no
 #endif
 
 void v1_3_layer_0_3x3_conv(
-	fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim + (v1_3_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-	layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+	fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim + (v1_3_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
 	fms_dt result[v1_layer_2_pw_depth][v1_layer_2_pw_ifm_width]);
 
-void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_1_dw_filter_size - v1_layer_1_dw_strides][v1_layer_1_dw_ifm_width],
+void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides][v1_layer_1_dw_ifm_width],
                      fms_dt lower[v1_layer_1_dw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ifm_width],
                      dw_weights_dt dw_weights[v1_layer_1_dw_depth][max_conv_h * max_conv_w],
                      fms_dt result[v1_layer_1_dw_num_fils][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ofm_width], int active_row);
 
 void v1_4_layer_0_3x3_conv(
-	fms_dt channels_buffer[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-	layer_0_weights_dt weights[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+	fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
 	fms_dt result[v1_layer_1_dw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ifm_width]);
 
 void v1_4_layer_2_pw_dw(
     fms_dt channels_buffer[v1_layer_2_pw_depth][v1_4_stages_layer_2_rows_at_once][v1_layer_2_dw_ifm_width],
-    weights_dt weights[v1_layer_2_pw_num_fils][v1_layer_2_pw_depth],
+    weights_dt weights[v1_layer_3_pw_specs.num_fils][v1_layer_2_pw_depth],
     dw_weights_dt dw_weights[v1_layer_2_dw_depth][max_conv_h * max_conv_w,
     fms_dt upper[v1_layer_2_dw_depth][v1_layer_2_dw_ifm_width],
     fms_dt lower[v1_layer_2_dw_depth][v1_layer_2_dw_strides][v1_layer_2_dw_ifm_width],
@@ -141,7 +141,7 @@ void v1_4_layer_2_pw_dw(
 
 void v1_4_stages_fill_channels_buffer(
 	fms_dt channels[input_image_depth][input_image_height][input_image_width],
-	fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
 	int starting_h);
 
 void mobilenet_v1_pipeline_3(

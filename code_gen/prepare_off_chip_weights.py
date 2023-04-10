@@ -9,7 +9,7 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/'+ \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 
-weights_file_format = weights_files_location + 'weights_{}_pw.txt'
+weights_file_format = weights_files_location + 'weights_{}.txt'
 
 parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
@@ -17,6 +17,8 @@ ofms_parallelism_key = 'pw_conv_parallelism_out'
 off_chip_weights_file = '../off_chip_weights/off_chip_weights.txt'
 off_chip_weights_offsets_file = '../off_chip_weights/off_chip_weights_offsets.txt'
 num_of_pw_weights_file = '../off_chip_weights/num_of_pw_weights_file.txt'
+
+model_dag = utils.read_model_dag()
 
 def get_ofms_parallelism(parallelism_file):
     ofms_parallelism = 1
@@ -36,11 +38,11 @@ def get_layer_index_from_file_name(file_name):
 
 layers_weights = {}
 num_pw_layer = 0
-for file in os.scandir(weights_files_location):
-    file_name = file.name
-    if file_name.startswith('conv2d_') and file_name.endswith('_weights.txt') and 'pw' in file_name:
-        layer_index = get_layer_index_from_file_name(file_name)
-        weights = np.loadtxt(file.path).astype(np.int8)
+for layer_index in range(len(model_dag)):
+    layer_specs = model_dag[layer_index]
+    if 'type' in layer_specs and layer_specs['type'] == 'pw':
+        weights_file = weights_file_format.format(layer_index)
+        weights = np.loadtxt(weights_file).astype(np.int8)
         layers_weights[layer_index] = weights
         num_pw_layer += 1
 

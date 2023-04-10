@@ -7,19 +7,17 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/'+ \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 
-weights_file_format = weights_files_location + 'weights_{}_pw.txt'
+weights_file_format = weights_files_location + 'weights_{}.txt'
 
 parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
 off_chip_weights_file = '../off_chip_weights/off_chip_weights_fpga.txt'
 
-layer_types = utils.read_layers_types()
-layers_weights_shapes = utils.read_layers_weight_shapes(layer_types)
-expansion_projection = utils.read_expansion_projection()
+model_dag = utils.read_model_dag()
 
 first_off_chip_layer = 0
-last_off_chip_layer = len(layer_types)
+last_off_chip_layer = len(model_dag)
 
 def get_ofms_parallelism(parallelism_file):
     ofms_parallelism = 1
@@ -31,19 +29,18 @@ def get_ofms_parallelism(parallelism_file):
     
     return ofms_parallelism
 
-
-layer_types = utils.read_layers_types()
-layers_weights_shapes = utils.read_layers_weight_shapes(layer_types)
-expansion_projection = utils.read_expansion_projection()
-
 formated_weights_all_layers = []
 for i in range(first_off_chip_layer, last_off_chip_layer):
-    if layer_types[i] != 'pw':
+    layer_specs = model_dag[i]
+    if 'type' not in layer_specs or layer_specs['type'] != 'pw':
         continue
+    
+    layer_weights_shape = layer_specs['weights_shape']
+    num_of_filters = layer_weights_shape[0]
+    filter_depth = layer_weights_shape[1]
     weights = np.loadtxt(weights_file_format.format(i)).astype(np.int8)
     weights = np.reshape(weights, \
-            (layers_weights_shapes[i].num_of_filters, layers_weights_shapes[i].depth, \
-                layers_weights_shapes[i].height, layers_weights_shapes[i].width))
+            (num_of_filters, filter_depth))
     
     ofms_parallelism = get_ofms_parallelism(parallelism_file)
     # print("get_ofms_parallelism", ofms_parallelism)
@@ -54,7 +51,7 @@ for i in range(first_off_chip_layer, last_off_chip_layer):
              weights.shape[1], weights.shape[2], weights.shape[3])), 0).astype(np.int8)
 
     splitted_weights = np.split(weights, int(weights.shape[0] / ofms_parallelism), 0)
-    splitted_weights = [np.transpose(splitted_weights[i], (1,2,3,0)) for i in range(len(splitted_weights))]
+    splitted_weights = [np.transpose(splitted_weights[i], (1,0)) for i in range(len(splitted_weights))]
     combined_weights = np.concatenate(splitted_weights, 0)
     combined_weights = combined_weights.reshape(combined_weights.size) 
     formated_weights_all_layers.append(combined_weights)

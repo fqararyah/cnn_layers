@@ -48,7 +48,7 @@ void krnl_fibha_v1(
 
 	dw_weights_dt dw_weights_buffer[max_conv_d][max_conv_h*max_conv_w];
 	cnn_pipeline_7_mob_v2(input_image, result, tmp_channels);
-	seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
+	seml(off_chip_weights, channels, result, tmp_channels, weights_1, fc_input);
 //	for (int i = 0;
 //			i < input_image_depth * input_image_num_fms_groups_in_a_channel;
 //			i++) {
@@ -56,6 +56,6 @@ void krnl_fibha_v1(
 //		result2[i] = (fms_dt)input_image[i](7, 0);
 //	}
 //	seml(input_image, off_chip_weights, channels, result, result2, tmp_channels,
-//				tmp_channels_2, weights_0, dw_weights_buffer, fc_input);
+//				tmp_channels_2, weights_1, dw_weights_buffer, fc_input);
 }
 }

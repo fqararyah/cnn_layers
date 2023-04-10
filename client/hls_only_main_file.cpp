@@ -34,7 +34,7 @@ void top_func(
 					  tmp_channels, 56 * 56 * 24, 56, 56);
 #endif
 	copy_channels_to_tmp_channels(channels, tmp_channels);
-	seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
+	seml(off_chip_weights, channels, result, tmp_channels, weights_1, fc_input);
 #endif
 
 #elif FIBHA_VERSION == 2
@@ -52,6 +52,6 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
 	copy_channels_to_tmp_channels(channels, tmp_channels);
-	seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
+	seml(off_chip_weights, channels, result, tmp_channels, weights_1, fc_input);
 #endif
 }

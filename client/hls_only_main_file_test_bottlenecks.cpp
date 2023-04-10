@@ -35,5 +35,5 @@ void top_func(
 
 	_0_1_bottlenecks_chain(input_image, result);
 	avgpool(result, fc_input);
-	//seml(off_chip_weights, channels, result, tmp_channels, weights_0, fc_input);
+	//seml(off_chip_weights, channels, result, tmp_channels, weights_1, fc_input);
 }

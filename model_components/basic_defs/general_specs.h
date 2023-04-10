@@ -24,7 +24,7 @@ const int switch_point_fms_depth = 144; // not really, but the max of ...
 const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
 const int max_tmp_fms_size = 56 * 56 * 24;
 
-const int MAX_FMS_BUFFER_DEPTH = 144 * 16;
+const int MAX_FMS_BUFFER_DEPTH = 192 * 16; // 192 * (28/7) * (28/7)
 const int MIN_FMS_HEIGHT = 8;
 const int MIN_FMS_WIDTH = 8;
 const int MAX_FILTER_DIM_STRIDE_1 = 3;
@@ -88,6 +88,7 @@ const int input_image_num_fms_groups_in_a_channel = input_image_num_fms_groups_i
 
 struct layer_specs
 {
+	conv_type conv_layer_type;
 	int layer_num_fils;
 	int strides;
 	int filter_size;
@@ -109,5 +110,14 @@ struct layer_specs
 	int layer_num_of_ofm_tiles_w;
 	int layer_num_of_weight_groups_for_one_pass;
 	int layer_weights_offset;
+	bool write_to_tmp;
+	bool fused_with_add;
+	fms_dt layer_ifms_zero_point;
+	scales_dt layer_ofms_scale;
+	fms_dt layer_ofms_zero_point;
+	rec_scales_dt add_layer_scale_reciprocal;
+	biases_dt add_layer_zero_point;
+	scales_dt skip_connection_other_layer_scale;
+	biases_dt skip_connection_other_layer_zero_point;
 };
 #endif

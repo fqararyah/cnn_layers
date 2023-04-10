@@ -1,6 +1,6 @@
 #include "bottleneck.h"
 
-#if CHAIN_LENGTH >= 9
+#if CHAIN_LENGTH >= 9  && ! ONLY_SEML
 
 void bottleneck_2_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_2_expanded_ifms_depth],
@@ -75,7 +75,7 @@ void bottleneck_2_update_previous_pass_buffer(
 			previous_pass_dw_input_slice[1][offset_w];
 	}
 	previous_pass_dw_input_slice[1][offset_w] = dw_lower_buffer_slice[0];
-	//		if (offset_w + 1 == bottleneck_2_ifms_width / layer_0_s_strides)//to do, handle once at another place
+	//		if (offset_w + 1 == bottleneck_2_ifms_width / layer_1_s_specs.strides)//to do, handle once at another place
 	//		{
 	//			previous_pass_dw_input[d][1][offset_w + 1] = dw_lower_buffer[d][1];
 	//			previous_pass_dw_input[d][1][offset_w + 2] = dw_lower_buffer[d][2];
@@ -180,13 +180,13 @@ mob_v2_bottleneck_2:
 		weights_dt projection_kernel_weights[bottleneck_2_ofms_depth];
 
 		expansion_layer_normalization.fused_scales =
-			layer_6_pw_fused_scales[d_in_out];
+			layer_8_pw_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_scales_log_2_shift =
-			layer_6_pw_fused_scales_log_2_shifts[d_in_out];
+			layer_8_pw_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.relu_6_fused_scale =
-			layer_6_pw_relu_6_fused_scales[d_in_out];
+			layer_8_pw_relu_6_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_zero_point =
-			layer_6_pw_fused_zero_points[d_in_out];
+			layer_8_pw_fused_zero_points[d_in_out];
 
 		fms_dt expansion_result;
 
@@ -240,9 +240,9 @@ mob_v2_bottleneck_2:
 			// if(starting_h == 1 && d_in_out == 15)cout<<starting_w - 2<<"\n";
 			pss_f_dt tm =  normalize_projection_kernel_output_no_q(
 				projection_kernel_output_buffer_prev,
-				layer_8_pw_fused_scales,
-				layer_8_pw_fused_scales_log_2_shifts,
-				layer_8_pw_fused_zero_points, d_in_out, layer_2_activation,
+				layer_10_pw_fused_scales,
+				layer_10_pw_fused_scales_log_2_shifts,
+				layer_10_pw_fused_zero_points, d_in_out, layer_3_pw_specs.layer_activation,
 				bottleneck_2_projection_layer_index);
 			chain_seml_communication_buffer[d_in_out][prev_projection_kernel_starting_w] = tm;
 			tm=0;

@@ -7,7 +7,7 @@
 void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 		fms_dt tmp_channels[max_tmp_fms_size],
-		const layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+		const layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
 		fms_dt fc_input[fc_layer_input_size]) {
 #pragma HLS INLINE off
 //		for(int i=0;i<max_fms_size;i++){
@@ -15,10 +15,10 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 //		}
 //		begin_code_generation
 pw_conv(off_chip_weights, channels, result, 6, layer_6_pw_depth,
-    layer_6_pw_num_fils, layer_6_pw_num_of_tiles_in_d,
-    layer_6_pw_num_of_tiles_out_d, layer_6_pw_num_of_tiles_h,
-    layer_6_pw_num_of_tiles_w, tmp_channels, 0,
-    layer_6_pw_num_of_weight_groups_for_one_pass,
+    layer_8_pw_specs.layer_num_fils, layer_8_pw_num_of_tiles_in_d,
+    layer_8_pw_num_of_tiles_out_d, layer_10_pw_specs.layer_num_of_ofm_tiles_h,
+    layer_10_pw_specs.layer_num_of_ofm_tiles_w, tmp_channels, 0,
+    layer_8_pw_num_of_weight_groups_for_one_pass,
     0, layer_6_pw_weights_offset, layer_6_activation,
          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
@@ -26,15 +26,15 @@ dw_conv_3x3(seml_dw_weights_3x3, result, channels, 7, layer_7_dw_depth,
     layer_7_dw_ifm_width, layer_7_dw_ifm_height, layer_7_dw_num_of_tiles_in_d,
     layer_7_dw_ifm_num_of_tiles_h, layer_7_dw_ifm_num_of_tiles_w, 
     layer_7_dw_num_of_tiles_h, layer_7_dw_num_of_tiles_w,
-    layer_7_dw_strides, layer_7_dw_padding_left, layer_7_dw_padding_right, layer_7_dw_padding_top,
+    layer_9_dw_specs.strides, layer_9_dw_specs.padding_left, layer_9_dw_specs.padding_right, layer_9_dw_specs.padding_top,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
         fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
 pw_conv(off_chip_weights, channels, result, 8, layer_8_pw_depth,
-    layer_8_pw_num_fils, layer_8_pw_num_of_tiles_in_d,
-    layer_8_pw_num_of_tiles_out_d, layer_8_pw_num_of_tiles_h,
-    layer_8_pw_num_of_tiles_w, tmp_channels, 1,
-    layer_8_pw_num_of_weight_groups_for_one_pass,
-    0, layer_8_pw_weights_offset, layer_8_activation,
+    layer_10_pw_num_fils, layer_10_pw_num_of_tiles_in_d,
+    layer_10_pw_num_of_tiles_out_d, layer_10_pw_num_of_tiles_h,
+    layer_10_pw_num_of_tiles_w, tmp_channels, 1,
+    layer_10_pw_num_of_weight_groups_for_one_pass,
+    0, layer_8_pw_weights_offset, layer_10_pw_specs.activation,
          fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
          fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
 pw_conv(off_chip_weights, channels, result, 9, layer_9_pw_depth,

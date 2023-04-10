@@ -227,7 +227,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 {
 #pragma HLS INLINE off
 
-    fms_quantization_scheme normalization = {0, 0, 0, 0};
+    fms_quantization_scheme normalization;
 
     const int current_dw_layer_weights_offset = dw_layers_weights_offsets[layer];
     const int current_layer_fused_parameters_offset =
@@ -241,11 +241,10 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
     relu_6_fused_scales_dt relu_6_fused_scales_tile[MAX_DW_LAYER_D];
     biases_dt fused_zero_points_tile[MAX_DW_LAYER_D];
 
-    normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
-    normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
-    normalization.ofm_scale = conv_fms_scales[layer + 1];
+    const fms_dt current_layer_fms_zero_point = layer_specs_struct.layer_ifms_zero_point;
 
-    const fms_dt current_layer_fms_zero_point = conv_fms_zero_points[layer];
+    normalization.ofm_scale = layer_specs_struct.layer_ofms_scale;
+    normalization.ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
 
     fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED];
     fms_dt channels_tile_copy[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED];

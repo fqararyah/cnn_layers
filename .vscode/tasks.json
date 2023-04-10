@@ -20,7 +20,6 @@
                 "/media/SSD2TB/wd/cnn_layers/model_components/layers/impl/dw_conv_v1_6.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/layers/impl/dw_conv_v2.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/layers/impl/conv.cpp",
-                "/media/SSD2TB/wd/cnn_layers/model_components/model/SESL/impl/cnn_pipeline_6_mob_v2.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/model/fused_bottlenecks/bottleneck_kernels.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/model/fused_bottlenecks/bottleneck_0.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/model/fused_bottlenecks/bottleneck_1.cpp",

@@ -3,7 +3,7 @@
 
 void _4_layer_2_pw(
 	fms_dt channels_buffer[layer_2_pw_depth][layer_2_pw_ifm_width],
-	weights_dt weights[layer_2_pw_num_fils][layer_2_pw_depth],
+	weights_dt weights[layer_3_pw_specs.num_fils][layer_2_pw_depth],
 	fms_dt result[max_fms_size], int starting_h)
 {
 
@@ -11,7 +11,7 @@ void _4_layer_2_pw(
 
 	// rows for next DW
 	for (int o_o_d = 0;
-		 o_o_d < layer_2_pw_num_fils / layer_2_pw_parallelism_out;
+		 o_o_d < layer_3_pw_specs.num_fils / layer_2_pw_parallelism_out;
 		 o_o_d++)
 	{
 		int o_o_d_offset = o_o_d * layer_2_pw_parallelism_out;
@@ -52,20 +52,20 @@ void mobilenet_v2_pipeline_4(
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 1
 
-	dw_weights_dt dw_weights_1[layer_1_dw_depth][3][3];
+	dw_weights_dt dw_weights_2[layer_1_dw_depth][3][3];
 
-#pragma HLS ARRAY_PARTITION variable = dw_weights_1 type = complete dim = 1
+#pragma HLS ARRAY_PARTITION variable = dw_weights_2 type = complete dim = 1
 
-	layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][3][3];
+	layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][3][3];
 
 	weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth];
-	weights_dt pw_weights_2[layer_2_pw_num_fils][layer_2_pw_depth];
+	weights_dt pw_weights_3[layer_3_pw_specs.num_fils][layer_2_pw_depth];
 	weights_dt pw_weights_3[layer_3_pw_num_fils][layer_3_pw_depth];
-	_5_fill_layers_weights(weights_0, dw_weights_1, pw_weights_1, pw_weights_2,
+	_5_fill_layers_weights(weights_1, dw_weights_2, pw_weights_1, pw_weights_3,
 						   pw_weights_3);
 
 	//#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_0_s_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 
 	fms_dt _5_layer_0_3x3_conv_out_0[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};
@@ -73,7 +73,7 @@ void mobilenet_v2_pipeline_4(
 	fms_dt _5_layer_1_pw_out_0[layer_1_dw_depth][layer_1_dw_ifm_width] = {0};
 
 	fms_dt _5_layer_1_dw_upper[layer_1_dw_depth][2][layer_1_dw_ifm_width] = {0};
-	fms_dt _5_layer_1_dw_lower[layer_1_dw_depth][layer_1_dw_strides][layer_1_dw_ifm_width] = {0};
+	fms_dt _5_layer_1_dw_lower[layer_1_dw_depth][layer_2_dw_specs.strides][layer_1_dw_ifm_width] = {0};
 	fms_dt _5_layer_1_dw_out_0[layer_2_pw_depth][layer_2_pw_ifm_width] = {0};
 
 #pragma HLS ARRAY_PARTITION variable = channels_buffer_0 complete dim = 1
@@ -89,7 +89,7 @@ void mobilenet_v2_pipeline_4(
 	//###########################################################
 
 	//#########################odd###############################
-	fms_dt channels_buffer_1[input_image_depth][layer_0_s_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_1[input_image_depth][layer_1_s_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 
 	fms_dt _5_layer_0_3x3_conv_out_1[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};
@@ -111,21 +111,21 @@ void mobilenet_v2_pipeline_4(
 	_5_stages_fill_channels_buffer(channels, channels_buffer_0, 0);
 	//##########
 	_5_stages_fill_channels_buffer(channels, channels_buffer_1, 2);
-	_5_layer_0_3x3_conv(channels_buffer_0, weights_0,
+	_5_layer_0_3x3_conv(channels_buffer_0, weights_1,
 						_5_layer_0_3x3_conv_out_0);
 	//##########
 	_5_stages_fill_channels_buffer(channels, channels_buffer_0, 4);
-	_5_layer_0_3x3_conv(channels_buffer_1, weights_0,
+	_5_layer_0_3x3_conv(channels_buffer_1, weights_1,
 						_5_layer_0_3x3_conv_out_1);
-	_5_layer_1_pw_dw(_5_layer_0_3x3_conv_out_0, pw_weights_1, dw_weights_1,
+	_5_layer_1_pw_dw(_5_layer_0_3x3_conv_out_0, pw_weights_1, dw_weights_2,
 					 _5_layer_1_dw_upper, _5_layer_1_dw_lower, _5_layer_1_dw_out_0, 0);
 	//this sequence does not produce a valid _5_layer_1_dw_out_0 yet, as it needs 2
 	//rows but only 1 has been feed so far
 	//##########
 	_5_stages_fill_channels_buffer(channels, channels_buffer_1, 6);
-	_5_layer_0_3x3_conv(channels_buffer_0, weights_0,
+	_5_layer_0_3x3_conv(channels_buffer_0, weights_1,
 						_5_layer_0_3x3_conv_out_0);
-	_5_layer_1_pw_dw(_5_layer_0_3x3_conv_out_1, pw_weights_1, dw_weights_1,
+	_5_layer_1_pw_dw(_5_layer_0_3x3_conv_out_1, pw_weights_1, dw_weights_2,
 					 _5_layer_1_dw_upper, _5_layer_1_dw_lower, _5_layer_1_dw_out_1, 1);
 	//##########
 
@@ -137,75 +137,75 @@ main_pipeline_loop:
 		if (even_odd)
 		{
 			_5_stages_fill_channels_buffer(channels, channels_buffer_0, h * _5_stages_layer_1_rows_at_once * layer_0_strides);
-			_5_layer_0_3x3_conv(channels_buffer_1, weights_0,
+			_5_layer_0_3x3_conv(channels_buffer_1, weights_1,
 								_5_layer_0_3x3_conv_out_1);
 			_5_layer_1_pw_dw(
 				_5_layer_0_3x3_conv_out_0,
 				pw_weights_1,
-				dw_weights_1,
+				dw_weights_2,
 				_5_layer_1_dw_upper,
 				_5_layer_1_dw_lower,
 				_5_layer_1_dw_out_0,
 				1);
-			_4_layer_2_pw(_5_layer_1_dw_out_1, pw_weights_2,
+			_4_layer_2_pw(_5_layer_1_dw_out_1, pw_weights_3,
 						  result, h - 4);
 		}
 		else
 		{
 			_5_stages_fill_channels_buffer(channels, channels_buffer_1, h);
-			_5_layer_0_3x3_conv(channels_buffer_0, weights_0,
+			_5_layer_0_3x3_conv(channels_buffer_0, weights_1,
 								_5_layer_0_3x3_conv_out_0);
 			_5_layer_1_pw_dw(
 				_5_layer_0_3x3_conv_out_1,
 				pw_weights_1,
-				dw_weights_1,
+				dw_weights_2,
 				_5_layer_1_dw_upper,
 				_5_layer_1_dw_lower,
 				_5_layer_1_dw_out_1,
 				1);
-			_4_layer_2_pw(_5_layer_1_dw_out_0, pw_weights_2,
+			_4_layer_2_pw(_5_layer_1_dw_out_0, pw_weights_3,
 						  result, h - 4);
 		}
 		even_odd = 1 - even_odd;
 	}
 	//###########################################################
 	// pipeline flushing##########################################
-	_4_layer_2_pw(_5_layer_1_dw_out_1, pw_weights_2,
+	_4_layer_2_pw(_5_layer_1_dw_out_1, pw_weights_3,
 				  result, h - 4);
 	//##########
 	_5_layer_1_pw_dw(
 		_5_layer_0_3x3_conv_out_0,
 		pw_weights_1,
-		dw_weights_1,
+		dw_weights_2,
 		_5_layer_1_dw_upper,
 		_5_layer_1_dw_lower,
 		_5_layer_1_dw_out_0,
 		1);
-	_4_layer_2_pw(_5_layer_1_dw_out_0, pw_weights_2,
+	_4_layer_2_pw(_5_layer_1_dw_out_0, pw_weights_3,
 				  result, h - 3);
 	//##########
-	_5_layer_0_3x3_conv(channels_buffer_1, weights_0,
+	_5_layer_0_3x3_conv(channels_buffer_1, weights_1,
 						_5_layer_0_3x3_conv_out_1);
 	_5_layer_1_pw_dw(
 		_5_layer_0_3x3_conv_out_1,
 		pw_weights_1,
-		dw_weights_1,
+		dw_weights_2,
 		_5_layer_1_dw_upper,
 		_5_layer_1_dw_lower,
 		_5_layer_1_dw_out_1,
 		1);
-	_4_layer_2_pw(_5_layer_1_dw_out_1, pw_weights_2,
+	_4_layer_2_pw(_5_layer_1_dw_out_1, pw_weights_3,
 				  result, h - 2);
 	//##########
 	fms_dt padding_bottom[layer_1_pw_depth][layer_1_pw_ifm_width] = {0};
 	_5_layer_1_pw_dw(
 		padding_bottom,
 		pw_weights_1,
-		dw_weights_1,
+		dw_weights_2,
 		_5_layer_1_dw_upper,
 		_5_layer_1_dw_lower,
 		_5_layer_1_dw_out_0,
 		1);
-	_4_layer_2_pw(_5_layer_1_dw_out_0, pw_weights_2,
+	_4_layer_2_pw(_5_layer_1_dw_out_0, pw_weights_3,
 				  result, h - 2);
 }

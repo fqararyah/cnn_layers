@@ -1,6 +1,6 @@
 #include "bottleneck.h"
 
-#if CHAIN_LENGTH >= 6 && MODEL_ID == 2
+#if CHAIN_LENGTH >= 6 && MODEL_ID == 2 && ! ONLY_SEML
 
 void bottleneck_1_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_1_expanded_ifms_depth],
@@ -178,15 +178,15 @@ mob_v2_bottleneck_1:
 								   dw_input_buffer, expansion_result, d_in_out, dw_kernel_starting_w,
 								   starting_h);
 
-		dw_layer_normalization.fused_scales = layer_4_dw_fused_scales[d_in_out];
+		dw_layer_normalization.fused_scales = layer_6_dw_fused_scales[d_in_out];
 		dw_layer_normalization.fused_scales_log_2_shift =
-			layer_4_dw_fused_scales_log_2_shifts[d_in_out];
+			layer_6_dw_fused_scales_log_2_shifts[d_in_out];
 		dw_layer_normalization.relu_6_fused_scale =
-			layer_4_dw_relu_6_fused_scales[d_in_out];
+			layer_6_dw_relu_6_fused_scales[d_in_out];
 		dw_layer_normalization.fused_zero_point =
-			layer_4_dw_fused_zero_points[d_in_out];
+			layer_6_dw_fused_zero_points[d_in_out];
 
-		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_4[d_in_out],
+		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_6[d_in_out],
 									 bottleneck_1_dw_filter_dim);
 		fms_dt dw_result = dw_relu_norm(dw_pss, dw_layer_normalization,
 										bottleneck_1_dw_layer_relu);
@@ -196,7 +196,7 @@ mob_v2_bottleneck_1:
 			bottleneck_1_update_previous_pass_buffer(previous_pass_dw_input_w,
 													 dw_lower_buffer, dw_kernel_starting_w, d_in_out);
 		}
-		bottleneck_1_fill_projection_kernel_weights(pw_weights_5,
+		bottleneck_1_fill_projection_kernel_weights(pw_weights_7,
 													projection_kernel_weights, d_in_out);
 		projection_kernel(dw_result, bottleneck_1_ofms_depth,
 						  projection_kernel_weights, projection_kernel_output_buffer,
@@ -207,11 +207,11 @@ mob_v2_bottleneck_1:
 			next_bottleneck_communication_buffer[d_in_out][prev_projection_kernel_starting_w] =
 				normalize_projection_kernel_output(
 					projection_kernel_output_buffer_prev,
-					layer_5_pw_fused_scales,
-					layer_5_pw_fused_scales_log_2_shifts,
-					layer_5_pw_relu_6_fused_scales,
-					layer_5_pw_fused_zero_points, d_in_out,
-					layer_5_activation,
+					layer_7_pw_fused_scales,
+					layer_7_pw_fused_scales_log_2_shifts,
+					layer_7_pw_relu_6_fused_scales,
+					layer_7_pw_fused_zero_points, d_in_out,
+					layer_7_pw_specs.layer_activation,
 					bottleneck_1_projection_layer_index);
 		}
 	}

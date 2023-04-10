@@ -7,12 +7,10 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 out_file = '../model_components/model/headers/layers_specs.h'  # './out/layers_specs.h'
 
-to_replace = ['*LNF*', '*LD*', '*LW*', '*LH*', '*LST*', '*LPL*',
-              '*LPR*', '*LFS*', '*i*', '*i-1*', '*i-1_pw*', '*LWOF*']
-
 weights_group_items = 64
 
-specs_block = 'const layer_specs layer_{}_specs = {}\n\
+specs_struct = 'const layer_specs layer_{}_specs = {}\n\
+                {},//conv_layer_type;; \n\
                 {},//layer_num_fils \n\
                 {},//strides;\n\
                 {},//filter_size;\n\
@@ -34,139 +32,65 @@ specs_block = 'const layer_specs layer_{}_specs = {}\n\
                 {},//layer_num_of_ofm_tiles_w;\n\
                 {},//layer_num_of_weight_groups_for_one_pass;\n\
                 {},//layer_weights_offset;\n\
-            {};\n'
+                {},//bool write_to_tmp;\n\
+                {},//bool fused_with_add;\n\
+                {},//fms_dt layer_ifms_zero_point;\n\
+                {},//,fms_dt layer_ofms_scale;\n\
+                {},//fms_dt layer_ofms_zero_point;\n\
+                {},//rec_scales_dt add_layer_scale_reciprocal;\n\
+                {},//biases_dt add_layer_zero_point;\n\
+                {},//scales_dt skip_connection_other_layer_scale;\n\
+                {}//biases_dt skip_connection_other_layer_zero_point;\n\
+                {};\n'
 
-block_0 = "//****************************\n \
-const int layer_0_s_num_fils = *LNF* / alpha;\n\
-const int layer_0_s_depth = input_image_depth;\n\
-const int layer_0_s_ifm_height = input_image_height;\n\
-const int layer_0_s_ifm_width = input_image_width;\n\
-const int layer_0_s_strides = *LST*;\n\
-const int layer_0_s_ofm_height = layer_0_s_ifm_height / layer_0_s_strides;\n\
-const int layer_0_s_ofm_width = layer_0_s_ifm_width / layer_0_s_strides;\n\
-const int layer_0_s_num_of_tiles_out_d = int(0.99 + ((float) layer_0_s_num_fils) / pw_conv_parallelism_out);\n\
-const int layer_0_s_padding_left = *LPL*;\n\
-const int layer_0_s_padding_right = *LPR*;\n\
-const int layer_0_s_padding_top = *LPT*;\n \
-const int layer_0_s_padding_bottom = *LPB*;\n \
-const int layer_0_s_filter_dim = *LFS*;\n \
-const int layer_0_s_num_of_tiles_w = layer_0_s_ofm_width / pw_tile_w; \n \
-const int layer_0_s_num_of_tiles_h = layer_0_s_ofm_height / pw_tile_h; \n \
-const int layer_0_s_num_of_tiles_d_in = layer_0_s_depth / pw_tile_d; \n \
+specs_block = "//****************************\n \
+const int layer_{}_{}_num_fils = {} / alpha;\n\
+const int layer_{}_{}_depth = {};\n\
+const int layer_{}_{}_filter_dim = {};\n \
+const int layer_{}_{}_ifm_width = {};\n \
 //****************************\n"
 
-
-dw_block = "const int layer_*i*_dw_num_fils = layer_*i-1*_*PREV*_num_fils / alpha;\n \
-const int layer_*i*_dw_depth = layer_*i*_dw_num_fils;\n \
-const int layer_*i*_dw_strides = *LST*;\n \
-const int layer_*i*_dw_ifm_height = layer_*i-1*_*PREV*_ofm_height;\n \
-const int layer_*i*_dw_ifm_width = layer_*i-1*_*PREV*_ofm_width;\n \
-const int layer_*i*_dw_ofm_height = layer_*i*_dw_ifm_height / layer_*i*_dw_strides;\n \
-const int layer_*i*_dw_ofm_width = layer_*i*_dw_ifm_width / layer_*i*_dw_strides;\n \
-const int layer_*i*_dw_padding_left = *LPL*;\n \
-const int layer_*i*_dw_padding_right = *LPR*;\n \
-const int layer_*i*_dw_padding_top = *LPT*;\n \
-const int layer_*i*_dw_padding_bottom = *LPB*;\n \
-const int layer_*i*_dw_filter_size = *LFS*;\n \
-const int layer_*i*_dw_num_of_tiles_in_d = (int)(0.99 + (float)layer_*i*_dw_depth / dw_tile_d);\n \
-const int layer_*i*_dw_ifm_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_dw_ifm_width / dw_tile_w); \n \
-const int layer_*i*_dw_ifm_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_dw_ifm_height / dw_tile_h); \n \
-const int layer_*i*_dw_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_dw_ofm_width / dw_tile_w); \n \
-const int layer_*i*_dw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_dw_ofm_height / dw_tile_h); \n \
-//****************************\n"
-
-pw_block = "//****************************\n \
-const int layer_*i*_pw_num_fils = *LNF* / alpha;\n \
-const int layer_*i*_pw_depth = layer_*i-1*_*PREV*_num_fils;\n \
-const int layer_*i*_pw_ifm_height = layer_*i-1*_*PREV*_ofm_height;\n \
-const int layer_*i*_pw_ifm_width = layer_*i-1*_*PREV*_ofm_width;\n \
-const int layer_*i*_pw_ofm_height = layer_*i*_pw_ifm_height;\n \
-const int layer_*i*_pw_ofm_width = layer_*i*_pw_ifm_width;\n \
-const int layer_*i*_pw_num_of_tiles_in_d = (int)(0.99 + (float)layer_*i*_pw_depth / pw_tile_d);\n \
-const int layer_*i*_pw_num_of_tiles_out_d = (int)(0.99 + (float)layer_*i*_pw_num_fils / pw_conv_parallelism_out);\n \
-const int layer_*i*_pw_num_of_tiles_w = (int)(0.99 + (float)layer_*i*_pw_ofm_width / pw_tile_w); \n \
-const int layer_*i*_pw_num_of_tiles_h = (int)(0.99 + (float)layer_*i*_pw_ofm_height / pw_tile_h); \n \
-const int layer_*i*_pw_num_of_weight_groups_for_one_pass = layer_*i*_pw_depth * pw_conv_parallelism_out / weights_group_items; \n \
-const int layer_*i*_pw_weights_offset = *LWOF*; \n \
-const int layer_*i*_activation = *LA*;\n\
-//****************************\n"
-
-
-layers_types = utils.read_layers_types()
-layers_weights = utils.read_layers_weight_shapes(layers_types)
-layers_inputs = utils.read_layers_input_shapes()
-layers_outputs = utils.read_layers_output_shapes()
-layers_strides = utils.read_layers_strides()
-layers_activations = utils.read_layers_activations()
-
-
-def replace(replacement_dic, block):
-    for key, val in replacement_dic.items():
-        block = block.replace(key, str(val))
-
-    return block
-
+model_dag = utils.read_model_dag()
 
 current_block_indx = 0
 cumulative_pw_weights = 0
-target_block = ''
 with open(out_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef LAYERS_SPECS\n")
     f.write("#define LAYERS_SPECS\n")
-    for i in range(len(layers_types)):
-        replacement_dic = {}
-        replacement_dic['*PREV*'] = layers_types[i-1]
-        if layers_types[i] == 'pw':
-            replacement_dic['*LWOF*'] = cumulative_pw_weights
-            print(i, layers_weights[i].get_size(), layers_inputs[i].height)
-            assert layers_weights[i].get_size() % weights_group_items == 0 or layers_outputs[i].height == 1 or cgc.MODEL_NAME != 'mob_v2'
-            cumulative_pw_weights += int(
-                layers_weights[i].get_size() / weights_group_items)
-        if layers_types[i] in ['pw', 's']:
-            replacement_dic['*LNF*'] = layers_weights[i].num_of_filters
-        if layers_types[i] in ['dw', 's']:
-            replacement_dic['*LST*'] = layers_strides[i]
-            padding = int(layers_weights[i].width - layers_strides[i])
-            if padding % 2 == 0:
-                replacement_dic['*LPL*'] = int(padding / 2)
-                replacement_dic['*LPR*'] = int(padding / 2)
-                replacement_dic['*LPT*'] = int(padding / 2)
-                replacement_dic['*LPB*'] = int(padding / 2)
-            else:
-                replacement_dic['*LPL*'] = 0
-                replacement_dic['*LPR*'] = padding
-                replacement_dic['*LPT*'] = 0
-                replacement_dic['*LPB*'] = padding
-            replacement_dic['*LFS*'] = layers_weights[i].width
+    for layer_index in range(len(model_dag)):
+        layer_specs = model_dag[layer_index]
+        layer_type = ''
+        if 'type' in layer_specs:
+            layer_type = layer_specs['type']
+        if layer_type not in cgc.CONV_LAYER_TYPES:
+            continue
 
-        replacement_dic['*i*'] = i
-        replacement_dic['*i-1*'] = i - 1
-        current_layer_activation = ''
-        if layers_activations[i] == 'relu6':
-            current_layer_activation = '6'
-        elif layers_activations[i] == 'sigmoid':
-            current_layer_activation = '2'
-        else:
-            current_layer_activation = '0'
-        replacement_dic['*LA*'] = current_layer_activation
-        if i == 0:
-            target_block = block_0
-        elif layers_types[i] == 'pw':
-            target_block = pw_block
-        else:
-            target_block = dw_block
+        layer_weights_shape = layer_specs['weights_shape']
+        layer_weights_size = 1
+        for i in layer_weights_shape:
+            layer_weights_size *= i
+        layer_filter_dim = 1
+        layer_ifms_depth = layer_weights_shape[1]
+        layer_num_fils = layer_weights_shape[0]
+        if layer_type != 'pw':
+            layer_filter_dim = layer_weights_shape[-1]
+        if layer_type == 'dw':
+            layer_ifms_depth = layer_num_fils
 
-        target_block = replace(replacement_dic, target_block)
-        f.write(target_block)
-        
         replacement_list = []
         #replacement_dic['*PREV*'] = layers_types[i-1]
-        strides = layers_strides[i]
-        filter_dim = layers_weights[i].width
-        num_of_filters = layers_weights[i].num_of_filters
-        replacement_list.append(str(i) + '_' + layers_types[i])
+        strides = layer_specs['strides']
+        filter_dim = layer_filter_dim
+        num_of_filters = layer_num_fils
+        replacement_list.append(str(layer_index) + '_' + layer_type)
         replacement_list.append('{')
+        if layer_type == 'pw':
+            replacement_list.append('PW_CONV')
+        elif layer_type == 'dw':
+            replacement_list.append('DW_CONV')
+        else:
+            replacement_list.append('S_CONV')
         replacement_list.append(num_of_filters)
         replacement_list.append(strides)
         replacement_list.append(filter_dim)
@@ -174,7 +98,7 @@ with open(out_file, 'w') as f:
         padding_right = 0
         padding_top = 0
         padding_bottom = 0
-        if layers_types[i] != 'pw':
+        if layer_type != 'pw':
             padding = int(filter_dim - strides)
             if strides == 1:
                 padding_left = int(padding / 2)
@@ -190,47 +114,96 @@ with open(out_file, 'w') as f:
         replacement_list.append(padding_top)
         replacement_list.append(padding_bottom)
 
-        layer_depth = layers_inputs[i].depth
-        layer_height = layers_inputs[i].height
-        layer_width = layers_inputs[i].width
+        layer_ifms_shape = layer_specs['ifms_shape']
+        layer_depth = layer_ifms_shape[0]
+        layer_height = layer_ifms_shape[1]
+        layer_width = layer_ifms_shape[2]
 
         replacement_list.append(layer_depth)
         replacement_list.append(layer_height)
         replacement_list.append(layer_width)
 
-        replacement_list.append( int(layer_height / strides) )
-        replacement_list.append( int(layer_width / strides) )
+        replacement_list.append(int(layer_height / strides))
+        replacement_list.append(int(layer_width / strides))
 
         layer_activation = ''
-        if layers_activations[i] == 'relu6':
+        if layer_specs['activation'] == 'relu6':
             layer_activation = '6'
-        elif layers_activations[i] == 'sigmoid':
+        elif layer_specs['activation'] == 'sigmoid':
             layer_activation = '2'
         else:
             layer_activation = '0'
 
         replacement_list.append(layer_activation)
 
-        replacement_list.append('(' + str(layer_depth) + ' + pw_tile_d) / pw_tile_d')
+        replacement_list.append(
+            '(' + str(layer_depth) + ' + pw_tile_d) / pw_tile_d')
         replacement_list.append('(' + str(num_of_filters) +
-                                 ' + pw_conv_parallelism_out) / pw_conv_parallelism_out')
+                                ' + pw_conv_parallelism_out) / pw_conv_parallelism_out')
 
-        replacement_list.append('(' + str(layer_height) + ' + pw_tile_h) / pw_tile_h')
-        replacement_list.append('(' + str(layer_width) + ' + pw_tile_w) / pw_tile_w')
+        replacement_list.append(
+            '(' + str(layer_height) + ' + pw_tile_h) / pw_tile_h')
+        replacement_list.append(
+            '(' + str(layer_width) + ' + pw_tile_w) / pw_tile_w')
 
-        replacement_list.append('(' + str( int(layer_height / strides)) + ' + pw_tile_h) / pw_tile_h')
-        replacement_list.append('(' + str(int(layer_width / strides)) + ' + pw_tile_w) / pw_tile_w')
+        replacement_list.append(
+            '(' + str(int(layer_height / strides)) + ' + pw_tile_h) / pw_tile_h')
+        replacement_list.append(
+            '(' + str(int(layer_width / strides)) + ' + pw_tile_w) / pw_tile_w')
 
-        replacement_list.append( str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
+        replacement_list.append(
+            str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
 
-        if layers_types[i] != 'dw' and i > 0:
+        if layer_type != 'dw' and i > 0:
             replacement_list.append(cumulative_pw_weights)
-            cumulative_pw_weights += int(layers_weights[i].get_size() / weights_group_items)
+            cumulative_pw_weights += int(
+                layer_weights_size / weights_group_items)
         else:
             replacement_list.append(0)
 
+        write_to_tmp = 0
+        fused_with_add = 0
+        add_layer_scale_reciprocal = 1
+        add_layer_zero_point = 0
+        skip_connection_other_layer_scale = 1
+        skip_connection_other_layer_zero_point = 0
+
+        layer_children = layer_specs['children']
+        if len(layer_children) > 1:
+            write_to_tmp = 1
+
+        if model_dag[layer_children[0]]['name'] == 'add':
+            add_layer_specs = model_dag[layer_children[0]]
+            the_other_conv_layer_specs = model_dag[add_layer_specs['parents'][0]]
+            fused_with_add = 1
+            add_layer_scale_reciprocal = 1 / add_layer_specs['ofms_scales']
+            add_layer_zero_point = add_layer_specs['ofms_zero_points']
+            skip_connection_other_layer_scale = the_other_conv_layer_specs['ofms_scales']
+            skip_connection_other_layer_zero_point = the_other_conv_layer_specs['ofms_zero_points']
+            if len(add_layer_specs['children']) > 1:
+                #if the fused add layer is a beginning of a branch
+                write_to_tmp = 1
+
+        replacement_list.append(write_to_tmp)
+        replacement_list.append(fused_with_add)
+
+        replacement_list.append(layer_specs['ifms_zero_points'])
+        replacement_list.append(layer_specs['ofms_scales'])
+        replacement_list.append(layer_specs['ofms_zero_points'])
+
+        replacement_list.append(add_layer_scale_reciprocal)
+        replacement_list.append(add_layer_zero_point)
+        replacement_list.append(skip_connection_other_layer_scale)
+        replacement_list.append(skip_connection_other_layer_zero_point)
+
         replacement_list.append('}')
 
-        f.write(specs_block.format(*replacement_list))
+        to_write_specs_block = specs_block.format(layer_index, layer_type, layer_num_fils,
+                           layer_index, layer_type, layer_ifms_depth,
+                           layer_index, layer_type, layer_filter_dim,
+                           layer_index, layer_type, layer_width)
+        f.write(to_write_specs_block)
+
+        f.write(specs_struct.format(*replacement_list))
 
     f.write('#endif\n')

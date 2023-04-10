@@ -1,8 +1,10 @@
 #include "bottleneck_kernels.h"
 
+#if ! ONLY_SEML
+
 //*************************
 pss_dt conv_kernel(fms_dt ifms_buffer[],
-				   const layer_0_weights_dt weights_0[layer_0_s_num_fils][layer_0_s_depth][layer_0_s_filter_dim][layer_0_s_filter_dim],
+				   const layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
 				   const int filter_dim, int conv_d)
 {
 #pragma HLS INLINE
@@ -18,7 +20,7 @@ conv_kernel:
 			for (int c_w = 0; c_w < filter_dim; c_w++)
 			{
 #pragma HLS UNROLL
-				pss += ifms_buffer[d * ifms_buffer_hw + c_h * bottlenck_0_input_buffer_width + c_w] * weights_0[conv_d][d][c_h][c_w];
+				pss += ifms_buffer[d * ifms_buffer_hw + c_h * bottlenck_0_input_buffer_width + c_w] * weights_1[conv_d][d][c_h][c_w];
 			}
 		}
 	}
@@ -291,3 +293,5 @@ pss_f_dt normalize_projection_kernel_output_no_q(pss_dt pss_buffer[],
 		
 	return pw_relu_norm_no_q_no_relu(pss_buffer[offset_d], projection_layer_normalization, 0);
 }
+
+#endif

@@ -1,5 +1,7 @@
 #include "bottleneck.h"
 
+#if ! ONLY_SEML
+
 void bottleneck_0_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_0_expanded_ifms_depth],
 	weights_dt kernel_weights[], int d)
@@ -73,7 +75,7 @@ void bottleneck_0_update_previous_pass_buffer(
 			previous_pass_dw_input_slice[1][offset_w];
 	}
 	previous_pass_dw_input_slice[1][offset_w] = dw_lower_buffer_slice[0];
-	//		if (offset_w + 1 == bottleneck_0_ifms_width / layer_0_s_strides)//to do, handle once at another place
+	//		if (offset_w + 1 == bottleneck_0_ifms_width / layer_1_s_specs.strides)//to do, handle once at another place
 	//		{
 	//			previous_pass_dw_input[d][1][offset_w + 1] = dw_lower_buffer[d][1];
 	//			previous_pass_dw_input[d][1][offset_w + 2] = dw_lower_buffer[d][2];
@@ -174,22 +176,22 @@ mob_v2_bottleneck_0:
 		weights_dt projection_kernel_weights[bottleneck_0_ofms_depth];
 
 		expansion_layer_normalization.fused_scales =
-			layer_0_s_fused_scales[d_in_out];
+			layer_1_s_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_scales_log_2_shift =
-			layer_0_s_fused_scales_log_2_shifts[d_in_out];
+			layer_1_s_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.relu_6_fused_scale =
-			layer_0_s_fused_scales_log_2_shifts[d_in_out];
+			layer_1_s_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.fused_zero_point =
-			layer_0_s_fused_zero_points[d_in_out];
+			layer_1_s_fused_zero_points[d_in_out];
 		expansion_layer_normalization.layer_0_relu_6_fused_scale =
-			layer_0_s_relu_6_fused_scales[d_in_out];
+			layer_1_s_relu_6_fused_scales[d_in_out];
 		fms_dt expansion_result;
 
-		if (starting_h * layer_0_s_strides < bottleneck_0_ifms_height + layer_0_s_padding_top &&
-			expansion_kernel_starting_w < layer_0_s_padding_right + bottleneck_0_ifms_width / layer_0_s_strides - 1)
+		if (starting_h * layer_1_s_specs.strides < bottleneck_0_ifms_height + layer_1_s_specs.padding_top &&
+			expansion_kernel_starting_w < layer_1_s_specs.padding_right + bottleneck_0_ifms_width / layer_1_s_specs.strides - 1)
 		{
-			pss_dt expansion_pss = conv_kernel(bottleneck_input, weights_0,
-											   layer_0_s_filter_dim, d_in_out);
+			pss_dt expansion_pss = conv_kernel(bottleneck_input, weights_1,
+											   layer_1_s_filter_dim, d_in_out);
 			expansion_result = conv_relu_norm(expansion_pss,
 											  expansion_layer_normalization,
 											  bottleneck_0_expansion_layer_relu);
@@ -203,15 +205,15 @@ mob_v2_bottleneck_0:
 								   dw_input_buffer, expansion_result, dw_kernel_starting_w,
 								   starting_h);
 
-		dw_layer_normalization.fused_scales = layer_1_dw_fused_scales[d_in_out];
+		dw_layer_normalization.fused_scales = layer_2_dw_fused_scales[d_in_out];
 		dw_layer_normalization.fused_scales_log_2_shift =
-			layer_1_dw_fused_scales_log_2_shifts[d_in_out];
+			layer_2_dw_fused_scales_log_2_shifts[d_in_out];
 		dw_layer_normalization.relu_6_fused_scale =
-			layer_1_dw_relu_6_fused_scales[d_in_out];
+			layer_2_dw_relu_6_fused_scales[d_in_out];
 		dw_layer_normalization.fused_zero_point =
-			layer_1_dw_fused_zero_points[d_in_out];
+			layer_2_dw_fused_zero_points[d_in_out];
 
-		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_1[d_in_out],
+		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_2[d_in_out],
 									 bottleneck_0_dw_filter_dim);
 		fms_dt dw_result = dw_relu_norm(dw_pss, dw_layer_normalization,
 										bottleneck_0_dw_layer_relu);
@@ -221,7 +223,7 @@ mob_v2_bottleneck_0:
 			bottleneck_0_update_previous_pass_buffer(previous_pass_dw_input[d_in_out - 1],
 													 dw_lower_buffer[d_in_out - 1], dw_kernel_starting_w, starting_h);
 		}
-		bottleneck_0_fill_projection_kernel_weights(pw_weights_2,
+		bottleneck_0_fill_projection_kernel_weights(pw_weights_3,
 													projection_kernel_weights, d_in_out);
 		projection_kernel(dw_result, bottleneck_0_ofms_depth,
 						  projection_kernel_weights, projection_kernel_output_buffer,
@@ -232,10 +234,10 @@ mob_v2_bottleneck_0:
 			// if(starting_h == 1 && d_in_out == 15)cout<<starting_w - 2<<"\n";
 			bottleneck_0_1_communication_buffer[d_in_out][h_in_communication_buffer][prev_projection_kernel_starting_w] = normalize_projection_kernel_output(
 				projection_kernel_output_buffer_prev,
-				layer_2_pw_fused_scales,
-				layer_2_pw_fused_scales_log_2_shifts,
-				layer_2_pw_relu_6_fused_scales,
-				layer_2_pw_fused_zero_points, d_in_out, layer_2_activation,
+				layer_3_pw_fused_scales,
+				layer_3_pw_fused_scales_log_2_shifts,
+				layer_3_pw_relu_6_fused_scales,
+				layer_3_pw_fused_zero_points, d_in_out, layer_3_pw_specs.layer_activation,
 				bottleneck_0_projection_layer_index);
 		}
 	}
@@ -251,3 +253,5 @@ mob_v2_bottleneck_0:
 		projection_kernel_output_buffer,
 		projection_kernel_output_buffer_prev);
 }
+
+#endif
