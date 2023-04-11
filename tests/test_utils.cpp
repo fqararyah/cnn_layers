@@ -18,16 +18,23 @@ void dump_layer_output_no_tiling(string file_name, fms_dt ofms[max_fms_size],
 }
 
 void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
-					   int ofms_size, const int ofms_h, const int ofms_w)
+					   const layer_specs layer_specs_struct)
 {
+	const int ofms_h = layer_specs_struct.layer_ofm_height; 
+	const int ofms_w = layer_specs_struct.layer_ofm_width;
+	const int ofms_hw = ofms_h * ofms_w;
+	const int ofms_size = ofms_hw * layer_specs_struct.layer_num_fils;
+	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ofm_tiles_w;
+	const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ofm_tiles_h * num_of_tiles_w;
+
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
+	
 	const int size = 32 * 32 * 192;
 	bool skip_vals[size];
 
-	int scaled_ofms_w = ((int)(((float)ofms_w / pw_tile_w) + 0.99)) * pw_tile_w;
-	int scaled_ofms_h = ((int)(((float)ofms_h / pw_tile_h) + 0.99)) * pw_tile_h;
-	int num_tiles_hw = (scaled_ofms_w / pw_tile_w) * (scaled_ofms_h / pw_tile_h);
+	int scaled_ofms_w = num_of_tiles_w * pw_tile_w;
+	int scaled_ofms_h = layer_specs_struct.layer_num_of_ofm_tiles_h * pw_tile_h;
 
 	int num_tiles_w = (scaled_ofms_w / pw_tile_w);
 	int scaled_ofms_size = (ofms_size / (ofms_h * ofms_w)) * scaled_ofms_h * scaled_ofms_w;
@@ -38,8 +45,8 @@ void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 		int tile_indx = i / pw_tile_size;
 		int in_tile_index = i % pw_tile_size;
 
-		int tile_in_d = tile_indx / (num_tiles_hw);
-		int tile_in_h = (tile_indx % num_tiles_hw) / num_tiles_w;
+		int tile_in_d = tile_indx / (num_of_tiles_hw);
+		int tile_in_h = (tile_indx % num_of_tiles_hw) / num_tiles_w;
 		int tile_in_w = tile_indx % num_tiles_w;
 
 		int in_tile_d = in_tile_index / pw_tile_hw;
@@ -80,6 +87,7 @@ void dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][MIN_F
 {
 
 	ofstream myfile;
+	
 	const int ofms_h = layer_specs_struct.layer_ofm_height; 
 	const int ofms_w = layer_specs_struct.layer_ofm_width;
 	const int ofms_hw = ofms_h * ofms_w;

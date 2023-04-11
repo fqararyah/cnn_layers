@@ -12,7 +12,7 @@
 #define MODEL_ID MOB_V2//1: mob_v1, 2: mob_v2, 3: mnasnet, 4: proxylessnas
 #define HW CPU//0 is
 #define ONLY_SESL 0
-#define ONLY_SEML 1
+#define ONLY_SEML 0
 #define USE_FIRB 1
 #define DEBUGGING 1
 #define TESTING 1

@@ -241,12 +241,12 @@ fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 {
 #pragma HLS INLINE
 
-	const fms_dt projection_layer_ofms_zero_point =
-		conv_fms_zero_points[bottleneck_projection_layer_index + 1];
-	const rec_scales_dt projection_layer_ofms_scale_rec =
-		conv_fms_scales_rec[bottleneck_projection_layer_index + 1];
-	const rec_scales_dt projection_layer_ofms_scale =
-		conv_fms_scales[bottleneck_projection_layer_index + 1];
+	const fms_dt projection_layer_ofms_zero_point = 0; //= //todo
+		//conv_fms_zero_points[bottleneck_projection_layer_index + 1];
+	const rec_scales_dt projection_layer_ofms_scale_rec = 0; //=
+		//conv_fms_scales_rec[bottleneck_projection_layer_index + 1];
+	const rec_scales_dt projection_layer_ofms_scale = 0; //=
+		//conv_fms_scales[bottleneck_projection_layer_index + 1];
 
 	// normalize_projection_kernel_output: for (int i = 0; i < ofms_depth; i++)
 	// {
@@ -281,8 +281,8 @@ pss_f_dt normalize_projection_kernel_output_no_q(pss_dt pss_buffer[],
 
 	fms_quantization_scheme projection_layer_normalization;
 
-	projection_layer_normalization.ofm_scale =
-		conv_fms_scales[bottleneck_projection_layer_index + 1];
+	projection_layer_normalization.ofm_scale = 1;//todo
+		//conv_fms_scales[bottleneck_projection_layer_index + 1];
 
 	projection_layer_normalization.fused_scales =
 		projection_layer_fused_scales[offset_d];

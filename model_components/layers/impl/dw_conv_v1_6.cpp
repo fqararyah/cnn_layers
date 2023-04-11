@@ -339,16 +339,11 @@ void dw_conv_copy_engine_result_tile(
 
 void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 				 fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
-				 const int layer, const int layer_conv_d, const int layer_ifm_width,
-				 const int layer_ifm_height, const int num_of_tiles_d,
-				 const int num_of_ifms_tiles_h, const int num_of_ifms_tiles_w,
-				 const int num_of_ofms_tiles_h, const int num_of_ofms_tiles_w,
-				 const int strides, const int padding_left, const int padding_right,
-				 const int padding_top,
+				 const int layer,
+				 const layer_specs layer_specs_struct,
 				 const fused_scales_dt fused_scales[],
 				 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-				 const relu_6_fused_scales_dt relu_6_fused_scales[],
-				 const biases_dt fused_zero_points[],
+				 const relu_6_fused_scales_dt relu_6_fused_scales[], const biases_dt fused_zero_points[],
 				 const fused_scales_dt fused_scales_part2[],
 				 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
 				 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
@@ -356,16 +351,27 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 {
 #pragma HLS INLINE off
 
-	const int padding_bottom = padding_right;
-
-	const int num_of_ifms_tiles_hw = num_of_ifms_tiles_h * num_of_ifms_tiles_w;
-	const int num_of_ofms_tiles_hw = num_of_ofms_tiles_h * num_of_ofms_tiles_w;
+	const int padding_bottom = layer_specs_struct.padding_bottom;
 
 	fms_quantization_scheme normalization = {0, 0, 0, 0};
 
 	const int current_dw_layer_weights_offset = dw_layers_weights_offsets[layer];
 	const int current_layer_fused_parameters_offset =
 		layers_fused_parameters_offsets[layer];
+
+	const int padding_top = layer_specs_struct.padding_top;
+	const int padding_left = layer_specs_struct.padding_left;
+	const int padding_right = layer_specs_struct.padding_right;
+	const int layer_ifm_width = layer_specs_struct.layer_ifm_width;
+	const int layer_ifm_height = layer_specs_struct.layer_ifm_height;
+	const int strides = layer_specs_struct.strides;
+	const int layer_conv_d = layer_specs_struct.layer_depth;
+	const int num_of_ifms_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
+	const int num_of_ifms_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
+	const int num_of_ifms_tiles_hw = num_of_ifms_tiles_h * num_of_ifms_tiles_w;
+	const int num_of_ofms_tiles_w = layer_specs_struct.layer_num_of_ofm_tiles_w;
+	const int num_of_ofms_tiles_h = layer_specs_struct.layer_num_of_ofm_tiles_h;
+	const int num_of_ofms_tiles_hw = num_of_ofms_tiles_h * num_of_ofms_tiles_w;
 
 	dw_weights_dt weights_tile[dw_pipeline_depth][3 * 3];
 #pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 1
@@ -375,11 +381,10 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 	relu_6_fused_scales_dt relu_6_fused_scales_tile[dw_pipeline_depth];
 	biases_dt fused_zero_points_tile[dw_pipeline_depth];
 
-	normalization.ofm_zero_point = conv_fms_zero_points[layer + 1];
-	normalization.ofm_scale_rec = conv_fms_scales_rec[layer + 1];
-	normalization.ofm_scale = conv_fms_scales[layer + 1];
+	normalization.ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
+	normalization.ofm_scale = layer_specs_struct.layer_ofms_scale;
 
-	const fms_dt current_layer_fms_zero_point = conv_fms_zero_points[layer];
+	const fms_dt current_layer_fms_zero_point = layer_specs_struct.layer_ifms_zero_point;
 
 	fms_dt ifms_buffer[dw_pipeline_depth][max_filter_hw_dim][switch_point_fms_width + max_padding_lr];
 	fms_dt ifms_buffer_lower_part[dw_pipeline_depth][max_strides][switch_point_fms_width + max_padding_lr];

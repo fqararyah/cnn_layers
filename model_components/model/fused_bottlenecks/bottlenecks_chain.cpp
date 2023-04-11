@@ -620,12 +620,11 @@ void _0_1_bottlenecks_chain(
 
 #pragma HLS ARRAY_PARTITION variable = bottleneck_0_dw_lower_buffer complete
 
-	const fms_dt bottleneck_0_dw_ifms_zero_point =
-		conv_fms_zero_points[chain_0_1_first_dw_layer_in_the_chain];
+	const fms_dt bottleneck_0_dw_ifms_zero_point = layer_2_dw_specs.layer_ifms_zero_point;
 	const int bottleneck_0_first_fill_offset = chain_0_1_first_filter_dim - chain_0_1_first_strides;
 	const int bottleneck_0_extra_cols_filled_first_time =
 		chain_0_1_first_filter_dim - chain_0_1_first_strides;
-	const fms_dt layer_0_s_ifms_zero_point = conv_fms_zero_points[0];
+	const fms_dt layer_0_s_ifms_zero_point = layer_1_s_specs.layer_ifms_zero_point;
 	const int num_of_ifm_groups_read_each_time =
 		input_image_num_fms_groups_in_width * chain_0_1_rows_filled_each_time;
 
@@ -645,8 +644,8 @@ void _0_1_bottlenecks_chain(
 	fms_dt bottleneck_1_previous_pass_dw_input_1[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width];
 	fms_dt bottleneck_1_previous_pass_dw_input_2[bottleneck_1_expanded_ifms_depth][bottleneck_1_inter_pass_dw_input_width];
 
-	const fms_dt bottleneck_1_dw_ifms_zero_point =
-		conv_fms_zero_points[bottleneck_1_dw_layer_index];
+	const fms_dt bottleneck_1_dw_ifms_zero_point = layer_2_dw_specs.layer_ifms_zero_point;
+		//conv_fms_zero_points[bottleneck_1_dw_layer_index];
 	//******************************************************************************************************************
 
 	int filling_h = 0;

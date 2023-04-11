@@ -2,6 +2,8 @@
 #include "../headers/layers_imp_common_includes.h"
 #include "../headers/pw_conv.h"
 
+#if FIBHA_VERSION == 2
+
 void pw_write_results_tile(
 	fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
@@ -88,9 +90,10 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 		rec_scales_dt add_layer_scale_reciprocal = layer_specs_struct.add_layer_scale_reciprocal;
 		biases_dt add_layer_zero_point = layer_specs_struct.add_layer_zero_point;
 
-		fms_quantization_scheme normalization = {0, 0, 0, 0};
+		fms_quantization_scheme normalization;
 		normalization.ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
 		normalization.ofm_scale = layer_specs_struct.layer_ofms_scale;
+
 		const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ofm_tiles_h * layer_specs_struct.layer_num_of_ofm_tiles_w;
 		const int layer_relu = layer_specs_struct.layer_activation;
 
@@ -344,7 +347,7 @@ void pw_conv(weights_grp_dt *weights,
 #if HW == FPGA
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
 	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
-										   layer_specs_struct.layer_depth, num_of_weight_groups,
+										   layer_specs_struct.layer_depth, layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
 										   layer_specs_struct.layer_weights_offset,
 										   layer_specs_struct.layer_num_fils);
 #elif HW == CPU
@@ -390,7 +393,8 @@ conv2_ots_loop:
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
 												  weights_tile, td_o * pw_conv_parallelism_out,
 												  layer_specs_struct.layer_depth,
-												  num_of_weight_groups, layer_specs_struct.layer_weights_offset);
+												  layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+												  layer_specs_struct.layer_weights_offset);
 #endif
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
@@ -399,7 +403,7 @@ conv2_ots_loop:
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out,
 											   layer_specs_struct.layer_depth,
-											   num_of_weight_groups,
+											   layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
 											   layer_specs_struct.layer_weights_offset,
 											   layer_specs_struct.layer_num_fils);
 #elif HW == CPU
@@ -410,3 +414,5 @@ conv2_ots_loop:
 #endif
 	}
 }
+
+#endif

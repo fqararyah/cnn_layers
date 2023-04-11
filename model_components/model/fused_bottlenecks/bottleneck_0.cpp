@@ -134,21 +134,21 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[bottleneck_0_input_buffer_size]
 {
 #pragma HLS INLINE off
 
-	const fms_dt expansion_layer_ofms_zero_point =
-		conv_fms_zero_points[bottleneck_0_expansion_layer_index + 1];
-	const rec_scales_dt expansion_layer_ofms_scale_rec =
-		conv_fms_scales_rec[bottleneck_0_expansion_layer_index + 1];
-	const rec_scales_dt expansion_layer_ofms_scale =
-		conv_fms_scales[bottleneck_0_expansion_layer_index + 1];
+	const fms_dt expansion_layer_ofms_zero_point =0;//todo
+		//conv_fms_zero_points[bottleneck_0_expansion_layer_index + 1];
+	const rec_scales_dt expansion_layer_ofms_scale_rec =1;//todo
+		//conv_fms_scales_rec[bottleneck_0_expansion_layer_index + 1];
+	const rec_scales_dt expansion_layer_ofms_scale =1;//todo
+		//conv_fms_scales[bottleneck_0_expansion_layer_index + 1];
 
-	const fms_dt dw_layer_ofms_zero_point =
-		conv_fms_zero_points[bottleneck_0_dw_layer_index + 1];
-	const rec_scales_dt dw_layer_ofms_scale_rec =
-		conv_fms_scales_rec[bottleneck_0_dw_layer_index + 1];
-	const rec_scales_dt dw_layer_ofms_scale =
-		conv_fms_scales[bottleneck_0_dw_layer_index + 1];
-	const fms_dt current_dw_ifms_zero_point =
-		conv_fms_zero_points[bottleneck_0_dw_layer_index];
+	const fms_dt dw_layer_ofms_zero_point =0;//todo
+		//conv_fms_zero_points[bottleneck_0_dw_layer_index + 1];
+	const rec_scales_dt dw_layer_ofms_scale_rec =1;//todo
+		//conv_fms_scales_rec[bottleneck_0_dw_layer_index + 1];
+	const rec_scales_dt dw_layer_ofms_scale =1;//todo
+		//conv_fms_scales[bottleneck_0_dw_layer_index + 1];
+	const fms_dt current_dw_ifms_zero_point =0;//todo
+		//conv_fms_zero_points[bottleneck_0_dw_layer_index];
 
 	fms_quantization_scheme expansion_layer_normalization;
 	expansion_layer_normalization.ofm_zero_point =

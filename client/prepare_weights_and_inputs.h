@@ -38,10 +38,10 @@ void verify_input_image(string file_name,
 						fms_dt input_image[input_image_depth][input_image_height][input_image_width]);
 
 void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
-					  const int ofms_h, const int ofms_w);
+					   const layer_specs layer_specs_struct);
 
-void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size], const int ifms_size,
-							 const int ifms_h, const int ifms_w);
+void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size],
+							  const layer_specs layer_specs_struct);
 
 // V2
 void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],

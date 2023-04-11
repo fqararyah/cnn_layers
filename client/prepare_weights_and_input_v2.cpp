@@ -33,6 +33,7 @@ void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER
 							 const layer_specs layer_specs_struct)
 {
 	ofstream myfile;
+	
 	const int ifms_h = layer_specs_struct.layer_ifm_height; 
 	const int ifms_w = layer_specs_struct.layer_ifm_width;
 	const int ifms_hw = ifms_h * ifms_w;

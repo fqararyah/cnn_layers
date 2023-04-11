@@ -205,15 +205,14 @@ void verify_input_image(string file_name,
 }
 
 void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
-					  const int ifms_h, const int ifms_w)
+					  const layer_specs layer_specs_struct)
 {
 
-	int ofms_hw = ifms_h * ifms_w;
-	int num_tiles_h =
-		(ifms_h % pw_tile_h) == 0 ? (ifms_h / pw_tile_h) : (ifms_h / pw_tile_h) + 1;
-	int num_tiles_w =
-		(ifms_w % pw_tile_w) == 0 ? (ifms_w / pw_tile_w) : (ifms_w / pw_tile_w) + 1;
-	int num_tiles_hw = num_tiles_h * num_tiles_w;
+	const int ifms_h = layer_specs_struct.layer_ifm_height;
+	const int ifms_w = layer_specs_struct.layer_ifm_width;
+	const int ifms_hw = ifms_h * ifms_w;
+	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
+	const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ifm_tiles_h * num_of_tiles_w;
 
 	int a;
 	int line = 0;
@@ -221,14 +220,14 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 	assert(!infile.fail());
 	while (infile >> a)
 	{
-		int z = (line / ofms_hw);
-		int h = ((line % ofms_hw) / ifms_w);
+		int z = (line / ifms_hw);
+		int h = ((line % ifms_hw) / ifms_w);
 		int w = (line % ifms_w);
 
 		int tile_in_z = z / pw_tile_d;
 		int tile_in_h = h / pw_tile_h;
 		int tile_in_w = w / pw_tile_w;
-		int tile_index = tile_in_z * num_tiles_hw + tile_in_h * num_tiles_w + tile_in_w;
+		int tile_index = tile_in_z * num_of_tiles_hw + tile_in_h * num_of_tiles_w + tile_in_w;
 
 		int in_tile_z = z % pw_tile_d;
 		int in_tile_h = h % pw_tile_h;
@@ -243,25 +242,27 @@ void fill_layer_input(string file_name, fms_dt layer_input[max_fms_size],
 }
 
 void verify_fill_layer_input(string file_name, fms_dt ifms[max_fms_size],
-							 const int ifms_size, const int ifms_h, const int ifms_w)
+							 const layer_specs layer_specs_struct)
 {
 
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	int num_tiles_h =
-		(ifms_h % pw_tile_h) == 0 ? (ifms_h / pw_tile_h) : (ifms_h / pw_tile_h) + 1;
-	int num_tiles_w =
-		(ifms_w % pw_tile_w) == 0 ? (ifms_w / pw_tile_w) : (ifms_w / pw_tile_w) + 1;
-	int num_tiles_hw = num_tiles_h * num_tiles_w;
+	
+	const int ifms_h = layer_specs_struct.layer_ifm_height;
+	const int ifms_w = layer_specs_struct.layer_ifm_width;
+	const int ifms_hw = ifms_h * ifms_w;
+	const int ifms_size = ifms_hw * layer_specs_struct.layer_depth;
+	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
+	const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ifm_tiles_h * num_of_tiles_w;
 
 	for (int i = 0; i < ifms_size; i++)
 	{
 		int tile_indx = i / pw_tile_size;
 		int in_tile_index = i % pw_tile_size;
 
-		int tile_in_d = tile_indx / (num_tiles_hw);
-		int tile_in_h = (tile_indx % num_tiles_hw) / num_tiles_w;
-		int tile_in_w = tile_indx % num_tiles_w;
+		int tile_in_d = tile_indx / (num_of_tiles_hw);
+		int tile_in_h = (tile_indx % num_of_tiles_hw) / num_of_tiles_w;
+		int tile_in_w = tile_indx % num_of_tiles_w;
 
 		int in_tile_d = in_tile_index / pw_tile_hw;
 		int in_tile_h = (in_tile_index % pw_tile_hw) / pw_tile_w;

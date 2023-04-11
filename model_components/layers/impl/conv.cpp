@@ -74,7 +74,7 @@ void fill_channels_buffer_cpu(
 		}
 		else
 		{
-			chain_0_1_padd_bottom_channels_buffer_rows(channels_tile, conv_fms_zero_points[0]);
+			chain_0_1_padd_bottom_channels_buffer_rows(channels_tile, layer_1_s_specs.layer_ifms_zero_point);
 		}
 	}
 }
@@ -87,13 +87,12 @@ void layer_0_s_conv_engine(
 	fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[])
 {
 
-	const biases_dt current_layer_zero_point = conv_fms_zero_points[0];
+	const biases_dt current_layer_zero_point = layer_1_s_specs.layer_ifms_zero_point;
 	for (int f = 0; f < layer_1_s_num_fils; f++)
 	{
 		fms_quantization_scheme normalization = {0, 0, 0, 0};
-		normalization.ofm_zero_point = conv_fms_zero_points[2];
-		normalization.ofm_scale_rec = conv_fms_scales_rec[2];
-		normalization.ofm_scale = conv_fms_scales[2];
+		normalization.ofm_zero_point = layer_1_s_specs.layer_ofms_zero_point;
+		normalization.ofm_scale = layer_1_s_specs.layer_ofms_scale;
 		normalization.fused_zero_point = fused_zero_points[f];
 		normalization.fused_scales = fused_scales[f];
 		normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts[f];
