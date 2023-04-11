@@ -119,6 +119,10 @@ with open(out_file, 'w') as f:
         layer_height = layer_ifms_shape[1]
         layer_width = layer_ifms_shape[2]
 
+        if model_dag[layer_index - 1]['name'] == 'pad':
+            layer_width -= padding_right
+            layer_height -= padding_bottom
+
         replacement_list.append(layer_depth)
         replacement_list.append(layer_height)
         replacement_list.append(layer_width)

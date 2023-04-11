@@ -161,7 +161,7 @@ const layer_specs layer_4_pw_specs = {
  const int layer_6_dw_num_fils = 96 / alpha;
 const int layer_6_dw_depth = 96;
 const int layer_6_dw_filter_dim = 3;
- const int layer_6_dw_ifm_width = 113;
+ const int layer_6_dw_ifm_width = 112;
  //****************************
 const layer_specs layer_6_dw_specs = {
                 DW_CONV,//conv_layer_type;; 
@@ -173,15 +173,15 @@ const layer_specs layer_6_dw_specs = {
                 0,//padding_top;
                 1,//padding_bottom;
                 96,//layer_depth;
-                113,//layer_ifm_height;
-                113,//layer_ifm_width;
+                112,//layer_ifm_height;
+                112,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
                 6,//layer_activation;
                 (96 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (96 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (113 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (113 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
@@ -395,7 +395,7 @@ const layer_specs layer_12_pw_specs = {
  const int layer_14_dw_num_fils = 144 / alpha;
 const int layer_14_dw_depth = 144;
 const int layer_14_dw_filter_dim = 3;
- const int layer_14_dw_ifm_width = 57;
+ const int layer_14_dw_ifm_width = 56;
  //****************************
 const layer_specs layer_14_dw_specs = {
                 DW_CONV,//conv_layer_type;; 
@@ -407,15 +407,15 @@ const layer_specs layer_14_dw_specs = {
                 0,//padding_top;
                 1,//padding_bottom;
                 144,//layer_depth;
-                57,//layer_ifm_height;
-                57,//layer_ifm_width;
+                56,//layer_ifm_height;
+                56,//layer_ifm_width;
                 28,//layer_ofm_height;
                 28,//layer_ofm_width;
                 6,//layer_activation;
                 (144 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (144 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (57 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (57 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
@@ -746,7 +746,7 @@ const layer_specs layer_24_pw_specs = {
  const int layer_26_dw_num_fils = 192 / alpha;
 const int layer_26_dw_depth = 192;
 const int layer_26_dw_filter_dim = 3;
- const int layer_26_dw_ifm_width = 29;
+ const int layer_26_dw_ifm_width = 28;
  //****************************
 const layer_specs layer_26_dw_specs = {
                 DW_CONV,//conv_layer_type;; 
@@ -758,15 +758,15 @@ const layer_specs layer_26_dw_specs = {
                 0,//padding_top;
                 1,//padding_bottom;
                 192,//layer_depth;
-                29,//layer_ifm_height;
-                29,//layer_ifm_width;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 6,//layer_activation;
                 (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (192 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (29 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (29 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
@@ -1565,7 +1565,7 @@ const layer_specs layer_51_pw_specs = {
  const int layer_53_dw_num_fils = 576 / alpha;
 const int layer_53_dw_depth = 576;
 const int layer_53_dw_filter_dim = 3;
- const int layer_53_dw_ifm_width = 15;
+ const int layer_53_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_53_dw_specs = {
                 DW_CONV,//conv_layer_type;; 
@@ -1577,15 +1577,15 @@ const layer_specs layer_53_dw_specs = {
                 0,//padding_top;
                 1,//padding_bottom;
                 576,//layer_depth;
-                15,//layer_ifm_height;
-                15,//layer_ifm_width;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
                 6,//layer_activation;
                 (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (576 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (15 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (15 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 576 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
