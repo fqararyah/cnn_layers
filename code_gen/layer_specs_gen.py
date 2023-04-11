@@ -137,24 +137,24 @@ with open(out_file, 'w') as f:
         replacement_list.append(layer_activation)
 
         replacement_list.append(
-            '(' + str(layer_depth) + ' + pw_tile_d) / pw_tile_d')
+            '(' + str(layer_depth) + ' + pw_tile_d - 1) / pw_tile_d')
         replacement_list.append('(' + str(num_of_filters) +
                                 ' + pw_conv_parallelism_out) / pw_conv_parallelism_out')
 
         replacement_list.append(
-            '(' + str(layer_height) + ' + pw_tile_h) / pw_tile_h')
+            '(' + str(layer_height) + ' + pw_tile_h - 1) / pw_tile_h')
         replacement_list.append(
-            '(' + str(layer_width) + ' + pw_tile_w) / pw_tile_w')
+            '(' + str(layer_width) + ' + pw_tile_w - 1) / pw_tile_w')
 
         replacement_list.append(
-            '(' + str(int(layer_height / strides)) + ' + pw_tile_h) / pw_tile_h')
+            '(' + str(int(layer_height / strides)) + ' + pw_tile_h - 1) / pw_tile_h')
         replacement_list.append(
-            '(' + str(int(layer_width / strides)) + ' + pw_tile_w) / pw_tile_w')
+            '(' + str(int(layer_width / strides)) + ' + pw_tile_w - 1) / pw_tile_w')
 
         replacement_list.append(
             str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
 
-        if layer_type != 'dw' and i > 0:
+        if layer_type == 'pw' and i > 0:
             replacement_list.append(cumulative_pw_weights)
             cumulative_pw_weights += int(
                 layer_weights_size / weights_group_items)

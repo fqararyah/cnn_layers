@@ -18,12 +18,7 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
 layer_0_s_block = 'layer_0_s_3x3(weights_1, input_image, result);\n'
 
-pw_block = 'pw_conv(off_chip_weights, *CHANNELS*, result, *i*, layer_*i*_pw_depth,\n\
-    layer_*i*_pw_num_fils, layer_*i*_pw_num_of_tiles_in_d,\n\
-    layer_*i*_pw_num_of_tiles_out_d, layer_*i*_pw_num_of_tiles_h,\n\
-    layer_*i*_pw_num_of_tiles_w, tmp_channels, *RW*,\n\
-    layer_*i*_pw_num_of_weight_groups_for_one_pass,\n\
-    *DIRECTION*, layer_*i*_pw_weights_offset, layer_*i*_activation,\n\
+pw_block = 'pw_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_pw_specs,\n\
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
@@ -101,7 +96,6 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     if layer_type == 'dw':
         target_block = dw_block
     elif layer_type == 'pw':
-        continue
         target_block = pw_block
 
     target_block = target_block.replace('*i*', str(layer_index))
