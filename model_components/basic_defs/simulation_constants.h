@@ -16,5 +16,5 @@
 #define USE_FIRB 1
 #define DEBUGGING 1
 #define TESTING 1
-#define FIBHA_VERSION 1
+#define FIBHA_VERSION 2
 #endif

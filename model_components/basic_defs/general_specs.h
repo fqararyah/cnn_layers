@@ -8,7 +8,7 @@
 
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 4344;
+const int first_quantization_arrays_num_elements = 8344;
 
 // switch point
 #if ONLY_SEML
