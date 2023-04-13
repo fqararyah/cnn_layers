@@ -19,8 +19,8 @@ const int chain_0_1_output_num_tiles_w = (bottleneck_1_ofms_width / pw_tile_w)
 
 const int chain_0_1_max_filter_dim = bottleneck_1_dw_filter_dim;
 const int chain_0_1_first_filter_dim = bottleneck_0_dw_filter_dim;
-const int chain_0_1_max_strides = layer_1_s_specs.strides;
-const int chain_0_1_first_strides = layer_1_s_specs.strides;
+const int chain_0_1_max_strides = 2;
+const int chain_0_1_first_strides = 2;
 const int chain_0_1_first_padding_left = 0;
 const int chain_0_1_max_rows_at_once =
 		bottleneck_0_rows_at_once > bottleneck_1_rows_at_once ?

@@ -350,8 +350,7 @@ void bottleneck_0_pipeline_filling_stage(
 				layer_3_pw_fused_scales,
 				layer_3_pw_fused_scales_log_2_shifts,
 				layer_3_pw_relu_6_fused_scales,
-				layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation,
-				bottleneck_0_projection_layer_index);
+				layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
 		}
 		// perform last update for the dw inter step buffer
 		for (int d = 0; d < bottleneck_0_expanded_ifms_depth; d++)
@@ -425,8 +424,7 @@ void bottleneck_0_within_pipeline_stage(
 				layer_3_pw_fused_scales,
 				layer_3_pw_fused_scales_log_2_shifts,
 				layer_3_pw_relu_6_fused_scales,
-				layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation,
-				bottleneck_0_projection_layer_index);
+				layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
 		}
 		// perform last update for the dw inter step buffer
 		for (int d = 0; d < bottleneck_0_expanded_ifms_depth; d++)
@@ -522,8 +520,7 @@ void bottleneck_1_within_pipeline_stage(
 				layer_7_pw_fused_scales,
 				layer_7_pw_fused_scales_log_2_shifts,
 				layer_7_pw_relu_6_fused_scales,
-				layer_7_pw_fused_zero_points, d, layer_7_pw_specs.layer_activation,
-				bottleneck_1_projection_layer_index);
+				layer_7_pw_fused_zero_points, d, layer_7_pw_specs.layer_activation, layer_7_pw_specs);
 	}
 }
 

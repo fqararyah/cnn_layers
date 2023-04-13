@@ -91,30 +91,18 @@ void mob_v2_bottleneck_1(fms_dt bottleneck_input[],
 #pragma HLS INLINE off
 
 	const fms_dt expansion_layer_ofms_zero_point = layer_4_pw_specs.layer_ofms_zero_point;
-	const rec_scales_dt expansion_layer_ofms_scale_rec =
-		layer_4_pw_specs.layer_ofms_scale;//TODO, this may need fix if it is used
-	const rec_scales_dt expansion_layer_ofms_scale =
-		layer_4_pw_specs.layer_ofms_scale;
+	const rec_scales_dt expansion_layer_ofms_scale = layer_4_pw_specs.layer_ofms_scale;
 
-	const fms_dt dw_layer_ofms_zero_point =
-		layer_6_dw_specs.layer_ofms_zero_point;
-	const rec_scales_dt dw_layer_ofms_scale_rec =
-		layer_6_dw_specs.layer_ofms_scale;//TODO, this may need fix if it is used
-	const rec_scales_dt dw_layer_ofms_scale =
-		layer_6_dw_specs.layer_ofms_scale;
-	const fms_dt current_dw_ifms_zero_point =
-		layer_6_dw_specs.layer_ifms_zero_point;;
+	const fms_dt dw_layer_ofms_zero_point = layer_6_dw_specs.layer_ofms_zero_point;
+	const rec_scales_dt dw_layer_ofms_scale = layer_6_dw_specs.layer_ofms_scale;
+	const fms_dt current_dw_ifms_zero_point = layer_6_dw_specs.layer_ifms_zero_point;;
 
 	fms_quantization_scheme expansion_layer_normalization;
-	expansion_layer_normalization.ofm_zero_point =
-		expansion_layer_ofms_zero_point;
-	expansion_layer_normalization.ofm_scale_rec =
-		expansion_layer_ofms_scale_rec;
+	expansion_layer_normalization.ofm_zero_point = expansion_layer_ofms_zero_point;
 	expansion_layer_normalization.ofm_scale = expansion_layer_ofms_scale;
 
 	fms_quantization_scheme dw_layer_normalization;
 	dw_layer_normalization.ofm_zero_point = dw_layer_ofms_zero_point;
-	dw_layer_normalization.ofm_scale_rec = dw_layer_ofms_scale_rec;
 	dw_layer_normalization.ofm_scale = dw_layer_ofms_scale;
 
 	const int dw_kernel_starting_w = expansion_kernel_starting_w - (bottleneck_0_dw_filter_dim - bottleneck_0_dw_padding_left) + 1;
@@ -133,13 +121,13 @@ mob_v2_bottleneck_1:
 #pragma HLS ARRAY_PARTITION variable = projection_kernel_weights type = complete
 
 		expansion_layer_normalization.fused_scales =
-			layer_3_pw_fused_scales[d_in_out];
+			layer_4_pw_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_scales_log_2_shift =
-			layer_3_pw_fused_scales_log_2_shifts[d_in_out];
+			layer_4_pw_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.relu_6_fused_scale =
-			layer_3_pw_relu_6_fused_scales[d_in_out];
+			layer_4_pw_relu_6_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_zero_point =
-			layer_3_pw_fused_zero_points[d_in_out];
+			layer_4_pw_fused_zero_points[d_in_out];
 
 		fms_dt expansion_result[bottleneck_1_expansion_parallelism_h][bottleneck_1_expansion_parallelism_w];
 		fms_dt dw_input_buffer[bottleneck_1_dw_filter_dim * bottleneck_1_dw_filter_dim];
@@ -158,7 +146,7 @@ mob_v2_bottleneck_1:
 					{
 						// in first step, do only one and write it to the second col
 						pss_dt expansion_pss = expansion_kernel(bottleneck_input,
-																pw_weights_3[d_in_out], bottleneck_1_ifms_depth,
+																pw_weights_4[d_in_out], bottleneck_1_ifms_depth,
 																d_in_out, h, w,
 																bottleneck_1_expansion_parallelism_w);
 						expansion_result[h][first_step_in_w + w] = pw_relu_norm(
@@ -210,8 +198,7 @@ mob_v2_bottleneck_1:
 					layer_7_pw_fused_scales_log_2_shifts,
 					layer_7_pw_relu_6_fused_scales,
 					layer_7_pw_fused_zero_points, d_in_out,
-					layer_7_pw_specs.layer_activation,
-					bottleneck_1_projection_layer_index);
+					layer_7_pw_specs.layer_activation, layer_7_pw_specs);
 		}
 	}
 

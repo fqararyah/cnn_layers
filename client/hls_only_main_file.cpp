@@ -21,19 +21,19 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = cyclic factor = main_buffers_partitining_factor
 	//#pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
-// #if CHAIN_LENGTH == 9 && MODEL_ID == 2
-// 	_0_1_2_bottlenecks_chain(input_image,
-// 							 tmp_channels);
-// 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
-// 					  tmp_channels, 56 * 56 * 24, 56, 56);
-// #elif CHAIN_LENGTH == 6 && MODEL_ID == 2
-// 	_0_1_bottlenecks_chain(input_image,
-// 						   channels);
-// #if DEBUGGING
-// 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_5.txt",
-// 					  tmp_channels, 56 * 56 * 24, 56, 56);
-// #endif
-// #endif
+#if CHAIN_LENGTH == 9 && MODEL_ID == 2
+	_0_1_2_bottlenecks_chain(input_image,
+							 tmp_channels);
+	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+					  tmp_channels, 56 * 56 * 24, 56, 56);
+#elif CHAIN_LENGTH == 6 && MODEL_ID == 2
+	_0_1_bottlenecks_chain(input_image,
+						   channels);
+#if DEBUGGING
+	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+					  channels, layer_7_pw_specs);
+#endif
+#endif
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 	seml(off_chip_weights, channels, result, tmp_channels, weights_1, fc_input);
 

@@ -1,6 +1,6 @@
 #include "bottleneck.h"
 
-#if ! ONLY_SEML
+#if !ONLY_SEML
 
 void bottleneck_0_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_0_expanded_ifms_depth],
@@ -25,7 +25,7 @@ bottleneck_0_padding_top_right:
 	for (int d = 0;
 		 d < bottleneck_0_expanded_ifms_depth; d++)
 	{
-		//padding_top
+		// padding_top
 		for (int h = 0; h < bottleneck_0_dw_padding_top; h++)
 		{
 			for (int w = 0; w < bottleneck_0_inter_pass_dw_input_width; w++)
@@ -33,7 +33,7 @@ bottleneck_0_padding_top_right:
 				previous_pass_dw_input[d][h][w] = zero_point;
 			}
 		}
-		//padding_right
+		// padding_right
 		for (int h = bottleneck_0_dw_padding_top; h < bottleneck_0_inter_pass_dw_input_height; h++)
 		{
 			for (int w = bottleneck_0_inter_pass_dw_input_width - bottleneck_0_dw_padding_right;
@@ -134,32 +134,21 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[bottleneck_0_input_buffer_size]
 {
 #pragma HLS INLINE off
 
-	const fms_dt expansion_layer_ofms_zero_point =0;//todo
-		//conv_fms_zero_points[bottleneck_0_expansion_layer_index + 1];
-	const rec_scales_dt expansion_layer_ofms_scale_rec =1;//todo
-		//conv_fms_scales_rec[bottleneck_0_expansion_layer_index + 1];
-	const rec_scales_dt expansion_layer_ofms_scale =1;//todo
-		//conv_fms_scales[bottleneck_0_expansion_layer_index + 1];
+	const fms_dt expansion_layer_ofms_zero_point = layer_1_s_specs.layer_ofms_zero_point;
+	const rec_scales_dt expansion_layer_ofms_scale = layer_1_s_specs.layer_ofms_scale;
 
-	const fms_dt dw_layer_ofms_zero_point =0;//todo
-		//conv_fms_zero_points[bottleneck_0_dw_layer_index + 1];
-	const rec_scales_dt dw_layer_ofms_scale_rec =1;//todo
-		//conv_fms_scales_rec[bottleneck_0_dw_layer_index + 1];
-	const rec_scales_dt dw_layer_ofms_scale =1;//todo
-		//conv_fms_scales[bottleneck_0_dw_layer_index + 1];
-	const fms_dt current_dw_ifms_zero_point =0;//todo
-		//conv_fms_zero_points[bottleneck_0_dw_layer_index];
+	const fms_dt dw_layer_ofms_zero_point = layer_2_dw_specs.layer_ofms_zero_point;
+	const rec_scales_dt dw_layer_ofms_scale = layer_2_dw_specs.layer_ofms_scale;
+	const fms_dt current_dw_ifms_zero_point = layer_2_dw_specs.layer_ifms_zero_point; // todo
+												 // conv_fms_zero_points[bottleneck_0_dw_layer_index];
 
 	fms_quantization_scheme expansion_layer_normalization;
 	expansion_layer_normalization.ofm_zero_point =
 		expansion_layer_ofms_zero_point;
-	expansion_layer_normalization.ofm_scale_rec =
-		expansion_layer_ofms_scale_rec;
 	expansion_layer_normalization.ofm_scale = expansion_layer_ofms_scale;
 
 	fms_quantization_scheme dw_layer_normalization;
 	dw_layer_normalization.ofm_zero_point = dw_layer_ofms_zero_point;
-	dw_layer_normalization.ofm_scale_rec = dw_layer_ofms_scale_rec;
 	dw_layer_normalization.ofm_scale = dw_layer_ofms_scale;
 
 	const int dw_kernel_starting_w = expansion_kernel_starting_w - (bottleneck_0_dw_filter_dim - bottleneck_0_dw_padding_left) + 1;
@@ -237,8 +226,7 @@ mob_v2_bottleneck_0:
 				layer_3_pw_fused_scales,
 				layer_3_pw_fused_scales_log_2_shifts,
 				layer_3_pw_relu_6_fused_scales,
-				layer_3_pw_fused_zero_points, d_in_out, layer_3_pw_specs.layer_activation,
-				bottleneck_0_projection_layer_index);
+				layer_3_pw_fused_zero_points, d_in_out, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
 		}
 	}
 

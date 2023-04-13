@@ -42,7 +42,7 @@ fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 										const biases_dt projection_layer_fused_zero_points[],
 										const int offset_d,
 										const int layer_relu,
-										int bottleneck_projection_layer_index);
+										const layer_specs layer_specs_struct);
 
 pss_f_dt normalize_projection_kernel_output_no_q(pss_dt pss_buffer[],
 										const fused_scales_dt projection_layer_fused_scales[],
@@ -50,4 +50,4 @@ pss_f_dt normalize_projection_kernel_output_no_q(pss_dt pss_buffer[],
 										const biases_dt projection_layer_fused_zero_points[],
 										const int offset_d,
 										const int layer_relu,
-										int bottleneck_projection_layer_index);
+										const layer_specs layer_specs_struct);
