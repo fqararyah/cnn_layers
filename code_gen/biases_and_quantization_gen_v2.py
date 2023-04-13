@@ -6,9 +6,6 @@ import os
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-first_quantization_arrays_elements_threshold = 4000
-first_quantization_arrays_num_of_elements = 0
-
 scales_bit_width = 18
 scales_integer_part_width = 1
 biases_bit_width = 32
@@ -28,6 +25,12 @@ fms_scales_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
 
 #########################################################################
 model_dag = utils.read_model_dag()
+#########################################################################
+overall_quantization_arrays_num_of_elements = 0
+for layer_specs in model_dag:
+    overall_quantization_arrays_num_of_elements += layer_specs['ifms_shape'][0]
+print(overall_quantization_arrays_num_of_elements)
+exit()
 #########################################################################
 
 #########################################################################
