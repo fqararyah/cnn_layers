@@ -2029,4 +2029,14 @@ const layer_specs layer_66_pw_specs = {
                 1,//scales_dt skip_connection_other_layer_scale;
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
+
+struct{
+const pooling_fused_scales_dt fused_scale = 1.1545443951766399;
+const biases_dt ifms_zero_point = -128;
+const biases_dt ofms_zero_point = -128;
+}layer_67_avgpool_specs;
+
+struct{
+const int64_t ifm_zero_point = -128;
+}layer_68_fc_specs;
 #endif

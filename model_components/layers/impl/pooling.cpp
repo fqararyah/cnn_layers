@@ -39,7 +39,9 @@ avgpool_itd_loop:
 				tmp += channels[tile_index * pw_tile_size + in_tile_index];
 			}
 		}
-		pss_f_dt scaled_tmp = (tmp / avgpool_input_hw - pooling_ifms_zero_point) * pooling_fused_scale + pooling_ofms_zero_point;
+		pss_f_dt scaled_tmp = (tmp / avgpool_input_hw - layer_67_avgpool_specs.ifms_zero_point) *
+								  layer_67_avgpool_specs.fused_scale +
+							  layer_67_avgpool_specs.ofms_zero_point;
 
 		result[d] = clamp(scaled_tmp);
 	}

@@ -63,151 +63,173 @@ with open(out_file, 'w') as f:
         layer_type = ''
         if 'type' in layer_specs:
             layer_type = layer_specs['type']
-        if layer_type not in cgc.CONV_LAYER_TYPES:
-            continue
+        if layer_type in cgc.CONV_LAYER_TYPES:
+            layer_weights_shape = layer_specs['weights_shape']
+            layer_weights_size = 1
+            for i in layer_weights_shape:
+                layer_weights_size *= i
+            layer_filter_dim = 1
+            layer_ifms_depth = layer_weights_shape[1]
+            layer_num_fils = layer_weights_shape[0]
+            if layer_type != 'pw':
+                layer_filter_dim = layer_weights_shape[-1]
+            if layer_type == 'dw':
+                layer_ifms_depth = layer_num_fils
 
-        layer_weights_shape = layer_specs['weights_shape']
-        layer_weights_size = 1
-        for i in layer_weights_shape:
-            layer_weights_size *= i
-        layer_filter_dim = 1
-        layer_ifms_depth = layer_weights_shape[1]
-        layer_num_fils = layer_weights_shape[0]
-        if layer_type != 'pw':
-            layer_filter_dim = layer_weights_shape[-1]
-        if layer_type == 'dw':
-            layer_ifms_depth = layer_num_fils
-
-        replacement_list = []
-        #replacement_dic['*PREV*'] = layers_types[i-1]
-        strides = layer_specs['strides']
-        filter_dim = layer_filter_dim
-        num_of_filters = layer_num_fils
-        replacement_list.append(str(layer_index) + '_' + layer_type)
-        replacement_list.append('{')
-        if layer_type == 'pw':
-            replacement_list.append('PW_CONV')
-        elif layer_type == 'dw':
-            replacement_list.append('DW_CONV')
-        else:
-            replacement_list.append('S_CONV')
-        replacement_list.append(num_of_filters)
-        replacement_list.append(strides)
-        replacement_list.append(filter_dim)
-        padding_left = 0
-        padding_right = 0
-        padding_top = 0
-        padding_bottom = 0
-        if layer_type != 'pw':
-            padding = int(filter_dim - strides)
-            if strides == 1:
-                padding_left = int(padding / 2)
-                padding_right = int(padding / 2)
-                padding_top = int(padding / 2)
-                padding_bottom = int(padding / 2)
+            replacement_list = []
+            #replacement_dic['*PREV*'] = layers_types[i-1]
+            strides = layer_specs['strides']
+            filter_dim = layer_filter_dim
+            num_of_filters = layer_num_fils
+            replacement_list.append(str(layer_index) + '_' + layer_type)
+            replacement_list.append('{')
+            if layer_type == 'pw':
+                replacement_list.append('PW_CONV')
+            elif layer_type == 'dw':
+                replacement_list.append('DW_CONV')
             else:
-                padding_right = padding
-                padding_bottom = padding
+                replacement_list.append('S_CONV')
+            replacement_list.append(num_of_filters)
+            replacement_list.append(strides)
+            replacement_list.append(filter_dim)
+            padding_left = 0
+            padding_right = 0
+            padding_top = 0
+            padding_bottom = 0
+            if layer_type != 'pw':
+                padding = int(filter_dim - strides)
+                if strides == 1:
+                    padding_left = int(padding / 2)
+                    padding_right = int(padding / 2)
+                    padding_top = int(padding / 2)
+                    padding_bottom = int(padding / 2)
+                else:
+                    padding_right = padding
+                    padding_bottom = padding
 
-        replacement_list.append(padding_left)
-        replacement_list.append(padding_right)
-        replacement_list.append(padding_top)
-        replacement_list.append(padding_bottom)
+            replacement_list.append(padding_left)
+            replacement_list.append(padding_right)
+            replacement_list.append(padding_top)
+            replacement_list.append(padding_bottom)
 
-        layer_ifms_shape = layer_specs['ifms_shape']
-        layer_depth = layer_ifms_shape[0]
-        layer_height = layer_ifms_shape[1]
-        layer_width = layer_ifms_shape[2]
+            layer_ifms_shape = layer_specs['ifms_shape']
+            layer_depth = layer_ifms_shape[0]
+            layer_height = layer_ifms_shape[1]
+            layer_width = layer_ifms_shape[2]
 
-        if model_dag[layer_index - 1]['name'] == 'pad':
-            layer_width -= padding_right
-            layer_height -= padding_bottom
+            if model_dag[layer_index - 1]['name'] == 'pad':
+                layer_width -= padding_right
+                layer_height -= padding_bottom
 
-        replacement_list.append(layer_depth)
-        replacement_list.append(layer_height)
-        replacement_list.append(layer_width)
+            replacement_list.append(layer_depth)
+            replacement_list.append(layer_height)
+            replacement_list.append(layer_width)
 
-        replacement_list.append(int(layer_height / strides))
-        replacement_list.append(int(layer_width / strides))
+            replacement_list.append(int(layer_height / strides))
+            replacement_list.append(int(layer_width / strides))
 
-        layer_activation = ''
-        if layer_specs['activation'] == 'relu6':
-            layer_activation = '6'
-        elif layer_specs['activation'] == 'sigmoid':
-            layer_activation = '2'
-        else:
-            layer_activation = '0'
+            layer_activation = ''
+            if layer_specs['activation'] == 'relu6':
+                layer_activation = '6'
+            elif layer_specs['activation'] == 'sigmoid':
+                layer_activation = '2'
+            else:
+                layer_activation = '0'
 
-        replacement_list.append(layer_activation)
+            replacement_list.append(layer_activation)
 
-        replacement_list.append(
-            '(' + str(layer_depth) + ' + pw_tile_d - 1) / pw_tile_d')
-        replacement_list.append('(' + str(num_of_filters) +
-                                ' + pw_conv_parallelism_out) / pw_conv_parallelism_out')
+            replacement_list.append(
+                '(' + str(layer_depth) + ' + pw_tile_d - 1) / pw_tile_d')
+            replacement_list.append('(' + str(num_of_filters) +
+                                    ' + pw_conv_parallelism_out) / pw_conv_parallelism_out')
 
-        replacement_list.append(
-            '(' + str(layer_height) + ' + pw_tile_h - 1) / pw_tile_h')
-        replacement_list.append(
-            '(' + str(layer_width) + ' + pw_tile_w - 1) / pw_tile_w')
+            replacement_list.append(
+                '(' + str(layer_height) + ' + pw_tile_h - 1) / pw_tile_h')
+            replacement_list.append(
+                '(' + str(layer_width) + ' + pw_tile_w - 1) / pw_tile_w')
 
-        replacement_list.append(
-            '(' + str(int(layer_height / strides)) + ' + pw_tile_h - 1) / pw_tile_h')
-        replacement_list.append(
-            '(' + str(int(layer_width / strides)) + ' + pw_tile_w - 1) / pw_tile_w')
+            replacement_list.append(
+                '(' + str(int(layer_height / strides)) + ' + pw_tile_h - 1) / pw_tile_h')
+            replacement_list.append(
+                '(' + str(int(layer_width / strides)) + ' + pw_tile_w - 1) / pw_tile_w')
 
-        replacement_list.append(
-            str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
+            replacement_list.append(
+                str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
 
-        if layer_type == 'pw' and i > 0:
-            replacement_list.append(cumulative_pw_weights)
-            cumulative_pw_weights += int(
-                layer_weights_size / weights_group_items)
-        else:
-            replacement_list.append(0)
+            if layer_type == 'pw' and i > 0:
+                replacement_list.append(cumulative_pw_weights)
+                cumulative_pw_weights += int(
+                    layer_weights_size / weights_group_items)
+            else:
+                replacement_list.append(0)
 
-        write_to_tmp = 0
-        fused_with_add = 0
-        add_layer_scale_reciprocal = 1
-        add_layer_zero_point = 0
-        skip_connection_other_layer_scale = 1
-        skip_connection_other_layer_zero_point = 0
+            write_to_tmp = 0
+            fused_with_add = 0
+            add_layer_scale_reciprocal = 1
+            add_layer_zero_point = 0
+            skip_connection_other_layer_scale = 1
+            skip_connection_other_layer_zero_point = 0
 
-        layer_children = layer_specs['children']
-        if len(layer_children) > 1:
-            write_to_tmp = 1
-
-        if model_dag[layer_children[0]]['name'] == 'add':
-            add_layer_specs = model_dag[layer_children[0]]
-            the_other_conv_layer_specs = model_dag[add_layer_specs['parents'][0]]
-            fused_with_add = 1
-            add_layer_scale_reciprocal = 1 / add_layer_specs['ofms_scales']
-            add_layer_zero_point = add_layer_specs['ofms_zero_points']
-            skip_connection_other_layer_scale = the_other_conv_layer_specs['ofms_scales']
-            skip_connection_other_layer_zero_point = the_other_conv_layer_specs['ofms_zero_points']
-            if len(add_layer_specs['children']) > 1:
-                #if the fused add layer is a beginning of a branch
+            layer_children = layer_specs['children']
+            if len(layer_children) > 1:
                 write_to_tmp = 1
 
-        replacement_list.append(write_to_tmp)
-        replacement_list.append(fused_with_add)
+            if model_dag[layer_children[0]]['name'] == 'add':
+                add_layer_specs = model_dag[layer_children[0]]
+                the_other_conv_layer_specs = model_dag[add_layer_specs['parents'][0]]
+                fused_with_add = 1
+                add_layer_scale_reciprocal = 1 / add_layer_specs['ofms_scales']
+                add_layer_zero_point = add_layer_specs['ofms_zero_points']
+                skip_connection_other_layer_scale = the_other_conv_layer_specs['ofms_scales']
+                skip_connection_other_layer_zero_point = the_other_conv_layer_specs[
+                    'ofms_zero_points']
+                if len(add_layer_specs['children']) > 1:
+                    # if the fused add layer is a beginning of a branch
+                    write_to_tmp = 1
 
-        replacement_list.append(layer_specs['ifms_zero_points'])
-        replacement_list.append(layer_specs['ofms_scales'])
-        replacement_list.append(layer_specs['ofms_zero_points'])
+            replacement_list.append(write_to_tmp)
+            replacement_list.append(fused_with_add)
 
-        replacement_list.append(add_layer_scale_reciprocal)
-        replacement_list.append(add_layer_zero_point)
-        replacement_list.append(skip_connection_other_layer_scale)
-        replacement_list.append(skip_connection_other_layer_zero_point)
+            replacement_list.append(layer_specs['ifms_zero_points'])
+            replacement_list.append(layer_specs['ofms_scales'])
+            replacement_list.append(layer_specs['ofms_zero_points'])
 
-        replacement_list.append('}')
+            replacement_list.append(add_layer_scale_reciprocal)
+            replacement_list.append(add_layer_zero_point)
+            replacement_list.append(skip_connection_other_layer_scale)
+            replacement_list.append(skip_connection_other_layer_zero_point)
 
-        to_write_specs_block = specs_block.format(layer_index, layer_type, layer_num_fils,
-                           layer_index, layer_type, layer_ifms_depth,
-                           layer_index, layer_type, layer_filter_dim,
-                           layer_index, layer_type, layer_width)
-        f.write(to_write_specs_block)
+            replacement_list.append('}')
 
-        f.write(specs_struct.format(*replacement_list))
+            to_write_specs_block = specs_block.format(layer_index, layer_type, layer_num_fils,
+                                                      layer_index, layer_type, layer_ifms_depth,
+                                                      layer_index, layer_type, layer_filter_dim,
+                                                      layer_index, layer_type, layer_width)
+            f.write(to_write_specs_block)
+
+            f.write(specs_struct.format(*replacement_list))
+        elif 'type' in layer_specs:
+            layer_type = layer_specs['type']
+            layer_specs_struct_str = '\nstruct{}\n{}{}{};\n'
+            struct_var_name = 'layer_' + str(layer_specs['id']) + '_' + layer_type + '_specs' 
+            struct_var_body = ''
+
+            if layer_type == 'avgpool':
+                parent_layer_specs = model_dag[layer_specs['parents'][0]]
+                struct_var_body += 'const pooling_fused_scales_dt fused_scale = '
+                pooling_ofms_scale = layer_specs['ofms_scales']
+                pooling_ifms_scale = parent_layer_specs['ofms_scales']
+                pooling_fused_scale = pooling_ifms_scale / pooling_ofms_scale
+                struct_var_body += str(pooling_fused_scale) + ';\n'
+
+                pooling_ofms_zero_points = layer_specs['ofms_zero_points']
+                pooling_ifms_zero_points = parent_layer_specs['ofms_zero_points']
+                struct_var_body += 'const biases_dt ifms_zero_point = ' + str(pooling_ifms_zero_points) + ';\n'
+                struct_var_body += 'const biases_dt ofms_zero_point = ' + str(pooling_ofms_zero_points) + ';\n'
+            elif layer_type == 'fc':
+                struct_var_body += 'const int64_t ifm_zero_point = ' + str(layer_specs['ifms_zero_points']) + ';\n'
+
+            layer_specs_struct_str = layer_specs_struct_str.format('{', struct_var_body, '}', struct_var_name)
+            f.write(layer_specs_struct_str)
 
     f.write('#endif\n')

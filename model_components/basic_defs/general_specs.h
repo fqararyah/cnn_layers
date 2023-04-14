@@ -41,6 +41,7 @@ const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
 const int alpha = 1;
 
 // fc_layer
+const int FC_LAYER_INDEX = 68;
 const int fc_layer_input_size = 1280;
 const int fc_cols = 1000;
 

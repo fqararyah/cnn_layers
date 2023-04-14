@@ -8,7 +8,15 @@ from code_gen import utils
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
+IN_PLACE_OPS = ['pad', 'add']
+
 PRECISION = 8
+
+def is_in_place(op_name):
+    for in_place_op in IN_PLACE_OPS:
+        if in_place_op in op_name:
+            return True
+    return False
 
 def calc_fms_memory(model_dag, starting_layer):
     current_layer = model_dag[starting_layer]
@@ -16,7 +24,7 @@ def calc_fms_memory(model_dag, starting_layer):
     ifms_size = 1
     for i in ifms_shape:
         ifms_size *= i
-    if 'pad' in current_layer['name'] or 'add' in current_layer['name']:#padding is inplace
+    if is_in_place(current_layer['name']):
         ifms_size = 0
     ofms_shape = current_layer['ofms_shape']
     ofms_size = 1
@@ -42,7 +50,7 @@ def calc_fms_memory(model_dag, starting_layer):
         ifms_size = 1
         for i in ifms_shape:
             ifms_size *= i
-        if 'pad' in current_layer['name'] or 'add' in current_layer['name']:#padding is inplace
+        if is_in_place(current_layer['name']):
             ifms_size = 0
         ofms_shape = current_layer['ofms_shape']
         ofms_size = 1

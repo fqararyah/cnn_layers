@@ -103,7 +103,7 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
             pss += (int64_t)weights[row_start_index + j] * in_vector[j];
         }
         // if(i==999)cout << pss <<" "<<weight_sums[i]<<" "<<biases[i]<<"\n";
-        pss_vector[i] = pss + (-weight_sums[i] * ifm_zero_point) + biases[i];
+        pss_vector[i] = pss + (-weight_sums[i] * layer_68_fc_specs.ifm_zero_point) + biases[i];
     }
     for (int i = 0; i < 5; i++)
     {

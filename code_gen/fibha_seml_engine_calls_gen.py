@@ -65,7 +65,16 @@ with open(in_out_header_file, 'w') as f:
 file_replacement = ''
 in_a_code_gen_area = False
 insert_index = -1
-layers_to_generate = [cgc.FIRST_LAYER_TO_GENERATE,
+
+first_seml_layer_to_generate = 0
+conv_layers_so_far = 0
+while conv_layers_so_far < cgc.FIRST_LAYER_TO_GENERATE:
+    if 'type' in model_dag[first_seml_layer_to_generate] and model_dag[first_seml_layer_to_generate]['type'] in cgc.CONV_LAYER_TYPES:
+        conv_layers_so_far += 1
+
+    first_seml_layer_to_generate += 1 
+
+layers_to_generate = [first_seml_layer_to_generate,
                       cgc.LAST_LAYER_TO_GENERATE + 1 if cgc.LAST_LAYER_TO_GENERATE != -1 else len(model_dag)]
 
 with open(in_out_file, 'r') as f:

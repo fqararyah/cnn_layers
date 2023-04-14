@@ -11,11 +11,6 @@ using namespace std;
 #define CPP_FC
 const int num_classes = 1000;
 
-const double weights_scale = 1.873968634754419327e-03;
-const double ifms_scale = 0.020379824563860893;
-const double biases_scale = 3.819115227088332176e-05;
-const int64_t ifm_zero_point = -128;
-
 void read_ifms(string file_name,
                int8_t ifms[]);
 
