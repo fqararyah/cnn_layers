@@ -3,7 +3,7 @@
 #if FIBHA_VERSION == 2
 #ifndef CONV_WEIGHTS_3x3
 #define CONV_WEIGHTS_3x3
-const static weights_dt s_3x3_weights[][9] ={
+const static weights_dt on_chip_s_3x3_weights[][9] ={
 {-32, -53, -13, 52, 71, 32, -18, 1, -17},
 {-59, -86, -19, 96, 127, 41, -31, -5, -19},
 {-20, -24, -11, 30, 37, 13, -10, 0, -8},

@@ -14,8 +14,8 @@ weights_file_format = 'weights_{}.txt'
 conv_weights_h_file_3x3 = '../model_components/model/headers/on_chip_conv_weights_v2.h'
 pw_weights_h_file = '../model_components/model/headers/on_chip_pw_weights_v2.h'
 
-s_3x3_conv_weights_declaration_string = 'const static weights_dt s_3x3_weights[][9] ={\n'
-pw_weights_declaration_string = 'const static weights_dt pw_weights[] = {\n'
+s_3x3_conv_weights_declaration_string = 'const static weights_dt on_chip_s_3x3_weights[][9] ={\n'
+pw_weights_declaration_string = 'const static weights_dt on_chip_pw_weights[] = {\n'
 
 s_3x3_conv_weights = None
 pw_weights = None

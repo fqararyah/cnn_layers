@@ -148,9 +148,9 @@ void pipelined_engines::write_next_overlap_and_read_current(fms_dt dw_pipe_overl
     const int filter_minus_strides = layer_specs_struct.filter_size - layer_specs_struct.strides;
     for (int d = 0; d < PARALLELISM_PW_OFMS; d++)
     {
+#pragma HLS PIPELINE II = 2
         for (int h = 0; h < MAX_DW_STRIDES_IN_PIPE; h++)
         {
-#pragma HLS PIPELINE
             if (h >= filter_minus_strides)
             {
                 break;
@@ -273,8 +273,8 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                    fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                    fms_dt tmp_channels[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][MAX_PW_BUFFER_WIDTH],
                                    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
-                                   int pw_layer,
-                                   int dw_layer,
+                                   fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][DW_TILE_WIDTH_PADDED],
+                                   fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][DW_TILE_WIDTH_PADDED],
                                    const layer_specs pw_layer_specs_struct,
                                    const layer_specs dw_layer_specs_struct,
                                    const fused_scales_dt fused_scales[],
@@ -306,9 +306,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
 
     fms_dt normalized_tile[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W];
     fms_dt normalized_tile_copy[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W];
-
-    fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][DW_TILE_WIDTH_PADDED];
-    fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][DW_TILE_WIDTH_PADDED];
 
     dw_pss_dt dw_result_tile[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH];
     dw_pss_dt dw_result_tile_copy[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH];
