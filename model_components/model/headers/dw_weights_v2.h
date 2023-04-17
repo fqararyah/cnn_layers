@@ -1,4 +1,5 @@
 #include "../../basic_defs/basic_defs_glue.h"
+#if FIBHA_VERSION == 2
 #ifndef DW_WEIGHTS
 #define DW_WEIGHTS
 const static dw_weights_dt pipe_dw_weights_3x3[][9] = {
@@ -21158,4 +21159,5 @@ const static dw_weights_dt seml_dw_weights_3x3[][9] = {
 121, 94, 115},
 };
 const static int dw_layers_weights_offsets[] ={0, 0, 0, 32, 32, 32, 32, 128, 128, 128, 272, 272, 272, 272, 272, 416, 416, 416, 608, 608, 608, 608, 800, 800, 800, 800, 800, 992, 992, 992, 1376, 1376, 1376, 1376, 1760, 1760, 1760, 1760, 2144, 2144, 2144, 2144, 2528, 2528, 2528, 3104, 3104, 3104, 3104, 3680, 3680, 3680, 3680, 3680, 4256, 4256, 4256, 5216, 5216, 5216, 5216, 6176, 6176, 6176, 6176, 7136, 7136, 7136, 7136, 7136, 7136, 7136, 0};
+#endif
 #endif

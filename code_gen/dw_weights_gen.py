@@ -11,7 +11,7 @@ weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scrip
     cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-dw_weights_h_file = '../model_components/model/headers/dw_weights_v{}.h'.format(cgc.FIBHA_VERSION)
+dw_weights_h_file = '../model_components/model/headers/dw_weights.h'.format(cgc.FIBHA_VERSION_POSTFIX)
 
 pipe_dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_dim * layer_*i*_dw_filter_dim]'
 pipe_dw_weights_declaration_string_v2 = 'const static dw_weights_dt pipe_dw_weights_3x3[][9] = {\n'
@@ -37,6 +37,7 @@ current_index = 0
 num_of_layers_generated_for = 0
 with open(dw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
+    f.write("#if FIBHA_VERSION == " + str(cgc.FIBHA_VERSION) + '\n')
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
@@ -135,4 +136,5 @@ with open(dw_weights_h_file, 'w') as f:
         f.write('};\n')
         f.write(dw_layers_weights_offsets_declaration_string +
                 str(dw_layers_weights_offsets).replace('[', '').replace(']', '') + '};\n')
+    f.write('#endif\n')
     f.write('#endif\n')

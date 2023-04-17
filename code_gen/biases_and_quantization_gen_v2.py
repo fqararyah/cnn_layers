@@ -63,24 +63,27 @@ biases_file_format = biases_files_location + 'biases_{}.txt'
 
 
 # './out/dw_weights.h'
-h_file = '../model_components/model/headers/quantization_and_biases.h'
+h_file = '../model_components/model/headers/quantization_and_biases{}.h'.format(
+    cgc.FIBHA_VERSION_POSTFIX)
 
 layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
+pipe_layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
 layers_fused_parameters_offsets_declaration_string = 'const static int layers_fused_parameters_offsets[] = { \n'
-
+pipe_layers_fused_parameters_offsets_declaration_string = 'const static int pipe_layers_fused_parameters_offsets[] = { \n'
 
 weights_zero_points_declaration_string = 'const static fms_dt weights_zero_points[] = {'
 last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
+    wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION)+'\n')
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 
     # for now, I am getting the average pooling quantization manually from netron
     # wf.write('const pooling_fused_scales_dt pooling_fused_scale = ' +
     #          str(0.0235294122248888 / 0.020379824563860893) + ';\n')
-    #assert(0.0235294122248888 / 0.020379824563860893 < 1)
-    #assert(0.0235294122248888 / 0.020379824563860893 > 0.1)
+    # assert(0.0235294122248888 / 0.020379824563860893 < 1)
+    # assert(0.0235294122248888 / 0.020379824563860893 > 0.1)
     # wf.write('const biases_dt pooling_ifms_zero_point = -128;\n')
     # wf.write('const biases_dt pooling_ofms_zero_point = -128;\n')
 
@@ -89,12 +92,18 @@ with open(h_file, 'w') as wf:
     seml_fused_scales = []
     seml_fused_scales_log_2_shifts = []
     seml_relu_6_fused_scales = []
+    pipe_fused_zero_points = []
+    pipe_fused_scales = []
+    pipe_fused_scales_log_2_shifts = []
+    pipe_relu_6_fused_scales = []
     to_generate_for_layers = cgc.LAST_LAYER_TO_GENERATE if cgc.LAST_LAYER_TO_GENERATE > 0 else len(
         model_dag)
     num_of_generated_for_layers = 0
     for layer_index in range(to_generate_for_layers):
         layers_fused_parameters_offsets[layer_index +
                                         1] = layers_fused_parameters_offsets[layer_index]
+        pipe_layers_fused_parameters_offsets[layer_index +
+                                        1] = pipe_layers_fused_parameters_offsets[layer_index]
         layer_specs = model_dag[layer_index]
         layer_type = ''
         if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
@@ -154,6 +163,9 @@ with open(h_file, 'w') as wf:
         if (cgc.PIPELINE == False or num_of_generated_for_layers >= cgc.PIPELINE_LEN):
             layers_fused_parameters_offsets[layer_index +
                                             1] += layer_weight_shape[0]
+        else:
+            pipe_layers_fused_parameters_offsets[layer_index +
+                                        1] += layer_weight_shape[0]
 
         with open(weights_scales_file_format.format(layer_index), 'r') as f:
             ifms_scale = layer_specs['ifms_scales']
@@ -190,7 +202,8 @@ with open(h_file, 'w') as wf:
                         utils.NET_PREFIX in [
                             'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5']
 
-        if cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN or num_of_generated_for_layers == 0:
+        if ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
+                or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 1:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
                 layer_index, layer_type)
             fused_zero_points_declaration_string += '{ ' + str(
@@ -215,6 +228,12 @@ with open(h_file, 'w') as wf:
             wf.write(fused_scales_declaration_string)
             wf.write(fused_scales_log_2_shifts_declaration_string)
             wf.write(relu_6_fused_scales_declaration_string)
+        elif ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
+              or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 2:
+            pipe_fused_scales.extend(fused_scales)
+            pipe_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
+            pipe_relu_6_fused_scales.extend(relu_6_fused_scales)
+            pipe_fused_zero_points.extend(fused_zero_points)
         else:
             if first_quantization_arrays_num_of_elements < first_quantization_arrays_elements_threshold:
                 first_quantization_arrays_num_of_elements += len(fused_scales)
@@ -229,6 +248,32 @@ with open(h_file, 'w') as wf:
 
     wf.write(layers_fused_parameters_offsets_declaration_string +
              str(layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
+    wf.write(pipe_layers_fused_parameters_offsets_declaration_string +
+             str(pipe_layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
+########################################################################################################
+    if cgc.FIBHA_VERSION == 2 and cgc.PIPELINE_LEN > 0:
+        pipe_fused_zero_points_declaration_string = 'const static biases_dt pipe_fused_zero_points[] = \n'
+
+        pipe_fused_zero_points_declaration_string += '{ ' + str(
+            pipe_fused_zero_points[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+
+        pipe_fused_scales_declaration_string = 'const static fused_scales_dt pipe_fused_scales[] ='
+        pipe_fused_scales_declaration_string += '{ ' + str(
+            pipe_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+
+        pipe_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt pipe_fused_scales_log_2_shifts[] ='
+        pipe_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
+            pipe_fused_scales_log_2_shifts[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+
+        pipe_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt pipe_relu_6_fused_scales[] ='
+        pipe_relu_6_fused_scales_declaration_string += '{ ' + str(
+            pipe_relu_6_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+
+        if cgc.LAST_LAYER_TO_GENERATE >= cgc.PIPELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
+            wf.write(pipe_fused_zero_points_declaration_string)
+            wf.write(pipe_fused_scales_declaration_string)
+            wf.write(pipe_fused_scales_log_2_shifts_declaration_string)
+            wf.write(pipe_relu_6_fused_scales_declaration_string)
 ########################################################################################################
     seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = \n'
 
@@ -276,6 +321,7 @@ with open(h_file, 'w') as wf:
         wf.write(seml_fused_scales_log_2_shifts_declaration_string)
         wf.write(seml_relu_6_fused_scales_declaration_string)
 ########################################################################################################
+    wf.write("#endif\n")
     wf.write("#endif\n")
 
 

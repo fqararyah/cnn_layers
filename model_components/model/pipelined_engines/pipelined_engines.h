@@ -2,6 +2,9 @@
 #define PIPELINED_ENGINES
 
 #include "../../basic_defs/basic_defs_glue.h"
+#include "../headers/quantization_and_biases.h"
+#include "../headers/model_glue.h"
+#include "../headers/quantization_and_biases_v2.h"
 #include "../../layers/headers/norm_act.h"
 #include "pipelined_engines_specs.h"
 
@@ -20,11 +23,11 @@ namespace pipelined_engines
                                           const int current_layer_fused_parameters_offset);
 
     void load_pw_weights(const weights_dt pw_weights[],
-                         weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_DW_BUFFER_DEPTH],
-                         layer_specs layer_specs_struct,
-                         const int starting_filter);
+                         weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
+                         const int starting_filter,
+                         layer_specs layer_specs_struct);
 
-    void pw_conv_engine(weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_DW_BUFFER_DEPTH],
+    void pw_conv_engine(weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
                         fms_dt channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                         pss_dt engine_result[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
                         const int starting_filter,
@@ -64,7 +67,6 @@ namespace pipelined_engines
         dw_weights_dt weights[][MAX_DW_FILTER_AREA_IN_PIPE],
         fms_dt channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][DW_TILE_WIDTH_PADDED],
         dw_pss_dt result_tile[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH],
-        const int starting_d,
         layer_specs layer_specs_struct);
 
     void dw_normalize_and_write_back_result_tile(fms_dt result[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH],
@@ -79,9 +81,11 @@ namespace pipelined_engines
                                                  layer_specs layer_specs_struct);
 
     void pw_dw_conv(const weights_dt pw_weights[],
+                    const dw_weights_dt weights[][3 * 3],
                     fms_dt channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt result[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][MAX_PW_BUFFER_WIDTH],
                     fms_dt tmp_channels[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][MAX_PW_BUFFER_WIDTH],
+                    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
                     int pw_layer,
                     int dw_layer,
                     const layer_specs pw_layer_specs_struct,
