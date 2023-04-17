@@ -89,6 +89,7 @@ const int input_image_num_fms_groups_in_a_channel = input_image_num_fms_groups_i
 
 struct layer_specs
 {
+	int layer_index;
 	conv_type conv_layer_type;
 	int layer_num_fils;
 	int strides;
@@ -111,6 +112,7 @@ struct layer_specs
 	int layer_num_of_ofm_tiles_w;
 	int layer_num_of_weight_groups_for_one_pass;
 	int layer_weights_offset;
+	int dw_ifms_cumulative_width_offset;
 	bool write_to_tmp;
 	bool fused_with_add;
 	fms_dt layer_ifms_zero_point;

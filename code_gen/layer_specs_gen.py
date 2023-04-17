@@ -10,6 +10,7 @@ out_file = '../model_components/model/headers/layers_specs.h'  # './out/layers_s
 weights_group_items = 64
 
 specs_struct = 'const layer_specs layer_{}_specs = {}\n\
+                {},//layer_index;\n\
                 {},//conv_layer_type;; \n\
                 {},//layer_num_fils \n\
                 {},//strides;\n\
@@ -32,6 +33,7 @@ specs_struct = 'const layer_specs layer_{}_specs = {}\n\
                 {},//layer_num_of_ofm_tiles_w;\n\
                 {},//layer_num_of_weight_groups_for_one_pass;\n\
                 {},//layer_weights_offset;\n\
+                {},//dw_ifms_cumulative_width_offset;\n\
                 {},//bool write_to_tmp;\n\
                 {},//bool fused_with_add;\n\
                 {},//fms_dt layer_ifms_zero_point;\n\
@@ -54,6 +56,8 @@ model_dag = utils.read_model_dag()
 
 current_block_indx = 0
 cumulative_pw_weights = 0
+cumulative_dw_weights = 0
+dw_ifms_cumulative_width_offset = 0
 with open(out_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef LAYERS_SPECS\n")
@@ -83,6 +87,7 @@ with open(out_file, 'w') as f:
             num_of_filters = layer_num_fils
             replacement_list.append(str(layer_index) + '_' + layer_type)
             replacement_list.append('{')
+            replacement_list.append(layer_index)
             if layer_type == 'pw':
                 replacement_list.append('PW_CONV')
             elif layer_type == 'dw':
@@ -158,9 +163,17 @@ with open(out_file, 'w') as f:
 
             if layer_type == 'pw' and i > 0:
                 replacement_list.append(cumulative_pw_weights)
+                replacement_list.append(0)
                 cumulative_pw_weights += int(
                     layer_weights_size / weights_group_items)
+            elif layer_type == 'dw':
+                replacement_list.append(cumulative_dw_weights)
+                replacement_list.append(dw_ifms_cumulative_width_offset)
+                dw_ifms_cumulative_width_offset += int(layer_width) * layer_depth * (layer_filter_dim - strides)
+                cumulative_dw_weights += int(
+                    layer_depth)
             else:
+                replacement_list.append(0)
                 replacement_list.append(0)
 
             write_to_tmp = 0
@@ -211,7 +224,8 @@ with open(out_file, 'w') as f:
         elif 'type' in layer_specs:
             layer_type = layer_specs['type']
             layer_specs_struct_str = '\nstruct{}\n{}{}{};\n'
-            struct_var_name = 'layer_' + str(layer_specs['id']) + '_' + layer_type + '_specs' 
+            struct_var_name = 'layer_' + \
+                str(layer_specs['id']) + '_' + layer_type + '_specs'
             struct_var_body = ''
 
             if layer_type == 'avgpool':
@@ -224,12 +238,16 @@ with open(out_file, 'w') as f:
 
                 pooling_ofms_zero_points = layer_specs['ofms_zero_points']
                 pooling_ifms_zero_points = parent_layer_specs['ofms_zero_points']
-                struct_var_body += 'const biases_dt ifms_zero_point = ' + str(pooling_ifms_zero_points) + ';\n'
-                struct_var_body += 'const biases_dt ofms_zero_point = ' + str(pooling_ofms_zero_points) + ';\n'
+                struct_var_body += 'const biases_dt ifms_zero_point = ' + \
+                    str(pooling_ifms_zero_points) + ';\n'
+                struct_var_body += 'const biases_dt ofms_zero_point = ' + \
+                    str(pooling_ofms_zero_points) + ';\n'
             elif layer_type == 'fc':
-                struct_var_body += 'const int64_t ifm_zero_point = ' + str(layer_specs['ifms_zero_points']) + ';\n'
+                struct_var_body += 'const int64_t ifm_zero_point = ' + \
+                    str(layer_specs['ifms_zero_points']) + ';\n'
 
-            layer_specs_struct_str = layer_specs_struct_str.format('{', struct_var_body, '}', struct_var_name)
+            layer_specs_struct_str = layer_specs_struct_str.format(
+                '{', struct_var_body, '}', struct_var_name)
             f.write(layer_specs_struct_str)
 
     f.write('#endif\n')

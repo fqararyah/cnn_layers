@@ -21,6 +21,7 @@ num_of_generated_layers = 0
 with open(conv_pw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#include "layers_specs.h"\n')
+    f.write("#if FIBHA_VERSION == 1\n")
     f.write("#ifndef CONV_PW_WEIGHTS\n")
     f.write("#define CONV_PW_WEIGHTS\n")
 
@@ -70,4 +71,5 @@ with open(conv_pw_weights_h_file, 'w') as f:
             f.write('},\n')
         f.write('};\n')
 
+    f.write('#endif\n')
     f.write('#endif\n')
