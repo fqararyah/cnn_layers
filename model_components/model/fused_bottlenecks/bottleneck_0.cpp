@@ -1,6 +1,6 @@
 #include "bottleneck.h"
 
-#if !ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && !ONLY_SEML
 
 void bottleneck_0_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_0_expanded_ifms_depth],

@@ -1,6 +1,6 @@
 #include "bottleneck_kernels.h"
 
-#if ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && ! ONLY_SEML
 
 //*************************
 pss_dt conv_kernel(fms_dt ifms_buffer[],

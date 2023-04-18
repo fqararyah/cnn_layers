@@ -1,6 +1,6 @@
 #include "bottlenecks_chain.h"
 
-#if CHAIN_LENGTH == 9 && MODEL_ID != 1  && ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH == 9 && MODEL_ID != 1  && ! ONLY_SEML
 // padding left and right
 // padding top: just do not fill
 void bottleneck_chain_0_1_2_fill_ifm_groups_buffer(

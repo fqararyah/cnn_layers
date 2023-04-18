@@ -18,6 +18,8 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_2.cpp \
 	./model_components/model/fused_bottlenecks/bottlenecks_chain.cpp \
 	./model_components/model/fused_bottlenecks/bottlenecks_chain_0_1_2.cpp \
+	./model_components/model/pipelined_engines/pipelined_engines.cpp \
+	./model_components/model/pipelined_engines/pipeline_main.cpp \
 	./tests/test_utils.cpp \
 	./tests/main_tester.cpp
 	g++ -o main_tester ./model_components/utils/utils.cpp \
@@ -40,5 +42,7 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_2.cpp \
 	./model_components/model/fused_bottlenecks/bottlenecks_chain.cpp \
 	./model_components/model/fused_bottlenecks/bottlenecks_chain_0_1_2.cpp \
+	./model_components/model/pipelined_engines/pipelined_engines.cpp \
+	./model_components/model/pipelined_engines/pipeline_main.cpp \
 	./tests/test_utils.cpp \
 	./tests/main_tester.cpp

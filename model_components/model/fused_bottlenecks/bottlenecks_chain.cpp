@@ -1,6 +1,6 @@
 #include "bottlenecks_chain.h"
 
-#if CHAIN_LENGTH == 6 && MODEL_ID != 1  && ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && FIBHA_VERSION == 1 && CHAIN_LENGTH == 6 && MODEL_ID != 1  && ! ONLY_SEML
 
 // padding left and right
 // padding top: just do not fill

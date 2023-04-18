@@ -12,15 +12,13 @@ namespace pipelined_engines
 {
 
     void fill_fused_scales_and_zps_buffer(const fused_scales_dt fused_scales[],
-                                          fused_scales_dt fused_scales_buffer[],
                                           const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-                                          fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[],
                                           const relu_6_fused_scales_dt relu_6_fused_scales[],
-                                          relu_6_fused_scales_dt relu_6_fused_scales_buffer[],
                                           const biases_dt fused_zero_points[],
-                                          biases_dt fused_zero_points_buffer[],
+                                          fms_quantization_scheme normalization_buffer[],
                                           int starting_d,
-                                          const int current_layer_fused_parameters_offset);
+                                          const int current_layer_fused_parameters_offset,
+                                          const layer_specs layer_specs_struct);
 
     void load_pw_weights(const weights_dt pw_weights[],
                          weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
@@ -46,16 +44,14 @@ namespace pipelined_engines
 
     void pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
                                     fms_dt normalized_tile[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
-                                    const fused_scales_dt fused_scales[],
-                                    const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-                                    const relu_6_fused_scales_dt relu_6_fused_scales[],
-                                    const biases_dt fused_zero_points[],
+                                    const fms_quantization_scheme normalization_buffer[],
                                     const layer_specs layer_specs_struct);
 
     void write_next_overlap_and_read_current(fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
                                              fms_dt normalized_tile[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
                                              fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][DW_TILE_WIDTH_PADDED],
-                                             const int starting_d,
+                                             const int starting_d_read,
+                                             const int starting_d_write,
                                              const int starting_w,
                                              layer_specs layer_specs_struct);
 
@@ -69,13 +65,9 @@ namespace pipelined_engines
         dw_pss_dt result_tile[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH],
         layer_specs layer_specs_struct);
 
-    void dw_normalize_and_write_back_result_tile(fms_dt result[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH],
-                                                 dw_pss_dt result_tile[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                                                 fms_quantization_scheme normalization,
-                                                 const fused_scales_dt fused_scales_tile[],
-                                                 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_tile[],
-                                                 const relu_6_fused_scales_dt relu_6_fused_scales_tile[],
-                                                 const biases_dt fused_zero_points_tile[],
+    void dw_normalize_and_write_back_result_tile(dw_pss_dt result_tile[DW_TILE_DEPTH][MAX_PW_BUFFER_HEIGHT][DW_TILE_WIDTH],
+                                                 fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+                                                 const fms_quantization_scheme normalization_buffer[],
                                                  const int starting_d,
                                                  const int starting_w,
                                                  layer_specs layer_specs_struct);

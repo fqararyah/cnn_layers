@@ -1,17 +1,47 @@
 #include "prepare_weights_and_inputs.h"
+#include "../model_components/model/pipelined_engines/pipelined_engines_specs.h"
+
+using namespace pipelined_engines;
+
+void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+								  const int starting_h, const layer_specs layer_specs_struct)
+{
+
+	const int ifms_h = layer_specs_struct.layer_ifm_height;
+	const int ifms_w = layer_specs_struct.layer_ifm_width;
+	const int ifms_hw = ifms_h * ifms_w;
+	const int lines_to_skip = starting_h;
+
+	int a;
+	int line = 0;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+	while (infile >> a)
+	{
+		int d = line / ifms_hw;
+		int h = ((line % ifms_hw) / ifms_w) % MAX_PW_BUFFER_HEIGHT;
+		int abs_h = ((line % ifms_hw) / ifms_w);
+		int w = line % ifms_w;
+		line++;
+		if (abs_h < lines_to_skip || abs_h >= lines_to_skip + MAX_PW_BUFFER_HEIGHT)
+		{
+			continue;
+		}
+		channels_buffer[d][h][w] = (fms_dt)a;
+	}
+}
 
 void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 					  const layer_specs layer_specs_struct)
 {
-	int a;
-	int line = 0;
-
-	const int ifms_h = layer_specs_struct.layer_ifm_height; 
+	const int ifms_h = layer_specs_struct.layer_ifm_height;
 	const int ifms_w = layer_specs_struct.layer_ifm_width;
 	const int ifms_hw = ifms_h * ifms_w;
 	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
 	const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ifm_tiles_h * num_of_tiles_w;
 
+	int a;
+	int line = 0;
 	std::ifstream infile(file_name);
 	assert(!infile.fail());
 	while (infile >> a)
@@ -33,8 +63,8 @@ void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER
 							 const layer_specs layer_specs_struct)
 {
 	ofstream myfile;
-	
-	const int ifms_h = layer_specs_struct.layer_ifm_height; 
+
+	const int ifms_h = layer_specs_struct.layer_ifm_height;
 	const int ifms_w = layer_specs_struct.layer_ifm_width;
 	const int ifms_hw = ifms_h * ifms_w;
 	const int ifms_size = ifms_hw * layer_specs_struct.layer_depth;
