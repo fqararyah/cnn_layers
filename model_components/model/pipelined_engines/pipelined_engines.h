@@ -18,6 +18,7 @@ namespace pipelined_engines
                                           fms_quantization_scheme normalization_buffer[],
                                           int starting_d,
                                           const int current_layer_fused_parameters_offset,
+                                          const int buffer_size,
                                           const layer_specs layer_specs_struct);
 
     void load_pw_weights(const weights_dt pw_weights[],

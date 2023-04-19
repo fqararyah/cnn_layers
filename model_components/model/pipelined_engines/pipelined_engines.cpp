@@ -12,16 +12,17 @@ void pipelined_engines::fill_fused_scales_and_zps_buffer(const fused_scales_dt f
                                                          fms_quantization_scheme normalization_buffer[],
                                                          int starting_d,
                                                          const int current_layer_fused_parameters_offset,
+                                                         const int buffer_size,
                                                          const layer_specs layer_specs_struct)
 {
 #pragma HLS INLINE off
 
     const int absolute_current_layer_fused_parameters_offset = current_layer_fused_parameters_offset + starting_d;
-    for (int i = 0; i < PARALLELISM_DW_OFMS; i++)
+    for (int i = 0; i < buffer_size; i++)
     {
         if (starting_d == 0)
         {
-            normalization_buffer[i].ofm_zero_point = layer_specs_struct.layer_ofms_scale;
+            normalization_buffer[i].ofm_scale = layer_specs_struct.layer_ofms_scale;
             normalization_buffer[i].ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
         }
         normalization_buffer[i].fused_scales = fused_scales[absolute_current_layer_fused_parameters_offset + i];
@@ -41,7 +42,7 @@ void pipelined_engines::load_pw_weights(const weights_dt pw_weights[],
 
     const int layer_depth = layer_specs_struct.layer_depth;
     const int layer_num_filters = layer_specs_struct.layer_num_fils;
-    const int filling_weights_offset = layer_specs_struct.layer_weights_offset +
+    const int filling_weights_offset = layer_specs_struct.layer_weights_offset_on_chip +
                                        starting_filter * layer_depth;
 
     for (int filter_index = 0; filter_index < PARALLELISM_PW_OFMS; filter_index++)
@@ -178,12 +179,10 @@ void pipelined_engines::fill_dw_weights_tile(const dw_weights_dt weights[][MAX_D
 
     const int absolute_current_layer_weights_offset =
         current_dw_layer_weights_offset + starting_d;
-    for (int d = 0; d < dw_pipeline_depth; d++)
+    for (int d = 0; d < DW_BUFFER_DEPTH; d++)
     {
-#pragma HLS PIPELINE
         for (int i = 0; i < MAX_DW_FILTER_AREA_IN_PIPE; i++)
         {
-#pragma HLS UNROLL
             weights_tile[d][i] = weights[absolute_current_layer_weights_offset + d][i];
         }
     }
@@ -347,6 +346,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                                  dw_normalization_buffer,
                                                  prev_prev_d, // starting_d
                                                  pipe_layers_fused_parameters_offsets[dw_layer],
+                                                 DW_TILE_DEPTH,
                                                  dw_layer_specs_struct);
                 //###############################
                 dw_conv_engine(
@@ -385,6 +385,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                                  pw_normalization_buffer,
                                                  d, // starting_d
                                                  pipe_layers_fused_parameters_offsets[pw_layer],
+                                                 PARALLELISM_PW_OFMS,
                                                  pw_layer_specs_struct);
 
                 load_pw_weights(pw_weights,
@@ -408,6 +409,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                                  dw_normalization_buffer_copy,
                                                  prev_prev_d, // starting_d
                                                  pipe_layers_fused_parameters_offsets[dw_layer],
+                                                 DW_TILE_DEPTH,
                                                  dw_layer_specs_struct);
                 //###############################
                 dw_conv_engine(
@@ -446,6 +448,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                                  pw_normalization_buffer_copy,
                                                  d, // starting_d
                                                  pipe_layers_fused_parameters_offsets[pw_layer],
+                                                 PARALLELISM_PW_OFMS,
                                                  pw_layer_specs_struct);
 
                 load_pw_weights(pw_weights,

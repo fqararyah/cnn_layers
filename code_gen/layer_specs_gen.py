@@ -33,6 +33,7 @@ specs_struct = 'const layer_specs layer_{}_specs = {}\n\
                 {},//layer_num_of_ofm_tiles_w;\n\
                 {},//layer_num_of_weight_groups_for_one_pass;\n\
                 {},//layer_weights_offset;\n\
+                {},//layer_weights_offset_on_chip;\n\
                 {},//dw_ifms_cumulative_width_offset;\n\
                 {},//bool write_to_tmp;\n\
                 {},//bool fused_with_add;\n\
@@ -56,6 +57,7 @@ model_dag = utils.read_model_dag()
 
 current_block_indx = 0
 cumulative_pw_weights = 0
+cumulative_pw_weights_on_chip = 0
 cumulative_dw_weights = 0
 dw_ifms_cumulative_width_offset = 0
 with open(out_file, 'w') as f:
@@ -163,16 +165,20 @@ with open(out_file, 'w') as f:
 
             if layer_type == 'pw' and i > 0:
                 replacement_list.append(cumulative_pw_weights)
+                replacement_list.append(cumulative_pw_weights_on_chip)
                 replacement_list.append(0)
                 cumulative_pw_weights += int(
                     layer_weights_size / weights_group_items)
+                cumulative_pw_weights_on_chip += int(layer_weights_size)
             elif layer_type == 'dw':
                 replacement_list.append(cumulative_dw_weights)
+                replacement_list.append(0)
                 replacement_list.append(dw_ifms_cumulative_width_offset)
                 dw_ifms_cumulative_width_offset += int(layer_width) * layer_depth * (layer_filter_dim - strides)
                 cumulative_dw_weights += int(
                     layer_depth)
             else:
+                replacement_list.append(0)
                 replacement_list.append(0)
                 replacement_list.append(0)
 

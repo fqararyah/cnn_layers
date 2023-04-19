@@ -8,7 +8,7 @@
 
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 8344;
+const int first_quantization_arrays_num_elements = 8288;
 
 // switch point
 #if ONLY_SEML
@@ -112,6 +112,7 @@ struct layer_specs
 	int layer_num_of_ofm_tiles_w;
 	int layer_num_of_weight_groups_for_one_pass;
 	int layer_weights_offset;
+	int layer_weights_offset_on_chip;
 	int dw_ifms_cumulative_width_offset;
 	bool write_to_tmp;
 	bool fused_with_add;

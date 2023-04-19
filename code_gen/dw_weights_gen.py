@@ -11,7 +11,7 @@ weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scrip
     cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-dw_weights_h_file = '../model_components/model/headers/dw_weights.h'.format(cgc.FIBHA_VERSION_POSTFIX)
+dw_weights_h_file = '../model_components/model/headers/dw_weights{}.h'.format(cgc.FIBHA_VERSION_POSTFIX)
 
 pipe_dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_dim * layer_*i*_dw_filter_dim]'
 pipe_dw_weights_declaration_string_v2 = 'const static dw_weights_dt pipe_dw_weights_3x3[][9] = {\n'
