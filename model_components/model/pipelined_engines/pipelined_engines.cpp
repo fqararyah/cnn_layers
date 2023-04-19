@@ -159,31 +159,39 @@ void pipelined_engines::write_next_overlap_and_read_current(fms_dt dw_pipe_overl
                                               (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
     const int write_offset_in_overlap_buffer = starting_d_write +
                                                (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
-    const int filter_minus_strides = layer_specs_struct.filter_size - layer_specs_struct.strides;
+    const int strides = layer_specs_struct.strides;
+    const int filter_dim = layer_specs_struct.filter_size;
+    const int filter_minus_strides = filter_dim - strides;
     const int padding_left = layer_specs_struct.padding_left;
 
-    for (int o_w = 0; o_w < layer_ifms_width; o_w += PARALLELISM_PW_W)
+    const int useful_rows_in_channels_tile = MAX_DW_BUFFER_HEIGHT - (MAX_DW_BUFFER_HEIGHT - filter_dim) % strides;
+    const int write_offset_h_in_channels_tile = useful_rows_in_channels_tile - (1 + (starting_h == 0)) * filter_minus_strides;
+
+    for (int d = 0; d < PARALLELISM_PW_OFMS; d++)
     {
-        for (int d = 0; d < PARALLELISM_PW_OFMS; d++)
+        for (int h = 0; h < MAX_FILTER_MINUS_STRIDES; h++)
         {
-#pragma HLS PIPELINE II = 2
-            for (int h = 0; h < MAX_DW_STRIDES_IN_PIPE; h++)
+            if (h >= filter_minus_strides)
             {
-                if (h >= filter_minus_strides)
-                {
-                    break;
-                }
+                break;
+            }
+            for (int o_w = 0; o_w < layer_ifms_width; o_w += PARALLELISM_PW_W)
+            {
+                int current_write_offset_in_overlap_buffer = write_offset_in_overlap_buffer + h * (layer_ifms_width / PARALLELISM_PW_W) +
+                                                             o_w;
+                int current_read_offset_in_overlap_buffer = read_offset_in_overlap_buffer + h * (layer_ifms_width / PARALLELISM_PW_W) +
+                                                             o_w;
                 for (int w = 0; w < PARALLELISM_PW_W; w++)
                 {
 #pragma HLS UNROLL
                     if (starting_h != 0)
                     {
                         dw_channels_tile[d][h][w + o_w + padding_left] =
-                            dw_pipe_overlap_buffer[read_offset_in_overlap_buffer + d * filter_minus_strides + h]
+                            dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer + d * filter_minus_strides + h]
                                                   [o_w + w];
                     }
-                    dw_pipe_overlap_buffer[write_offset_in_overlap_buffer + d * filter_minus_strides + h][o_w + w] =
-                        dw_channels_tile[d][PARALLELISM_PW_H - filter_minus_strides + h][o_w + w + padding_left];
+                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer + d * filter_minus_strides + h][o_w + w] =
+                        dw_channels_tile[d][write_offset_h_in_channels_tile + h][o_w + w + padding_left];
                 }
             }
         }

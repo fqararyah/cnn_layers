@@ -117,7 +117,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                dw_pipe_overlap_buffer,
                dw_channels_tile,
                dw_channels_tile_copy,
-               0,//starting_h
+               0, // starting_h
                layer_12_pw_specs,
                layer_14_dw_specs,
                pipe_fused_scales,
@@ -130,6 +130,37 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
         result,
         0, // starting_h
         layer_12_pw_specs);
+
+    const int switching_layer_strides = layer_14_dw_specs.strides;
+    const int pipe_rows_produced_in_a_pass = PARALLELISM_PW_H / switching_layer_strides;
+    const int rows_filled_to_produce_one_row = 2;
+    for (int h = 1; h < layer_51_pw_specs.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
+    {
+        fill_pipe_layer_input_buffer("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
+                                     channels_buffer, h * rows_filled_to_produce_one_row, layer_12_pw_specs);
+
+        pw_dw_conv(on_chip_pw_weights,
+                   pipe_dw_weights_3x3,
+                   channels_buffer,
+                   result_buffer,
+                   tmp_channels,
+                   dw_pipe_overlap_buffer,
+                   dw_channels_tile,
+                   dw_channels_tile_copy,
+                   h, // starting_h
+                   layer_12_pw_specs,
+                   layer_14_dw_specs,
+                   pipe_fused_scales,
+                   pipe_fused_scales_log_2_shifts,
+                   pipe_relu_6_fused_scales,
+                   pipe_fused_zero_points);
+
+        write_pipe_seml_communication_buffer(
+            result_buffer,
+            result,
+            h, // starting_h
+            layer_12_pw_specs);
+    }
 }
 
 #endif

@@ -20,6 +20,7 @@ namespace pipelined_engines
     const int MAX_DW_FILTER_DIM_IN_PIPE = 3;
     const int MAX_DW_STRIDES_IN_PIPE = 2;
     const int MAX_DW_PADDING_IN_PIPE = 1;
+    const int MAX_FILTER_MINUS_STRIDES = 3 - 1;
     const int MAX_DW_FILTER_AREA_IN_PIPE = MAX_DW_FILTER_DIM_IN_PIPE * MAX_DW_FILTER_DIM_IN_PIPE;
 
     const int DW_BUFFER_DEPTH = PARALLELISM_PW_OFMS;
