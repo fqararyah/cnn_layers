@@ -4,13 +4,13 @@
 using namespace pipelined_engines;
 
 void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-								  const int starting_h, const layer_specs layer_specs_struct)
+								  const int starting_h, const int start_filling_offset_in_buffer,
+								  const layer_specs layer_specs_struct)
 {
 
 	const int ifms_h = layer_specs_struct.layer_ifm_height;
 	const int ifms_w = layer_specs_struct.layer_ifm_width;
 	const int ifms_hw = ifms_h * ifms_w;
-	const int lines_to_skip = starting_h;
 
 	int a;
 	int line = 0;
@@ -19,15 +19,14 @@ void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_P
 	while (infile >> a)
 	{
 		int d = line / ifms_hw;
-		int h = ((line % ifms_hw) / ifms_w) % MAX_PW_BUFFER_HEIGHT;
-		int abs_h = ((line % ifms_hw) / ifms_w);
+		int h = ((line % ifms_hw) / ifms_w) - starting_h;
 		int w = line % ifms_w;
 		line++;
-		if (abs_h < lines_to_skip || abs_h >= lines_to_skip + MAX_PW_BUFFER_HEIGHT)
+		if (h < 0 || h >= MAX_PW_BUFFER_HEIGHT || start_filling_offset_in_buffer + h >= MAX_PW_BUFFER_HEIGHT)
 		{
 			continue;
 		}
-		channels_buffer[d][h][w] = (fms_dt)a;
+		channels_buffer[d][h + start_filling_offset_in_buffer][w] = (fms_dt)a;
 	}
 }
 

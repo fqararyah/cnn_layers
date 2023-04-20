@@ -106,8 +106,12 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
     padd_lr_dw_channels_tile(dw_channels_tile,
                              layer_9_dw_specs);
 
+    const int rows_to_fill_first_time = 1;
+    const int start_filling_offset_in_buffer_first_time = MAX_PW_BUFFER_HEIGHT - rows_to_fill_first_time;
+    const int start_filling_offset_in_buffer_non_first = 0;
+
     fill_pipe_layer_input_buffer("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
-                                 channels_buffer, 0, layer_12_pw_specs);
+                                 channels_buffer, 0, start_filling_offset_in_buffer_first_time, layer_12_pw_specs);
 
     pw_dw_conv(on_chip_pw_weights,
                pipe_dw_weights_3x3,
@@ -129,15 +133,17 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
         result_buffer,
         result,
         0, // starting_h
-        layer_12_pw_specs);
+        layer_15_pw_specs);
 
     const int switching_layer_strides = layer_14_dw_specs.strides;
     const int pipe_rows_produced_in_a_pass = PARALLELISM_PW_H / switching_layer_strides;
     const int rows_filled_to_produce_one_row = 2;
-    for (int h = 1; h < layer_51_pw_specs.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
+    for (int h = 0; h < layer_15_pw_specs.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
     {
-        fill_pipe_layer_input_buffer("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
-                                     channels_buffer, h * rows_filled_to_produce_one_row, layer_12_pw_specs);
+        fill_pipe_layer_input_buffer(
+            "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
+            channels_buffer, rows_to_fill_first_time + h * rows_filled_to_produce_one_row,
+            start_filling_offset_in_buffer_non_first, layer_12_pw_specs);
 
         pw_dw_conv(on_chip_pw_weights,
                    pipe_dw_weights_3x3,
@@ -147,7 +153,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
                    dw_channels_tile_copy,
-                   h, // starting_h
+                   rows_to_fill_first_time + h * rows_filled_to_produce_one_row, // starting_h
                    layer_12_pw_specs,
                    layer_14_dw_specs,
                    pipe_fused_scales,
@@ -159,7 +165,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
             result_buffer,
             result,
             h, // starting_h
-            layer_12_pw_specs);
+            layer_15_pw_specs);
     }
 }
 
