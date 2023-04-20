@@ -5,25 +5,30 @@
 using namespace pipelined_engines;
 
 void padd_lr_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
+                              fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                               layer_specs layer_specs_struct)
 {
     const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
+    const int padding_left = layer_specs_struct.padding_left;
     const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
 
-    for (int d = 0; d < DW_TILE_DEPTH; d++)
+    for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
     {
         for (int h = 0; h < MAX_DW_BUFFER_HEIGHT; h++)
         {
             for (int w = 0; w < MAX_DW_PADDING_IN_PIPE; w++)
             {
                 dw_channels_tile[d][h][w] = current_layer_ifms_zero_point;
-                dw_channels_tile[d][h][layer_ifms_width + MAX_DW_PADDING_IN_PIPE + w] = current_layer_ifms_zero_point;
+                dw_channels_tile[d][h][layer_ifms_width + padding_left + w] = current_layer_ifms_zero_point;
+                dw_channels_tile_copy[d][h][w] = current_layer_ifms_zero_point;
+                dw_channels_tile_copy[d][h][layer_ifms_width + padding_left + w] = current_layer_ifms_zero_point;
             }
         }
     }
 }
 
 void padd_top_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
+                               fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                                layer_specs layer_specs_struct)
 {
     const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
@@ -37,6 +42,7 @@ void padd_top_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUF
             for (int w = 0; w < MAX_DW_BUFFER_WIDTH; w++)
             {
                 dw_channels_tile[d][h][w] = current_layer_ifms_zero_point;
+                dw_channels_tile_copy[d][h][w] = current_layer_ifms_zero_point;
             }
         }
     }
@@ -100,11 +106,11 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
     fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH];
     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH];
 
-    padd_top_dw_channels_tile(dw_channels_tile,
-                              layer_9_dw_specs);
+    padd_top_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+                              layer_14_dw_specs);
 
-    padd_lr_dw_channels_tile(dw_channels_tile,
-                             layer_9_dw_specs);
+    padd_lr_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+                             layer_14_dw_specs);
 
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = MAX_PW_BUFFER_HEIGHT - rows_to_fill_first_time;
