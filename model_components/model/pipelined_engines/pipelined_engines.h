@@ -28,7 +28,7 @@ namespace pipelined_engines
 
     void pw_conv_engine(weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
                         fms_dt channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                        pss_dt engine_result[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
+                        pss_dt engine_result[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][MAX_PW_BUFFER_WIDTH],
                         const int starting_filter,
                         const layer_specs layer_specs_struct);
 
@@ -42,10 +42,13 @@ namespace pipelined_engines
                  const relu_6_fused_scales_dt relu_6_fused_scales[],
                  const biases_dt fused_zero_points[]);
 
-    void pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
+    void pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                     fms_dt normalized_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
+                                    fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                     const fms_quantization_scheme normalization_buffer[],
+                                    const int starting_d,
                                     const int starting_h,
+                                    const bool fused_pw_dw,
                                     const layer_specs layer_specs_struct,
                                     const layer_specs dw_layer_specs_struct);
 
@@ -81,6 +84,7 @@ namespace pipelined_engines
                     fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                     const int starting_h,
+                    bool fused_pw_dw,
                     const layer_specs pw_layer_specs_struct,
                     const layer_specs dw_layer_specs_struct,
                     const fused_scales_dt fused_scales[],
