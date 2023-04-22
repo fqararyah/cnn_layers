@@ -13,6 +13,60 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
 //			result[i] = i % 127;
 //		}
 //		begin_code_generation
+pw_conv(off_chip_weights, channels , result, tmp_channels, 8, layer_8_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+dw_conv_3x3(seml_dw_weights_3x3, result, channels, 9,layer_9_dw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+pw_conv(off_chip_weights, channels , result, tmp_channels, 10, layer_10_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
+ result, layer_12_pw_specs);
+#endif
+#if DEBUGGING
+ verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_12.txt",
+ result, layer_12_pw_specs);
+#endif
+pw_conv(off_chip_weights, result , channels, tmp_channels, 12, layer_12_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_12.txt",
+ channels, layer_12_pw_specs);
+#endif
+dw_conv_3x3(seml_dw_weights_3x3, channels, result, 14,layer_14_dw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
+ result, layer_14_dw_specs);
+#endif
+pw_conv(off_chip_weights, result , channels, tmp_channels, 15, layer_15_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+pw_conv(off_chip_weights, channels , result, tmp_channels, 16, layer_16_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+dw_conv_3x3(seml_dw_weights_3x3, result, channels, 17,layer_17_dw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_17.txt",
+ channels, layer_17_dw_specs);
+#endif
+pw_conv(off_chip_weights, channels , result, tmp_channels, 18, layer_18_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+pw_conv(off_chip_weights, result , channels, tmp_channels, 20, layer_20_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_20.txt",
+ channels, layer_20_pw_specs);
+#endif
 dw_conv_3x3(seml_dw_weights_3x3, channels, result, 21,layer_21_dw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);

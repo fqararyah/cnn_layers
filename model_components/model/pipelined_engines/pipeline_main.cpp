@@ -1,6 +1,6 @@
 #include "pipeline_main.h"
 
-#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && FIBHA_VERSION == 2
 
 using namespace pipelined_engines;
 
@@ -108,20 +108,20 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
     fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH];
     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH];
 
-    layer_specs first_layer_in_second_part = layer_16_pw_specs;
+    layer_specs first_layer_in_second_part = layer_8_pw_specs;
 
     padd_top_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                              layer_14_dw_specs);
+                              layer_6_dw_specs);
 
     padd_lr_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                             layer_14_dw_specs);
+                             layer_6_dw_specs);
 
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = MAX_PW_BUFFER_HEIGHT - rows_to_fill_first_time;
     const int start_filling_offset_in_buffer_non_first = 0;
 
-    fill_pipe_layer_input_buffer("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
-                                 channels_buffer, 0, start_filling_offset_in_buffer_first_time, layer_12_pw_specs);
+    fill_pipe_layer_input_buffer("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
+                                 channels_buffer, 0, start_filling_offset_in_buffer_first_time, layer_4_pw_specs);
 
     pw_dw_conv(on_chip_pw_weights,
                pipe_dw_weights_3x3,
@@ -133,22 +133,22 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                dw_channels_tile_copy,
                0, // starting_h
                1, // fused
-               layer_12_pw_specs,
-               layer_14_dw_specs,
+               layer_4_pw_specs,
+               layer_6_dw_specs,
                pipe_fused_scales,
                pipe_fused_scales_log_2_shifts,
                pipe_relu_6_fused_scales,
                pipe_fused_zero_points);
 
-    const int switching_layer_strides = layer_14_dw_specs.strides;
+    const int switching_layer_strides = layer_6_dw_specs.strides;
     const int pipe_rows_produced_in_a_pass = PARALLELISM_PW_H / switching_layer_strides;
     const int rows_filled_to_produce_one_row = 2;
-    for (int h = 0; h < layer_15_pw_specs.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
+    for (int h = 0; h < layer_7_pw_specs.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
     {
         fill_pipe_layer_input_buffer(
-            "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
+            "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
             channels_buffer, rows_to_fill_first_time + h * rows_filled_to_produce_one_row,
-            start_filling_offset_in_buffer_non_first, layer_12_pw_specs);
+            start_filling_offset_in_buffer_non_first, layer_4_pw_specs);
 
         pw_dw_conv(on_chip_pw_weights,
                    pipe_dw_weights_3x3,
@@ -160,17 +160,12 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                    dw_channels_tile_copy,
                    rows_to_fill_first_time + h * rows_filled_to_produce_one_row, // starting_h
                    1,
-                   layer_12_pw_specs,
-                   layer_14_dw_specs,
+                   layer_4_pw_specs,
+                   layer_6_dw_specs,
                    pipe_fused_scales,
                    pipe_fused_scales_log_2_shifts,
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points);
-
-        // fill_pipe_layer_input_buffer(
-        //     "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_15.txt",
-        //     result_buffer, h,
-        //     start_filling_offset_in_buffer_non_first, layer_15_pw_specs);
 
         pw_dw_conv(on_chip_pw_weights,
                    pipe_dw_weights_3x3,
@@ -182,8 +177,8 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                    dw_channels_tile_copy,
                    h, // starting_h
                    0,
-                   layer_15_pw_specs,
-                   layer_14_dw_specs,
+                   layer_7_pw_specs,
+                   layer_6_dw_specs,
                    pipe_fused_scales,
                    pipe_fused_scales_log_2_shifts,
                    pipe_relu_6_fused_scales,

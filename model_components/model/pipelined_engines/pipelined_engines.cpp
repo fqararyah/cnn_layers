@@ -120,46 +120,49 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
 {
 #pragma HLs INLINE off
 
-    const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
-    const int layer_ifms_height = layer_specs_struct.layer_ifm_height;
-    const int layer_ifms_depth = layer_specs_struct.layer_depth;
-    const int layer_relu = layer_specs_struct.layer_activation;
-    const int strides = dw_layer_specs_struct.strides;
-    const int filter_dim = dw_layer_specs_struct.filter_size;
-    const int writing_w_offset = layer_specs_struct.padding_left;
-    const fms_dt dw_layer_ifms_zero_point = dw_layer_specs_struct.layer_ifms_zero_point;
-
-    const int filter_minus_strides = filter_dim - strides;
-
-    const int write_offset_h_in_normalized_tile = filter_minus_strides;
-
-    for (int o_w = 0; o_w < layer_ifms_width; o_w += PARALLELISM_PW_W)
+    if (starting_d >= 0)
     {
-        for (int f = 0; f < PARALLELISM_PW_OFMS; f++)
+        const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
+        const int layer_ifms_height = layer_specs_struct.layer_ifm_height;
+        const int layer_ifms_depth = layer_specs_struct.layer_depth;
+        const int layer_relu = layer_specs_struct.layer_activation;
+        const int strides = dw_layer_specs_struct.strides;
+        const int filter_dim = dw_layer_specs_struct.filter_size;
+        const int writing_w_offset = layer_specs_struct.padding_left;
+        const fms_dt dw_layer_ifms_zero_point = dw_layer_specs_struct.layer_ifms_zero_point;
+
+        const int filter_minus_strides = filter_dim - strides;
+
+        const int write_offset_h_in_normalized_tile = filter_minus_strides;
+
+        for (int o_w = 0; o_w < layer_ifms_width; o_w += PARALLELISM_PW_W)
         {
-            for (int h = 0; h < MAX_PW_BUFFER_HEIGHT; h++)
+            for (int f = 0; f < PARALLELISM_PW_OFMS; f++)
             {
-#pragma HLS PIPELINE
-                for (int w = 0; w < PARALLELISM_PW_W; w++)
+                for (int h = 0; h < MAX_PW_BUFFER_HEIGHT; h++)
                 {
-#pragma HLS UNROLL
-                    pss_dt tmp_pss = engine_result_tile[f][h][w + o_w];
-                    if (fused_pw_dw)
+#pragma HLS PIPELINE
+                    for (int w = 0; w < PARALLELISM_PW_W; w++)
                     {
-                        if (starting_h + h < layer_ifms_height)
+#pragma HLS UNROLL
+                        pss_dt tmp_pss = engine_result_tile[f][h][w + o_w];
+                        if (fused_pw_dw)
                         {
-                            normalized_tile[f][h + write_offset_h_in_normalized_tile][writing_w_offset + o_w + w] = pw_relu_norm(
-                                tmp_pss, normalization_buffer[f],
-                                layer_relu);
+                            if (starting_h + h < layer_ifms_height)
+                            {
+                                normalized_tile[f][h + write_offset_h_in_normalized_tile][writing_w_offset + o_w + w] = pw_relu_norm(
+                                    tmp_pss, normalization_buffer[f],
+                                    layer_relu);
+                            }
+                            else
+                            {
+                                normalized_tile[f][h + write_offset_h_in_normalized_tile][writing_w_offset + o_w + w] = dw_layer_ifms_zero_point;
+                            }
                         }
                         else
                         {
-                            normalized_tile[f][h + write_offset_h_in_normalized_tile][writing_w_offset + o_w + w] = dw_layer_ifms_zero_point;
+                            result[starting_d + f][h][o_w + w] = pw_relu_norm(tmp_pss, normalization_buffer[f], layer_relu);
                         }
-                    }
-                    else
-                    {
-                        result[starting_d + f][h][o_w + w] = pw_relu_norm(tmp_pss, normalization_buffer[f], layer_relu);
                     }
                 }
             }
@@ -179,14 +182,16 @@ void pipelined_engines::write_next_overlap_and_read_current(fms_dt dw_pipe_overl
     if (starting_d_write >= 0)
     {
         const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
-        const int read_offset_in_overlap_buffer = starting_d_read +
-                                                  (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
-        const int write_offset_in_overlap_buffer = starting_d_write +
-                                                   (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
         const int strides = layer_specs_struct.strides;
         const int filter_dim = layer_specs_struct.filter_size;
         const int filter_minus_strides = filter_dim - strides;
         const int padding_left = layer_specs_struct.padding_left;
+
+        const int num_of_tiles_in_w = (layer_ifms_width / PARALLELISM_PW_W);
+        const int read_offset_in_overlap_buffer = starting_d_read * filter_minus_strides * num_of_tiles_in_w +
+                                                  (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
+        const int write_offset_in_overlap_buffer = starting_d_write * filter_minus_strides * num_of_tiles_in_w +
+                                                   (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
 
         const int useful_rows_in_channels_tile = MAX_DW_BUFFER_HEIGHT - (MAX_DW_BUFFER_HEIGHT - filter_dim) % strides;
         const int write_offset_h_in_channels_tile = useful_rows_in_channels_tile - filter_minus_strides;
@@ -201,20 +206,22 @@ void pipelined_engines::write_next_overlap_and_read_current(fms_dt dw_pipe_overl
                 }
                 for (int o_w = 0; o_w < layer_ifms_width; o_w += PARALLELISM_PW_W)
                 {
-                    int current_write_offset_in_overlap_buffer = write_offset_in_overlap_buffer + h * (layer_ifms_width / PARALLELISM_PW_W) +
-                                                                 o_w;
-                    int current_read_offset_in_overlap_buffer = read_offset_in_overlap_buffer + h * (layer_ifms_width / PARALLELISM_PW_W) +
-                                                                o_w;
+                    int current_write_offset_in_overlap_buffer = write_offset_in_overlap_buffer +
+                                                                 d * filter_minus_strides * num_of_tiles_in_w +
+                                                                 (h * layer_ifms_width + o_w) / PARALLELISM_PW_W;
+                    int current_read_offset_in_overlap_buffer = read_offset_in_overlap_buffer +
+                                                                d * filter_minus_strides * num_of_tiles_in_w +
+                                                                (h * layer_ifms_width + o_w) / PARALLELISM_PW_W;
                     for (int w = 0; w < PARALLELISM_PW_W; w++)
                     {
 #pragma HLS UNROLL
                         if (starting_h != 0)
                         {
                             dw_channels_tile[d][h][w + o_w + padding_left] =
-                                dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer + d * filter_minus_strides + h]
-                                                      [o_w + w];
+                                dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer]
+                                                      [w];
                         }
-                        dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer + d * filter_minus_strides + h][o_w + w] =
+                        dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][w] =
                             dw_channels_tile[d][write_offset_h_in_channels_tile + h][o_w + w + padding_left];
                     }
                 }
@@ -257,7 +264,7 @@ void pipelined_engines::dw_conv_engine(
     const int strides = layer_specs_struct.strides;
 
 dw_conv_engine:
-    for (int o_w = 0; o_w < layer_ofms_width; o_w += PARALLELISM_PW_W)
+    for (int o_w = 0; o_w < layer_ofms_width; o_w += PARALLELISM_DW_W)
     {
         for (int c_h = 0; c_h < MAX_DW_FILTER_DIM_IN_PIPE; c_h++)
         {
@@ -273,7 +280,7 @@ dw_conv_engine:
                         for (int w = 0; w < PARALLELISM_DW_W; w++)
                         {
 #pragma HLS UNROLL
-                            if (c_w >= filter_dim || c_h >= filter_dim || h >= MAX_PW_BUFFER_HEIGHT / strides || w >= PARALLELISM_DW_W)
+                            if (c_w >= filter_dim || c_h >= filter_dim || h >= MAX_PW_BUFFER_HEIGHT / strides)
                             {
                                 break;
                             }
@@ -314,7 +321,7 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(dw_pss_dt result
         const int ifms_d = layer_specs_struct.layer_depth;
         const int layer_relu = layer_specs_struct.layer_activation;
 
-        for (int o_w = 0; o_w < layer_ofms_width; o_w += PARALLELISM_PW_W)
+        for (int o_w = 0; o_w < layer_ofms_width; o_w += PARALLELISM_DW_W)
         {
             for (int d = 0; d < DW_TILE_DEPTH; d++)
             {
@@ -325,7 +332,7 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(dw_pss_dt result
                     {
 #pragma HLS UNROLL
                         result[starting_d + d][h][o_w + w] = dw_relu_norm(
-                            result_tile[d][h][w], normalization_buffer[d],
+                            result_tile[d][h][o_w + w], normalization_buffer[d],
                             layer_relu);
                     }
                 }

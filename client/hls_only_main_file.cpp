@@ -35,7 +35,7 @@ void top_func(
 #endif
 #endif
 	copy_channels_to_tmp_channels(channels, tmp_channels);
-	seml(off_chip_weights, channels, result, tmp_channels, weights_1, fc_input);
+	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 
 #elif FIBHA_VERSION == 2
 	fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
@@ -51,8 +51,8 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 	pipelined_engines_caller(channels);
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_15.txt",
- channels, layer_15_pw_specs);
+	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+ channels, layer_7_pw_specs);
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif

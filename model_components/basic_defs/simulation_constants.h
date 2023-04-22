@@ -4,7 +4,7 @@
 
 #define CPU 1
 #define FPGA 0
-#define CHAIN_LENGTH 12
+#define CHAIN_LENGTH 6
 #define MOB_V1 1
 #define MOB_V2 2
 #define MNAS 3
