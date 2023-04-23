@@ -111,7 +111,7 @@ void pipelined_engines::pw_conv_engine(weights_dt weights_tile[PARALLELISM_PW_OF
 void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                                    fms_dt normalized_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                                                    fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                                                   fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+                                                   fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
                                                    const fms_quantization_scheme normalization_buffer[],
                                                    const int starting_d,
                                                    const int starting_h,
@@ -138,13 +138,18 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
 
         const int write_offset_h_in_normalized_tile = filter_minus_strides;
 
+        scales_dt skip_connection_other_layer_scale = layer_specs_struct.skip_connection_other_layer_scale;
+        biases_dt skip_connection_other_layer_zero_point = layer_specs_struct.skip_connection_other_layer_zero_point;
+
+        rec_scales_dt add_layer_scale_reciprocal = layer_specs_struct.add_layer_scale_reciprocal;
+        biases_dt add_layer_zero_point = layer_specs_struct.add_layer_zero_point;
+
         for (int o_w = 0; o_w < layer_ifms_width; o_w += PARALLELISM_PW_W)
         {
             for (int f = 0; f < PARALLELISM_PW_OFMS; f++)
             {
                 for (int h = 0; h < MAX_PW_BUFFER_HEIGHT; h++)
                 {
-#pragma HLS PIPELINE
                     for (int w = 0; w < PARALLELISM_PW_W; w++)
                     {
 #pragma HLS UNROLL
@@ -166,10 +171,35 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
                         }
                         else
                         {
-                            fms_dt normalized_val = pw_relu_norm(tmp_pss, normalization_buffer[f], layer_relu);
+                            fms_dt normalized_val;
+                            if (layer_specs_struct.fused_with_add == 0)
+                            {
+                                normalized_val = pw_relu_norm(tmp_pss, normalization_buffer[f], layer_relu);
+                            }
+                            else
+                            {
+                                pss_f_dt tmp_channels_scaled_val =
+                                    skip_connection_other_layer_scale *
+                                    (tmp_channels[starting_d + f][h][w + o_w] - skip_connection_other_layer_zero_point);
+                                pss_f_dt scaled_tmp =
+                                    pw_relu_norm_no_q_no_relu(
+                                        tmp_pss,
+                                        normalization_buffer[f], layer_relu);
+
+                                pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) *
+                                                               add_layer_scale_reciprocal +
+                                                           add_layer_zero_point;
+                                addition_result = addition_result + quant_half - (addition_result < 0);
+                                normalized_val = clamp(addition_result);
+                            }
                             result[starting_d + f][h][o_w + w] = normalized_val;
-                            if(layer_specs_struct.write_to_tmp){
-                                tmp_channels[starting_d + f][h][o_w + w] = normalized_val;
+                            if (layer_specs_struct.write_to_tmp)
+                            {
+                                if (h == 0)
+                                {
+                                    tmp_channels[starting_d + f][0][o_w + w] = tmp_channels[starting_d + f][MAX_PW_BUFFER_HEIGHT][o_w + w];
+                                }
+                                tmp_channels[starting_d + f][h + 1][o_w + w] = normalized_val;
                             }
                         }
                     }
@@ -333,7 +363,8 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(dw_pss_dt result
 
         for (int h = 0; h < MAX_PW_BUFFER_HEIGHT; h++)
         {
-            if(h + h_offset_in_result >= MAX_PW_BUFFER_HEIGHT){
+            if (h + h_offset_in_result >= MAX_PW_BUFFER_HEIGHT)
+            {
                 break;
             }
             for (int o_w = 0; o_w < layer_ofms_width; o_w += PARALLELISM_DW_W)
@@ -358,7 +389,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                    const dw_weights_dt weights[][3 * 3],
                                    fms_dt channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                    fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                                   fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+                                   fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
                                    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
                                    fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                                    fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
