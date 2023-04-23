@@ -45,6 +45,7 @@ namespace pipelined_engines
     void pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                     fms_dt normalized_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                                     fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+                                    fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                     const fms_quantization_scheme normalization_buffer[],
                                     const int starting_d,
                                     const int starting_h,
@@ -73,6 +74,7 @@ namespace pipelined_engines
                                                  fms_dt result[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                                  const fms_quantization_scheme normalization_buffer[],
                                                  const int starting_d,
+                                                 const int h_offset_in_result,
                                                  layer_specs layer_specs_struct);
 
     void pw_dw_conv(const weights_dt pw_weights[],
@@ -84,6 +86,7 @@ namespace pipelined_engines
                     fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
                     const int starting_h,
+                    const int h_offset_in_result,
                     bool fused_pw_dw,
                     const layer_specs pw_layer_specs_struct,
                     const layer_specs dw_layer_specs_struct,
