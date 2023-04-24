@@ -1,6 +1,10 @@
 #include "../headers/seml.h"
 
+#if HW == CPU
 #include "../../../../tests/test_utils.h"
+#endif
+
+using namespace seml_engines;
 
 #if FIBHA_VERSION == 1
 

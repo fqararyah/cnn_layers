@@ -1,7 +1,7 @@
 #ifndef Q_DATA_TYPES
 #define Q_DATA_TYPES
 
-#if HW == FPGA
+#if HW == _FPGA
 #include "ap_int.h"
 #include "ap_fixed.h"
 #elif CPU
@@ -55,7 +55,7 @@ const int dw_pss_dt_offset = dw_pss_dt_width - 1;					// 11;
 const int fc_weights_dt_width = 8;
 const int fc_out_dt_width = fms_dt_width + fc_weights_dt_width + 11; //11 is ceil(log(fc_layer_input_size))
 
-#if HW == FPGA
+#if HW == _FPGA
 typedef ap_int<layer_0_weights_dt_width> layer_0_weights_dt;
 typedef ap_int<weights_dt_width> weights_dt;
 typedef ap_int<dw_weights_dt_width> dw_weights_dt;

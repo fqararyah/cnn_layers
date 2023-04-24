@@ -84,7 +84,7 @@ int main(int argc, char* argv[]) {
 	//*********************************************************************************************************************
 	string weights_file = "./off_chip_weights/off_chip_weights.txt";
 	string input_images_folder = "./preprocessed_tst_images/";
-	string output_folder = "./fpga_out/";
+	string output_folder = "./_FPGA_out/";
 
 	weights_grp_dt glued_weights[all_pw_weights];
 	fms_dt fc_input[fc_layer_input_size];
@@ -153,7 +153,7 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err, program = cl::Program(context, devices, bins, NULL, &err));
 
 	// This call will get the kernel object from program. A kernel is an
-	// OpenCL function that is executed on the FPGA.
+	// OpenCL function that is executed on the _FPGA.
 	OCL_CHECK(err, krnl_fibha_v2 = cl::Kernel(program, "krnl_fibha_v2", &err));
 
 	// These commands will allocate memory on the Device. The cl::Buffer objects can
@@ -225,7 +225,7 @@ int main(int argc, char* argv[]) {
 						cout << duration.count() << endl;
 
 			// The result of the previous kernel execution will need to be retrieved in
-			// order to view the results. This call will transfer the data from FPGA to
+			// order to view the results. This call will transfer the data from _FPGA to
 			// source_results vector
 			OCL_CHECK(err,
 					q.enqueueMigrateMemObjects({buffer_result},CL_MIGRATE_MEM_OBJECT_HOST));

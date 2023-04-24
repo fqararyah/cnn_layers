@@ -28,7 +28,7 @@ void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 	}
 }
 
-#if HW == FPGA
+#if HW == _FPGA
 void fill_weights_tile_from_weight_groups_tile(
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],

@@ -2,6 +2,7 @@
 
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 
+using namespace pipelined_engines;
 #ifndef PIPELINED_PW_CONV
 #define PIPELINED_PW_CONV
 
@@ -474,7 +475,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                     dw_result_tile,
                     dw_layer_specs_struct);
                 //###############################
-                fill_dw_weights_tile(weights,
+                pipelined_engines::fill_dw_weights_tile(weights,
                                      dw_weights_tile_copy,
                                      prev_d, dw_layers_weights_offsets[dw_layer]);
                 //###############################
@@ -541,7 +542,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                     dw_result_tile_copy,
                     dw_layer_specs_struct);
                 //###############################
-                fill_dw_weights_tile(weights,
+                pipelined_engines::fill_dw_weights_tile(weights,
                                      dw_weights_tile,
                                      prev_d, dw_layers_weights_offsets[dw_layer]);
                 //###############################
@@ -610,7 +611,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                 dw_result_tile,
                 dw_layer_specs_struct);
             //###############################
-            fill_dw_weights_tile(weights,
+            pipelined_engines::fill_dw_weights_tile(weights,
                                  dw_weights_tile_copy,
                                  num_of_filters - PARALLELISM_PW_OFMS, dw_layers_weights_offsets[dw_layer]);
             //###############################
@@ -686,7 +687,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                 dw_result_tile_copy,
                 dw_layer_specs_struct);
             //###############################
-            fill_dw_weights_tile(weights,
+            pipelined_engines::fill_dw_weights_tile(weights,
                                  dw_weights_tile,
                                  num_of_filters - PARALLELISM_PW_OFMS, dw_layers_weights_offsets[dw_layer]);
             //###############################

@@ -2,6 +2,8 @@
 #include "../headers/dw_conv.h"
 #include "../headers/conv_utils.h"
 
+using namespace seml_engines;
+
 #if FIBHA_VERSION == 2
 
 void dw_conv_engine(
@@ -94,7 +96,7 @@ void fill_scales_tiles(const fused_scales_dt fused_scales[],
     }
 }
 
-void fill_dw_weights_tile(const dw_weights_dt weights[][3 * 3],
+void seml_engines::fill_dw_weights_tile(const dw_weights_dt weights[][3 * 3],
                           dw_weights_dt weights_tile[][3 * 3],
                           int starting_d, const int current_dw_layer_weights_offset)
 {
@@ -212,7 +214,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
     }
 }
 
-void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
+void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                  fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                  fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                  const int layer,
@@ -309,7 +311,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 
                 if (dw_pipeline_in_d % 2 == 0)
                 {
-                    fill_dw_weights_tile(weights, weights_tile,
+                    seml_engines::fill_dw_weights_tile(weights, weights_tile,
                                          tile_in_d,
                                          current_dw_layer_weights_offset);
 
@@ -341,7 +343,7 @@ void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 }
                 else
                 {
-                    fill_dw_weights_tile(weights, weights_tile,
+                    seml_engines::fill_dw_weights_tile(weights, weights_tile,
                                          tile_in_d,
                                          current_dw_layer_weights_offset);
 

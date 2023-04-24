@@ -12,7 +12,7 @@ weights_file_format = weights_files_location + 'weights_{}.txt'
 parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
-off_chip_weights_file = '../off_chip_weights/off_chip_weights_fpga.txt'
+off_chip_weights_file = '../off_chip_weights/off_chip_weights__FPGA.txt'
 
 model_dag = utils.read_model_dag()
 

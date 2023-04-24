@@ -8,5 +8,6 @@
 #include "quantization_and_biases.h"
 #include "quantization_and_biases_v2.h"
 #include "../pipelined_engines/pipelined_engines_specs.h"
+#include "../pipelined_engines/pipeline_main.h"
 
 #include "../SEML/headers/seml.h"

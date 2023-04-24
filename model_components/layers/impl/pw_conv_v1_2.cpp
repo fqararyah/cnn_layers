@@ -371,7 +371,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 	const int layer_num_fils = layer_specs_struct.layer_num_fils;
 	const int num_of_tiles_d_out = layer_specs_struct.layer_num_of_tiles_out_d;
 
-#if HW == FPGA
+#if HW == _FPGA
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
 	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
 										   layer_specs_struct.layer_depth, layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
@@ -416,7 +416,7 @@ conv2_ots_loop:
 									 current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
 		}
 
-#if HW == FPGA
+#if HW == _FPGA
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
 												  weights_tile, td_o * pw_conv_parallelism_out,
 												  layer_specs_struct.layer_depth,
@@ -432,7 +432,7 @@ conv2_ots_loop:
 				layer_specs_struct.layer_activation, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
 				fused_zero_points_buffer, td_o, layer_specs_struct);
-#if HW == FPGA
+#if HW == _FPGA
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out,
 											   layer_specs_struct.layer_depth,

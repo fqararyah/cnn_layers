@@ -2193,6 +2193,6 @@ const biases_dt ofms_zero_point = -128;
 }layer_67_avgpool_specs;
 
 struct{
-const int64_t ifm_zero_point = -128;
+const fms_dt ifm_zero_point = -128;
 }layer_68_fc_specs;
 #endif

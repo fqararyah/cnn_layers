@@ -8,7 +8,7 @@
 
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 8288;
+const int first_quantization_arrays_num_elements = 8320;
 
 // switch point
 #if ONLY_SEML
@@ -24,7 +24,7 @@ const int switch_point_fms_depth = 144; // not really, but the max of ...
 const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
 const int max_tmp_fms_size = 56 * 56 * 24;
 
-const int MAX_FMS_BUFFER_DEPTH = 144 * 64;//192 * 16; // 192 * (28/7) * (28/7)
+const int MAX_FMS_BUFFER_DEPTH = 192 * 16; // 192 * (28/7) * (28/7)
 const int MIN_FMS_HEIGHT = 8;
 const int MIN_FMS_WIDTH = 8;
 const int MAX_FILTER_DIM_STRIDE_1 = 3;

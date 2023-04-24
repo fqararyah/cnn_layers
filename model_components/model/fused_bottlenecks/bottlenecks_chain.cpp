@@ -52,7 +52,7 @@ void chain_0_1_fill_row_from_groups_buffer(
 #pragma HLS PIPELINE
 				if (o_w_offset + w < input_image_width)
 				{
-#if HW == FPGA
+#if HW == _FPGA
 					channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
 						w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
 #endif
@@ -652,7 +652,7 @@ void _0_1_bottlenecks_chain(
 
 	//#######################################pipeline filling###########################################
 	//-------------------------------------------------------------------------
-#if HW == FPGA
+#if HW == _FPGA
 	bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 												0,
 												input_image_num_fms_groups_in_width); // to do
@@ -695,7 +695,7 @@ void _0_1_bottlenecks_chain(
 	chain_0_1_fill_channels_buffer_cpu(channels,
 									   chain_input, filling_row, true,
 									   layer_0_s_ifms_zero_point);
-#elif HW == FPGA
+#elif HW == _FPGA
 	bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 												filling_row, num_of_ifm_groups_read_each_time);
 	bottleneck_chain_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
@@ -737,7 +737,7 @@ void _0_1_bottlenecks_chain(
 		chain_0_1_fill_channels_buffer_cpu(channels,
 										   chain_input, filling_row, true,
 										   layer_0_s_ifms_zero_point);
-#elif HW == FPGA
+#elif HW == _FPGA
 		bottleneck_chain_0_1_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 													filling_row, num_of_ifm_groups_read_each_time);
 		bottleneck_chain_fill_channels_buffer_from_groups_buffer(

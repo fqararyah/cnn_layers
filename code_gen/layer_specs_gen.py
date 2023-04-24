@@ -249,7 +249,7 @@ with open(out_file, 'w') as f:
                 struct_var_body += 'const biases_dt ofms_zero_point = ' + \
                     str(pooling_ofms_zero_points) + ';\n'
             elif layer_type == 'fc':
-                struct_var_body += 'const int64_t ifm_zero_point = ' + \
+                struct_var_body += 'const fms_dt ifm_zero_point = ' + \
                     str(layer_specs['ifms_zero_points']) + ';\n'
 
             layer_specs_struct_str = layer_specs_struct_str.format(

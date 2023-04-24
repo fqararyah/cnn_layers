@@ -135,10 +135,11 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
     const int rows_filled_to_produce_one_row = 2;
 
     //######################################################
+#if HW == CPU
     fill_pipe_layer_input_buffer(
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
         channels_buffer, 0, start_filling_offset_in_buffer_first_time, layer_4_pw_specs);
-
+#endif
     pw_dw_conv(on_chip_pw_weights,
                pipe_dw_weights_3x3,
                channels_buffer,
@@ -157,11 +158,12 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                pipe_relu_6_fused_scales,
                pipe_fused_zero_points);
     //######################################################
+#if HW == CPU
     fill_pipe_layer_input_buffer(
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
         channels_buffer, rows_to_fill_first_time,
         start_filling_offset_in_buffer_non_first, layer_4_pw_specs);
-
+#endif
     pw_dw_conv(on_chip_pw_weights,
                pipe_dw_weights_3x3,
                channels_buffer,
@@ -285,10 +287,12 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
         { // todo change 2
             for (int i = 0; i < 2; i++)
             { // todo change 2
+#if HW == CPU
                 fill_pipe_layer_input_buffer(
                     "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
                     channels_buffer, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
                     start_filling_offset_in_buffer_non_first, layer_4_pw_specs);
+#endif
                 pw_dw_conv(on_chip_pw_weights,
                            pipe_dw_weights_3x3,
                            channels_buffer,

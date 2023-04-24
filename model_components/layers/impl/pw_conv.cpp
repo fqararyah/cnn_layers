@@ -401,7 +401,7 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor = num_of_weights_in_the_same_filter_and_group
 
-#if HW == FPGA
+#if HW == _FPGA
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
 	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
 										   layer_conv_d, num_of_weight_groups, layer_weights_offset,
@@ -445,7 +445,7 @@ conv2_ots_loop:
 									 current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
 		}
 
-#if HW == FPGA
+#if HW == _FPGA
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
 												  weights_tile, td_o * pw_conv_parallelism_out, layer_conv_d,
 												  num_of_weight_groups, layer_weights_offset);
@@ -457,7 +457,7 @@ conv2_ots_loop:
 				layer_relu, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
 				fused_zero_points_buffer, td_o);
-#if HW == FPGA
+#if HW == _FPGA
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out, layer_conv_d,
 											   num_of_weight_groups, layer_weights_offset, layer_num_fils);
