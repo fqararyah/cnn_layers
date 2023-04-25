@@ -387,7 +387,7 @@ void fill_dw_weights_and_scales_tiles(const dw_weights_dt weights[][3 * 3],
 // 	}
 // }
 
-void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
+void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 		const int layer, const int layer_conv_d, const int layer_ifm_width,
 		const int layer_ifm_height, const int num_of_tiles_d,

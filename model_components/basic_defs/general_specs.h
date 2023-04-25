@@ -63,13 +63,15 @@ const int min_strides = 1;
 const int max_strides = 2;
 #if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2
 const int max_filter_hw_dim = 3;
+const int max_conv_filter_hw_dim = 3;
 const int max_padding_lr = 2;
 #elif MODEL_ID == 3 || MODEL_ID == 4
 const int max_filter_hw_dim = 5;
 #endif
 const int max_padding = 1;
-const int max_conv_h = max_filter_hw_dim;
-const int max_conv_w = max_filter_hw_dim;
+const int max_conv_h = max_conv_filter_hw_dim;
+const int max_conv_w = max_conv_filter_hw_dim;
+const int max_filter_area = max_conv_h * max_conv_w;
 
 const int median_depth = 96;
 const int median_width = 14;

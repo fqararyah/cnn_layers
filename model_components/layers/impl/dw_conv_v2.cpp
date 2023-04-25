@@ -50,14 +50,14 @@ dw_conv_engine:
                             result_tile[d_in_pipeline][h][w] =
                                 channels_tile[d_in_pipeline][h * strides + c_h]
                                              [w * strides + c_w] *
-                                weights[d_in_pipeline][c_h * filter_dim + c_w];
+                                weights[d_in_pipeline][c_h * max_filter_hw_dim + c_w];
                         }
                         else
                         {
                             result_tile[d_in_pipeline][h][w] +=
                                 channels_tile[d_in_pipeline][h * strides + c_h]
                                              [w * strides + c_w] *
-                                weights[d_in_pipeline][c_h * filter_dim + c_w];
+                                weights[d_in_pipeline][c_h * max_filter_hw_dim + c_w];
                         }
                     }
                 }

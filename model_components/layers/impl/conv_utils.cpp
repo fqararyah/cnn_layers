@@ -279,11 +279,17 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
     const int padding_top_left = layer_specs_struct.padding_top;
     const int layer_ifm_height = layer_specs_struct.layer_ifm_height;
     const int layer_ifm_width = layer_specs_struct.layer_ifm_width;
+    const int layer_ifms_depth = layer_specs_struct.layer_depth;
 
     const int num_of_tiles_hw = num_of_ifm_tiles_h * num_of_ifm_tiles_w;
     for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
     {
 #pragma HLS PIPELINE
+
+        if (tile_in_d + d > layer_ifms_depth)
+        {
+            break;
+        }
 
         const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
         const int bottom_tile_index = main_tile_index + num_of_ifm_tiles_w;

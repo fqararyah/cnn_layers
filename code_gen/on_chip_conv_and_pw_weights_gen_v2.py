@@ -34,8 +34,8 @@ with open(pw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#include "layers_specs.h"\n')
     f.write("#if FIBHA_VERSION == 2\n")
-    f.write("#ifndef PW_WEIGHTS\n")
-    f.write("#define PW_WEIGHTS\n")
+    f.write("#ifndef ON_CHIP_PW_WEIGHTS\n")
+    f.write("#define ON_CHIP_PW_WEIGHTS\n")
 
 for ii in range(len(model_dag)):
     if num_of_generated_layers >= on_chip_conv_and_layers:
@@ -86,6 +86,7 @@ with open(conv_weights_h_file_3x3, 'a') as f:
 with open(pw_weights_h_file, 'a') as f:
     f.write(pw_weights_declaration_string)
     f.write(str(pw_weights[0]))
+    print('on_chip pw weights size:', pw_weights.shape[0])
     for i in range(1, pw_weights.shape[0]):
         f.write(', ')
         f.write(str(pw_weights[i]))

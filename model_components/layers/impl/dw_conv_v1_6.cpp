@@ -337,7 +337,7 @@ void dw_conv_copy_engine_result_tile(
 	}
 }
 
-void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
+void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 				 fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 				 const int layer,
 				 const layer_specs layer_specs_struct,

@@ -35,8 +35,9 @@ void top_func(
 #endif
 #endif
 	copy_channels_to_tmp_channels(channels, tmp_channels);
+#if ONLY_SESL == 0
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
-
+#endif
 #elif FIBHA_VERSION == 2
 	fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
 	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
