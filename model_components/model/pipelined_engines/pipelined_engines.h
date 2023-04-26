@@ -2,9 +2,13 @@
 #define PIPELINED_ENGINES
 
 #include "../../basic_defs/basic_defs_glue.h"
-#include "../headers/quantization_and_biases.h"
 #include "../headers/model_glue.h"
-#include "../headers/quantization_and_biases_v2.h"
+#if MODEL_ID == MOB_V2
+#include "../../model/headers/quantization_and_biases.h"
+#include "../../model/headers/mob_v2_quantization_and_biases_v2.h"
+#elif MODEL_ID == RESNET50
+#include "../../model/headers/resnet50_quantization_and_biases_v2.h"
+#endif
 #include "../../layers/headers/norm_act.h"
 #include "pipelined_engines_specs.h"
 

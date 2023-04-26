@@ -1,6 +1,6 @@
 #include "../../basic_defs/basic_defs_glue.h"
-#if FIBHA_VERSION ==2
-#ifndef BIAS_QUANT && MODEL_ID == MOB_V2
+#if FIBHA_VERSION ==2 && MODEL_ID == MOB_V2
+#ifndef BIAS_QUANT
 #define BIAS_QUANT
 const static int layers_fused_parameters_offsets[] = { 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 32, 224, 416, 448, 448, 640, 832, 864, 864, 1056, 1056, 1248, 1312, 1696, 2080, 2144, 2144, 2528, 2912, 2976, 2976, 3360, 3744, 3808, 3808, 4192, 4576, 4672, 5248, 5824, 5920, 5920, 6496, 7072, 7168, 7168, 7744, 7744, 8320, 8480, 9440, 10400, 10560, 10560, 11520, 12480, 12640, 12640, 13600, 14560, 14880, 16160, 16160, 16160, 16160, 16160};

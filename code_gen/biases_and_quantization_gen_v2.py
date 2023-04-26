@@ -75,8 +75,8 @@ weights_zero_points_declaration_string = 'const static fms_dt weights_zero_point
 last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION)+'\n')
-    wf.write("#ifndef BIAS_QUANT && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
+    wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION)+ " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
+    wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 
     # for now, I am getting the average pooling quantization manually from netron

@@ -28,7 +28,7 @@ pw_block = 'pw_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_pw_s
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
 dw_block = \
-    'dw_conv_3x3(seml_dw_weights_3x3, {}, {}, *i*,layer_*i*_dw_specs,\n\
+    'seml_engines::dw_conv_3x3(seml_dw_weights_3x3, {}, {}, *i*,layer_*i*_dw_specs,\n\
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 

@@ -107,6 +107,8 @@ with open(dw_weights_h_file, 'w') as f:
         for ii in range(current_index, last_layer):
             layer_specs = model_dag[ii]
             layer_type = ''
+            if ii == current_index:
+                dw_layers_weights_offsets[ii] = 0
             if ii > 0:
                 dw_layers_weights_offsets[ii + 1] = dw_layers_weights_offsets[ii]
             if 'type' not in layer_specs or layer_specs['type'] != 'dw':

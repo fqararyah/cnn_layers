@@ -8,7 +8,7 @@
 
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 8320;
+const int first_quantization_arrays_num_elements = 12288;
 
 // switch point
 #if ONLY_SEML
@@ -45,8 +45,8 @@ const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
 const int alpha = 1;
 
 // fc_layer
-const int FC_LAYER_INDEX = 68;
-const int fc_layer_input_size = 1280;
+const int FC_LAYER_INDEX = 74;
+const int fc_layer_input_size = 2048;
 const int fc_cols = 1000;
 
 // avg_pool_layer
