@@ -51,8 +51,8 @@ const int chain_0_1_2_ofms_height = bottleneck_2_ofms_height;
 const int chain_0_1_2_ofms_width = bottleneck_2_ofms_width;
 const int chain_0_1_2_max_filter_dim = bottleneck_1_dw_filter_dim;
 const int chain_0_1_2_first_filter_dim = bottleneck_0_dw_filter_dim;
-const int chain_0_1_2_max_strides = layer_1_s_specs.strides;
-const int chain_0_1_2_first_strides = layer_1_s_specs.strides;
+const int chain_0_1_2_max_strides = first_conv_layer_specs.strides;
+const int chain_0_1_2_first_strides = first_conv_layer_specs.strides;
 const int chain_0_1_2_first_padding_left = 0;
 const int chain_0_1_2_max_rows_at_once =
 		bottleneck_0_rows_at_once > bottleneck_1_rows_at_once ?

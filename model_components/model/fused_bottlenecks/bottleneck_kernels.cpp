@@ -1,10 +1,11 @@
-#include "bottleneck_kernels.h"
-
+#include "../../basic_defs/simulation_constants.h"
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && ! ONLY_SEML
+
+#include "bottleneck_kernels.h"
 
 //*************************
 pss_dt conv_kernel(fms_dt ifms_buffer[],
-				   const layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+				   const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 				   const int filter_dim, int conv_d)
 {
 #pragma HLS INLINE

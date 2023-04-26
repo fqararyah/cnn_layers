@@ -4,7 +4,7 @@ import utils
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-in_out_file = '../model_components/model/SEML/imp/seml{}.cpp'.format(
+in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format( cgc.MODEL_NAME,
     cgc.FIBHA_VERSION_POSTFIX)
 constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
@@ -17,6 +17,10 @@ ifms_file_format = 'ifms_{}.txt'
 debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
 layer_0_s_block = 'layer_0_s_3x3(weights_1, input_image, result);\n'
+
+s_pw_block = 'pw_and_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_s_specs,\n\
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 pw_block = 'pw_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_pw_specs,\n\
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
@@ -106,6 +110,8 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         target_block = dw_block
     elif layer_type == 'pw':
         target_block = pw_block
+    elif layer_type == 's':
+        target_block = s_pw_block
 
     target_block = target_block.replace('*i*', str(layer_index))
 

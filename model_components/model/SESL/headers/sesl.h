@@ -37,10 +37,10 @@ const int _6_stages_layer_6_rows_at_once = 1;
 //l7
 const int _7_stages_layer_7_rows_at_once = 1;
 
-const int _7_stages_layer_0_s_in_rows_at_once = layer_1_s_specs.strides
+const int _7_stages_layer_0_s_in_rows_at_once = first_conv_layer_specs.strides
 		* _7_stages_layer_0_s_rows_at_once;
-const int _7_stages_layer_0_s_in_buffer_height = layer_1_s_filter_dim
-		+ (_7_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides;
+const int _7_stages_layer_0_s_in_buffer_height = first_conv_layer_filter_dim
+		+ (_7_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides;
 
 void pw_conv_pipeline(fms_dt channels[max_fms_size],
 		weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
@@ -55,9 +55,9 @@ void cnn_pipeline_7_mob_v2(
 		fms_dt result[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]);
 
 void _6_layer_0_s_3x3_conv(
-		fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim
-				+ (_6_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides][input_image_width],
-		const layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+		fms_dt channels_buffer[input_image_depth][first_conv_layer_filter_dim
+				+ (_6_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides][input_image_width],
+		const layer_0_weights_dt weights[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 		fms_dt result[layer_1_dw_depth][_6_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width]);
 
 void _6_layer_1_dw(

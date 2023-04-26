@@ -2,7 +2,9 @@
 #define MAIN_FILE
 
 #include "../model_components/model/headers/model_glue.h"
+#if ! ONLY_SEML
 #include "../model_components/model/fused_bottlenecks/bottlenecks_glue.h"
+#endif
 //#include "../model_components/model/pipelined_engines/pipeline_main.h"
 
 void top_func(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],

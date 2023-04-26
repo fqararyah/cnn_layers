@@ -5,23 +5,23 @@
 using namespace std;
 
 void _6_layer_0_s_3x3_conv(
-    fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides][input_image_width],
-    const layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+    fms_dt channels_buffer[input_image_depth][first_conv_layer_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides][input_image_width],
+    const layer_0_weights_dt weights[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
     fms_dt result[layer_1_dw_depth][_6_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width])
 {
 #pragma HLS INLINE off
 
-    const int _channels_buffer_height = layer_1_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides;
+    const int _channels_buffer_height = first_conv_layer_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides;
     fms_dt intermediate_channels_buffer[input_image_depth][_channels_buffer_height][layer_2_dw_specs.filter_size] =
         {0};
 #pragma HLS ARRAY_PARTITION variable = intermediate_channels_buffer type = complete dim = 0
 
-    const int offset_left = layer_1_s_filter_dim - layer_1_s_specs.padding_left;
+    const int offset_left = first_conv_layer_filter_dim - first_conv_layer_specs.padding_left;
     const fms_dt current_layer_zero_point = conv_fms_zero_points[0];
 
 layer_0_s_ofms:
     for (int o_o_d = 0;
-         o_o_d < layer_1_s_num_fils / sesl_layer_0_s_parallelism_ofms; o_o_d++)
+         o_o_d < first_conv_layer_num_fils / sesl_layer_0_s_parallelism_ofms; o_o_d++)
     {
         // outer filters loop
         int o_o_d_offset = o_o_d * sesl_layer_0_s_parallelism_ofms; // for indexing in depth
@@ -31,10 +31,10 @@ layer_0_s_ofms:
         {
             for (int h = 0; h < _channels_buffer_height; h++)
             {
-                for (int w = 0; w < layer_1_s_filter_dim - layer_1_s_specs.padding_left;
+                for (int w = 0; w < first_conv_layer_filter_dim - first_conv_layer_specs.padding_left;
                      w++)
                 {
-                    intermediate_channels_buffer[d][h][w + layer_1_s_specs.padding_left] =
+                    intermediate_channels_buffer[d][h][w + first_conv_layer_specs.padding_left] =
                         channels_buffer[d][h][w];
                 }
             }
@@ -43,7 +43,7 @@ layer_0_s_ofms:
 
     layer_0_s_pipeline:
         for (int w = 0; w < input_image_width; w +=
-                                               layer_1_s_specs.strides)
+                                               first_conv_layer_specs.strides)
         {
 #pragma HLS PIPELINE
             const int starting_fill_index = w + offset_left;
@@ -51,7 +51,7 @@ layer_0_s_ofms:
             for (int row = 0; row < _6_stages_layer_0_s_rows_at_once; row++)
             {
 #pragma HLS UNROLL
-                const int conv_start_h = row * layer_1_s_specs.strides;
+                const int conv_start_h = row * first_conv_layer_specs.strides;
             layer_0_s_parallelized_ofms:
                 for (int o_d = 0;
                      o_d < sesl_layer_0_s_parallelism_ofms; o_d++)
@@ -66,14 +66,14 @@ layer_0_s_ofms:
 #pragma HLS UNROLL
                         // parallelized depth loop
                     layer_0_s_ch:
-                        for (int h = 0; h < layer_1_s_filter_dim;
+                        for (int h = 0; h < first_conv_layer_filter_dim;
                              h++)
                         {
 #pragma HLS UNROLL
                             // conv height loop
                         layer_0_s_cw:
                             for (int c_w = 0;
-                                 c_w < layer_1_s_filter_dim; c_w++)
+                                 c_w < first_conv_layer_filter_dim; c_w++)
                             {
 #pragma HLS UNROLL
                                 // conv width loop
@@ -94,17 +94,17 @@ layer_0_s_ofms:
                     normalization.ofm_scale_rec = conv_fms_scales_rec[2];
                     normalization.ofm_scale = conv_fms_scales[2];
                     normalization.fused_zero_point =
-                        layer_1_s_fused_zero_points[o_o_d_offset + o_d];
+                        first_conv_layer_fused_zero_points[o_o_d_offset + o_d];
                     normalization.fused_scales =
-                        layer_1_s_fused_scales[o_o_d_offset + o_d];
-                    normalization.fused_scales_log_2_shift = layer_1_s_fused_scales_log_2_shifts[o_o_d_offset + o_d];
-                    normalization.layer_1_s_relu_6_fused_scale =
-                        layer_1_s_relu_6_fused_scales[o_o_d_offset + o_d];
-                    result[o_o_d_offset + o_d][row][w / layer_1_s_specs.strides] =
+                        first_conv_layer_fused_scales[o_o_d_offset + o_d];
+                    normalization.fused_scales_log_2_shift = first_conv_layer_fused_scales_log_2_shifts[o_o_d_offset + o_d];
+                    normalization.first_conv_layer_relu_6_fused_scale =
+                        first_conv_layer_relu_6_fused_scales[o_o_d_offset + o_d];
+                    result[o_o_d_offset + o_d][row][w / first_conv_layer_specs.strides] =
                         conv_relu_norm(tmp, normalization, 6);
                     //					if (o_o_d_offset + o_d >= layer_1_dw_depth
                     //							|| row >= _6_stages_layer_0_s_rows_at_once
-                    //							|| w / layer_1_s_specs.strides >= layer_1_dw_ifm_width) {
+                    //							|| w / first_conv_layer_specs.strides >= layer_1_dw_ifm_width) {
                     //						cout
                     //								<< "\nBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBBB\n";
                     //						cout << "o_o_d_offset + o_d >= layer_1_dw_depth "
@@ -113,7 +113,7 @@ layer_0_s_ofms:
                     //						cout << "row >= _6_stages_layer_0_s_rows_at_once " << row
                     //								<< " " << _6_stages_layer_0_s_rows_at_once
                     //								<< "\n";
-                    //						cout << "w / layer_1_s_specs.strides >= layer_1_dw_ifm_width "
+                    //						cout << "w / first_conv_layer_specs.strides >= layer_1_dw_ifm_width "
                     //								<< row << " " << layer_1_dw_ifm_width << "\n";
                     //					}
                     //					if (o_o_d == 0 && o_d == 0 && w == 0) {
@@ -124,33 +124,33 @@ layer_0_s_ofms:
                 }
             }
             // shift and fill the intermediate_channels_buffer
-            if (w < input_image_width - layer_1_s_specs.strides)
+            if (w < input_image_width - first_conv_layer_specs.strides)
             {
                 for (int d = 0; d < input_image_depth; d++)
                 {
 #pragma HLS UNROLL
                     for (int c_h = 0;
-                         c_h < layer_1_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides;
+                         c_h < first_conv_layer_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides;
                          c_h++)
                     {
 #pragma HLS UNROLL
                         for (int c_w = 0;
-                             c_w < layer_1_s_filter_dim - layer_1_s_specs.strides;
+                             c_w < first_conv_layer_filter_dim - first_conv_layer_specs.strides;
                              c_w++)
                         {
 #pragma HLS UNROLL
                             //							if (d >= input_image_depth
                             //									|| c_h >= _channels_buffer_height
-                            //									|| c_w + layer_1_s_specs.strides
+                            //									|| c_w + first_conv_layer_specs.strides
                             //											>= layer_2_dw_specs.filter_size) {
                             //								cout
                             //										<< "CCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCCC";
                             //							}
                             intermediate_channels_buffer[d][c_h][c_w] =
-                                intermediate_channels_buffer[d][c_h][c_w + layer_1_s_specs.strides];
+                                intermediate_channels_buffer[d][c_h][c_w + first_conv_layer_specs.strides];
                         }
-                        for (int c_w = layer_1_s_filter_dim - layer_1_s_specs.strides;
-                             c_w < layer_1_s_filter_dim; c_w++)
+                        for (int c_w = first_conv_layer_filter_dim - first_conv_layer_specs.strides;
+                             c_w < first_conv_layer_filter_dim; c_w++)
                         {
 #pragma HLS UNROLL
                             //							if (d >= input_image_depth
@@ -159,10 +159,10 @@ layer_0_s_ofms:
                             //								cout
                             //										<< "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD";
                             //							}
-                            if (c_w - (layer_1_s_filter_dim - layer_1_s_specs.strides) + starting_fill_index < layer_1_s_ifm_width)
+                            if (c_w - (first_conv_layer_filter_dim - first_conv_layer_specs.strides) + starting_fill_index < first_conv_layer_ifm_width)
                             {
                                 intermediate_channels_buffer[d][c_h][c_w] =
-                                    channels_buffer[d][c_h][c_w - (layer_1_s_filter_dim - layer_1_s_specs.strides) + starting_fill_index];
+                                    channels_buffer[d][c_h][c_w - (first_conv_layer_filter_dim - first_conv_layer_specs.strides) + starting_fill_index];
                             }
                             else
                             {
@@ -919,14 +919,14 @@ void _6_layer_5_pw(
 
 void _6_stages_fill_channels_buffer(
     fms_dt channels[input_image_depth][input_image_height][input_image_width],
-    fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides][input_image_width],
+    fms_dt channels_buffer_0[input_image_depth][first_conv_layer_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides][input_image_width],
     int starting_h)
 {
 
     const fms_dt current_layer_zero_point = conv_fms_zero_points[0];
 
-    const int buffer_height = layer_1_s_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides;
-    const int rows_to_shift = layer_1_s_filter_dim - layer_1_s_specs.strides;
+    const int buffer_height = first_conv_layer_filter_dim + (_6_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides;
+    const int rows_to_shift = first_conv_layer_filter_dim - first_conv_layer_specs.strides;
 
     const int shift_starting_point = buffer_height - rows_to_shift;
     const int fill_starting_point = rows_to_shift;

@@ -5,7 +5,7 @@ import code_generation_constants as cgc
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-out_file = '../model_components/model/headers/layers_specs.h'  # './out/layers_specs.h'
+out_file = '../model_components/model/headers/{}_layers_specs.h'  # './out/layers_specs.h'
 
 weights_group_items = 64
 
@@ -46,11 +46,28 @@ specs_struct = 'const layer_specs layer_{}_specs = {}\n\
                 {}//biases_dt skip_connection_other_layer_zero_point;\n\
                 {};\n'
 
+pooling_specs_struct = 'const pooling_layer_specs layer_{}_specs = {}\n\
+                {},//const pooling_fused_scales_dt fused_scale; \n\
+                {},//const biases_dt ifms_zero_point;\n\
+                {},//const biases_dt ofms_zero_point;\n\
+                {};\n'
+
+fc_specs_struct = 'const fc_layer_specs layer_{}_specs = {}\n\
+                {},//const fms_dt ifm_zero_point\n\
+                {};\n'
+
 specs_block = "//****************************\n \
 const int layer_{}_{}_num_fils = {} / alpha;\n\
 const int layer_{}_{}_depth = {};\n\
 const int layer_{}_{}_filter_dim = {};\n \
 const int layer_{}_{}_ifm_width = {};\n \
+//****************************\n"
+
+first_layer_specs_block = "//****************************\n \
+const int first_conv_layer_num_fils = {} / alpha;\n\
+const int first_conv_layer_depth = {};\n\
+const int first_conv_layer_filter_dim = {};\n \
+const int first_conv_layer_ifm_width = {};\n \
 //****************************\n"
 
 model_dag = utils.read_model_dag()
@@ -60,13 +77,14 @@ cumulative_pw_weights = 0
 cumulative_pw_weights_on_chip = 0
 cumulative_dw_weights = 0
 dw_ifms_cumulative_width_offset = 0
-with open(out_file, 'w') as f:
+with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef LAYERS_SPECS\n")
     f.write("#define LAYERS_SPECS\n")
     for layer_index in range(len(model_dag)):
         layer_specs = model_dag[layer_index]
         layer_type = ''
+        replacement_list = []
         if 'type' in layer_specs:
             layer_type = layer_specs['type']
         if layer_type in cgc.CONV_LAYER_TYPES:
@@ -82,8 +100,7 @@ with open(out_file, 'w') as f:
             if layer_type == 'dw':
                 layer_ifms_depth = layer_num_fils
 
-            replacement_list = []
-            #replacement_dic['*PREV*'] = layers_types[i-1]
+            # replacement_dic['*PREV*'] = layers_types[i-1]
             strides = layer_specs['strides']
             filter_dim = layer_filter_dim
             num_of_filters = layer_num_fils
@@ -174,7 +191,8 @@ with open(out_file, 'w') as f:
                 replacement_list.append(cumulative_dw_weights)
                 replacement_list.append(0)
                 replacement_list.append(dw_ifms_cumulative_width_offset)
-                dw_ifms_cumulative_width_offset += int(layer_width) * layer_depth * (layer_filter_dim - strides)
+                dw_ifms_cumulative_width_offset += int(
+                    layer_width) * layer_depth * (layer_filter_dim - strides)
                 cumulative_dw_weights += int(
                     layer_depth)
             else:
@@ -220,10 +238,14 @@ with open(out_file, 'w') as f:
 
             replacement_list.append('}')
 
-            to_write_specs_block = specs_block.format(layer_index, layer_type, layer_num_fils,
-                                                      layer_index, layer_type, layer_ifms_depth,
-                                                      layer_index, layer_type, layer_filter_dim,
-                                                      layer_index, layer_type, layer_width)
+            if current_block_indx > 0:
+                to_write_specs_block = specs_block.format(layer_index, layer_type, layer_num_fils,
+                                                        layer_index, layer_type, layer_ifms_depth,
+                                                        layer_index, layer_type, layer_filter_dim,
+                                                        layer_index, layer_type, layer_width)
+            else:
+                current_block_indx += 1
+                to_write_specs_block = first_layer_specs_block.format(layer_num_fils, layer_ifms_depth, layer_filter_dim, layer_width)
             f.write(to_write_specs_block)
 
             f.write(specs_struct.format(*replacement_list))
@@ -235,25 +257,23 @@ with open(out_file, 'w') as f:
             struct_var_body = ''
 
             if layer_type == 'avgpool':
+                replacement_list.append(str(layer_index) + '_' + layer_type)
+                replacement_list.append('{')
                 parent_layer_specs = model_dag[layer_specs['parents'][0]]
-                struct_var_body += 'const pooling_fused_scales_dt fused_scale = '
                 pooling_ofms_scale = layer_specs['ofms_scales']
                 pooling_ifms_scale = parent_layer_specs['ofms_scales']
-                pooling_fused_scale = pooling_ifms_scale / pooling_ofms_scale
-                struct_var_body += str(pooling_fused_scale) + ';\n'
+                replacement_list.append(pooling_ifms_scale / pooling_ofms_scale)
 
-                pooling_ofms_zero_points = layer_specs['ofms_zero_points']
-                pooling_ifms_zero_points = parent_layer_specs['ofms_zero_points']
-                struct_var_body += 'const biases_dt ifms_zero_point = ' + \
-                    str(pooling_ifms_zero_points) + ';\n'
-                struct_var_body += 'const biases_dt ofms_zero_point = ' + \
-                    str(pooling_ofms_zero_points) + ';\n'
+                replacement_list.append(layer_specs['ofms_zero_points'])
+                replacement_list.append(parent_layer_specs['ofms_zero_points'])
+                replacement_list.append('}')
+                f.write(pooling_specs_struct.format(*replacement_list))
+
             elif layer_type == 'fc':
-                struct_var_body += 'const fms_dt ifm_zero_point = ' + \
-                    str(layer_specs['ifms_zero_points']) + ';\n'
-
-            layer_specs_struct_str = layer_specs_struct_str.format(
-                '{', struct_var_body, '}', struct_var_name)
-            f.write(layer_specs_struct_str)
+                replacement_list.append(str(layer_index) + '_' + layer_type)
+                replacement_list.append('{')
+                replacement_list.append(layer_specs['ifms_zero_points'])
+                replacement_list.append('}')
+                f.write(fc_specs_struct.format(*replacement_list))
 
     f.write('#endif\n')

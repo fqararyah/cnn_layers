@@ -12,7 +12,7 @@ weights_file_format = weights_files_location + 'weights_{}.txt'
 parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
-off_chip_weights_file = '../off_chip_weights/off_chip_weights__FPGA.txt'
+off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights_fpga.txt'
 
 model_dag = utils.read_model_dag()
 
@@ -32,15 +32,17 @@ def get_ofms_parallelism(parallelism_file):
 formated_weights_all_layers = []
 for i in range(first_off_chip_layer, last_off_chip_layer):
     layer_specs = model_dag[i]
-    if 'type' not in layer_specs or layer_specs['type'] != 'pw':
+    if 'type' not in layer_specs or (layer_specs['type'] != 'pw' and layer_specs['type'] != 's'):
         continue
     
     layer_weights_shape = layer_specs['weights_shape']
     num_of_filters = layer_weights_shape[0]
-    filter_depth = layer_weights_shape[1]
+    filter_size = layer_weights_shape[1]
+    if layer_specs['type'] != 'pw':
+        filter_size *= layer_weights_shape[2] * layer_weights_shape[3]
     weights = np.loadtxt(weights_file_format.format(i)).astype(np.int8)
     weights = np.reshape(weights, \
-            (num_of_filters, filter_depth))
+            (num_of_filters, filter_size))
     
     ofms_parallelism = get_ofms_parallelism(parallelism_file)
     # print("get_ofms_parallelism", ofms_parallelism)
@@ -56,4 +58,4 @@ for i in range(first_off_chip_layer, last_off_chip_layer):
     combined_weights = combined_weights.reshape(combined_weights.size) 
     formated_weights_all_layers.append(combined_weights)
 
-np.savetxt(off_chip_weights_file, np.concatenate(formated_weights_all_layers, 0), fmt='%i')
+np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_weights_all_layers, 0), fmt='%i')

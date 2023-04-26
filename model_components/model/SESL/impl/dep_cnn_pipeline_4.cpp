@@ -56,7 +56,7 @@ void mobilenet_v2_pipeline_4(
 
 #pragma HLS ARRAY_PARTITION variable = dw_weights_2 type = complete dim = 1
 
-	layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][3][3];
+	layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][3][3];
 
 	weights_dt pw_weights_1[layer_1_pw_num_fils][layer_1_pw_depth];
 	weights_dt pw_weights_3[layer_3_pw_specs.num_fils][layer_2_pw_depth];
@@ -65,7 +65,7 @@ void mobilenet_v2_pipeline_4(
 						   pw_weights_3);
 
 	//#########################even###############################
-	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_0[input_image_depth][first_conv_layer_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 
 	fms_dt _5_layer_0_3x3_conv_out_0[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};
@@ -89,7 +89,7 @@ void mobilenet_v2_pipeline_4(
 	//###########################################################
 
 	//#########################odd###############################
-	fms_dt channels_buffer_1[input_image_depth][layer_1_s_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
+	fms_dt channels_buffer_1[input_image_depth][first_conv_layer_filter_dim + (_5_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width];
 
 	fms_dt _5_layer_0_3x3_conv_out_1[layer_1_pw_depth][layer_1_pw_ifm_width] =
 		{0};

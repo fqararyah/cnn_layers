@@ -1,6 +1,8 @@
-#include "bottlenecks_chain.h"
+#include "../../basic_defs/simulation_constants.h"
 
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && FIBHA_VERSION == 1 && CHAIN_LENGTH == 6 && MODEL_ID != 1  && ! ONLY_SEML
+
+#include "bottlenecks_chain.h"
 
 // padding left and right
 // padding top: just do not fill
@@ -95,7 +97,7 @@ void chain_0_1_padd_bottom_channels_buffer_rows(
 		for (int d = 0; d < input_image_depth; d++)
 		{
 #pragma HLS UNROLL
-			for (int h = chain_0_1_in_buffer_height - layer_1_s_specs.padding_bottom;
+			for (int h = chain_0_1_in_buffer_height - first_conv_layer_specs.padding_bottom;
 				 h < chain_0_1_in_buffer_height; h++)
 			{
 #pragma HLS UNROLL
@@ -118,7 +120,7 @@ void bottleneck_chain_fill_channels_buffer_from_groups_buffer(
 		chain_0_1_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
 	}
 	const int channels_buffer_start_filling_h =
-		starting_h == 0 ? layer_1_s_specs.padding_top : rows_to_shift;
+		starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
 	for (int h = 0; h < chain_0_1_rows_filled_each_time; h++)
 	{
 		if (starting_h + h < input_image_height)
@@ -265,7 +267,7 @@ void chain_0_1_fill_channels_buffer_cpu(
 		chain_0_1_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
 	}
 	const int channels_buffer_start_filling_h =
-		starting_h == 0 ? layer_1_s_specs.padding_top : rows_to_shift;
+		starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
 	for (int h = 0; h < chain_0_1_rows_filled_each_time; h++)
 	{
 		if (starting_h + h < input_image_height)
@@ -308,11 +310,11 @@ void bottleneck_0_pipeline_filling_stage(
 	for (int h = 0; h < chain_0_1_bottleneck_0_rows_at_once; h++)
 	{
 		fill_first_cols_of_first_bottleneck_input(chain_input,
-												  bottleneck_0_input, h * layer_1_s_specs.strides); // starting_h + 2
+												  bottleneck_0_input, h * first_conv_layer_specs.strides); // starting_h + 2
 
 		shift_and_fill_bottleneck_0_input(chain_input, bottleneck_0_input,
 										  bottleneck_0_extra_cols_filled_first_time,
-										  h * layer_1_s_specs.strides, layer_0_s_ifms_zero_point); // starting_h + 2
+										  h * first_conv_layer_specs.strides, layer_0_s_ifms_zero_point); // starting_h + 2
 
 		bottleneck_0_do_padding_left(bottleneck_0_previous_pass_dw_input,
 									 bottleneck_0_dw_lower_buffer, bottleneck_0_dw_ifms_zero_point);
@@ -331,7 +333,7 @@ void bottleneck_0_pipeline_filling_stage(
 				const int fill_input_index = (w + 1) * chain_0_1_first_strides + bottleneck_0_first_fill_offset;
 				shift_and_fill_bottleneck_0_input(chain_input,
 												  bottleneck_0_input, fill_input_index,
-												  h * layer_1_s_specs.strides, // starting_h + 2
+												  h * first_conv_layer_specs.strides, // starting_h + 2
 												  layer_0_s_ifms_zero_point);
 				mob_v2_bottleneck_0(bottleneck_0_input,
 									bottleneck_0_projection_kernel_output,
@@ -387,11 +389,11 @@ void bottleneck_0_within_pipeline_stage(
 	for (int h = 0; h < chain_0_1_bottleneck_0_rows_at_once; h++)
 	{
 		fill_first_cols_of_first_bottleneck_input(chain_input,
-												  bottleneck_0_input, h * layer_1_s_specs.strides); // starting_h + 2
+												  bottleneck_0_input, h * first_conv_layer_specs.strides); // starting_h + 2
 
 		shift_and_fill_bottleneck_0_input(chain_input, bottleneck_0_input,
 										  bottleneck_0_extra_cols_filled_first_time,
-										  h * layer_1_s_specs.strides, layer_0_s_ifms_zero_point); // starting_h + 2
+										  h * first_conv_layer_specs.strides, layer_0_s_ifms_zero_point); // starting_h + 2
 
 		bottleneck_0_do_padding_left(bottleneck_0_previous_pass_dw_input,
 									 bottleneck_0_dw_lower_buffer, bottleneck_0_dw_ifms_zero_point);
@@ -406,7 +408,7 @@ void bottleneck_0_within_pipeline_stage(
 		{
 			const int fill_input_index = (w + 1) * chain_0_1_first_strides + bottleneck_0_first_fill_offset;
 			shift_and_fill_bottleneck_0_input(chain_input, bottleneck_0_input,
-											  fill_input_index, h * layer_1_s_specs.strides, // starting_h + 2
+											  fill_input_index, h * first_conv_layer_specs.strides, // starting_h + 2
 											  layer_0_s_ifms_zero_point);
 			mob_v2_bottleneck_0(bottleneck_0_input,
 								bottleneck_0_projection_kernel_output,
@@ -621,7 +623,7 @@ void _0_1_bottlenecks_chain(
 	const int bottleneck_0_first_fill_offset = chain_0_1_first_filter_dim - chain_0_1_first_strides;
 	const int bottleneck_0_extra_cols_filled_first_time =
 		chain_0_1_first_filter_dim - chain_0_1_first_strides;
-	const fms_dt layer_0_s_ifms_zero_point = layer_1_s_specs.layer_ifms_zero_point;
+	const fms_dt layer_0_s_ifms_zero_point = first_conv_layer_specs.layer_ifms_zero_point;
 	const int num_of_ifm_groups_read_each_time =
 		input_image_num_fms_groups_in_width * chain_0_1_rows_filled_each_time;
 

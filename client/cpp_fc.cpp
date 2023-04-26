@@ -16,7 +16,7 @@ void read_ifms(string file_name,
 }
 
 void read_fc_weights(string file_name,
-                  int8_t fc_weights[])
+                     int8_t fc_weights[])
 {
     int a;
     std::ifstream infile(file_name);
@@ -85,7 +85,8 @@ string top_5_to_predictions_dict(int top5[5], string image_name)
     return dict;
 }
 
-void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int top5[5], int biases[])
+void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int top5[5], int biases[],
+              const fc_layer_specs layer_specs_struct)
 {
     double scaled_pss;
     double pss_vector[num_classes];
@@ -103,14 +104,15 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
             pss += (int64_t)weights[row_start_index + j] * in_vector[j];
         }
         // if(i==999)cout << pss <<" "<<weight_sums[i]<<" "<<biases[i]<<"\n";
-        pss_vector[i] = pss + (-weight_sums[i] * layer_68_fc_specs.ifm_zero_point) + biases[i];
+        pss_vector[i] = pss + (-weight_sums[i] * layer_specs_struct.ifm_zero_point) + biases[i];
     }
     for (int i = 0; i < 5; i++)
     {
-        double max = - 1000000;
+        double max = -1000000;
         for (int j = 0; j < num_classes; j++)
         {
-            if(pss_vector[j] > max && top5[0] != j && top5[1] != j && top5[2] != j && top5[3] != j && top5[4] != j){
+            if (pss_vector[j] > max && top5[0] != j && top5[1] != j && top5[2] != j && top5[3] != j && top5[4] != j)
+            {
                 max = pss_vector[j];
                 top5[i] = j;
             }
@@ -166,7 +168,7 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
 //             {
 //                 break;
 //             }
-            
+
 //             auto start = high_resolution_clock::now();
 //             fc_layer(ifms, fc_weights, weight_sums, top5, biases);
 //             auto stop = high_resolution_clock::now();

@@ -1,6 +1,8 @@
 #include "../headers/layers_imp_common_includes.h"
 #include "../headers/pw_conv.h"
 
+#if FIBHA_VERSION == 1
+
 void pw_fill_channels_tile(fms_dt channels[max_fms_size],
 						   fms_dt channels_tile[pw_tile_h][pw_tile_w], const int starting_index,
 						   int starting_d, const int layer_conv_d)
@@ -469,3 +471,5 @@ conv2_ots_loop:
 #endif
 	}
 }
+
+#endif

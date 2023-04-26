@@ -51,10 +51,13 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = tmp_channels type = complete dim = 3
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
+
+#if ONLY_SEML == 0
 	pipelined_engines_caller(channels);
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
  channels, layer_14_dw_specs);
 	copy_channels_to_tmp_channels(channels, tmp_channels);
-	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
+#endif
+	//seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif
 }

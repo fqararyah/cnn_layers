@@ -241,14 +241,14 @@ void fill_row(
 
 void _7_stages_fill_channels_buffer(
 	fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (_7_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides][input_image_width],
+	fms_dt channels_buffer_0[input_image_depth][first_conv_layer_filter_dim + (_7_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides][input_image_width],
 	int starting_h)
 {
 
 	const fms_dt current_layer_zero_point = conv_fms_zero_points[0];
 
-	const int buffer_height = layer_1_s_filter_dim + (_7_stages_layer_0_s_rows_at_once - 1) * layer_1_s_specs.strides;
-	const int rows_to_shift = layer_1_s_filter_dim - layer_1_s_specs.strides;
+	const int buffer_height = first_conv_layer_filter_dim + (_7_stages_layer_0_s_rows_at_once - 1) * first_conv_layer_specs.strides;
+	const int rows_to_shift = first_conv_layer_filter_dim - first_conv_layer_specs.strides;
 
 	const int filling_starting_offset =
 		starting_h == 0 ? input_image_num_fms_groups_in_width * rows_to_shift : starting_h * input_image_num_fms_groups_in_width;
@@ -259,7 +259,7 @@ void _7_stages_fill_channels_buffer(
 		starting_h >= buffer_height - rows_to_shift ? buffer_height - rows_to_shift : starting_h - 1;
 	const int fill_starting_row = rows_to_shift;
 	const int first_time_offset =
-		starting_h == 0 ? (layer_1_s_filter_dim - layer_1_s_specs.strides) : 0;
+		starting_h == 0 ? (first_conv_layer_filter_dim - first_conv_layer_specs.strides) : 0;
 
 	fms_grp_dt tmp_buffer[input_image_depth][input_image_num_fms_groups_in_width];
 
@@ -424,7 +424,7 @@ void _7_stages_padd_bottom_channels_buffer_rows(
 		for (int d = 0; d < input_image_depth; d++)
 		{
 #pragma HLS UNROLL
-			for (int h = _7_stages_layer_0_s_in_buffer_height - layer_1_s_specs.padding_bottom;
+			for (int h = _7_stages_layer_0_s_in_buffer_height - first_conv_layer_specs.padding_bottom;
 				 h < _7_stages_layer_0_s_in_buffer_height; h++)
 			{
 #pragma HLS UNROLL
@@ -447,7 +447,7 @@ void _7_stages_fill_channels_buffer_from_groups_buffer(
 		_7_stages_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
 	}
 	const int channels_buffer_start_filling_h =
-		starting_h == 0 ? layer_1_s_specs.padding_top : rows_to_shift;
+		starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
 	for (int h = 0; h < _7_stages_layer_0_s_in_rows_at_once; h++)
 	{
 		if (starting_h + h < input_image_height)
@@ -517,8 +517,8 @@ void cnn_pipeline_7_mob_v2(
 	//###########################################################
 
 	//#########################odd###############################
-	//	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim
-	//			+ (_7_stages_layer_2_rows_at_once - 1) * layer_1_s_specs.strides][input_image_width];
+	//	fms_dt channels_buffer_0[input_image_depth][first_conv_layer_filter_dim
+	//			+ (_7_stages_layer_2_rows_at_once - 1) * first_conv_layer_specs.strides][input_image_width];
 
 	fms_dt _6_layer_0_s_3x3_conv_out_1[layer_1_dw_depth][_7_stages_layer_0_s_rows_at_once][layer_1_dw_ifm_width] =
 		{0};
@@ -552,21 +552,21 @@ void cnn_pipeline_7_mob_v2(
 	const int num_of_ifm_groups_read_each_time =
 		input_image_num_fms_groups_in_width * _7_stages_layer_0_s_in_rows_at_once;
 
-	const fms_dt layer_1_s_fms_zero_point = conv_fms_zero_points[0];
+	const fms_dt first_conv_layer_fms_zero_point = conv_fms_zero_points[0];
 	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * _7_stages_layer_0_s_in_rows_at_once];
 
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 pipeline_active_row, input_image_num_fms_groups_in_width);
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0, pipeline_active_row, false,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	pipeline_active_row++;
 
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 pipeline_active_row, num_of_ifm_groups_read_each_time);
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0, pipeline_active_row, false,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	_6_layer_0_s_3x3_conv(channels_buffer_0, weights_1,
 						  _6_layer_0_s_3x3_conv_out_0);
 	//****************************
@@ -576,7 +576,7 @@ void cnn_pipeline_7_mob_v2(
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0,
 													  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 									 num_of_ifm_groups_read_each_time);
@@ -604,7 +604,7 @@ void cnn_pipeline_7_mob_v2(
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0,
 													  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 									 num_of_ifm_groups_read_each_time);
@@ -619,7 +619,7 @@ void cnn_pipeline_7_mob_v2(
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0,
 													  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 									 num_of_ifm_groups_read_each_time);
@@ -637,7 +637,7 @@ void cnn_pipeline_7_mob_v2(
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0,
 													  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 									 num_of_ifm_groups_read_each_time);
@@ -655,7 +655,7 @@ void cnn_pipeline_7_mob_v2(
 	_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 													  channels_buffer_0,
 													  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-													  layer_1_s_fms_zero_point);
+													  first_conv_layer_fms_zero_point);
 	_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 									 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 									 num_of_ifm_groups_read_each_time);
@@ -692,7 +692,7 @@ main_pipeline_loop:
 			_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 															  channels_buffer_0,
 															  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-															  layer_1_s_fms_zero_point);
+															  first_conv_layer_fms_zero_point);
 			_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 											 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 											 num_of_ifm_groups_read_each_time);
@@ -720,7 +720,7 @@ main_pipeline_loop:
 			_7_stages_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 															  channels_buffer_0,
 															  pipeline_active_row * rows_filled_each_time + extra_rows_filled_first_time, true,
-															  layer_1_s_fms_zero_point);
+															  first_conv_layer_fms_zero_point);
 			_7_stages_fill_ifm_groups_buffer(channels, fms_groups_buffer,
 											 (pipeline_active_row + 1) * rows_filled_each_time + extra_rows_filled_first_time,
 											 num_of_ifm_groups_read_each_time);

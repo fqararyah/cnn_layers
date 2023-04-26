@@ -2,6 +2,8 @@
 #include "../headers/pw_conv.h"
 #include "../headers/conv_utils.h"
 
+#if FIBHA_VERSION == 2
+
 void pw_and_conv_eng(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
                      fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
                      dw_pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
@@ -52,8 +54,8 @@ void pw_conv_pipeline(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_
                       weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
                       dw_pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                       layer_specs layer_specs_struct,
-                      int td_o,
-                      int t_in_h, int t_in_w)
+                      const int td_o,
+                      const  int t_in_h, const int t_in_w)
 {
 #pragma HLS INLINE OFF
 
@@ -116,30 +118,7 @@ conv2_itd_loop:
     }
 }
 
-void copy_pss_tile(
-    pss_dt src_pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
-    pss_dt dst_pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w])
-{
-
-#pragma HLS INLINE off
-
-pw_conv_eng_loops:
-    for (int f_d = 0; f_d < pw_conv_parallelism_out; f_d++)
-    {
-#pragma HLS PIPELINE
-        for (int t_h = 0; t_h < pw_tile_h; t_h++)
-        {
-#pragma HLS UNROLL
-            for (int t_w = 0; t_w < pw_tile_w; t_w++)
-            {
-#pragma HLS UNROLL
-                dst_pss_tile[f_d][t_h][t_w] = src_pss_tile[f_d][t_h][t_w];
-            }
-        }
-    }
-}
-
-void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
+void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
              fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
@@ -188,7 +167,7 @@ conv2_ith_loop:
                            relu_6_fused_scales_buffer, fused_zero_points_buffer,
                            prev_tile_index);
 
-            pw_conv_pipeline(channels, result, weights_tile, results_tile,
+            pw_conv_pipeline(channels, weights_tile, results_tile,
                              layer_specs_struct,
                              td_o, t_in_h, t_in_w);
             copy_pss_tile(results_tile, prev_results_tile);
@@ -210,7 +189,7 @@ conv2_ith_loop:
                           td_o * pw_conv_parallelism_out, layer_specs_struct);
 }
 
-void pw_conv(weights_grp_dt *weights,
+void pw_and_conv(weights_grp_dt *weights,
              fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
@@ -226,7 +205,7 @@ void pw_conv(weights_grp_dt *weights,
 {
 #pragma HLS INLINE off
 
-    weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d];
+    weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area];
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor = num_of_weights_in_the_same_filter_and_group
 

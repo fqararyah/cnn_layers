@@ -1,6 +1,6 @@
 #include "pipelined_engines.h"
 
-#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && ! ONLY_SEML
 
 using namespace pipelined_engines;
 #ifndef PIPELINED_PW_CONV

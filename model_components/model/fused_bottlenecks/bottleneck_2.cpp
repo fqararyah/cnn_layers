@@ -1,6 +1,8 @@
-#include "bottleneck.h"
+#include "../../basic_defs/simulation_constants.h"
 
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH >= 9  && ! ONLY_SEML
+
+#include "bottleneck.h"
 
 void bottleneck_2_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_2_expanded_ifms_depth],
@@ -75,7 +77,7 @@ void bottleneck_2_update_previous_pass_buffer(
 			previous_pass_dw_input_slice[1][offset_w];
 	}
 	previous_pass_dw_input_slice[1][offset_w] = dw_lower_buffer_slice[0];
-	//		if (offset_w + 1 == bottleneck_2_ifms_width / layer_1_s_specs.strides)//to do, handle once at another place
+	//		if (offset_w + 1 == bottleneck_2_ifms_width / first_conv_layer_specs.strides)//to do, handle once at another place
 	//		{
 	//			previous_pass_dw_input[d][1][offset_w + 1] = dw_lower_buffer[d][1];
 	//			previous_pass_dw_input[d][1][offset_w + 2] = dw_lower_buffer[d][2];

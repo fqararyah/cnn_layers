@@ -14,6 +14,13 @@ void fill_layers_weights_cpu(weights_dt *weights,
 							 int starting_filter, const int layer_depth,
 							 const int layer_weights_offset,
 							 const int layer_num_fils);
+
+void fill_layers_weights_cpu(weights_dt *weights,
+							 weights_dt weights_buffer[][max_conv_d][max_filter_area],
+							 int starting_filter, const int layer_depth,
+							 const int layer_weights_offset,
+							 const int layer_num_fils);
+							 
 void fill_layers_weights_cpu(weights_dt *weights,
 							 weights_dt weights_buffer[][max_conv_d],
 							 int starting_filter, const int layer_depth,
@@ -21,7 +28,7 @@ void fill_layers_weights_cpu(weights_dt *weights,
 							 const int layer_num_fils);
 
 void fill_layer_0_s_weights(
-	layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][3][3]);
+	layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][3][3]);
 
 void fill_dw_layer_weights(
 	const dw_weights_dt src[max_conv_d][max_conv_h * max_conv_w],
@@ -72,16 +79,16 @@ void copy_channels_to_tmp_channels(fms_dt channels[max_fms_size], fms_dt tmp_cha
 void copy_channels_to_tmp_channels(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 								   fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
 								   
-// void v1_3_fill_layers_weights(layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+// void v1_3_fill_layers_weights(layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 //                          dw_weights_dt dw_weights_2[layer_1_dw_depth][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size],
 //                          weights_dt pw_weights_3[v1_layer_3_pw_specs.num_fils][v1_layer_2_pw_depth]);
 //
-// void v1_4_fill_layers_weights(layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+// void v1_4_fill_layers_weights(layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 //                          dw_weights_dt dw_weights_2[layer_1_dw_depth][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size],
 //                          dw_weights_dt dw_weights_2[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size],
 //                          weights_dt pw_weights_3[v1_layer_3_pw_specs.num_fils][v1_layer_2_pw_depth]);
 
-// void v1_7_fill_layers_weights(layer_0_weights_dt weights_1[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+// void v1_7_fill_layers_weights(layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 //	dw_weights_dt dw_weights_2[v1_layer_1_dw_depth][v1_layer_6_dw_specs.filter_size][v1_layer_6_dw_specs.filter_size],
 //	dw_weights_dt dw_weights_2[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size],
 //	dw_weights_dt dw_weights_3[v1_layer_4_dw_depth][v1_layer_6_dw_specs.filter_size][v1_layer_6_dw_specs.filter_size],

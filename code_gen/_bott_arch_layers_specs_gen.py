@@ -13,22 +13,22 @@ to_replace = ['*LNF*', '*LD*', '*LW*', '*LH*', '*LST*', '*LPL*',
 weights_group_items = 64
 
 block_0 = "//****************************\n \
-const int layer_1_s_num_fils = *LNF* / alpha;\n\
-const int layer_1_s_depth = input_image_depth;\n\
+const int first_conv_layer_num_fils = *LNF* / alpha;\n\
+const int first_conv_layer_depth = input_image_depth;\n\
 const int layer_0_s_ifm_height = input_image_height;\n\
-const int layer_1_s_ifm_width = input_image_width;\n\
-const int layer_1_s_specs.strides = *LST*;\n\
-const int layer_0_s_ofm_height = layer_0_s_ifm_height / layer_1_s_specs.strides;\n\
-const int layer_1_s_specs.layer_ofm_width = layer_1_s_ifm_width / layer_1_s_specs.strides;\n\
-const int layer_0_s_num_of_tiles_out_d = int(0.99 + ((float) layer_1_s_num_fils) / pw_conv_parallelism_out);\n\
-const int layer_1_s_specs.padding_left = *LPL*;\n\
-const int layer_1_s_specs.padding_right = *LPR*;\n\
-const int layer_1_s_specs.padding_top = *LPT*;\n \
-const int layer_1_s_specs.padding_bottom = *LPB*;\n \
-const int layer_1_s_filter_dim = *LFS*;\n \
-const int layer_1_s_specs.layer_num_of_ofm_tiles_w = layer_1_s_specs.layer_ofm_width / pw_tile_w; \n \
-const int layer_1_s_specs.layer_num_fils = layer_0_s_ofm_height / pw_tile_h; \n \
-const int layer_0_s_num_of_tiles_d_in = layer_1_s_depth / pw_tile_d; \n \
+const int first_conv_layer_ifm_width = input_image_width;\n\
+const int first_conv_layer_specs.strides = *LST*;\n\
+const int layer_0_s_ofm_height = layer_0_s_ifm_height / first_conv_layer_specs.strides;\n\
+const int first_conv_layer_specs.layer_ofm_width = first_conv_layer_ifm_width / first_conv_layer_specs.strides;\n\
+const int layer_0_s_num_of_tiles_out_d = int(0.99 + ((float) first_conv_layer_num_fils) / pw_conv_parallelism_out);\n\
+const int first_conv_layer_specs.padding_left = *LPL*;\n\
+const int first_conv_layer_specs.padding_right = *LPR*;\n\
+const int first_conv_layer_specs.padding_top = *LPT*;\n \
+const int first_conv_layer_specs.padding_bottom = *LPB*;\n \
+const int first_conv_layer_filter_dim = *LFS*;\n \
+const int first_conv_layer_specs.layer_num_of_ofm_tiles_w = first_conv_layer_specs.layer_ofm_width / pw_tile_w; \n \
+const int first_conv_layer_specs.layer_num_fils = layer_0_s_ofm_height / pw_tile_h; \n \
+const int layer_0_s_num_of_tiles_d_in = first_conv_layer_depth / pw_tile_d; \n \
 //****************************\n"
 
 

@@ -1,6 +1,8 @@
-#include "bottleneck.h"
+#include "../../basic_defs/simulation_constants.h"
 
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && !ONLY_SEML
+
+#include "bottleneck.h"
 
 void bottleneck_0_fill_projection_kernel_weights(
 	const weights_dt layer_weights[][bottleneck_0_expanded_ifms_depth],
@@ -75,7 +77,7 @@ void bottleneck_0_update_previous_pass_buffer(
 			previous_pass_dw_input_slice[1][offset_w];
 	}
 	previous_pass_dw_input_slice[1][offset_w] = dw_lower_buffer_slice[0];
-	//		if (offset_w + 1 == bottleneck_0_ifms_width / layer_1_s_specs.strides)//to do, handle once at another place
+	//		if (offset_w + 1 == bottleneck_0_ifms_width / first_conv_layer_specs.strides)//to do, handle once at another place
 	//		{
 	//			previous_pass_dw_input[d][1][offset_w + 1] = dw_lower_buffer[d][1];
 	//			previous_pass_dw_input[d][1][offset_w + 2] = dw_lower_buffer[d][2];
@@ -134,8 +136,8 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[bottleneck_0_input_buffer_size]
 {
 #pragma HLS INLINE off
 
-	const fms_dt expansion_layer_ofms_zero_point = layer_1_s_specs.layer_ofms_zero_point;
-	const rec_scales_dt expansion_layer_ofms_scale = layer_1_s_specs.layer_ofms_scale;
+	const fms_dt expansion_layer_ofms_zero_point = first_conv_layer_specs.layer_ofms_zero_point;
+	const rec_scales_dt expansion_layer_ofms_scale = first_conv_layer_specs.layer_ofms_scale;
 
 	const fms_dt dw_layer_ofms_zero_point = layer_2_dw_specs.layer_ofms_zero_point;
 	const rec_scales_dt dw_layer_ofms_scale = layer_2_dw_specs.layer_ofms_scale;
@@ -165,22 +167,22 @@ mob_v2_bottleneck_0:
 		weights_dt projection_kernel_weights[bottleneck_0_ofms_depth];
 
 		expansion_layer_normalization.fused_scales =
-			layer_1_s_fused_scales[d_in_out];
+			first_conv_layer_fused_scales[d_in_out];
 		expansion_layer_normalization.fused_scales_log_2_shift =
-			layer_1_s_fused_scales_log_2_shifts[d_in_out];
+			first_conv_layer_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.relu_6_fused_scale =
-			layer_1_s_fused_scales_log_2_shifts[d_in_out];
+			first_conv_layer_fused_scales_log_2_shifts[d_in_out];
 		expansion_layer_normalization.fused_zero_point =
-			layer_1_s_fused_zero_points[d_in_out];
+			first_conv_layer_fused_zero_points[d_in_out];
 		expansion_layer_normalization.layer_0_relu_6_fused_scale =
-			layer_1_s_relu_6_fused_scales[d_in_out];
+			first_conv_layer_relu_6_fused_scales[d_in_out];
 		fms_dt expansion_result;
 
-		if (starting_h * layer_1_s_specs.strides < bottleneck_0_ifms_height + layer_1_s_specs.padding_top &&
-			expansion_kernel_starting_w < layer_1_s_specs.padding_right + bottleneck_0_ifms_width / layer_1_s_specs.strides - 1)
+		if (starting_h * first_conv_layer_specs.strides < bottleneck_0_ifms_height + first_conv_layer_specs.padding_top &&
+			expansion_kernel_starting_w < first_conv_layer_specs.padding_right + bottleneck_0_ifms_width / first_conv_layer_specs.strides - 1)
 		{
 			pss_dt expansion_pss = conv_kernel(bottleneck_input, weights_1,
-											   layer_1_s_filter_dim, d_in_out);
+											   first_conv_layer_filter_dim, d_in_out);
 			expansion_result = conv_relu_norm(expansion_pss,
 											  expansion_layer_normalization,
 											  bottleneck_0_expansion_layer_relu);

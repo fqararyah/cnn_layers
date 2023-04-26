@@ -8,7 +8,7 @@
 
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 8320;
+const int first_quantization_arrays_num_elements = 12288;
 
 // switch point
 #if ONLY_SEML
@@ -24,7 +24,11 @@ const int switch_point_fms_depth = 144; // not really, but the max of ...
 const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
 const int max_tmp_fms_size = 56 * 56 * 24;
 
+#if MODEL_ID == MOB_V2
 const int MAX_FMS_BUFFER_DEPTH = 192 * 16; // 192 * (28/7) * (28/7)
+#elif MODEL_ID == RESNET50
+const int MAX_FMS_BUFFER_DEPTH = 512 * 16; // 192 * (28/7) * (28/7)
+#endif
 const int MIN_FMS_HEIGHT = 8;
 const int MIN_FMS_WIDTH = 8;
 const int MAX_FILTER_DIM_STRIDE_1 = 3;
@@ -41,8 +45,8 @@ const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
 const int alpha = 1;
 
 // fc_layer
-const int FC_LAYER_INDEX = 68;
-const int fc_layer_input_size = 1280;
+const int FC_LAYER_INDEX = 74;
+const int fc_layer_input_size = 2048;
 const int fc_cols = 1000;
 
 // avg_pool_layer
@@ -58,10 +62,14 @@ const int DF = 1;
 const int start_with_pw = 1;
 
 // maxs for buffers
+#if MODEL_ID == MOB_V2
 const int max_conv_d = 1280 / alpha; // to_automate
+#elif MODEL_ID == RESNET50
+const int max_conv_d = 2048; // to_automate
+#endif
 const int min_strides = 1;
 const int max_strides = 2;
-#if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2
+#if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2 || MODEL_ID == RESNET50
 const int max_filter_hw_dim = 3;
 const int max_conv_filter_hw_dim = 3;
 const int max_padding_lr = 2;
@@ -126,4 +134,16 @@ struct layer_specs
 	scales_dt skip_connection_other_layer_scale;
 	biases_dt skip_connection_other_layer_zero_point;
 };
+
+struct pooling_layer_specs{
+const pooling_fused_scales_dt fused_scale;
+const biases_dt ifms_zero_point;
+const biases_dt ofms_zero_point;
+};
+
+struct fc_layer_specs{
+const fms_dt ifm_zero_point;
+};
+
+
 #endif

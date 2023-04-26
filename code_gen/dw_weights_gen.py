@@ -90,7 +90,7 @@ with open(dw_weights_h_file, 'w') as f:
             else:
                 pipe_dw_weights_v2 = current_weights
     
-    if cgc.FIBHA_VERSION == 2:
+    if cgc.FIBHA_VERSION == 2 and pipe_dw_weights_v2 is not None:
         f.write(pipe_dw_weights_declaration_string_v2)
         for i in range(pipe_dw_weights_v2.shape[0]):
             f.write('{')

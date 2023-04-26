@@ -14,12 +14,12 @@ const int bottleneck_0_dw_padding_bottom = 1;//todo
 const int bottleneck_0_ifms_depth = input_image_depth;
 const int bottleneck_0_ifms_height = input_image_height;
 const int bottleneck_0_ifms_width = input_image_width;
-const int bottleneck_0_expanded_ifms_depth = layer_1_s_num_fils;
+const int bottleneck_0_expanded_ifms_depth = first_conv_layer_num_fils;
 const int bottleneck_0_ofms_depth = layer_3_pw_num_fils;
 const int bottleneck_0_ofms_height = bottleneck_0_ifms_height / 2;//todo 2 is layer_1_s strides
 const int bottleneck_0_ofms_width = bottleneck_0_ifms_width / 2;//todo 2 is layer_1_s strides
 
-const int bottleneck_0_expansion_layer_relu = layer_1_s_specs.layer_activation;
+const int bottleneck_0_expansion_layer_relu = first_conv_layer_specs.layer_activation;
 const int bottleneck_0_dw_layer_relu = layer_2_dw_specs.layer_activation;
 const int bottleneck_0_projection_layer_relu = layer_3_pw_specs.layer_activation;
 //******************************************

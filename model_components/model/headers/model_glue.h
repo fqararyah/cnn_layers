@@ -1,5 +1,9 @@
-#include "layers_specs.h"
 
+#if MODEL_ID == MOB_V2
+#include "mob_v2_layers_specs.h"
+#elif MODEL_ID == RESNET50
+#include "resnet50_layers_specs.h"
+#endif
 #include "dw_weights.h"
 #include "dw_weights_v2.h"
 #include "on_chip_conv_pw_weights.h"

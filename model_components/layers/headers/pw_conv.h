@@ -3,6 +3,28 @@
 
 #include "../../basic_defs/basic_defs_glue.h"
 
+void copy_pss_tile(
+	pss_dt src_pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
+	pss_dt dst_pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w]);
+
+void pw_write_results_tile(
+	fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+	int tile_indx,
+	fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
+	int starting_d, layer_specs layer_specs_struct);
+
+void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+					pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
+					fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
+					layer_specs layer_specs_struct,
+					fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out],
+					fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[pw_conv_parallelism_out],
+					relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out],
+					biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
+					const int tile_index);
+
 void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 			 fms_dt result[max_fms_size], 
 			 fms_dt tmp_channels[max_tmp_fms_size],

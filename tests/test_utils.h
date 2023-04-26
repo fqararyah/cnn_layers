@@ -22,4 +22,7 @@ void dump_pw_weights_tile(string file_name,
 						  weights_dt tile[pw_conv_parallelism_out][max_conv_d], int layer_depth);
 void dump_ouput(string file_name, fms_dt out[], int size);
 
+string get_model_prefix();
+
+
 #endif

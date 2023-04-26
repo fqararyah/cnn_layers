@@ -2,10 +2,10 @@
 #ifndef LAYERS_SPECS
 #define LAYERS_SPECS
 //****************************
- const int layer_1_s_num_fils = 32 / alpha;
-const int layer_1_s_depth = 3;
-const int layer_1_s_filter_dim = 3;
- const int layer_1_s_ifm_width = 224;
+ const int first_conv_layer_num_fils = 32 / alpha;
+const int first_conv_layer_depth = 3;
+const int first_conv_layer_filter_dim = 3;
+ const int first_conv_layer_ifm_width = 224;
  //****************************
 const layer_specs layer_1_s_specs = {
                 1,//layer_index;
@@ -2185,14 +2185,12 @@ const layer_specs layer_66_pw_specs = {
                 1,//scales_dt skip_connection_other_layer_scale;
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
-
-struct{
-const pooling_fused_scales_dt fused_scale = 1.1545443951766399;
-const biases_dt ifms_zero_point = -128;
-const biases_dt ofms_zero_point = -128;
-}layer_67_avgpool_specs;
-
-struct{
-const fms_dt ifm_zero_point = -128;
-}layer_68_fc_specs;
+const pooling_layer_specs layer_67_avgpool_specs = {
+                1.1545443951766399,//const pooling_fused_scales_dt fused_scale; 
+                -128,//const biases_dt ifms_zero_point;
+                -128,//const biases_dt ofms_zero_point;
+                };
+const fc_layer_specs layer_68_fc_specs = {
+                -128,//const fms_dt ifm_zero_point
+                };
 #endif

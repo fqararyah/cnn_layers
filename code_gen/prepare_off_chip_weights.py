@@ -21,12 +21,12 @@ fc_biases_file_format = biases_files_location + 'biases_{}.txt'
 parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
-off_chip_fc_weights_file = '../off_chip_weights/fc_weights.txt'
-off_chip_fc_weight_sums_file = '../off_chip_weights/fc_weight_sums.txt'
-off_chip_fc_biases_file = '../off_chip_weights/fc_biases.txt'
-off_chip_weights_file = '../off_chip_weights/off_chip_weights.txt'
-off_chip_weights_offsets_file = '../off_chip_weights/off_chip_weights_offsets.txt'
-num_of_pw_weights_file = '../off_chip_weights/num_of_pw_weights_file.txt'
+off_chip_fc_weights_file = '../off_chip_weights/{}_fc_weights.txt'
+off_chip_fc_weight_sums_file = '../off_chip_weights/{}_fc_weight_sums.txt'
+off_chip_fc_biases_file = '../off_chip_weights/{}_fc_biases.txt'
+off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights.txt'
+off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets.txt'
+num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights.txt'
 
 model_dag = utils.read_model_dag()
 
@@ -52,7 +52,7 @@ fc_layer_index = 0
 fc_weights_shape = []
 for layer_index in range(len(model_dag)):
     layer_specs = model_dag[layer_index]
-    if 'type' in layer_specs and layer_specs['type'] == 'pw':
+    if 'type' in layer_specs and (layer_specs['type'] == 'pw' or layer_specs['type'] == 's'):
         weights_file = weights_file_format.format(layer_index)
         weights = np.loadtxt(weights_file).astype(np.int8)
         layers_weights[layer_index] = weights
@@ -64,11 +64,11 @@ for layer_index in range(len(model_dag)):
         fc_biases_file = fc_biases_file_format.format(layer_index)
         weights = np.loadtxt(fc_weights_file).astype(np.int8)
         biases = np.loadtxt(fc_biases_file).astype(np.int32)
-        np.savetxt(off_chip_fc_weights_file, weights, fmt='%i')
-        np.savetxt(off_chip_fc_biases_file, biases, fmt='%i')
+        np.savetxt(off_chip_fc_weights_file.format(cgc.MODEL_NAME), weights, fmt='%i')
+        np.savetxt(off_chip_fc_biases_file.format(cgc.MODEL_NAME), biases, fmt='%i')
         weights = np.reshape(weights, fc_weights_shape)
         weight_sums = np.sum(weights, axis=1)
-        np.savetxt(off_chip_fc_weight_sums_file, weight_sums, fmt='%i')
+        np.savetxt(off_chip_fc_weight_sums_file.format(cgc.MODEL_NAME), weight_sums, fmt='%i')
 
 layers_indices = list(layers_weights.keys())
 layers_indices.sort()
@@ -82,9 +82,9 @@ for layer_index in layers_indices:
     layers_weights_offsets[layer_index] = weights_combined_so_far
     weights_combined_so_far += layers_weights[layer_index].size
 
-np.savetxt(off_chip_weights_file, np.concatenate(combined_weights, 0), fmt='%i')
-np.savetxt(off_chip_weights_offsets_file, np.array(layers_weights_offsets), fmt='%i')
-with open(num_of_pw_weights_file, 'w') as f:
+np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(combined_weights, 0), fmt='%i')
+np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME), np.array(layers_weights_offsets), fmt='%i')
+with open(num_of_pw_weights_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write(str(weights_combined_so_far))
 
 replacement_string = ''

@@ -20,7 +20,7 @@ void dump_layer_output_no_tiling(string file_name, fms_dt ofms[max_fms_size],
 void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 					   const layer_specs layer_specs_struct)
 {
-	const int ofms_h = layer_specs_struct.layer_ofm_height; 
+	const int ofms_h = layer_specs_struct.layer_ofm_height;
 	const int ofms_w = layer_specs_struct.layer_ofm_width;
 	const int ofms_hw = ofms_h * ofms_w;
 	const int ofms_size = ofms_hw * layer_specs_struct.layer_num_fils;
@@ -29,7 +29,7 @@ void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	
+
 	const int size = 32 * 32 * 192;
 	bool skip_vals[size];
 
@@ -87,8 +87,8 @@ void dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][MIN_F
 {
 
 	ofstream myfile;
-	
-	const int ofms_h = layer_specs_struct.layer_ofm_height; 
+
+	const int ofms_h = layer_specs_struct.layer_ofm_height;
 	const int ofms_w = layer_specs_struct.layer_ofm_width;
 	const int ofms_hw = ofms_h * ofms_w;
 	const int ofms_size = ofms_hw * layer_specs_struct.layer_num_fils;
@@ -178,4 +178,20 @@ void dump_ouput(string file_name, fms_dt out[], int size)
 		myfile << out[i] << "\n";
 	}
 	myfile.close();
+}
+
+string get_model_prefix()
+{
+	string model_name;
+	switch (MODEL_ID)
+	{
+	case MOB_V2:
+		model_name = "mob_v2";
+		break;
+	case RESNET50:
+		model_name = "resnet50";
+	default:
+		break;
+	}
+	return model_name;
 }

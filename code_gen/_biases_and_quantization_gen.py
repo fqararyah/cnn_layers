@@ -314,7 +314,7 @@ with open(h_file, 'w') as wf:
                 fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
             relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_{}_relu_6_fused_scales[] ='.format(
-                layer_index, layers_types[layer_index]) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_1_s_relu_6_fused_scales[] ='
+                layer_index, layers_types[layer_index]) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ='
             relu_6_fused_scales_declaration_string += '{ ' + str(
                 relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 

@@ -1,6 +1,6 @@
 #include "pipeline_main.h"
 
-#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && FIBHA_VERSION == 2
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && FIBHA_VERSION == 2 && ! ONLY_SEML
 
 using namespace pipelined_engines;
 

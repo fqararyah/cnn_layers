@@ -2,12 +2,14 @@
 #include "../headers/pooling.h"
 
 void avgpool(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt result[fc_layer_input_size])
+			 fms_dt result[fc_layer_input_size],
+			 const pooling_layer_specs layer_specs_struct)
 {
 }
 
 void avgpool(fms_dt channels[max_fms_size],
-			 fms_dt result[fc_layer_input_size])
+			 fms_dt result[fc_layer_input_size],
+			 const pooling_layer_specs layer_specs_struct)
 {
 #pragma HLS INLINE OFF
 	const int avgpool_input_hw = avgpool_input_height * avgpool_input_width;
@@ -39,9 +41,9 @@ avgpool_itd_loop:
 				tmp += channels[tile_index * pw_tile_size + in_tile_index];
 			}
 		}
-		pss_f_dt scaled_tmp = (tmp / avgpool_input_hw - layer_67_avgpool_specs.ifms_zero_point) *
-								  layer_67_avgpool_specs.fused_scale +
-							  layer_67_avgpool_specs.ofms_zero_point;
+		pss_f_dt scaled_tmp = (tmp / avgpool_input_hw - layer_specs_struct.ifms_zero_point) *
+								  layer_specs_struct.fused_scale +
+							  layer_specs_struct.ofms_zero_point;
 
 		result[d] = clamp(scaled_tmp);
 	}

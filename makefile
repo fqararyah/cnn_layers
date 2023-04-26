@@ -1,8 +1,10 @@
 zbc: ./model_components/utils/utils.cpp \
-	./model_components/model/SEML/imp/seml.cpp \
-	./model_components/model/SEML/imp/seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
+	./model_components/model/SEML/imp/resnet50_seml_v2.cpp \
 	./model_components/layers/impl/pw_conv_v1_2.cpp \
 	./model_components/layers/impl/pw_conv_v2.cpp \
+	./model_components/layers/impl/pw_and_conv.cpp \
 	./client/prepare_weights_and_input.cpp \
 	./client/prepare_weights_and_input_v2.cpp \
 	./model_components/layers/impl/pooling.cpp \
@@ -23,10 +25,12 @@ zbc: ./model_components/utils/utils.cpp \
 	./tests/test_utils.cpp \
 	./tests/main_tester.cpp
 	g++ -o main_tester ./model_components/utils/utils.cpp \
-	./model_components/model/SEML/imp/seml.cpp \
-	./model_components/model/SEML/imp/seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
+	./model_components/model/SEML/imp/resnet50_seml_v2.cpp \
 	./model_components/layers/impl/pw_conv_v1_2.cpp \
 	./model_components/layers/impl/pw_conv_v2.cpp \
+	./model_components/layers/impl/pw_and_conv.cpp \
 	./client/prepare_weights_and_input.cpp \
 	./client/prepare_weights_and_input_v2.cpp \
 	./model_components/layers/impl/pooling.cpp \

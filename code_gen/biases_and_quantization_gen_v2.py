@@ -63,7 +63,7 @@ biases_file_format = biases_files_location + 'biases_{}.txt'
 
 
 # './out/dw_weights.h'
-h_file = '../model_components/model/headers/quantization_and_biases{}.h'.format(
+h_file = '../model_components/model/headers/{}_quantization_and_biases{}.h'.format(cgc.MODEL_NAME,
     cgc.FIBHA_VERSION_POSTFIX)
 
 layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
@@ -76,7 +76,7 @@ last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION)+'\n')
-    wf.write("#ifndef BIAS_QUANT\n")
+    wf.write("#ifndef BIAS_QUANT && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
     wf.write("#define BIAS_QUANT\n")
 
     # for now, I am getting the average pooling quantization manually from netron
@@ -220,7 +220,7 @@ with open(h_file, 'w') as wf:
                 fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
             relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_{}_relu_6_fused_scales[] ='.format(
-                layer_index, layer_type) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt layer_1_s_relu_6_fused_scales[] ='
+                layer_index, layer_type) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ='
             relu_6_fused_scales_declaration_string += '{ ' + str(
                 relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 

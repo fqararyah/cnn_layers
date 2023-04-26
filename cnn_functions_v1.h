@@ -5,7 +5,7 @@
 #define V1_FIRST
 //*********UK*********
 //*****layer_1 (first layer to apply UK from)*****
-const int v1_layer_1_dw_num_fils = layer_1_s_num_fils * alpha;
+const int v1_layer_1_dw_num_fils = first_conv_layer_num_fils * alpha;
 const int v1_layer_1_dw_depth = v1_layer_1_dw_num_fils;
 const int v1_layer_2_dw_specs.strides = 1;
 const int v1_layer_1_dw_ifm_height = layer_0_ofm_height;
@@ -117,8 +117,8 @@ const int v1_max_tmp_fms_size = 2;//negligable, ther is actually no
 #endif
 
 void v1_3_layer_0_3x3_conv(
-	fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim + (v1_3_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-	layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+	fms_dt channels_buffer[input_image_depth][first_conv_layer_filter_dim + (v1_3_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	layer_0_weights_dt weights[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 	fms_dt result[v1_layer_2_pw_depth][v1_layer_2_pw_ifm_width]);
 
 void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filter_size - v1_layer_2_dw_specs.strides][v1_layer_1_dw_ifm_width],
@@ -127,8 +127,8 @@ void v1_4_layer_1_dw(fms_dt upper[v1_layer_1_dw_depth][v1_layer_2_dw_specs.filte
                      fms_dt result[v1_layer_1_dw_num_fils][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ofm_width], int active_row);
 
 void v1_4_layer_0_3x3_conv(
-	fms_dt channels_buffer[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
-	layer_0_weights_dt weights[layer_1_s_num_fils][layer_1_s_depth][layer_1_s_filter_dim][layer_1_s_filter_dim],
+	fms_dt channels_buffer[input_image_depth][first_conv_layer_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	layer_0_weights_dt weights[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 	fms_dt result[v1_layer_1_dw_depth][v1_4_stages_layer_1_rows_at_once][v1_layer_1_dw_ifm_width]);
 
 void v1_4_layer_2_pw_dw(
@@ -141,7 +141,7 @@ void v1_4_layer_2_pw_dw(
 
 void v1_4_stages_fill_channels_buffer(
 	fms_dt channels[input_image_depth][input_image_height][input_image_width],
-	fms_dt channels_buffer_0[input_image_depth][layer_1_s_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
+	fms_dt channels_buffer_0[input_image_depth][first_conv_layer_filter_dim + (v1_4_stages_layer_1_rows_at_once - 1) * layer_0_strides][input_image_width],
 	int starting_h);
 
 void mobilenet_v1_pipeline_3(
