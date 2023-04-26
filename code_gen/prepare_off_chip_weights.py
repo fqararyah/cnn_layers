@@ -50,9 +50,13 @@ layers_weights = {}
 num_pw_layer = 0
 fc_layer_index = 0
 fc_weights_shape = []
+first_layer = True
 for layer_index in range(len(model_dag)):
     layer_specs = model_dag[layer_index]
     if 'type' in layer_specs and (layer_specs['type'] == 'pw' or layer_specs['type'] == 's'):
+        if first_layer:
+            first_layer = False
+            continue
         weights_file = weights_file_format.format(layer_index)
         weights = np.loadtxt(weights_file).astype(np.int8)
         layers_weights[layer_index] = weights

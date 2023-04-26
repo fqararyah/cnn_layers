@@ -58,6 +58,6 @@ void top_func(
  channels, layer_14_dw_specs);
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 #endif
-	//seml(off_chip_weights, channels, result, tmp_channels, fc_input);
+	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif
 }

@@ -30,9 +30,13 @@ def get_ofms_parallelism(parallelism_file):
     return ofms_parallelism
 
 formated_weights_all_layers = []
+first_layer = True
 for i in range(first_off_chip_layer, last_off_chip_layer):
     layer_specs = model_dag[i]
     if 'type' not in layer_specs or (layer_specs['type'] != 'pw' and layer_specs['type'] != 's'):
+        continue
+    if first_layer:
+        first_layer = False
         continue
     
     layer_weights_shape = layer_specs['weights_shape']
