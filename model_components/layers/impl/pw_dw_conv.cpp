@@ -105,7 +105,7 @@ void scale_pss_tile(fms_dt tmp_channels[max_fms_size],
 						if (read_write == 0 || read_write == 2)
 						{
 							scaled_val =
-								pw_relu_norm(
+								pw_relu_norm_6(
 									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 									normalization, layer_relu);
 						}

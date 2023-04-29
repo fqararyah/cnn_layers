@@ -77,6 +77,7 @@ cumulative_pw_weights = 0
 cumulative_pw_weights_on_chip = 0
 cumulative_dw_weights = 0
 dw_ifms_cumulative_width_offset = 0
+first_conv_layer = True
 with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef LAYERS_SPECS\n")
@@ -153,10 +154,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             replacement_list.append(int(layer_width / strides))
 
             layer_activation = ''
-            if layer_specs['activation'] == 'relu6':
-                layer_activation = '6'
-            elif layer_specs['activation'] == 'sigmoid':
-                layer_activation = '2'
+            if layer_specs['activation'] != '':
+                layer_activation = layer_specs['activation']
             else:
                 layer_activation = '0'
 
@@ -180,7 +179,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             replacement_list.append(
                 str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
 
-            if layer_type == 'pw' and i > 0:
+            if (layer_type == 'pw' or layer_type == 's') and not first_conv_layer:
                 replacement_list.append(cumulative_pw_weights)
                 replacement_list.append(cumulative_pw_weights_on_chip)
                 replacement_list.append(0)
@@ -196,6 +195,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 cumulative_dw_weights += int(
                     layer_depth)
             else:
+                if layer_type == 'pw' or layer_type == 's':
+                    first_conv_layer = False
                 replacement_list.append(0)
                 replacement_list.append(0)
                 replacement_list.append(0)

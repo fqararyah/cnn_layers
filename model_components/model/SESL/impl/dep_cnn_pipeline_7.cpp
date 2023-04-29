@@ -195,12 +195,12 @@ void _7_layer_6_pw(
                 normalization.ofm_zero_point = current_layer_ofms_zero_point;
                 normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
                 normalization.ofm_scale = current_layer_ofms_scale;
-                result[index_in_result] = pw_relu_norm(tmp, normalization,
+                result[index_in_result] = pw_relu_norm_6(tmp, normalization,
                                                        layer_6_activation);
                 //				if (o_o_d_offset + o_d == 0) {
-                ////					cout << "\n"<<tmp <<" >> "<<pw_relu_norm(tmp, normalization, layer_7_relu)
+                ////					cout << "\n"<<tmp <<" >> "<<pw_relu_norm_6(tmp, normalization, layer_7_relu)
                 ////							<< "\n";
-                //					cout << pw_relu_norm(tmp, normalization, layer_7_relu)
+                //					cout << pw_relu_norm_6(tmp, normalization, layer_7_relu)
                 //							<< " ";
                 //				}
             }

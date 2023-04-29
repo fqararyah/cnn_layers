@@ -286,7 +286,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
     {
 #pragma HLS PIPELINE
 
-        if (tile_in_d + d > layer_ifms_depth)
+        if (tile_in_d + d >= layer_ifms_depth)
         {
             break;
         }

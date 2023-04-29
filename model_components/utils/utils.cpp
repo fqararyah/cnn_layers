@@ -112,14 +112,15 @@ void fill_layers_weights_cpu(weights_dt *weights,
 	}
 }
 
-void fill_layers_weights_cpu(weights_dt *weights,
-							 weights_dt weights_buffer[][max_conv_d][max_filter_area],
-							 int starting_filter, const int layer_depth,
-							 const int layer_weights_offset,
-							 const int layer_num_fils)
+void fill_layers_weights_cpu_pw_conv(weights_dt *weights,
+									 weights_dt weights_buffer[][max_conv_d][max_filter_area],
+									 int starting_filter, const int layer_depth,
+									 const int layer_weights_offset,
+									 const int layer_num_fils)
 {
 	const int layer_Weights_offset_cpu = layer_weights_offset * weights_group_items;
-	const int current_fill_offset = layer_Weights_offset_cpu + starting_filter * layer_depth;
+	const int current_fill_offset = layer_Weights_offset_cpu + starting_filter * max_filter_area * layer_depth; // todo max_filter_area
+
 	for (int filter_index = 0; filter_index < pw_conv_parallelism_out; filter_index++)
 	{
 		if (filter_index + starting_filter < layer_num_fils)
@@ -128,7 +129,8 @@ void fill_layers_weights_cpu(weights_dt *weights,
 			{
 				for (int i = 0; i < max_filter_area; i++)
 				{
-					weights_buffer[filter_index][d][i] = weights[current_fill_offset + filter_index * layer_depth + d];
+					weights_buffer[filter_index][d][i] = weights[current_fill_offset +
+																 (filter_index * layer_depth + d) * max_filter_area + i]; // todo
 				}
 			}
 		}

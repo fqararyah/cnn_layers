@@ -125,10 +125,17 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 						fms_dt scaled_val;
 						if (layer_specs_struct.fused_with_add == 0)
 						{
+#if MODEL_ACTIVATION == RELU6
 							scaled_val =
-								pw_relu_norm(
+								pw_relu_norm_6(
 									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 									normalization, layer_relu);
+#elif MODEL_ACTIVATION == RELU
+							scaled_val =
+								relu_norm(
+									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
+									normalization, layer_relu);
+#endif
 						}
 						else
 						{

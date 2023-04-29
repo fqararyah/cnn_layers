@@ -151,7 +151,7 @@ mob_v2_bottleneck_1:
 																pw_weights_4[d_in_out], bottleneck_1_ifms_depth,
 																d_in_out, h, w,
 																bottleneck_1_expansion_parallelism_w);
-						expansion_result[h][first_step_in_w + w] = pw_relu_norm(
+						expansion_result[h][first_step_in_w + w] = pw_relu_norm_6(
 							expansion_pss, expansion_layer_normalization,
 							bottleneck_1_expansion_layer_relu);
 					}

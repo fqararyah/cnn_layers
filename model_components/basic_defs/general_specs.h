@@ -6,9 +6,13 @@
 #define PW_CONV 1
 #define DW_CONV 2
 
+#define RELU 1
+#define RELU6 6
+
+#define MODEL_ACTIVATION RELU
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 12288;
+const int first_quantization_arrays_num_elements = 11520;
 
 // switch point
 #if ONLY_SEML

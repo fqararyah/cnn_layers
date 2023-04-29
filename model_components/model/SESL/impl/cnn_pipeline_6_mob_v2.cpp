@@ -531,7 +531,7 @@ void _6_layer_2_pw(
 						current_layer_ofms_zero_point;
 					normalization.ofm_scale_rec = current_layer_ofms_scale_rec;
 					normalization.ofm_scale = current_layer_ofms_scale;
-					result[o_o_d_offset + o_d][row][w] = pw_relu_norm(tmp,
+					result[o_o_d_offset + o_d][row][w] = pw_relu_norm_6(tmp,
 																	  normalization, layer_3_pw_specs.layer_activation);
 				}
 			}
@@ -693,7 +693,7 @@ layer_3_pw_4_dw_main_loop:
 								normalization.ofm_scale_rec =
 									current_pw_ofms_scale_rec;
 								normalization.ofm_scale = current_pw_ofms_scale;
-								fms_dt scaled_val = pw_relu_norm(tmp,
+								fms_dt scaled_val = pw_relu_norm_6(tmp,
 																 normalization, layer_4_pw_specs.layer_activation);
 
 								lower[o_o_d_offset + o_d][row][pw_w_index] =
@@ -911,7 +911,7 @@ void _6_layer_5_pw(
 				normalization.ofm_zero_point = conv_fms_zero_points[6 + 1];
 				normalization.ofm_scale_rec = conv_fms_scales_rec[6 + 1];
 				normalization.ofm_scale = conv_fms_scales[6 + 1];
-				result[offset_in_result] = pw_relu_norm(tmp, normalization,
+				result[offset_in_result] = pw_relu_norm_6(tmp, normalization,
 														layer_7_pw_specs.layer_activation);
 			}
 		}

@@ -163,7 +163,7 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
                                 (MAX_DW_BUFFER_HEIGHT - filter_dim != h + write_offset_h_in_normalized_tile ||
                                  padding_top == 0 || starting_h != 0))
                             {
-                                normalized_tile[f][h + write_offset_h_in_normalized_tile][writing_w_offset + o_w + w] = pw_relu_norm(
+                                normalized_tile[f][h + write_offset_h_in_normalized_tile][writing_w_offset + o_w + w] = pw_relu_norm_6(
                                     tmp_pss, normalization_buffer[f],
                                     layer_relu);
                             }
@@ -177,7 +177,7 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
                             fms_dt normalized_val;
                             if (layer_specs_struct.fused_with_add == 0)
                             {
-                                normalized_val = pw_relu_norm(tmp_pss, normalization_buffer[f], layer_relu);
+                                normalized_val = pw_relu_norm_6(tmp_pss, normalization_buffer[f], layer_relu);
                             }
                             else
                             {

@@ -261,7 +261,7 @@ fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 	projection_layer_normalization.fused_zero_point =
 		projection_layer_fused_zero_points[offset_d];
 
-	return pw_relu_norm(pss_buffer[offset_d], projection_layer_normalization, layer_relu);
+	return pw_relu_norm_6(pss_buffer[offset_d], projection_layer_normalization, layer_relu);
 	//	}
 }
 //*************************

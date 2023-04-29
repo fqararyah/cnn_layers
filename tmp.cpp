@@ -13,7 +13,7 @@ fms_dt clamp(pss_f_dt val) {
 	return ret_val;
 }
 
-fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization,
+fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization,
 		const int layer_relu) {
 #pragma HLS INLINE
 	norm_act_pss_dt na_pss = pss + normalization.fused_zero_point;

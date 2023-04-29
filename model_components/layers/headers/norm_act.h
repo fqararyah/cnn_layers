@@ -3,7 +3,10 @@
 
 #include "../../basic_defs/basic_defs_glue.h"
 
-fms_dt pw_relu_norm(pss_dt pss, fms_quantization_scheme normalization, const int layer_relu);
+fms_dt relu_norm(pss_dt pss, fms_quantization_scheme normalization,
+					const int layer_relu);
+					
+fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization, const int layer_relu);
 
 pss_f_dt pw_relu_norm_no_q_no_relu(pss_dt pss, fms_quantization_scheme normalization,
 		const int layer_relu);

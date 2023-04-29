@@ -6,8 +6,8 @@
 
 void pw_and_conv_eng(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
                      fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
-                     dw_pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
-                     int starting_conv_d, int starting_filter, const layer_specs layer_specs_struct)
+                     pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+                     const int starting_conv_d, const int starting_filter, const layer_specs layer_specs_struct)
 {
 
     const int layer_depth = layer_specs_struct.layer_depth;
@@ -40,7 +40,7 @@ pw_conv_eng_loops:
                                 results_tile[f_d][t_h][t_w] = 0;
                             }
                             results_tile[f_d][t_h][t_w] += channels_tile[d][t_h + c_h][t_w + c_w] *
-                                                           weights_tile[f_d][starting_conv_d]
+                                                           weights_tile[f_d][starting_conv_d + d]
                                                                        [c_h * max_conv_filter_hw_dim + c_w];
                         }
                     }
@@ -52,7 +52,7 @@ pw_conv_eng_loops:
 
 void pw_conv_pipeline(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                       weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
-                      dw_pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+                      pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                       layer_specs layer_specs_struct,
                       const int td_o,
                       const  int t_in_h, const int t_in_w)
@@ -216,7 +216,7 @@ void pw_and_conv(weights_grp_dt *weights,
                                            layer_specs_struct.layer_weights_offset,
                                            layer_specs_struct.layer_num_fils);
 #elif HW == CPU
-    fill_layers_weights_cpu(weights,
+    fill_layers_weights_cpu_pw_conv(weights,
                             weights_tile,
                             0 * pw_conv_parallelism_out, layer_specs_struct.layer_depth,
                             layer_specs_struct.layer_weights_offset, layer_specs_struct.layer_num_fils);
@@ -272,7 +272,7 @@ conv2_ots_loop:
                                                layer_specs_struct.layer_weights_offset,
                                                layer_specs_struct.layer_num_fils);
 #elif HW == CPU
-        fill_layers_weights_cpu(weights,
+        fill_layers_weights_cpu_pw_conv(weights,
                                 weights_tile,
                                 (td_o + 1) * pw_conv_parallelism_out, layer_specs_struct.layer_depth,
                                 layer_specs_struct.layer_weights_offset, layer_specs_struct.layer_num_fils);

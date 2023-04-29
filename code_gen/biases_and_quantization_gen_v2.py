@@ -27,6 +27,8 @@ general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/ge
 #########################################################################
 model_dag = utils.read_model_dag()
 
+model_activation = ''
+
 overall_quantization_arrays_num_of_elements = 0
 for layer_specs in model_dag:
     overall_quantization_arrays_num_of_elements += layer_specs['ifms_shape'][0]
@@ -106,6 +108,11 @@ with open(h_file, 'w') as wf:
                                         1] = pipe_layers_fused_parameters_offsets[layer_index]
         layer_specs = model_dag[layer_index]
         layer_type = ''
+
+        if model_activation == '':
+            if 'activation' in layer_specs and layer_specs['activation'] != '':
+                model_activation = layer_specs['activation']
+
         if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
             layer_type = layer_specs['type']
         else:
@@ -334,6 +341,8 @@ with open(general_specs_file, 'r') as f:
         if 'const int first_quantization_arrays_num_elements' in line:
             replacement_string += 'const int first_quantization_arrays_num_elements = ' + \
                 str(first_quantization_arrays_num_of_elements) + ';\n'
+        elif '#define MODEL_ACTIVATION' in line:
+            replacement_string += '#define MODEL_ACTIVATION ' + model_activation + '\n'
         else:
             replacement_string += line
 
