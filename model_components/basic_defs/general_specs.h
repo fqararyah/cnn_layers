@@ -10,9 +10,10 @@
 #define RELU6 6
 
 #define MODEL_ACTIVATION RELU
+#define ADD_LAYER_ACTIVATION RELU
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 11520;
+const int first_quantization_arrays_num_elements = 4864;
 
 // switch point
 #if ONLY_SEML

@@ -146,10 +146,19 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 								pw_relu_norm_no_q_no_relu(
 									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 									normalization, layer_relu);
-
+#if ADD_LAYER_ACTIVATION == 0
 							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal + add_layer_zero_point;
 							addition_result = addition_result + quant_half - (addition_result < 0);
 							scaled_val = clamp(addition_result);
+#elif ADD_LAYER_ACTIVATION == RELU
+							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val);
+							if(addition_result > 0){
+								addition_result = addition_result * add_layer_scale_reciprocal + add_layer_zero_point + quant_half;
+								scaled_val = clamp(addition_result);
+							} else{
+								scaled_val = add_layer_zero_point;
+							}
+#endif
 						}
 
 						result_tile_scaled[tile_offset * pw_tile_d + t_d][t_h][t_w] =
@@ -195,10 +204,10 @@ pw_conv_eng_loops:
 			for (int t_w = 0; t_w < pw_tile_w; t_w++)
 			{
 #pragma HLS UNROLL
-				if (starting_conv_d == 0)
-				{
-					results_tile[f_d][t_h][t_w] = 0;
-				}
+				// if (starting_conv_d == 0)
+				// {
+				// 	results_tile[f_d][t_h][t_w] = 0;
+				// }
 				results_tile[f_d][t_h][t_w] += channels_tile[t_h][t_w] * weights_tile[f_d][starting_conv_d];
 			}
 		}
@@ -255,6 +264,7 @@ pw_conv_eng_loops:
 			{
 #pragma HLS UNROLL
 				dst_pss_tile[f_d][t_h][t_w] = src_pss_tile[f_d][t_h][t_w];
+				src_pss_tile[f_d][t_h][t_w] = 0;
 			}
 		}
 	}
@@ -282,8 +292,8 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
 #pragma HLS ARRAY_PARTITION variable = tmp_channels_scaled_tile complete dim = 3
 
-	pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
-	pss_dt prev_results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
+	pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w] = {0};
+	pss_dt prev_results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w] = {0};
 	fms_dt scaled_result_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
 #pragma HLS ARRAY_PARTITION variable = results_tile complete dim = 0
 #pragma HLS ARRAY_PARTITION variable = prev_results_tile complete dim = 1

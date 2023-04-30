@@ -27,7 +27,8 @@ general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/ge
 #########################################################################
 model_dag = utils.read_model_dag()
 
-model_activation = ''
+model_activation = '0'
+add_layers_activation = '0'
 
 overall_quantization_arrays_num_of_elements = 0
 for layer_specs in model_dag:
@@ -66,7 +67,7 @@ biases_file_format = biases_files_location + 'biases_{}.txt'
 
 # './out/dw_weights.h'
 h_file = '../model_components/model/headers/{}_quantization_and_biases{}.h'.format(cgc.MODEL_NAME,
-    cgc.FIBHA_VERSION_POSTFIX)
+                                                                                   cgc.FIBHA_VERSION_POSTFIX)
 
 layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
 pipe_layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
@@ -77,7 +78,8 @@ weights_zero_points_declaration_string = 'const static fms_dt weights_zero_point
 last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION)+ " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
+    wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION) +
+             " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 
@@ -105,16 +107,18 @@ with open(h_file, 'w') as wf:
         layers_fused_parameters_offsets[layer_index +
                                         1] = layers_fused_parameters_offsets[layer_index]
         pipe_layers_fused_parameters_offsets[layer_index +
-                                        1] = pipe_layers_fused_parameters_offsets[layer_index]
+                                             1] = pipe_layers_fused_parameters_offsets[layer_index]
         layer_specs = model_dag[layer_index]
         layer_type = ''
 
-        if model_activation == '':
+        if 'name' in layer_specs and layer_specs['name'] == 'add':
             if 'activation' in layer_specs and layer_specs['activation'] != '':
-                model_activation = layer_specs['activation']
+                add_layers_activation = layer_specs['activation']
 
         if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
             layer_type = layer_specs['type']
+            if 'activation' in layer_specs and layer_specs['activation'] not in ['', '0']:
+                model_activation = layer_specs['activation']
         else:
             continue
 
@@ -172,7 +176,7 @@ with open(h_file, 'w') as wf:
                                             1] += layer_weight_shape[0]
         else:
             pipe_layers_fused_parameters_offsets[layer_index +
-                                        1] += layer_weight_shape[0]
+                                                 1] += layer_weight_shape[0]
 
         with open(weights_scales_file_format.format(layer_index), 'r') as f:
             ifms_scale = layer_specs['ifms_scales']
@@ -343,6 +347,8 @@ with open(general_specs_file, 'r') as f:
                 str(first_quantization_arrays_num_of_elements) + ';\n'
         elif '#define MODEL_ACTIVATION' in line:
             replacement_string += '#define MODEL_ACTIVATION ' + model_activation + '\n'
+        elif '#define ADD_LAYER_ACTIVATION' in line:
+            replacement_string += '#define ADD_LAYER_ACTIVATION ' + add_layers_activation + '\n'
         else:
             replacement_string += line
 
