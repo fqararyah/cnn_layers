@@ -13,6 +13,8 @@ void pw_and_conv_eng(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d
     const int layer_depth = layer_specs_struct.layer_depth;
     const int layer_filters_hw = layer_specs_struct.filter_size;
     const int layer_num_of_filters = layer_specs_struct.layer_num_fils;
+    const int strides = layer_specs_struct.strides;
+
 #pragma HLS INLINE
 pw_conv_eng_loops:
     for (int c_h = 0; c_h < max_filter_hw_dim; c_h++)
@@ -22,10 +24,6 @@ pw_conv_eng_loops:
             for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
             {
 #pragma HLS PIPELINE
-                if (d + starting_conv_d >= layer_depth || c_h >= layer_filters_hw || c_w >= layer_filters_hw)
-                {
-                    break;
-                }
                 for (int f_d = 0; f_d < pw_conv_parallelism_out; f_d++)
                 {
 #pragma HLS UNROLL
@@ -35,14 +33,14 @@ pw_conv_eng_loops:
                         for (int t_w = 0; t_w < pw_tile_w; t_w++)
                         {
 #pragma HLS UNROLL
-                            results_tile[f_d][t_h][t_w] += channels_tile[d][t_h + c_h][t_w + c_w] *
+                            if (t_h >= dw_tile_h / strides || t_w >= dw_tile_w / strides ||
+                                d + starting_conv_d >= layer_depth || c_h >= layer_filters_hw || c_w >= layer_filters_hw)
+                            {
+                                break;
+                            }
+                            results_tile[f_d][t_h][t_w] += channels_tile[d][t_h * strides + c_h][t_w * strides + c_w] *
                                                            weights_tile[f_d][starting_conv_d + d]
                                                                        [c_h * max_conv_filter_hw_dim + c_w];
-                            // if (starting_conv_d == 0 && f_d == 0 && t_h == 0 && t_w == 0)
-                            // {
-                            //     cout << (int)channels_tile[d][t_h + c_h][t_w + c_w] << " * " << (int)weights_tile[f_d][starting_conv_d + d][c_h * max_conv_filter_hw_dim + c_w] << "\n";
-                            //     cout << results_tile[0][0][0] << "\n";
-                            // }
                         }
                     }
                 }
@@ -134,7 +132,11 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_fi
 
     const int num_of_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
     const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
+    const int num_of_ofm_tiles_h = layer_specs_struct.layer_num_of_ofm_tiles_h;
+    const int num_of_ofm_tiles_w = layer_specs_struct.layer_num_of_ofm_tiles_w;
     const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
+    const int num_of_ofm_tiles_hw = num_of_ofm_tiles_h * num_of_ofm_tiles_w;
+    const int strides = layer_specs_struct.strides;
 
     fms_quantization_scheme normalization;
 
@@ -151,16 +153,20 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_fi
 #pragma HLS ARRAY_PARTITION variable = scaled_result_tile complete dim = 2
 
     int prev_tile_index = -1;
+    int in_tile_h = -1;
+    int in_tile_w = -1;
+
 conv2_ith_loop:
     for (int t_in_h = 0; t_in_h < num_of_tiles_h; t_in_h++)
     {
-    //############width loop##############
+        //############width loop##############
     conv2_itw_loop:
         for (int t_in_w = 0; t_in_w < num_of_tiles_w;
              t_in_w++)
         {
             //############depth loop##############
-            int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d) * num_of_tiles_hw + t_in_h * num_of_tiles_w + t_in_w;
+            int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d) * num_of_ofm_tiles_hw + (t_in_h / strides) * num_of_ofm_tiles_w +
+                             (t_in_w / strides);
 
             scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
                            layer_specs_struct, fused_scales_buffer,
@@ -174,8 +180,12 @@ conv2_ith_loop:
             copy_pss_tile(results_tile, prev_results_tile);
             pw_write_results_tile(scaled_result_tile, result,
                                   prev_tile_index, tmp_channels, tmp_channels_scaled_tile,
-                                  td_o * pw_conv_parallelism_out, layer_specs_struct);
+                                  td_o * pw_conv_parallelism_out,
+                                  in_tile_h, in_tile_w,
+                                  layer_specs_struct);
 
+            in_tile_w = (t_in_w % strides) * (CHANNELS_TILE_WIDTH / strides);
+            in_tile_h = (t_in_h % strides) * (CHANNELS_TILE_HEIGHT / strides);
             prev_tile_index = tile_index;
         }
     }
@@ -187,7 +197,10 @@ conv2_ith_loop:
 
     pw_write_results_tile(scaled_result_tile, result,
                           prev_tile_index, tmp_channels, tmp_channels_scaled_tile,
-                          td_o * pw_conv_parallelism_out, layer_specs_struct);
+                          td_o * pw_conv_parallelism_out,
+                          strides == 1 ? 0 : (CHANNELS_TILE_HEIGHT / strides),
+                          strides == 1 ? 0 : (CHANNELS_TILE_WIDTH / strides),
+                          layer_specs_struct);
 }
 
 void pw_and_conv(weights_grp_dt *weights,

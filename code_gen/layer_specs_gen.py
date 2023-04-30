@@ -164,7 +164,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             replacement_list.append(
                 '(' + str(layer_depth) + ' + pw_tile_d - 1) / pw_tile_d')
             replacement_list.append('(' + str(num_of_filters) +
-                                    ' + pw_conv_parallelism_out) / pw_conv_parallelism_out')
+                                    ' + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out')
 
             replacement_list.append(
                 '(' + str(layer_height) + ' + pw_tile_h - 1) / pw_tile_h')

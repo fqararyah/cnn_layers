@@ -24,7 +24,7 @@ const layer_specs layer_2_s_specs = {
                 112,//layer_ofm_width;
                 RELU,//layer_activation;
                 (3 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (225 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (225 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -66,7 +66,7 @@ const layer_specs layer_5_pw_specs = {
                 56,//layer_ofm_width;
                 0,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -108,7 +108,7 @@ const layer_specs layer_6_pw_specs = {
                 56,//layer_ofm_width;
                 RELU,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -150,7 +150,7 @@ const layer_specs layer_7_s_specs = {
                 56,//layer_ofm_width;
                 RELU,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -192,7 +192,7 @@ const layer_specs layer_8_pw_specs = {
                 56,//layer_ofm_width;
                 0,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -234,7 +234,7 @@ const layer_specs layer_10_pw_specs = {
                 56,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -276,7 +276,7 @@ const layer_specs layer_11_s_specs = {
                 56,//layer_ofm_width;
                 RELU,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -318,7 +318,7 @@ const layer_specs layer_12_pw_specs = {
                 56,//layer_ofm_width;
                 0,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -360,7 +360,7 @@ const layer_specs layer_14_pw_specs = {
                 56,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -402,7 +402,7 @@ const layer_specs layer_15_s_specs = {
                 56,//layer_ofm_width;
                 RELU,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -444,7 +444,7 @@ const layer_specs layer_16_pw_specs = {
                 56,//layer_ofm_width;
                 0,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -486,7 +486,7 @@ const layer_specs layer_18_pw_specs = {
                 28,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -528,7 +528,7 @@ const layer_specs layer_19_pw_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -570,7 +570,7 @@ const layer_specs layer_20_s_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -612,7 +612,7 @@ const layer_specs layer_21_pw_specs = {
                 28,//layer_ofm_width;
                 0,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -654,7 +654,7 @@ const layer_specs layer_23_pw_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -696,7 +696,7 @@ const layer_specs layer_24_s_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -738,7 +738,7 @@ const layer_specs layer_25_pw_specs = {
                 28,//layer_ofm_width;
                 0,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -780,7 +780,7 @@ const layer_specs layer_27_pw_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -822,7 +822,7 @@ const layer_specs layer_28_s_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -864,7 +864,7 @@ const layer_specs layer_29_pw_specs = {
                 28,//layer_ofm_width;
                 0,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -906,7 +906,7 @@ const layer_specs layer_31_pw_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -948,7 +948,7 @@ const layer_specs layer_32_s_specs = {
                 28,//layer_ofm_width;
                 RELU,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -990,7 +990,7 @@ const layer_specs layer_33_pw_specs = {
                 28,//layer_ofm_width;
                 0,//layer_activation;
                 (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1032,7 +1032,7 @@ const layer_specs layer_35_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1074,7 +1074,7 @@ const layer_specs layer_36_pw_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1116,7 +1116,7 @@ const layer_specs layer_37_s_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1158,7 +1158,7 @@ const layer_specs layer_38_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1200,7 +1200,7 @@ const layer_specs layer_40_pw_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1242,7 +1242,7 @@ const layer_specs layer_41_s_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1284,7 +1284,7 @@ const layer_specs layer_42_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1326,7 +1326,7 @@ const layer_specs layer_44_pw_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1368,7 +1368,7 @@ const layer_specs layer_45_s_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1410,7 +1410,7 @@ const layer_specs layer_46_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1452,7 +1452,7 @@ const layer_specs layer_48_pw_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1494,7 +1494,7 @@ const layer_specs layer_49_s_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1536,7 +1536,7 @@ const layer_specs layer_50_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1578,7 +1578,7 @@ const layer_specs layer_52_pw_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1620,7 +1620,7 @@ const layer_specs layer_53_s_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1662,7 +1662,7 @@ const layer_specs layer_54_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1704,7 +1704,7 @@ const layer_specs layer_56_pw_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1746,7 +1746,7 @@ const layer_specs layer_57_s_specs = {
                 14,//layer_ofm_width;
                 RELU,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (256 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (256 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1788,7 +1788,7 @@ const layer_specs layer_58_pw_specs = {
                 14,//layer_ofm_width;
                 0,//layer_activation;
                 (256 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (1024 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (1024 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1830,7 +1830,7 @@ const layer_specs layer_60_pw_specs = {
                 7,//layer_ofm_width;
                 0,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (2048 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (2048 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1872,7 +1872,7 @@ const layer_specs layer_61_pw_specs = {
                 7,//layer_ofm_width;
                 RELU,//layer_activation;
                 (1024 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1914,7 +1914,7 @@ const layer_specs layer_62_s_specs = {
                 7,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1956,7 +1956,7 @@ const layer_specs layer_63_pw_specs = {
                 7,//layer_ofm_width;
                 0,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (2048 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (2048 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -1998,7 +1998,7 @@ const layer_specs layer_65_pw_specs = {
                 7,//layer_ofm_width;
                 RELU,//layer_activation;
                 (2048 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -2040,7 +2040,7 @@ const layer_specs layer_66_s_specs = {
                 7,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -2082,7 +2082,7 @@ const layer_specs layer_67_pw_specs = {
                 7,//layer_ofm_width;
                 0,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (2048 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (2048 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -2124,7 +2124,7 @@ const layer_specs layer_69_pw_specs = {
                 7,//layer_ofm_width;
                 RELU,//layer_activation;
                 (2048 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -2166,7 +2166,7 @@ const layer_specs layer_70_s_specs = {
                 7,//layer_ofm_width;
                 RELU,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (512 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (512 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
@@ -2208,7 +2208,7 @@ const layer_specs layer_71_pw_specs = {
                 7,//layer_ofm_width;
                 0,//layer_activation;
                 (512 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (2048 + pw_conv_parallelism_out) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (2048 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;

@@ -286,10 +286,10 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 
     for (int tile_in_h = 0; tile_in_h < layer_specs_struct.layer_num_of_ifm_tiles_h; tile_in_h++)
     {
-        const int in_tile_h = strides == 2 && tile_in_h % 2 == 1 ? CHANNELS_TILE_HEIGHT / strides : 0;
         for (int tile_in_w = 0; tile_in_w < layer_specs_struct.layer_num_of_ifm_tiles_w; tile_in_w++)
         {
-            const int in_tile_w = strides == 2 && tile_in_w % 2 == 1 ? CHANNELS_TILE_WIDTH / strides : 0;
+            int in_tile_h = (tile_in_h % strides) * (CHANNELS_TILE_HEIGHT / strides);
+            int in_tile_w = (tile_in_w % strides) * (CHANNELS_TILE_WIDTH / strides);
 
             fill_fms_tile(channels,
                           channels_tile,
