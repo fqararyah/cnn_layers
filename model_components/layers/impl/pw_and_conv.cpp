@@ -143,14 +143,16 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_fi
     pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
 #pragma HLS ARRAY_PARTITION variable = tmp_channels_scaled_tile complete dim = 3
 
-    pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w] = {0};
-    pss_dt prev_results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w] = {0};
+    pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
+    pss_dt prev_results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
     fms_dt scaled_result_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w];
 #pragma HLS ARRAY_PARTITION variable = results_tile complete dim = 0
 #pragma HLS ARRAY_PARTITION variable = prev_results_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = prev_results_tile complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = scaled_result_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = scaled_result_tile complete dim = 2
+
+    copy_pss_tile(results_tile, prev_results_tile); // just to initialize with zeros
 
     int prev_tile_index = -1;
     int in_tile_h = -1;

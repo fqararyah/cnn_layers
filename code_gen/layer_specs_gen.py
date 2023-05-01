@@ -1,6 +1,5 @@
-import utils
-import prepare_off_chip_weights
 
+import utils
 import code_generation_constants as cgc
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
@@ -35,6 +34,7 @@ specs_struct = 'const layer_specs layer_{}_specs = {}\n\
                 {},//layer_weights_offset;\n\
                 {},//layer_weights_offset_on_chip;\n\
                 {},//dw_ifms_cumulative_width_offset;\n\
+                {},//bool write_to_result_or_channels;\n\
                 {},//bool write_to_tmp;\n\
                 {},//bool fused_with_add;\n\
                 {},//fms_dt layer_ifms_zero_point;\n\
@@ -71,7 +71,6 @@ const int first_conv_layer_ifm_width = {};\n \
 //****************************\n"
 
 model_dag = utils.read_model_dag()
-
 current_block_indx = 0
 cumulative_pw_weights = 0
 cumulative_pw_weights_on_chip = 0
@@ -82,6 +81,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#ifndef LAYERS_SPECS\n")
     f.write("#define LAYERS_SPECS\n")
+
     for layer_index in range(len(model_dag)):
         layer_specs = model_dag[layer_index]
         layer_type = ''
@@ -178,7 +178,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
 
             replacement_list.append(
                 str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
-
+            
             if (layer_type == 'pw' or layer_type == 's') and not first_conv_layer:
                 replacement_list.append(cumulative_pw_weights)
                 replacement_list.append(cumulative_pw_weights_on_chip)
@@ -202,6 +202,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 replacement_list.append(0)
 
             write_to_tmp = 0
+            write_to_result_or_channels = 1
             fused_with_add = 0
             add_layer_scale_reciprocal = 1
             add_layer_zero_point = 0
@@ -209,10 +210,11 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             skip_connection_other_layer_zero_point = 0
 
             layer_children = layer_specs['children']
-            if len(layer_children) > 1:
-                write_to_tmp = 1
-
-            if model_dag[layer_children[0]]['name'] == 'add':
+            for i in range(len(layer_children)):
+                if layer_children[i] - i != layer_index + 1: 
+                    write_to_tmp = 1
+             
+            if model_dag[layer_children[0]]['name'] == 'add' and model_dag[layer_children[0]]['id'] == layer_index + 1:
                 add_layer_specs = model_dag[layer_children[0]]
                 the_other_conv_layer_specs = model_dag[add_layer_specs['parents'][0]]
                 fused_with_add = 1
@@ -225,6 +227,10 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                     # if the fused add layer is a beginning of a branch
                     write_to_tmp = 1
 
+            if write_to_tmp == 1 and fused_with_add == 0 and len(layer_children) <= 1:
+                write_to_result_or_channels = 0
+
+            replacement_list.append(write_to_result_or_channels)    
             replacement_list.append(write_to_tmp)
             replacement_list.append(fused_with_add)
 

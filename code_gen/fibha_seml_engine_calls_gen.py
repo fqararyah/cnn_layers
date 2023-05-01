@@ -4,8 +4,8 @@ import utils
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format( cgc.MODEL_NAME,
-    cgc.FIBHA_VERSION_POSTFIX)
+in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format(cgc.MODEL_NAME,
+                                                                        cgc.FIBHA_VERSION_POSTFIX)
 constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
@@ -76,7 +76,7 @@ while conv_layers_so_far < cgc.FIRST_LAYER_TO_GENERATE:
     if 'type' in model_dag[first_seml_layer_to_generate] and model_dag[first_seml_layer_to_generate]['type'] in cgc.CONV_LAYER_TYPES:
         conv_layers_so_far += 1
 
-    first_seml_layer_to_generate += 1 
+    first_seml_layer_to_generate += 1
 
 layers_to_generate = [first_seml_layer_to_generate,
                       cgc.LAST_LAYER_TO_GENERATE + 1 if cgc.LAST_LAYER_TO_GENERATE != -1 else len(model_dag)]
@@ -92,7 +92,7 @@ with open(in_out_file, 'r') as f:
             in_a_code_gen_area = False
             file_replacement += line
 
-direction = 0
+direction = 0  # assumes a topological ordering
 code_to_insert = ''
 
 for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
@@ -124,17 +124,18 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         # file_name
         ifms_file = ifms_file_format.format(layer_index)
         # insert func call
+        layer_specs_str = 'layer_' + \
+            str(layer_index) + '_' + layer_type + '_specs'
+        if len(model_dag[layer_specs['parents'][0]]['children']) > 1:
+            code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file, 'tmp_channels',
+                                                                      layer_specs_str)
         code_to_insert += debugging_fill_layer_input_block.format(ifms_file_path + ifms_file,
                                                                   'channels' if direction == 0 else 'result',
-                                                                  'layer_' +
-                                                                  str(layer_index) + '_' +
-                                                                  layer_type + '_specs'
+                                                                  layer_specs_str
                                                                   )
         code_to_insert += debugging_verify_fill_layer_input_block.format(ofms_file_path + 'verify_' + str(layer_index)+'.txt',
                                                                          'channels' if direction == 0 else 'result',
-                                                                         'layer_' +
-                                                                         str(layer_index) + '_' +
-                                                                         layer_type + '_specs'
+                                                                         layer_specs_str
                                                                          )
 
     code_to_insert += target_block
@@ -147,7 +148,13 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
                                                            layer_type + '_specs'
                                                            )
 
-    direction = 1 - direction
+    current_layer_parent_children = model_dag[layer_specs['parents'][0]]['children']
+    last_non_add_child = len(current_layer_parent_children) - 1
+    while last_non_add_child >= 0 and model_dag[current_layer_parent_children[last_non_add_child]]['name'] == 'add':
+        last_non_add_child -= 1
+
+    if layer_index == current_layer_parent_children[last_non_add_child]:
+        direction = 1 - direction
 
 file_replacement = file_replacement[:insert_index] + \
     code_to_insert + file_replacement[insert_index:]

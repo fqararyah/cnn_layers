@@ -13,7 +13,7 @@
 #define ADD_LAYER_ACTIVATION RELU
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 4864;
+const int first_quantization_arrays_num_elements = 11520;
 
 // switch point
 #if ONLY_SEML
@@ -129,6 +129,7 @@ struct layer_specs
 	int layer_weights_offset;
 	int layer_weights_offset_on_chip;
 	int dw_ifms_cumulative_width_offset;
+	bool write_to_result_or_channels;
 	bool write_to_tmp;
 	bool fused_with_add;
 	fms_dt layer_ifms_zero_point;

@@ -33,6 +33,7 @@ const layer_specs layer_2_s_specs = {
                 0,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -13,//fms_dt layer_ifms_zero_point;
@@ -75,15 +76,16 @@ const layer_specs layer_5_pw_specs = {
                 0,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                0,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
-                1,//bool fused_with_add;
+                0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
                 0.2052951604127884,//,fms_dt layer_ofms_scale;
                 26,//fms_dt layer_ofms_zero_point;
-                11.321174210026435,//rec_scales_dt add_layer_scale_reciprocal;
-                -128,//biases_dt add_layer_zero_point;
-                0.2052951604127884,//scales_dt skip_connection_other_layer_scale;
-                26//biases_dt skip_connection_other_layer_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
  const int layer_6_pw_num_fils = 64 / alpha;
@@ -117,6 +119,7 @@ const layer_specs layer_6_pw_specs = {
                 256,//layer_weights_offset;
                 16384,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -159,6 +162,7 @@ const layer_specs layer_7_s_specs = {
                 320,//layer_weights_offset;
                 20480,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -201,6 +205,7 @@ const layer_specs layer_8_pw_specs = {
                 896,//layer_weights_offset;
                 57344,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -243,6 +248,7 @@ const layer_specs layer_10_pw_specs = {
                 1152,//layer_weights_offset;
                 73728,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -285,6 +291,7 @@ const layer_specs layer_11_s_specs = {
                 1408,//layer_weights_offset;
                 90112,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -327,6 +334,7 @@ const layer_specs layer_12_pw_specs = {
                 1984,//layer_weights_offset;
                 126976,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -369,6 +377,7 @@ const layer_specs layer_14_pw_specs = {
                 2240,//layer_weights_offset;
                 143360,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -411,6 +420,7 @@ const layer_specs layer_15_s_specs = {
                 2496,//layer_weights_offset;
                 159744,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -453,6 +463,7 @@ const layer_specs layer_16_pw_specs = {
                 3072,//layer_weights_offset;
                 196608,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -495,15 +506,16 @@ const layer_specs layer_18_pw_specs = {
                 3328,//layer_weights_offset;
                 212992,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                0,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
-                1,//bool fused_with_add;
+                0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
                 0.17821790277957916,//,fms_dt layer_ofms_scale;
                 32,//fms_dt layer_ofms_zero_point;
-                13.211821108402159,//rec_scales_dt add_layer_scale_reciprocal;
-                -128,//biases_dt add_layer_zero_point;
-                0.17821790277957916,//scales_dt skip_connection_other_layer_scale;
-                32//biases_dt skip_connection_other_layer_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
  const int layer_19_pw_num_fils = 128 / alpha;
@@ -537,6 +549,7 @@ const layer_specs layer_19_pw_specs = {
                 5376,//layer_weights_offset;
                 344064,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -579,6 +592,7 @@ const layer_specs layer_20_s_specs = {
                 5888,//layer_weights_offset;
                 376832,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -621,6 +635,7 @@ const layer_specs layer_21_pw_specs = {
                 8192,//layer_weights_offset;
                 524288,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -663,6 +678,7 @@ const layer_specs layer_23_pw_specs = {
                 9216,//layer_weights_offset;
                 589824,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -705,6 +721,7 @@ const layer_specs layer_24_s_specs = {
                 10240,//layer_weights_offset;
                 655360,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -747,6 +764,7 @@ const layer_specs layer_25_pw_specs = {
                 12544,//layer_weights_offset;
                 802816,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -789,6 +807,7 @@ const layer_specs layer_27_pw_specs = {
                 13568,//layer_weights_offset;
                 868352,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -831,6 +850,7 @@ const layer_specs layer_28_s_specs = {
                 14592,//layer_weights_offset;
                 933888,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -873,6 +893,7 @@ const layer_specs layer_29_pw_specs = {
                 16896,//layer_weights_offset;
                 1081344,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -915,6 +936,7 @@ const layer_specs layer_31_pw_specs = {
                 17920,//layer_weights_offset;
                 1146880,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -957,6 +979,7 @@ const layer_specs layer_32_s_specs = {
                 18944,//layer_weights_offset;
                 1212416,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -999,6 +1022,7 @@ const layer_specs layer_33_pw_specs = {
                 21248,//layer_weights_offset;
                 1359872,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1041,15 +1065,16 @@ const layer_specs layer_35_pw_specs = {
                 22272,//layer_weights_offset;
                 1425408,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                0,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
-                1,//bool fused_with_add;
+                0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
                 0.1826944649219513,//,fms_dt layer_ofms_scale;
                 -35,//fms_dt layer_ofms_zero_point;
-                8.475441012028485,//rec_scales_dt add_layer_scale_reciprocal;
-                -128,//biases_dt add_layer_zero_point;
-                0.1826944649219513,//scales_dt skip_connection_other_layer_scale;
-                -35//biases_dt skip_connection_other_layer_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
  const int layer_36_pw_num_fils = 256 / alpha;
@@ -1083,6 +1108,7 @@ const layer_specs layer_36_pw_specs = {
                 30464,//layer_weights_offset;
                 1949696,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1125,6 +1151,7 @@ const layer_specs layer_37_s_specs = {
                 32512,//layer_weights_offset;
                 2080768,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1167,6 +1194,7 @@ const layer_specs layer_38_pw_specs = {
                 41728,//layer_weights_offset;
                 2670592,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1209,6 +1237,7 @@ const layer_specs layer_40_pw_specs = {
                 45824,//layer_weights_offset;
                 2932736,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1251,6 +1280,7 @@ const layer_specs layer_41_s_specs = {
                 49920,//layer_weights_offset;
                 3194880,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1293,6 +1323,7 @@ const layer_specs layer_42_pw_specs = {
                 59136,//layer_weights_offset;
                 3784704,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1335,6 +1366,7 @@ const layer_specs layer_44_pw_specs = {
                 63232,//layer_weights_offset;
                 4046848,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1377,6 +1409,7 @@ const layer_specs layer_45_s_specs = {
                 67328,//layer_weights_offset;
                 4308992,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1419,6 +1452,7 @@ const layer_specs layer_46_pw_specs = {
                 76544,//layer_weights_offset;
                 4898816,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1461,6 +1495,7 @@ const layer_specs layer_48_pw_specs = {
                 80640,//layer_weights_offset;
                 5160960,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1503,6 +1538,7 @@ const layer_specs layer_49_s_specs = {
                 84736,//layer_weights_offset;
                 5423104,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1545,6 +1581,7 @@ const layer_specs layer_50_pw_specs = {
                 93952,//layer_weights_offset;
                 6012928,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1587,6 +1624,7 @@ const layer_specs layer_52_pw_specs = {
                 98048,//layer_weights_offset;
                 6275072,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1629,6 +1667,7 @@ const layer_specs layer_53_s_specs = {
                 102144,//layer_weights_offset;
                 6537216,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1671,6 +1710,7 @@ const layer_specs layer_54_pw_specs = {
                 111360,//layer_weights_offset;
                 7127040,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1713,6 +1753,7 @@ const layer_specs layer_56_pw_specs = {
                 115456,//layer_weights_offset;
                 7389184,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1755,6 +1796,7 @@ const layer_specs layer_57_s_specs = {
                 119552,//layer_weights_offset;
                 7651328,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1797,6 +1839,7 @@ const layer_specs layer_58_pw_specs = {
                 128768,//layer_weights_offset;
                 8241152,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1839,15 +1882,16 @@ const layer_specs layer_60_pw_specs = {
                 132864,//layer_weights_offset;
                 8503296,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                0,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
-                1,//bool fused_with_add;
+                0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
                 0.3672782778739929,//,fms_dt layer_ofms_scale;
                 -59,//fms_dt layer_ofms_zero_point;
-                3.740195628194073,//rec_scales_dt add_layer_scale_reciprocal;
-                -128,//biases_dt add_layer_zero_point;
-                0.3672782778739929,//scales_dt skip_connection_other_layer_scale;
-                -59//biases_dt skip_connection_other_layer_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
  const int layer_61_pw_num_fils = 512 / alpha;
@@ -1881,6 +1925,7 @@ const layer_specs layer_61_pw_specs = {
                 165632,//layer_weights_offset;
                 10600448,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1923,6 +1968,7 @@ const layer_specs layer_62_s_specs = {
                 173824,//layer_weights_offset;
                 11124736,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -1965,6 +2011,7 @@ const layer_specs layer_63_pw_specs = {
                 210688,//layer_weights_offset;
                 13484032,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -2007,6 +2054,7 @@ const layer_specs layer_65_pw_specs = {
                 227072,//layer_weights_offset;
                 14532608,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -2049,6 +2097,7 @@ const layer_specs layer_66_s_specs = {
                 243456,//layer_weights_offset;
                 15581184,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -2091,6 +2140,7 @@ const layer_specs layer_67_pw_specs = {
                 280320,//layer_weights_offset;
                 17940480,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -2133,6 +2183,7 @@ const layer_specs layer_69_pw_specs = {
                 296704,//layer_weights_offset;
                 18989056,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -2175,6 +2226,7 @@ const layer_specs layer_70_s_specs = {
                 313088,//layer_weights_offset;
                 20037632,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
@@ -2217,6 +2269,7 @@ const layer_specs layer_71_pw_specs = {
                 349952,//layer_weights_offset;
                 22396928,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;

@@ -54,13 +54,17 @@ void pw_write_results_tile(
 								break;
 							}
 							fms_dt scaled_val = result_tile_scaled[tile_offset * pw_tile_d + t_d][t_h][t_w];
-							if (strides == 1)
+
+							if (layer_specs_struct.write_to_result_or_channels)
 							{
-								result[current_tile_indx][t_h][t_w] = scaled_val;
-							}
-							else
-							{
-								result[current_tile_indx][t_h + in_tile_h][t_w + in_tile_w] = scaled_val;
+								if (strides == 1)
+								{
+									result[current_tile_indx][t_h][t_w] = scaled_val;
+								}
+								else
+								{
+									result[current_tile_indx][t_h + in_tile_h][t_w + in_tile_w] = scaled_val;
+								}
 							}
 							if (layer_specs_struct.write_to_tmp)
 							{ // 2: expansion
