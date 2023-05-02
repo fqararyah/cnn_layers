@@ -1,11 +1,11 @@
 #include "pipeline_main.h"
 
-#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && FIBHA_VERSION == 2 && ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && FIBHA_VERSION == 2 && !ONLY_SEML
 
 using namespace pipelined_engines;
 
-void padd_lr_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
-                              fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
+void padd_lr_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                              fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                               layer_specs layer_specs_struct)
 {
     const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
@@ -14,7 +14,7 @@ void padd_lr_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFF
 
     for (int d = 0; d < DW_TILE_DEPTH; d++)
     {
-        for (int h = 0; h < MAX_DW_BUFFER_HEIGHT; h++)
+        for (int h = 0; h < DW_BUFFER_HEIGHT; h++)
         {
             for (int w = 0; w < MAX_DW_PADDING_IN_PIPE; w++)
             {
@@ -30,8 +30,32 @@ void padd_lr_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFF
     }
 }
 
-void padd_top_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
-                               fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
+void padd_left_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                layer_specs layer_specs_struct)
+{
+    const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
+    const int padding_left = layer_specs_struct.padding_left;
+    const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
+
+    for (int d = 0; d < DW_TILE_DEPTH; d++)
+    {
+        for (int h = 0; h < DW_BUFFER_HEIGHT; h++)
+        {
+            for (int w = 0; w < MAX_DW_PADDING_IN_PIPE; w++)
+            {
+                if (w < padding_left)
+                {
+                    dw_channels_tile[d][h][w] = current_layer_ifms_zero_point;
+                    dw_channels_tile_copy[d][h][w] = current_layer_ifms_zero_point;
+                }
+            }
+        }
+    }
+}
+
+void padd_top_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                               fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                                layer_specs layer_specs_struct)
 {
     const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
@@ -42,7 +66,7 @@ void padd_top_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUF
     {
         for (int h = 0; h < padding_top; h++)
         {
-            for (int w = 0; w < MAX_DW_BUFFER_WIDTH; w++)
+            for (int w = 0; w < DW_BUFFER_WIDTH; w++)
             {
                 dw_channels_tile[d][h][w] = current_layer_ifms_zero_point;
                 dw_channels_tile_copy[d][h][w] = current_layer_ifms_zero_point;
@@ -51,8 +75,8 @@ void padd_top_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUF
     }
 }
 
-void padd_bottom_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
-                                  fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH],
+void padd_bottom_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                  fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                                   layer_specs layer_specs_struct)
 {
     const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
@@ -63,17 +87,17 @@ void padd_bottom_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_
     {
         for (int h = 0; h < MAX_DW_PADDING_IN_PIPE; h++)
         {
-            for (int w = 0; w < MAX_DW_BUFFER_WIDTH; w++)
+            for (int w = 0; w < DW_BUFFER_WIDTH; w++)
             {
-                dw_channels_tile[d][MAX_DW_BUFFER_HEIGHT - padding_bottom + h][w] = current_layer_ifms_zero_point;
-                dw_channels_tile_copy[d][MAX_DW_BUFFER_HEIGHT - padding_bottom + h][w] = current_layer_ifms_zero_point;
+                dw_channels_tile[d][DW_BUFFER_HEIGHT - padding_bottom + h][w] = current_layer_ifms_zero_point;
+                dw_channels_tile_copy[d][DW_BUFFER_HEIGHT - padding_bottom + h][w] = current_layer_ifms_zero_point;
             }
         }
     }
 }
 
 void write_pipe_seml_communication_buffer(
-    fms_dt pipe_seml_communication_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+    fms_dt pipe_seml_communication_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
     const int starting_h,
     const int offset_h_in_communication_buffer,
@@ -90,9 +114,9 @@ void write_pipe_seml_communication_buffer(
 
     for (int d = 0; d < layer_depth; d++)
     {
-        for (int h = 0; h < MAX_PW_BUFFER_HEIGHT; h++)
+        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
         {
-            if (offset_h_in_communication_buffer + h >= MAX_PW_BUFFER_HEIGHT || h + starting_h >= layer_ifms_height)
+            if (offset_h_in_communication_buffer + h >= PW_BUFFER_HEIGHT || h + starting_h >= layer_ifms_height)
             {
                 break;
             }
@@ -111,23 +135,23 @@ void write_pipe_seml_communication_buffer(
 
 void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
-    fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
-    fms_dt result_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
-    fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH];
+    fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
+    fms_dt result_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
+    fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH];
     fms_dt dw_pipe_overlap_buffer[DW_PIPE_OVERLAP_BUFFER_DEPTH][DW_PIPE_OVERLAP_BUFFER_WIDTH];
-    fms_dt dw_channels_tile[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH];
-    fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][MAX_DW_BUFFER_HEIGHT][MAX_DW_BUFFER_WIDTH];
+    fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
+    fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
 
     layer_specs first_layer_in_second_part = layer_15_pw_specs;
 
     // padd_top_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
     //                           layer_6_dw_specs);
 
-    padd_lr_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+    padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
                              layer_6_dw_specs);
 
     const int rows_to_fill_first_time = 1;
-    const int start_filling_offset_in_buffer_first_time = MAX_PW_BUFFER_HEIGHT - rows_to_fill_first_time;
+    const int start_filling_offset_in_buffer_first_time = PW_BUFFER_HEIGHT - rows_to_fill_first_time;
     const int start_filling_offset_in_buffer_non_first = 0;
 
     const int switching_layer_strides = layer_9_dw_specs.strides;
@@ -210,12 +234,12 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
 
     for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
     {
-        for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+        for (int w = 0; w < PW_BUFFER_WIDTH; w++)
         {
             tmp_channels[d][0][w] = tmp_channels[d][4][w];
         }
     }
-    padd_lr_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+    padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
                              layer_9_dw_specs);
 
     pw_dw_conv(on_chip_pw_weights,
@@ -331,7 +355,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                        pipe_relu_6_fused_scales,
                        pipe_fused_zero_points);
 
-            padd_lr_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
                                      layer_9_dw_specs);
 
             pw_dw_conv(on_chip_pw_weights,
@@ -372,7 +396,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                        pipe_relu_6_fused_scales,
                        pipe_fused_zero_points);
 
-            padd_lr_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
                                      layer_14_dw_specs);
 
             pw_dw_conv(on_chip_pw_weights,

@@ -7,7 +7,7 @@ const int first_conv_layer_depth = 3;
 const int first_conv_layer_filter_dim = 3;
  const int first_conv_layer_ifm_width = 224;
  //****************************
-const layer_specs layer_1_s_specs = {
+const layer_specs first_conv_layer_specs = {
                 1,//layer_index;
                 S_CONV,//conv_layer_type;; 
                 32,//layer_num_fils 

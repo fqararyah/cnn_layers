@@ -8,7 +8,7 @@ out_file = '../model_components/model/headers/{}_layers_specs.h'  # './out/layer
 
 weights_group_items = 64
 
-specs_struct = 'const layer_specs layer_{}_specs = {}\n\
+specs_struct = 'const layer_specs {} = {}\n\
                 {},//layer_index;\n\
                 {},//conv_layer_type;; \n\
                 {},//layer_num_fils \n\
@@ -105,7 +105,10 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             strides = layer_specs['strides']
             filter_dim = layer_filter_dim
             num_of_filters = layer_num_fils
-            replacement_list.append(str(layer_index) + '_' + layer_type)
+            if first_conv_layer:
+                replacement_list.append('first_conv_layer_specs')
+            else:
+                replacement_list.append('layer_' + str(layer_index) + '_' + layer_type + '_specs')
             replacement_list.append('{')
             replacement_list.append(layer_index)
             if layer_type == 'pw':

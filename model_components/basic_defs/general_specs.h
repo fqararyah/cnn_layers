@@ -10,10 +10,10 @@
 #define RELU6 6
 
 #define MODEL_ACTIVATION RELU
-#define ADD_LAYER_ACTIVATION RELU
+#define ADD_LAYER_ACTIVATION 0
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 11520;
+const int first_quantization_arrays_num_elements = 8032;
 
 // switch point
 #if ONLY_SEML
@@ -50,8 +50,11 @@ const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
 const int alpha = 1;
 
 // fc_layer
-const int FC_LAYER_INDEX = 74;
+#if MODEL_ID == RESNET50
 const int fc_layer_input_size = 2048;
+#elif MODEL_ID == MOB_V2
+const int fc_layer_input_size = 1280;
+#endif
 const int fc_cols = 1000;
 
 // avg_pool_layer

@@ -25,14 +25,14 @@ model_dag = utils.read_model_dag()
 num_of_generated_layers = 0
 with open(conv_weights_h_file_3x3, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    f.write('#include "layers_specs.h"\n')
+    f.write('#include "'+ cgc.MODEL_NAME +'_layers_specs.h"\n')
     f.write("#if FIBHA_VERSION == 2\n")
     f.write("#ifndef CONV_WEIGHTS_3x3\n")
     f.write("#define CONV_WEIGHTS_3x3\n")
 
 with open(pw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    f.write('#include "layers_specs.h"\n')
+    f.write('#include "'+ cgc.MODEL_NAME +'_layers_specs.h"\n')
     f.write("#if FIBHA_VERSION == 2\n")
     f.write("#ifndef ON_CHIP_PW_WEIGHTS\n")
     f.write("#define ON_CHIP_PW_WEIGHTS\n")

@@ -54,9 +54,9 @@ else:
             dst.write(line)
 #...................................................................................
 
-# if cgc.FIBHA_VERSION == 1:
-#     import on_chip_conv_and_pw_weights_gen
-#     print('on_chip_conv_and_pw_weights_gen done!')
-# elif cgc.FIBHA_VERSION == 2:
-#     import on_chip_conv_and_pw_weights_gen_v2
-#     print('on_chip_conv_and_pw_weights_gen_v2 done!')
+if cgc.FIBHA_VERSION == 1:
+    import on_chip_conv_and_pw_weights_gen
+    print('on_chip_conv_and_pw_weights_gen done!')
+elif cgc.FIBHA_VERSION == 2:
+    import on_chip_conv_and_pw_weights_gen_v2
+    print('on_chip_conv_and_pw_weights_gen_v2 done!')

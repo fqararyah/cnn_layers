@@ -18,7 +18,6 @@ weights_file_format = weights_files_location + 'weights_{}.txt'
 fc_weights_file_format = weights_files_location + 'weights_{}.txt'
 fc_biases_file_format = biases_files_location + 'biases_{}.txt'
 
-parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
 off_chip_fc_weights_file = '../off_chip_weights/{}_fc_weights.txt'
@@ -90,18 +89,3 @@ np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(combined
 np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME), np.array(layers_weights_offsets), fmt='%i')
 with open(num_of_pw_weights_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write(str(weights_combined_so_far))
-
-replacement_string = ''
-with open(general_specs_file, 'r') as f:
-    for line in f:
-        if 'const int FC_LAYER_INDEX' in line:
-            replacement_string += 'const int FC_LAYER_INDEX = ' + str(fc_layer_index) + ';\n'
-        elif 'const int fc_layer_input_size' in line:
-            replacement_string += 'const int fc_layer_input_size = ' + str(fc_weights_shape[1]) + ';\n'
-        elif 'const int fc_cols' in line:
-            replacement_string += 'const int fc_cols = ' + str(fc_weights_shape[0]) + ';\n'
-        else:
-            replacement_string += line
-
-with open(general_specs_file, 'w') as f:
-    f.write(replacement_string)

@@ -3,14 +3,15 @@
 
 namespace pipelined_engines
 {
-    const int PARALLELISM_PW_OFMS = 2;
+    const int PARALLELISM_PW_OFMS = 24;
     const int PARALLELISM_PW_IFMS = 0; // no parallelism
     const int PARALLELISM_PW_H = 4;
-    const int PARALLELISM_PW_W = 56;
+    const int PARALLELISM_PW_W = 4;
 
     const int MAX_PW_BUFFER_DEPTH = 144;
-    const int MAX_PW_BUFFER_HEIGHT = PARALLELISM_PW_H;
     const int MAX_PW_BUFFER_WIDTH = 112;
+    const int PW_BUFFER_HEIGHT = PARALLELISM_PW_H;
+    const int PW_BUFFER_WIDTH = PARALLELISM_PW_W;
 
     const int PARALLELISM_DW_OFMS = 0;
     const int PARALLELISM_DW_IFMS = 0;
@@ -24,8 +25,8 @@ namespace pipelined_engines
     const int MAX_DW_FILTER_AREA_IN_PIPE = MAX_DW_FILTER_DIM_IN_PIPE * MAX_DW_FILTER_DIM_IN_PIPE;
 
     const int DW_BUFFER_DEPTH = PARALLELISM_PW_OFMS;
-    const int MAX_DW_BUFFER_HEIGHT = MAX_PW_BUFFER_HEIGHT + MAX_DW_FILTER_DIM_IN_PIPE - 1;
-    const int MAX_DW_BUFFER_WIDTH = MAX_PW_BUFFER_WIDTH + 2 * MAX_DW_PADDING_IN_PIPE;
+    const int DW_BUFFER_HEIGHT = PW_BUFFER_HEIGHT + MAX_DW_FILTER_DIM_IN_PIPE - 1;
+    const int DW_BUFFER_WIDTH = PW_BUFFER_WIDTH + 2 * MAX_DW_PADDING_IN_PIPE;
 
     const int DW_TILE_DEPTH = PARALLELISM_PW_OFMS;
 

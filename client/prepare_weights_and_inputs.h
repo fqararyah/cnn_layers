@@ -51,7 +51,7 @@ void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH]
 void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 							 const layer_specs layer_specs_struct);
 
-void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
 								  const int starting_h, const int start_filling_offset_in_buffer,
 								  const layer_specs layer_specs_struct);
 

@@ -3,7 +3,7 @@
 
 using namespace pipelined_engines;
 
-void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][MAX_PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
 								  const int starting_h, const int start_filling_offset_in_buffer,
 								  const layer_specs layer_specs_struct)
 {
@@ -22,7 +22,7 @@ void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_P
 		int h = ((line % ifms_hw) / ifms_w) - starting_h;
 		int w = line % ifms_w;
 		line++;
-		if (h < 0 || h >= MAX_PW_BUFFER_HEIGHT || start_filling_offset_in_buffer + h >= MAX_PW_BUFFER_HEIGHT)
+		if (h < 0 || h >= PW_BUFFER_HEIGHT || start_filling_offset_in_buffer + h >= PW_BUFFER_HEIGHT)
 		{
 			continue;
 		}
