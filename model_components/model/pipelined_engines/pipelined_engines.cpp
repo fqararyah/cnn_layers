@@ -135,23 +135,24 @@ void first_pass_pw_normalize_engine_result(fms_dt dw_pipe_overlap_buffer[][DW_PI
     const int useful_rows_in_channels_tile = DW_BUFFER_HEIGHT - (DW_BUFFER_HEIGHT - filter_dim) % strides;
     const int write_offset_h_in_channels_tile = useful_rows_in_channels_tile - filter_dim_minus_strides;
 
-    const int num_of_tiles_in_w = (layer_ifms_width / PARALLELISM_PW_W);
+    const int num_of_tiles_in_w = (layer_ifms_width / DW_PIPE_OVERLAP_BUFFER_WIDTH);
     const int d_offset_in_overlap_buffer = starting_d * filter_dim_minus_strides * num_of_tiles_in_w +
-                                           (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
+                                           (dw_layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
 
     for (int f = 0; f < PARALLELISM_PW_OFMS; f++)
     {
         for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
         {
+            int h_in_overlap_buffer = h - (PW_BUFFER_HEIGHT - filter_dim_minus_strides);
             int current_read_offset_in_overlap_buffer = d_offset_in_overlap_buffer +
                                                         f * filter_dim_minus_strides * num_of_tiles_in_w +
-                                                        (h * layer_ifms_width) / DW_PIPE_OVERLAP_BUFFER_WIDTH;
+                                                        (h_in_overlap_buffer * layer_ifms_width) / DW_PIPE_OVERLAP_BUFFER_WIDTH;
             int current_write_offset_in_overlap_buffer = d_offset_in_overlap_buffer +
                                                          f * filter_dim_minus_strides * num_of_tiles_in_w +
-                                                         (h * layer_ifms_width) / DW_PIPE_OVERLAP_BUFFER_WIDTH;
+                                                         (h_in_overlap_buffer * layer_ifms_width) / DW_PIPE_OVERLAP_BUFFER_WIDTH;
             for (int w = 0; w < MAX_FILTER_MINUS_STRIDES; w++)
             {
-                if (w > filter_dim_minus_strides)
+                if (w >= filter_dim_minus_strides)
                 {
                     break;
                 }
@@ -159,15 +160,15 @@ void first_pass_pw_normalize_engine_result(fms_dt dw_pipe_overlap_buffer[][DW_PI
                 {
                     continue;
                 }
-                if (h < filter_dim_minus_strides && starting_h != 0)
-                {
-                    normalized_tile[f][h + filter_dim_minus_strides][w] = dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer]
-                                                                                                [w - padding_left];
-                }
                 fms_dt scaled_val = pw_relu_norm_6(
                     engine_result_tile[f][h][w - padding_left], normalization_buffer[f],
                     layer_relu);
-                dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][w - padding_left] = scaled_val;
+                if (h_in_overlap_buffer >= 0)
+                {
+                    normalized_tile[f][h_in_overlap_buffer][w] = dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer]
+                                                                                                [w - padding_left];
+                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][w - padding_left] = scaled_val;
+                }
                 normalized_tile[f][h + filter_dim_minus_strides][w] = scaled_val;
             }
         }
@@ -177,7 +178,6 @@ void first_pass_pw_normalize_engine_result(fms_dt dw_pipe_overlap_buffer[][DW_PI
 void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                                                    fms_dt normalized_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                                                    fms_dt normalized_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                                                   fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                                    fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
                                                    const fms_quantization_scheme normalization_buffer[],
                                                    const int starting_d,
@@ -277,7 +277,8 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
                             addition_result = addition_result + quant_half - (addition_result < 0);
                             normalized_val = clamp(addition_result);
                         }
-                        result[starting_d + f][h][starting_w + w] = normalized_val;
+                        // result[starting_d + f][h][starting_w + w] = normalized_val;
+                        normalized_tile[f][h + write_offset_h_in_normalized_tile][filter_minus_strides + w] = normalized_val;
                         if (layer_specs_struct.write_to_tmp)
                         {
                             if (h == 0)
@@ -310,7 +311,7 @@ void pipelined_engines::write_next_overlap_and_read_current(fms_dt dw_pipe_overl
         const int filter_minus_strides = filter_dim - strides;
         const int padding_left = layer_specs_struct.padding_left;
 
-        const int num_of_tiles_in_w = (layer_ifms_width / PARALLELISM_PW_W);
+        const int num_of_tiles_in_w = (layer_ifms_width / DW_PIPE_OVERLAP_BUFFER_WIDTH);
         const int d_offset_in_overlap_buffer = starting_d * filter_minus_strides * num_of_tiles_in_w +
                                                (layer_specs_struct.dw_ifms_cumulative_width_offset / DW_PIPE_OVERLAP_BUFFER_WIDTH);
 
@@ -565,6 +566,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                            d,
                            0,
                            pw_layer_specs_struct);
+
             first_pass_pw_normalize_engine_result(dw_pipe_overlap_buffer,
                                                   pw_engine_result_tile_copy,
                                                   dw_channels_tile,
@@ -610,7 +612,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                     pw_normalize_engine_result(pw_engine_result_tile_copy,
                                                dw_channels_tile_copy,
                                                dw_channels_tile,
-                                               result,
                                                tmp_channels,
                                                pw_normalization_buffer,
                                                d,
@@ -652,7 +653,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                     pw_normalize_engine_result(pw_engine_result_tile,
                                                dw_channels_tile,
                                                dw_channels_tile_copy,
-                                               result,
                                                tmp_channels,
                                                pw_normalization_buffer,
                                                d,
@@ -696,7 +696,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                 pw_normalize_engine_result(pw_engine_result_tile_copy,
                                            dw_channels_tile_copy,
                                            dw_channels_tile,
-                                           result,
                                            tmp_channels,
                                            pw_normalization_buffer,
                                            d,
@@ -752,7 +751,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                 pw_normalize_engine_result(pw_engine_result_tile,
                                            dw_channels_tile,
                                            dw_channels_tile_copy,
-                                           result,
                                            tmp_channels,
                                            pw_normalization_buffer,
                                            d,

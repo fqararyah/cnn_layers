@@ -123,6 +123,7 @@ for i in range(0, 72):
     fms_mem = calc_fms_memory(model_dag, i)
     if 'type' in model_dag[i] and model_dag[i]['type'] in cgc.CONV_LAYER_TYPES:
         conv_layer_index += 1
-        print(i, '->', conv_layer_index, ':', fms_mem * PRECISION / (8*(2**20)), 'MiB')
-    else:
-       print(i, '->', model_dag[i]['name'], ':', fms_mem * PRECISION / (8*(2**20)), 'MiB') 
+        print(int(fms_mem))
+    #     print(i, '->', conv_layer_index, ':', fms_mem * PRECISION / (8*(2**20)), 'MiB')
+    # else:
+    #    print(i, '->', model_dag[i]['name'], ':', fms_mem * PRECISION / (8*(2**20)), 'MiB') 
