@@ -6,6 +6,30 @@ using namespace pipelined_engines;
 #ifndef PIPELINED_PW_CONV
 #define PIPELINED_PW_CONV
 
+void pipelined_engines::padd_left_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                                   fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                                   layer_specs layer_specs_struct)
+{
+    const fms_dt current_layer_ifms_zero_point = layer_specs_struct.layer_ifms_zero_point;
+    const int padding_left = layer_specs_struct.padding_left;
+    const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
+
+    for (int d = 0; d < DW_TILE_DEPTH; d++)
+    {
+        for (int h = 0; h < DW_BUFFER_HEIGHT; h++)
+        {
+            for (int w = 0; w < MAX_DW_PADDING_IN_PIPE; w++)
+            {
+                if (w < padding_left)
+                {
+                    dw_channels_tile[d][h][w] = current_layer_ifms_zero_point;
+                    dw_channels_tile_copy[d][h][w] = current_layer_ifms_zero_point;
+                }
+            }
+        }
+    }
+}
+
 void pipelined_engines::fill_fused_scales_and_zps_buffer(const fused_scales_dt fused_scales[],
                                                          const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
                                                          const relu_6_fused_scales_dt relu_6_fused_scales[],
@@ -174,7 +198,7 @@ void first_pass_pw_normalize_engine_result(fms_dt dw_pipe_overlap_buffer[][DW_PI
                     dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][w - padding_left] = scaled_val;
                 }
                 if (starting_h + h < layer_ifms_height && (DW_BUFFER_HEIGHT - filter_dim != h + write_offset_h_in_normalized_tile ||
-                    padding_top == 0 || starting_h != 0))
+                                                           padding_top == 0 || starting_h != 0))
                 { // first time, we start from the last filter_dim rows, hence the row DW_BUFFER_HEIGHT - filter_dim should pe a padding
                     normalized_tile[f][h + filter_dim_minus_strides][w] = scaled_val;
                 }
@@ -596,6 +620,10 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
         for (int d = 0; d < num_of_filters; d += PARALLELISM_PW_OFMS)
         {
             //###############################
+
+            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+                                       dw_layer_specs_struct);
+
             fill_fused_scales_and_zps_buffer(fused_scales,
                                              fused_scales_log_2_shifts,
                                              relu_6_fused_scales,

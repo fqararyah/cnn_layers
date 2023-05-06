@@ -56,6 +56,10 @@ namespace pipelined_engines
                                              const int starting_h,
                                              const int starting_w,
                                              layer_specs layer_specs_struct);
+    
+    void padd_left_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                layer_specs layer_specs_struct);
 
     void fill_dw_weights_tile(const dw_weights_dt weights[][MAX_DW_FILTER_AREA_IN_PIPE],
                               dw_weights_dt weights_tile[][MAX_DW_FILTER_AREA_IN_PIPE],
