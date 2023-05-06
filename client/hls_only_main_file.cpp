@@ -54,8 +54,8 @@ void top_func(
 
 #if ONLY_SEML == 0
 	pipelined_engines_caller(channels);
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
- channels, layer_14_dw_specs);
+	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
+ channels, layer_6_dw_specs);
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 #endif
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);

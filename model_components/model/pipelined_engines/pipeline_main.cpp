@@ -142,13 +142,13 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
 
-    layer_specs first_layer_in_second_part = layer_15_pw_specs;
+    layer_specs first_layer_in_second_part = layer_7_pw_specs;
 
     // padd_top_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
     //                           layer_6_dw_specs);
 
     padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                             layer_6_dw_specs);
+                               layer_6_dw_specs);
 
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = PW_BUFFER_HEIGHT - rows_to_fill_first_time;
@@ -205,6 +205,13 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                pipe_fused_scales_log_2_shifts,
                pipe_relu_6_fused_scales,
                pipe_fused_zero_points);
+    
+     write_pipe_seml_communication_buffer(
+                result_buffer,
+                result,
+                0, // starting_h
+                0,
+                first_layer_in_second_part);
 
     for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
     {
@@ -240,7 +247,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
         }
     }
     padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                             layer_9_dw_specs);
+                               layer_9_dw_specs);
 
     pw_dw_conv(on_chip_pw_weights,
                pipe_dw_weights_3x3,
@@ -296,25 +303,18 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                pipe_relu_6_fused_scales,
                pipe_fused_zero_points);
 
-    // write_pipe_seml_communication_buffer(
-    //     channels_buffer,
-    //     result,
-    //     0, // starting_h
-    //     3, // todo
-    //     first_layer_in_second_part);
-
     const int rows_produced_in_pipeline_filling_phase = 1; // todo
 
     for (int h = 0; h < first_layer_in_second_part.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
     {
-        for (int o_i = 0; o_i < 2; o_i++)
-        { // todo change 2
+        //for (int o_i = 0; o_i < 2; o_i++)
+        //{ // todo change 2
             for (int i = 0; i < 2; i++)
             { // todo change 2
 #if HW == CPU
                 fill_pipe_layer_input_buffer(
                     "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
-                    channels_buffer, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
+                    channels_buffer, h * 2 + (i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
                     start_filling_offset_in_buffer_non_first, layer_4_pw_specs);
 #endif
                 pw_dw_conv(on_chip_pw_weights,
@@ -325,7 +325,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
                            dw_channels_tile_copy,
-                           h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
+                           h * 2 + (i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
                            i * 2,                                                                                              // h_offset_in_result,
                            1,
                            layer_4_pw_specs,
@@ -336,94 +336,107 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
                            pipe_fused_zero_points);
             }
 
-            pw_dw_conv(on_chip_pw_weights,
-                       pipe_dw_weights_3x3,
-                       result_buffer,
-                       channels_buffer,
-                       tmp_channels,
-                       dw_pipe_overlap_buffer,
-                       dw_channels_tile,
-                       dw_channels_tile_copy,
-                       h * 2 + o_i * pipe_rows_produced_in_a_pass +
-                           rows_produced_in_pipeline_filling_phase + 1, // starting_h
-                       0,                                               // h_offset_in_result,
-                       0,
-                       layer_7_pw_specs,
-                       layer_6_dw_specs,
-                       pipe_fused_scales,
-                       pipe_fused_scales_log_2_shifts,
-                       pipe_relu_6_fused_scales,
-                       pipe_fused_zero_points);
-
-            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                                     layer_9_dw_specs);
-
-            pw_dw_conv(on_chip_pw_weights,
-                       pipe_dw_weights_3x3,
-                       channels_buffer,
-                       result_buffer,
-                       tmp_channels,
-                       dw_pipe_overlap_buffer,
-                       dw_channels_tile,
-                       dw_channels_tile_copy,
-                       h * 2 + o_i * pipe_rows_produced_in_a_pass +
-                           rows_produced_in_pipeline_filling_phase + 1, // starting_h
-                       0,                                               // h_offset_in_result,
-                       1,
-                       layer_8_pw_specs,
-                       layer_9_dw_specs,
-                       pipe_fused_scales,
-                       pipe_fused_scales_log_2_shifts,
-                       pipe_relu_6_fused_scales,
-                       pipe_fused_zero_points);
-
-            pw_dw_conv(on_chip_pw_weights,
-                       pipe_dw_weights_3x3,
-                       result_buffer,
-                       channels_buffer,
-                       tmp_channels,
-                       dw_pipe_overlap_buffer,
-                       dw_channels_tile,
-                       dw_channels_tile_copy,
-                       h * 2 + o_i * pipe_rows_produced_in_a_pass +
-                           rows_produced_in_pipeline_filling_phase + 1, // starting_h
-                       0,                                               // h_offset_in_result,
-                       0,
-                       layer_10_pw_specs,
-                       layer_6_dw_specs,
-                       pipe_fused_scales,
-                       pipe_fused_scales_log_2_shifts,
-                       pipe_relu_6_fused_scales,
-                       pipe_fused_zero_points);
-
-            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                                     layer_14_dw_specs);
-
-            pw_dw_conv(on_chip_pw_weights,
-                       pipe_dw_weights_3x3,
-                       channels_buffer,
-                       result_buffer,
-                       tmp_channels,
-                       dw_pipe_overlap_buffer,
-                       dw_channels_tile,
-                       dw_channels_tile_copy,
-                       h * 2 + o_i * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
-                       o_i * 2,                                                                              // h_offset_in_result,
-                       1,
-                       layer_12_pw_specs,
-                       layer_14_dw_specs,
-                       pipe_fused_scales,
-                       pipe_fused_scales_log_2_shifts,
-                       pipe_relu_6_fused_scales,
-                       pipe_fused_zero_points);
-
             write_pipe_seml_communication_buffer(
                 result_buffer,
                 result,
-                h, // starting_h
-                o_i * 2,
+                h + 2, // starting_h
+                0,
                 first_layer_in_second_part);
-        }
+
+            // pw_dw_conv(on_chip_pw_weights,
+            //            pipe_dw_weights_3x3,
+            //            result_buffer,
+            //            channels_buffer,
+            //            tmp_channels,
+            //            dw_pipe_overlap_buffer,
+            //            dw_channels_tile,
+            //            dw_channels_tile_copy,
+            //            h * 2 + o_i * pipe_rows_produced_in_a_pass +
+            //                rows_produced_in_pipeline_filling_phase + 1, // starting_h
+            //            0,                                               // h_offset_in_result,
+            //            0,
+            //            layer_7_pw_specs,
+            //            layer_6_dw_specs,
+            //            pipe_fused_scales,
+            //            pipe_fused_scales_log_2_shifts,
+            //            pipe_relu_6_fused_scales,
+            //            pipe_fused_zero_points);
+
+            // padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+            //                            layer_9_dw_specs);
+
+            // pw_dw_conv(on_chip_pw_weights,
+            //            pipe_dw_weights_3x3,
+            //            channels_buffer,
+            //            result_buffer,
+            //            tmp_channels,
+            //            dw_pipe_overlap_buffer,
+            //            dw_channels_tile,
+            //            dw_channels_tile_copy,
+            //            h * 2 + o_i * pipe_rows_produced_in_a_pass +
+            //                rows_produced_in_pipeline_filling_phase + 1, // starting_h
+            //            0,                                               // h_offset_in_result,
+            //            1,
+            //            layer_8_pw_specs,
+            //            layer_9_dw_specs,
+            //            pipe_fused_scales,
+            //            pipe_fused_scales_log_2_shifts,
+            //            pipe_relu_6_fused_scales,
+            //            pipe_fused_zero_points);
+
+            // pw_dw_conv(on_chip_pw_weights,
+            //            pipe_dw_weights_3x3,
+            //            result_buffer,
+            //            channels_buffer,
+            //            tmp_channels,
+            //            dw_pipe_overlap_buffer,
+            //            dw_channels_tile,
+            //            dw_channels_tile_copy,
+            //            h * 2 + o_i * pipe_rows_produced_in_a_pass +
+            //                rows_produced_in_pipeline_filling_phase + 1, // starting_h
+            //            0,                                               // h_offset_in_result,
+            //            0,
+            //            layer_10_pw_specs,
+            //            layer_6_dw_specs,
+            //            pipe_fused_scales,
+            //            pipe_fused_scales_log_2_shifts,
+            //            pipe_relu_6_fused_scales,
+            //            pipe_fused_zero_points);
+
+            // padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+            //                            layer_14_dw_specs);
+
+// #if HW == CPU
+//             fill_pipe_layer_input_buffer(
+//                 "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_12.txt",
+//                 channels_buffer,  h * 2 + o_i * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
+//                 start_filling_offset_in_buffer_non_first, layer_12_pw_specs);
+// #endif
+            // pw_dw_conv(on_chip_pw_weights,
+            //            pipe_dw_weights_3x3,
+            //            channels_buffer,
+            //            result_buffer,
+            //            tmp_channels,
+            //            dw_pipe_overlap_buffer,
+            //            dw_channels_tile,
+            //            dw_channels_tile_copy,
+            //            h * 2 + o_i * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
+            //            o_i * 2,                                                                              // h_offset_in_result,
+            //            1,
+            //            layer_12_pw_specs,
+            //            layer_14_dw_specs,
+            //            pipe_fused_scales,
+            //            pipe_fused_scales_log_2_shifts,
+            //            pipe_relu_6_fused_scales,
+            //            pipe_fused_zero_points);
+
+            // write_pipe_seml_communication_buffer(
+            //     result_buffer,
+            //     result,
+            //     h, // starting_h
+            //     o_i * 2,
+            //     first_layer_in_second_part);
+      //  }
     }
 }
 
