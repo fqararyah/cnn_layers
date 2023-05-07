@@ -304,7 +304,7 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
                         {
                             if (h == 0)
                             {
-                                tmp_channels[starting_d + f][0][starting_w + w] = tmp_channels[starting_d + f][PW_BUFFER_HEIGHT][w];
+                                tmp_channels[starting_d + f][0][starting_w + w] = tmp_channels[starting_d + f][PW_BUFFER_HEIGHT][starting_w + w];
                             }
                             tmp_channels[starting_d + f][h + 1][starting_w + w] = normalized_val;
                         }
@@ -613,7 +613,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
     int prev_w = -1;
     int prev_prev_w = -1;
     int prev_prev_prev_w = -1;
-    int next_w = PARALLELISM_PW_OFMS;
 
     if (fused_pw_dw)
     {
@@ -675,7 +674,6 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                 prev_w = w - PARALLELISM_PW_W;
                 prev_prev_w = prev_w - PARALLELISM_PW_W;
                 prev_prev_prev_w = prev_prev_w - PARALLELISM_PW_W;
-                next_w = w + PARALLELISM_PW_W;
                 if ((w / PARALLELISM_PW_W) % 2 == 0)
                 {
                     dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
