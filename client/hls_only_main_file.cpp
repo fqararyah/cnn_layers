@@ -26,7 +26,7 @@ void top_func(
 							 tmp_channels);
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
-#elif CHAIN_LENGTH == 6 && MODEL_ID == 2
+#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && ! ONLY_SEML
 	_0_1_bottlenecks_chain(input_image,
 						   channels);
 #if DEBUGGING

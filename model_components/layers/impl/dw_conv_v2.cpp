@@ -265,6 +265,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
     const int ifms_d = layer_specs_struct.layer_depth;
     const int strides = layer_specs_struct.strides;
 
+    const int num_of_iterations_d = (ifms_d + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH;
+
     if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
     {
         fill_scales_tiles(fused_scales, fused_scales_tile, fused_scales_log_2_shifts,
@@ -300,7 +302,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                           layer_specs_struct);
 
             for (int dw_pipeline_in_d = 0;
-                 dw_pipeline_in_d < ifms_d / CHANNELS_PIPELINE_DEPTH;
+                 dw_pipeline_in_d < num_of_iterations_d;
                  dw_pipeline_in_d++)
             {
                 const int tile_in_d = dw_pipeline_in_d * (dw_pipeline_depth / dw_tile_d);
@@ -374,7 +376,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                   layer_specs_struct);
                 }
             }
-            if ((ifms_d / CHANNELS_PIPELINE_DEPTH - 1) % 2 == 0)
+            if ((num_of_iterations_d - 1) % 2 == 0)
             {
                 dw_normalize_and_write_back_result_tile(result,
                                                         engine_result_tile, normalization,

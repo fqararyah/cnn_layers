@@ -286,7 +286,7 @@ void pipelined_engines::pw_normalize_engine_result(pss_dt engine_result_tile[PAR
                         {
                             pss_f_dt tmp_channels_scaled_val =
                                 skip_connection_other_layer_scale *
-                                (tmp_channels[starting_d + f][h][w] - skip_connection_other_layer_zero_point);
+                                (tmp_channels[starting_d + f][h][starting_w + w] - skip_connection_other_layer_zero_point);
                             pss_f_dt scaled_tmp =
                                 pw_relu_norm_no_q_no_relu(
                                     tmp_pss,
