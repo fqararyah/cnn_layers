@@ -30,7 +30,7 @@ const int max_fms_size = switch_point_fms_width * switch_point_fms_height * swit
 const int max_tmp_fms_size = 56 * 56 * 24;
 
 #if MODEL_ID == MOB_V2
-const int MAX_FMS_BUFFER_DEPTH = 96 * 196; // 192 * (28/7) * (28/7)
+const int MAX_FMS_BUFFER_DEPTH = 192 * 16; // 192 * (28/7) * (28/7)
 #elif MODEL_ID == RESNET50
 const int MAX_FMS_BUFFER_DEPTH = 512 * 16; // 192 * (28/7) * (28/7)
 #endif

@@ -549,14 +549,17 @@ void pipelined_engines::pw_write_back_result_tile(fms_dt result_tile[DW_TILE_DEP
                                                   const int starting_d,
                                                   const int starting_w)
 {
-    for (int d = 0; d < DW_TILE_DEPTH; d++)
+    if (starting_w >= 0)
     {
-        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        for (int d = 0; d < DW_TILE_DEPTH; d++)
         {
-            //#pragma HLS PIPELINE
-            for (int w = 0; w < PARALLELISM_DW_W; w++)
+            for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
             {
-                result[starting_d + d][h][starting_w + w] = result_tile[d][h][w];
+                //#pragma HLS PIPELINE
+                for (int w = 0; w < PARALLELISM_DW_W; w++)
+                {
+                    result[starting_d + d][h][starting_w + w] = result_tile[d][h][w];
+                }
             }
         }
     }
