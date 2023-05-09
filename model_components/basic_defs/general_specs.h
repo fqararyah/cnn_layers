@@ -13,7 +13,7 @@
 #define ADD_LAYER_ACTIVATION 0
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 8032;
+const int first_quantization_arrays_num_elements = 8320;
 
 // switch point
 #if ONLY_SEML
@@ -93,7 +93,7 @@ const int median_depth = 96;
 const int median_width = 14;
 
 // weights
-const int all_pw_weights = 2125696 / weights_group_items;
+const int all_pw_weights = 2109952 / weights_group_items;
 const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
 
 // input specs

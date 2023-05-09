@@ -1,3 +1,4 @@
+from dataclasses import replace
 from posixpath import split
 import numpy as np
 import utils
@@ -46,20 +47,28 @@ def get_layer_index_from_file_name(file_name):
             return int(split)
 
 layers_weights = {}
-num_pw_layer = 0
+num_s_pw_layers_so_far = 0
+num_conv_layers_so_far = 0
 fc_layer_index = 0
 fc_weights_shape = []
+all_pw_weights = 0
 first_layer = True
 for layer_index in range(len(model_dag)):
     layer_specs = model_dag[layer_index]
+
+    if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
+        num_conv_layers_so_far += 1
+
+    if (num_conv_layers_so_far <= cgc.PIPELINE_LEN and cgc.PIPELINE == True) or first_layer:
+        first_layer = False
+        continue
+    
     if 'type' in layer_specs and (layer_specs['type'] == 'pw' or layer_specs['type'] == 's'):
-        if first_layer:
-            first_layer = False
-            continue
         weights_file = weights_file_format.format(layer_index)
         weights = np.loadtxt(weights_file).astype(np.int8)
         layers_weights[layer_index] = weights
-        num_pw_layer += 1
+        num_s_pw_layers_so_far += 1
+        all_pw_weights += weights.size
     elif 'type' in layer_specs and layer_specs['type'] == 'fc':
         fc_layer_index = layer_index
         fc_weights_shape = layer_specs['weights_shape']
@@ -89,3 +98,15 @@ np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(combined
 np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME), np.array(layers_weights_offsets), fmt='%i')
 with open(num_of_pw_weights_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write(str(weights_combined_so_far))
+
+replacement_string = ''
+
+with open(general_specs_file, 'r') as f:
+    for line in f:
+        if 'const int all_pw_weights =' in line:
+            replacement_string += 'const int all_pw_weights = {} / weights_group_items;\n'.format(all_pw_weights)
+        else:
+            replacement_string += line
+
+with open(general_specs_file, 'w') as f:
+    f.write(replacement_string)

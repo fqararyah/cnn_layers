@@ -72,10 +72,11 @@ const int first_conv_layer_ifm_width = {};\n \
 
 model_dag = utils.read_model_dag()
 current_block_indx = 0
-cumulative_pw_weights = 0
-cumulative_pw_weights_on_chip = 0
+cumulative_s_pw_weights = 0
+cumulative_s_pw_weights_on_chip = 0
 cumulative_dw_weights = 0
 dw_ifms_cumulative_width_offset = 0
+num_conv_layers_so_far = 0
 first_conv_layer = True
 with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
@@ -89,6 +90,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
         if 'type' in layer_specs:
             layer_type = layer_specs['type']
         if layer_type in cgc.CONV_LAYER_TYPES:
+            num_conv_layers_so_far += 1
             layer_weights_shape = layer_specs['weights_shape']
             layer_weights_size = 1
             for i in layer_weights_shape:
@@ -183,12 +185,13 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
             
             if (layer_type == 'pw' or layer_type == 's') and not first_conv_layer:
-                replacement_list.append(cumulative_pw_weights)
-                replacement_list.append(cumulative_pw_weights_on_chip)
+                replacement_list.append(cumulative_s_pw_weights)
+                replacement_list.append(cumulative_s_pw_weights_on_chip)
                 replacement_list.append(0)
-                cumulative_pw_weights += int(
-                    layer_weights_size / weights_group_items)
-                cumulative_pw_weights_on_chip += int(layer_weights_size)
+                if num_conv_layers_so_far > cgc.PIPELINE_LEN and cgc.PIPELINE == True:
+                    cumulative_s_pw_weights += int(
+                        layer_weights_size / weights_group_items)
+                cumulative_s_pw_weights_on_chip += int(layer_weights_size)
             elif layer_type == 'dw':
                 replacement_list.append(cumulative_dw_weights)
                 replacement_list.append(0)

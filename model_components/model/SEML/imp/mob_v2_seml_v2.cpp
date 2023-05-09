@@ -19,6 +19,38 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
     //			result[i] = i % 127;
     //		}
     //		begin_code_generation
+// #if DEBUGGING
+//  fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_15.txt",
+//  channels, layer_15_pw_specs);
+// #endif
+// #if DEBUGGING
+//  verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_15.txt",
+//  channels, layer_15_pw_specs);
+//#endif
+pw_conv(off_chip_weights, channels , result, tmp_channels, 15, layer_15_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_15.txt",
+ result, layer_15_pw_specs);
+#endif
+pw_conv(off_chip_weights, result , channels, tmp_channels, 16, layer_16_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_16.txt",
+ channels, layer_16_pw_specs);
+#endif
+seml_engines::dw_conv_3x3(seml_dw_weights_3x3, channels, result, 17,layer_17_dw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_17.txt",
+ result, layer_17_dw_specs);
+#endif
+pw_conv(off_chip_weights, result , channels, tmp_channels, 18, layer_18_pw_specs,
+    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
+    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
 pw_conv(off_chip_weights, channels , result, tmp_channels, 20, layer_20_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
