@@ -55,7 +55,7 @@ void pipelined_engines::fill_fused_scales_and_zps_buffer(const fused_scales_dt f
     }
 }
 
-void pipelined_engines::load_pw_weights(const weights_dt pw_weights[],
+void pipelined_engines::load_pw_weights(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                                         weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
                                         const int starting_filter,
                                         layer_specs layer_specs_struct)
@@ -81,7 +81,7 @@ void pipelined_engines::load_pw_weights(const weights_dt pw_weights[],
             {
                 break;
             }
-            weights_tile[filter_index][d] = pw_weights[current_filling_weights_offset + d];
+            weights_tile[filter_index][d] = on_chip_weights[current_filling_weights_offset + d][0];
         }
     }
 }
@@ -565,7 +565,7 @@ void pipelined_engines::pw_write_back_result_tile(fms_dt result_tile[DW_TILE_DEP
     }
 }
 
-void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
+void pipelined_engines::pw_dw_conv(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                                    const dw_weights_dt weights[][3 * 3],
                                    fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                    fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
@@ -648,7 +648,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                              PARALLELISM_PW_OFMS,
                                              pw_layer_specs_struct);
 
-            load_pw_weights(pw_weights,
+            load_pw_weights(on_chip_weights,
                             weights_tile,
                             d,
                             pw_layer_specs_struct);
@@ -892,7 +892,7 @@ void pipelined_engines::pw_dw_conv(const weights_dt pw_weights[],
                                              PARALLELISM_PW_OFMS,
                                              pw_layer_specs_struct);
 
-            load_pw_weights(pw_weights,
+            load_pw_weights(on_chip_weights,
                             weights_tile,
                             d,
                             pw_layer_specs_struct);

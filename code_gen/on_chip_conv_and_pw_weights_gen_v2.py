@@ -11,31 +11,55 @@ weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scrip
     cgc.MODEL_NAME)
 weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-conv_weights_h_file_3x3 = '../model_components/model/headers/on_chip_conv_weights_v2.h'
-pw_weights_h_file = '../model_components/model/headers/on_chip_pw_weights_v2.h'
+on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2.h'.format(cgc.MODEL_NAME)
 
-s_3x3_conv_weights_declaration_string = 'const static weights_dt on_chip_s_3x3_weights[][9] ={\n'
-pw_weights_declaration_string = 'const static weights_dt on_chip_pw_weights[] = {\n'
+on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'
 
-s_3x3_conv_weights = None
-pw_weights = None
+on_chip_weights_declaration_string = 'static weights_dt on_chip_weights[{}][ON_CHIP_WEIGHTS_PORTS];\n'
+first_layer_weights_declaration_string = 'const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils]' + \
+    '[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim]{\n'
 
 model_dag = utils.read_model_dag()
 
-num_of_generated_layers = 0
-with open(conv_weights_h_file_3x3, 'w') as f:
+with open(on_chip_weights_header_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    f.write('#include "'+ cgc.MODEL_NAME +'_layers_specs.h"\n')
+    f.write('#include "' + cgc.MODEL_NAME + '_layers_specs.h"\n')
     f.write("#if FIBHA_VERSION == 2\n")
-    f.write("#ifndef CONV_WEIGHTS_3x3\n")
-    f.write("#define CONV_WEIGHTS_3x3\n")
+    f.write("#ifndef ON_CHIP_WEIGHTS\n")
+    f.write("#define ON_CHIP_WEIGHTS\n")
 
-with open(pw_weights_h_file, 'w') as f:
-    f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    f.write('#include "'+ cgc.MODEL_NAME +'_layers_specs.h"\n')
-    f.write("#if FIBHA_VERSION == 2\n")
-    f.write("#ifndef ON_CHIP_PW_WEIGHTS\n")
-    f.write("#define ON_CHIP_PW_WEIGHTS\n")
+def write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_header_file):
+    num_of_filters = layer_weights_shape[0]
+    filter_depth = layer_weights_shape[1]
+    filter_h = layer_weights_shape[2]
+    filter_w = layer_weights_shape[3]
+    with open(on_chip_weights_header_file, 'a') as f:
+        f.write(first_layer_weights_declaration_string)
+        for i in range(num_of_filters):
+            f.write('{\n')
+            for j in range(filter_depth):
+                if filter_h > 1:
+                    f.write('{\n')
+                for k in range(filter_h):
+                    if filter_w > 1:
+                        f.write('{')
+                    for l in range(filter_w):
+                        f.write(str(weights[i][j][k][l]))
+                        if(l < filter_w - 1) or \
+                            (layer_type == 'pw' and j < filter_depth - 1):
+                            f.write(', ')
+                    if filter_w > 1:
+                        f.write('},\n')
+                if filter_h > 1:
+                    f.write('},\n')
+            f.write('},\n')
+        f.write('};\n')
+
+
+first_layer = True
+num_of_generated_layers = 0
+on_chip_weights_size = 0
+formated_weights_all_layers = []
 
 for ii in range(len(model_dag)):
     if num_of_generated_layers >= on_chip_conv_and_layers:
@@ -49,50 +73,48 @@ for ii in range(len(model_dag)):
 
     layer_weights_shape = layer_specs['weights_shape']
     num_of_generated_layers += 1
+
     weights_file = weights_files_location + \
         weights_file_format.format(str(ii))
-
+    
     weights = np.loadtxt(weights_file).astype(np.int8)
-    filter_dim = 1
-    if layer_type != 'pw':
-        filter_dim = layer_weights_shape[-1]
-        weights = np.reshape(
-            weights, ( int(weights.size / (filter_dim**2)), filter_dim**2))
-        if filter_dim == 3:
-            if s_3x3_conv_weights is not None:
-                s_3x3_conv_weights = np.concatenate(s_3x3_conv_weights, weights)
-            else:
-                s_3x3_conv_weights = weights
-    else:
-        if pw_weights is not None:
-            pw_weights = np.concatenate((pw_weights, weights))
-        else:
-            pw_weights = weights
 
-with open(conv_weights_h_file_3x3, 'a') as f:
-    f.write(s_3x3_conv_weights_declaration_string)
-    for i in range(s_3x3_conv_weights.shape[0]):
-        f.write('{')
-        f.write(str(s_3x3_conv_weights[i][0]))
-        for j in range(1, s_3x3_conv_weights.shape[1]):
-            f.write(', ')
-            f.write(str(s_3x3_conv_weights[i][j]))
-        f.write('},\n')
-    f.write('};\n')
+    on_chip_weights_size += weights.size
 
-    f.write('#endif\n')
-    f.write('#endif\n')
+    if first_layer:
+        first_layer = False
+        weights = np.reshape(weights, \
+            (layer_weights_shape[0], layer_weights_shape[1], layer_weights_shape[2], layer_weights_shape[3]))
+        write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_header_file)
+        continue
 
-with open(pw_weights_h_file, 'a') as f:
-    f.write(pw_weights_declaration_string)
-    f.write(str(pw_weights[0]))
-    print('on_chip pw weights size:', pw_weights.shape[0])
-    for i in range(1, pw_weights.shape[0]):
-        f.write(', ')
-        f.write(str(pw_weights[i]))
-        if i % 64 == 0:
-            f.write('\n')
-    f.write('};\n')
+    num_of_filters = layer_weights_shape[0]
+    filter_size = layer_weights_shape[1]
+    if layer_specs['type'] != 'pw':
+        filter_size *= layer_weights_shape[2] * layer_weights_shape[3]
 
+    weights = np.reshape(weights, \
+            (num_of_filters, filter_size))
+    
+    num_filters = weights.shape[0]
+    assert(num_filters % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
+    # if num_filters % ofms_parallelism != 0:
+    #     weights = np.append(weights, np.zeros(( int(ofms_parallelism - (num_filters % ofms_parallelism) ), \
+    #          weights.shape[1], weights.shape[2], weights.shape[3])), 0).astype(np.int8)
+
+    splitted_weights = np.split(weights, int(weights.shape[0] / cgc.ON_CHIP_WEIGHTS_PORTS), 0)
+    splitted_weights = [np.transpose(splitted_weights[i], (1,0)) for i in range(len(splitted_weights))]
+    combined_weights = np.concatenate(splitted_weights, 0)
+    combined_weights = combined_weights.reshape(combined_weights.size) 
+    formated_weights_all_layers.append(combined_weights)
+
+np.savetxt(on_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_weights_all_layers, 0), fmt='%i')
+
+
+
+with open(on_chip_weights_header_file, 'a') as f:
+    assert(on_chip_weights_size % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
+    f.write('const int on_chip_weights_size = ' + str(on_chip_weights_size) + ';\n')
+    f.write(on_chip_weights_declaration_string.format(int(on_chip_weights_size/ cgc.ON_CHIP_WEIGHTS_PORTS)))
     f.write('#endif\n')
     f.write('#endif\n')

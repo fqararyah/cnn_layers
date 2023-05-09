@@ -5,9 +5,17 @@
 #include <string>
 #include "../basic_defs/basic_defs_glue.h"
 
+#if MODEL_ID == MOB_V2
+#include "../model/headers/mob_v2_on_chip_weights_v2.h"
+#endif
+
 #include "../model/headers/model_glue.h"
 
 using namespace std;
+
+void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src);
+void fill_on_chip_weights_fpga(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+							   const int starting_filter);
 
 void fill_layers_weights_cpu(weights_dt *weights,
 							 weights_dt weights_buffer[][max_conv_d],

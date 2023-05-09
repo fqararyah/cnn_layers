@@ -5,6 +5,7 @@
 #include "../headers/model_glue.h"
 #if MODEL_ID == MOB_V2
 #include "../../model/headers/quantization_and_biases.h"
+#include "../../model/headers/mob_v2_on_chip_weights_v2.h"
 #include "../../model/headers/mob_v2_quantization_and_biases_v2.h"
 #elif MODEL_ID == RESNET50
 #include "../../model/headers/resnet50_quantization_and_biases_v2.h"
@@ -24,7 +25,7 @@ namespace pipelined_engines
                                           const int buffer_size,
                                           const layer_specs layer_specs_struct);
 
-    void load_pw_weights(const weights_dt pw_weights[],
+    void load_pw_weights(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                          weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
                          const int starting_filter,
                          layer_specs layer_specs_struct);
@@ -84,7 +85,7 @@ namespace pipelined_engines
                                    const int starting_d,
                                    const int starting_w);
 
-    void pw_dw_conv(const weights_dt pw_weights[],
+    void pw_dw_conv(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                     const dw_weights_dt weights[][3 * 3],
                     fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],

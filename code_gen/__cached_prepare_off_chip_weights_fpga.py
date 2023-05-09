@@ -52,9 +52,10 @@ for i in range(first_off_chip_layer, last_off_chip_layer):
     # print("get_ofms_parallelism", ofms_parallelism)
 
     num_filters = weights.shape[0]
-    if num_filters % ofms_parallelism != 0:
-        weights = np.append(weights, np.zeros(( int(ofms_parallelism - (num_filters % ofms_parallelism) ), \
-             weights.shape[1], weights.shape[2], weights.shape[3])), 0).astype(np.int8)
+    assert(num_filters % ofms_parallelism == 0)
+    # if num_filters % ofms_parallelism != 0:
+    #     weights = np.append(weights, np.zeros(( int(ofms_parallelism - (num_filters % ofms_parallelism) ), \
+    #          weights.shape[1], weights.shape[2], weights.shape[3])), 0).astype(np.int8)
 
     splitted_weights = np.split(weights, int(weights.shape[0] / ofms_parallelism), 0)
     splitted_weights = [np.transpose(splitted_weights[i], (1,0)) for i in range(len(splitted_weights))]

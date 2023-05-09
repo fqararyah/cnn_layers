@@ -49,6 +49,7 @@ int main(int argc, char **argv)
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
 	weights_dt *weights = (weights_dt*) malloc (num_of_pw_weights * weights_dt_width / 8);
+	weights_grp_dt on_chip_weights_src[on_chip_weights_size];
 	fms_dt input_image[input_image_depth * input_image_hw];
 #endif
 
@@ -107,7 +108,7 @@ int main(int argc, char **argv)
 			krnl_fibha_v2(input_image, weights, fc_input,
 						  ready_to_receive_new_input_ptr);
 #elif HW == CPU
-			top_func(input_image, weights, fc_input,
+			top_func(input_image, weights, on_chip_weights_src, fc_input,
 					 ready_to_receive_new_input_ptr);
 #endif
 // std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "

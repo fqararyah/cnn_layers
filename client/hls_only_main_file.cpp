@@ -4,6 +4,7 @@
 void top_func(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	weights_grp_dt off_chip_weights[all_pw_weights],
+	weights_grp_dt on_chip_weights_src[on_chip_weights_size],
 	fms_dt fc_input[fc_layer_input_size],
 	int *ready_to_receive_a_new_input_ptr)
 {
@@ -52,6 +53,12 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
+if(! on_chip_weights_filled){
+	on_chip_weights_filled = true;
+#if HW == CPU
+	fill_on_chip_weights_cpu(on_chip_weights_src);
+#endif
+}
 #if ONLY_SEML == 0
 	pipelined_engines_caller(channels);
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",

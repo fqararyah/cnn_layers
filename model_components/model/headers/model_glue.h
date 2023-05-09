@@ -6,10 +6,8 @@
 #endif
 #include "dw_weights.h"
 #include "dw_weights_v2.h"
-#include "on_chip_conv_pw_weights.h"
-#include "on_chip_conv_weights_v2.h"
-#include "on_chip_pw_weights_v2.h"
 #if MODEL_ID == MOB_V2
+#include "mob_v2_on_chip_weights_v2.h"
 #include "../../model/headers/quantization_and_biases.h"
 #include "../../model/headers/mob_v2_quantization_and_biases_v2.h"
 #elif MODEL_ID == RESNET50

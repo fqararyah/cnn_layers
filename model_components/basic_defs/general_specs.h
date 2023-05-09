@@ -15,6 +15,7 @@ typedef int conv_type;
 //
 const int first_quantization_arrays_num_elements = 8320;
 
+static bool on_chip_weights_filled = false;
 // switch point
 #if ONLY_SEML
 const int switch_point_fms_width = 112;

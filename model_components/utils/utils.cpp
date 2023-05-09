@@ -28,7 +28,49 @@ void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 	}
 }
 
+void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src)
+{
+	for (int i = 0; i < on_chip_weights_size / ON_CHIP_WEIGHTS_PORTS; i++)
+	{
+		for (int j = 0; j < ON_CHIP_WEIGHTS_PORTS; j++)
+		{
+			on_chip_weights[i][j] = on_chip_weights_src[i * ON_CHIP_WEIGHTS_PORTS + j];
+		}
+	}
+}
+
 #if HW == _FPGA
+void fill_on_chip_weights_fpga(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+							   const int starting_filter)
+{
+	for (int weight_grp_index = 0;
+		 weight_grp_index < num_of_weight_groups_in_the_largest_weight_tile; weight_grp_index++)
+	{
+		weights_grp_dt chunck = weight_groups_buffer[weight_grp_index];
+		for (int within_filter_index = 0;
+			 within_filter_index < num_of_weights_in_the_same_filter_and_group_on_chip;
+			 within_filter_index++)
+		{
+#pragma HLS UNROLL
+			for (int filter_index = 0; filter_index < ON_CHIP_WEIGHTS_PORTS;
+				 filter_index++)
+			{
+#pragma HLS UNROLL
+				on_chip_weights[filter_index][starting_filter + weight_grp_index * num_of_weights_in_the_same_filter_and_group_on_chip +
+											  within_filter_index] = (weights_dt)chunck((within_filter_index *
+																							 ON_CHIP_WEIGHTS_PORTS +
+																						 filter_index) *
+																								weights_dt_width +
+																							weights_dt_offset,
+																						(within_filter_index *
+																							 ON_CHIP_WEIGHTS_PORTS +
+																						 filter_index) *
+																							weights_dt_width);
+			}
+		}
+	}
+}
+
 void fill_weights_tile_from_weight_groups_tile(
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
 	weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
