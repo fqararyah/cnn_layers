@@ -86,7 +86,7 @@ int main(int argc, char* argv[]) {
 	string input_images_folder = "./preprocessed_tst_images/";
 	string output_folder = "./_FPGA_out/";
 
-	weights_grp_dt glued_weights[all_pw_weights];
+	weights_grp_dt glued_weights[all_pw_s_weights];
 	fms_dt fc_input[fc_layer_input_size];
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 
@@ -159,7 +159,7 @@ int main(int argc, char* argv[]) {
 	// These commands will allocate memory on the Device. The cl::Buffer objects can
 	// be used to reference the memory locations on the device.
 	OCL_CHECK(err,
-			cl::Buffer buffer_weights(context, CL_MEM_READ_ONLY, all_pw_weights, NULL, &err));
+			cl::Buffer buffer_weights(context, CL_MEM_READ_ONLY, all_pw_s_weights, NULL, &err));
 	OCL_CHECK(err,
 			cl::Buffer buffer_input_image(context, CL_MEM_READ_ONLY, input_image_depth * input_image_num_fms_groups_in_a_channel*(512/8), NULL, &err));
 	OCL_CHECK(err,
@@ -183,7 +183,7 @@ int main(int argc, char* argv[]) {
 	int *ready_to_receive_a_new_input_ptr = &ready_to_receive_a_new_input;
 
 	OCL_CHECK(err,
-			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_pw_weights, NULL, NULL, &err));
+			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_pw_s_weights, NULL, NULL, &err));
 	OCL_CHECK(err,
 			ptr_input_image = (fms_grp_dt*)q.enqueueMapBuffer (buffer_input_image , CL_TRUE , CL_MAP_WRITE , 0, input_image_depth * input_image_num_fms_groups_in_a_channel*(512/8), NULL, NULL, &err));
 	OCL_CHECK(err,

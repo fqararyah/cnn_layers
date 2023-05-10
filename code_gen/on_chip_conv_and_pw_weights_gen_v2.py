@@ -14,8 +14,9 @@ weights_file_format = 'weights_{}.txt'
 on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2.h'.format(cgc.MODEL_NAME)
 
 on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'
+general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
-on_chip_weights_declaration_string = 'static weights_dt on_chip_weights[{}][ON_CHIP_WEIGHTS_PORTS];\n'
+on_chip_weights_declaration_string = 'static weights_dt on_chip_weights[all_on_chip_pw_s_weights][ON_CHIP_WEIGHTS_PORTS];\n'
 first_layer_weights_declaration_string = 'const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils]' + \
     '[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim]{\n'
 
@@ -58,7 +59,7 @@ def write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_head
 
 first_layer = True
 num_of_generated_layers = 0
-on_chip_weights_size = 0
+all_on_chip_pw_s_weights = 0
 formated_weights_all_layers = []
 
 for ii in range(len(model_dag)):
@@ -79,7 +80,7 @@ for ii in range(len(model_dag)):
     
     weights = np.loadtxt(weights_file).astype(np.int8)
 
-    on_chip_weights_size += weights.size
+    all_on_chip_pw_s_weights += weights.size
 
     if first_layer:
         first_layer = False
@@ -113,8 +114,18 @@ np.savetxt(on_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_
 
 
 with open(on_chip_weights_header_file, 'a') as f:
-    assert(on_chip_weights_size % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
-    f.write('const int on_chip_weights_size = ' + str(on_chip_weights_size) + ';\n')
-    f.write(on_chip_weights_declaration_string.format(int(on_chip_weights_size/ cgc.ON_CHIP_WEIGHTS_PORTS)))
+    assert(all_on_chip_pw_s_weights % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
+    f.write(on_chip_weights_declaration_string.format(int(all_on_chip_pw_s_weights/ cgc.ON_CHIP_WEIGHTS_PORTS)))
     f.write('#endif\n')
     f.write('#endif\n')
+
+replacement_string = ''
+with open(general_specs_file, 'r') as f:
+    for line in f:
+        if 'const int all_on_chip_pw_s_weights =' in line:
+            replacement_string += 'const int all_on_chip_pw_s_weights = ' + str(all_on_chip_pw_s_weights) + ';\n'
+        else:
+            replacement_string += line
+
+with open(general_specs_file, 'w') as f:
+    f.write(replacement_string)

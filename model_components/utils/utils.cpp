@@ -28,9 +28,10 @@ void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 	}
 }
 
-void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src)
+void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src,
+							  weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS])
 {
-	for (int i = 0; i < on_chip_weights_size / ON_CHIP_WEIGHTS_PORTS; i++)
+	for (int i = 0; i < all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS; i++)
 	{
 		for (int j = 0; j < ON_CHIP_WEIGHTS_PORTS; j++)
 		{

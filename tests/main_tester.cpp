@@ -18,6 +18,8 @@ int main(int argc, char **argv)
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
+	string on_chip_weights_file =
+		"/media/SSD2TB/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #elif HW == _FPGA
 	string weights_file =
 		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/off_chip_weights__FPGA.txt";
@@ -48,8 +50,8 @@ int main(int argc, char **argv)
 	weights_grp_dt weights[num_of_pw_weights / weights_group_items];
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
-	weights_dt *weights = (weights_dt*) malloc (num_of_pw_weights * weights_dt_width / 8);
-	weights_grp_dt on_chip_weights_src[on_chip_weights_size];
+	weights_dt *weights = (weights_dt *)malloc(num_of_pw_weights * weights_dt_width / 8);
+	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *) malloc(all_on_chip_pw_s_weights * weights_dt_width / 8);
 	fms_dt input_image[input_image_depth * input_image_hw];
 #endif
 
@@ -65,6 +67,8 @@ int main(int argc, char **argv)
 	glue_weights(weights_file, weights);
 	validate_weights(weights_file, weights);
 #elif HW == CPU
+	glue_on_chip_weights_cpu(on_chip_weights_file,
+							glued_on_chip_weights);
 	load_weights(weights_file, weights);
 #endif
 
@@ -108,7 +112,7 @@ int main(int argc, char **argv)
 			krnl_fibha_v2(input_image, weights, fc_input,
 						  ready_to_receive_new_input_ptr);
 #elif HW == CPU
-			top_func(input_image, weights, on_chip_weights_src, fc_input,
+			top_func(input_image, weights, glued_on_chip_weights, fc_input,
 					 ready_to_receive_new_input_ptr);
 #endif
 // std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "

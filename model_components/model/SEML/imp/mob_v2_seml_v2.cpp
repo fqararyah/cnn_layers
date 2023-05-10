@@ -8,7 +8,7 @@ using namespace seml_engines;
 
 #if FIBHA_VERSION == 2  && MODEL_ID == MOB_V2
 
-void seml(weights_grp_dt off_chip_weights[all_pw_weights],
+void seml(weights_grp_dt off_chip_weights[all_pw_s_weights],
           fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
           fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
           fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
@@ -19,14 +19,14 @@ void seml(weights_grp_dt off_chip_weights[all_pw_weights],
     //			result[i] = i % 127;
     //		}
     //		begin_code_generation
-#if DEBUGGING
- fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_15.txt",
- channels, layer_15_pw_specs);
-#endif
-#if DEBUGGING
- verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_15.txt",
- channels, layer_15_pw_specs);
-#endif
+// #if DEBUGGING
+//  fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_15.txt",
+//  channels, layer_15_pw_specs);
+// #endif
+// #if DEBUGGING
+//  verify_fill_layer_input("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_15.txt",
+//  channels, layer_15_pw_specs);
+// #endif
 pw_conv(off_chip_weights, channels , result, tmp_channels, 15, layer_15_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);

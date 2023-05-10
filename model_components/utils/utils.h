@@ -13,7 +13,8 @@
 
 using namespace std;
 
-void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src);
+void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src,
+							  weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS]);
 void fill_on_chip_weights_fpga(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
 							   const int starting_filter);
 

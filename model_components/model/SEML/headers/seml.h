@@ -13,12 +13,12 @@
 
 using namespace std;
 
-void seml(weights_grp_dt off_chip_weights[all_pw_weights],
+void seml(weights_grp_dt off_chip_weights[all_pw_s_weights],
 		fms_dt channels[max_fms_size], fms_dt result[max_fms_size],
 		fms_dt tmp_channels[max_tmp_fms_size],
 		fms_dt fc_input[fc_layer_input_size]);
 
-void seml(weights_grp_dt off_chip_weights[all_pw_weights],
+void seml(weights_grp_dt off_chip_weights[all_pw_s_weights],
 		fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 		fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 		fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],

@@ -549,7 +549,6 @@ const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils][f
 },
 },
 };
-const int on_chip_weights_size = 38624;
-static weights_dt on_chip_weights[4828][ON_CHIP_WEIGHTS_PORTS];
+static weights_dt on_chip_weights[all_on_chip_pw_s_weights][ON_CHIP_WEIGHTS_PORTS];
 #endif
 #endif

@@ -21,10 +21,10 @@ void load_image(string file_name,
 				fms_dt image[]);
 
 void glue_weights(string file_name,
-				  weights_grp_dt glued_weights[all_pw_weights]);
+				  weights_grp_dt glued_weights[all_pw_s_weights]);
 
 void validate_weights(string file_name,
-					  weights_grp_dt glued_weights[all_pw_weights]);
+					  weights_grp_dt glued_weights[all_pw_s_weights]);
 
 void glue_input_image(string file_name,
 					  fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width / input_image_group_items]);
@@ -54,5 +54,8 @@ void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER
 void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
 								  const int starting_h, const int start_filling_offset_in_buffer,
 								  const layer_specs layer_specs_struct);
+
+void glue_on_chip_weights_cpu(string file_name,
+				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights]);
 
 #endif

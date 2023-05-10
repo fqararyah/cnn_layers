@@ -6,8 +6,6 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 out_file = '../model_components/model/headers/{}_layers_specs.h'  # './out/layers_specs.h'
 
-weights_group_items = 64
-
 specs_struct = 'const layer_specs {} = {}\n\
                 {},//layer_index;\n\
                 {},//conv_layer_type;; \n\
@@ -185,12 +183,11 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
             
             if (layer_type == 'pw' or layer_type == 's') and not first_conv_layer:
-                replacement_list.append(cumulative_s_pw_weights)
+                replacement_list.append(str(cumulative_s_pw_weights) + ' / weights_group_items')
                 replacement_list.append(cumulative_s_pw_weights_on_chip)
                 replacement_list.append(0)
                 if num_conv_layers_so_far > cgc.PIPELINE_LEN and cgc.PIPELINE == True:
-                    cumulative_s_pw_weights += int(
-                        layer_weights_size / weights_group_items)
+                    cumulative_s_pw_weights += layer_weights_size
                 cumulative_s_pw_weights_on_chip += int(layer_weights_size)
             elif layer_type == 'dw':
                 replacement_list.append(cumulative_dw_weights)

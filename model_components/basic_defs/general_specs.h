@@ -94,9 +94,9 @@ const int median_depth = 96;
 const int median_width = 14;
 
 // weights
-const int all_pw_weights = 2109952 / weights_group_items;
+const int all_pw_s_weights = 2109952 / weights_group_items;
 const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
-
+const int all_on_chip_pw_s_weights = 38624;
 // input specs
 const int input_image_height = 224;
 const int input_image_width = 224;

@@ -86,3 +86,18 @@ void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER
 	}
 	myfile.close();
 }
+
+void glue_on_chip_weights_cpu(string file_name,
+				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights])
+{
+	int a;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+	int line_num = 0;
+	while (infile >> a)
+	{
+		weights_grp_dt weight = (weights_grp_dt)a;
+		glued_on_chip_weights[line_num]= weight;
+		line_num++;
+	}
+}

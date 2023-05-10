@@ -25,7 +25,7 @@ extern "C" {
 void krnl_fibha_v1(
 		fms_grp_dt input_image[input_image_depth
 				* input_image_num_fms_groups_in_a_channel],
-		weights_grp_dt off_chip_weights[all_pw_weights],
+		weights_grp_dt off_chip_weights[all_pw_s_weights],
 		fms_dt fc_input[fc_layer_input_size],
 		int *ready_to_receive_a_new_input_ptr) {
 

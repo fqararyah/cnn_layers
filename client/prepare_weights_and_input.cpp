@@ -50,7 +50,7 @@ void load_image(string file_name,
 
 #if HW == _FPGA
 void glue_weights(string file_name,
-				  weights_grp_dt glued_weights[all_pw_weights])
+				  weights_grp_dt glued_weights[all_pw_s_weights])
 {
 	int a;
 	std::ifstream infile(file_name);
@@ -69,7 +69,7 @@ void glue_weights(string file_name,
 }
 
 void validate_weights(string file_name,
-					  weights_grp_dt glued_weights[all_pw_weights])
+					  weights_grp_dt glued_weights[all_pw_s_weights])
 {
 	int a;
 	std::ifstream infile(file_name);

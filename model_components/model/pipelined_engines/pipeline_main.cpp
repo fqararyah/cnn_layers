@@ -133,7 +133,8 @@ void write_pipe_seml_communication_buffer(
     }
 }
 
-void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
+void pipelined_engines_caller(weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
+                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
     const int tmp_channels_height = PW_BUFFER_HEIGHT + 1;
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
@@ -234,7 +235,7 @@ void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT
     {
         for (int w = 0; w < PW_BUFFER_WIDTH; w++)
         {
-            tmp_channels[d][0][w] = tmp_channels[d][tmp_channels_height - 2][w];//two rows were produced
+            tmp_channels[d][0][w] = tmp_channels[d][tmp_channels_height - 2][w]; // two rows were produced
         }
     }
 

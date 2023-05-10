@@ -64,24 +64,30 @@ void pipelined_engines::load_pw_weights(weights_dt on_chip_weights[][ON_CHIP_WEI
 
     const int layer_depth = layer_specs_struct.layer_depth;
     const int layer_num_filters = layer_specs_struct.layer_num_fils;
-    const int filling_weights_offset = layer_specs_struct.layer_weights_offset_on_chip +
-                                       starting_filter * layer_depth;
+    const int filling_weights_offset = (layer_specs_struct.layer_weights_offset_on_chip +
+                                        starting_filter * layer_depth) /
+                                       ON_CHIP_WEIGHTS_PORTS;
 
-    for (int filter_index = 0; filter_index < PARALLELISM_PW_OFMS; filter_index++)
+    for (int filter_g_index = 0; filter_g_index < PARALLELISM_PW_OFMS / ON_CHIP_WEIGHTS_PORTS; filter_g_index++)
     {
-        //#pragma HLS UNROLL
-        if (filter_index + starting_filter >= layer_num_filters)
+        int current_filling_weights_offset = filling_weights_offset + filter_g_index * layer_depth;
+
+        for (int filter_index = 0; filter_index < ON_CHIP_WEIGHTS_PORTS; filter_index++)
         {
-            break;
-        }
-        const int current_filling_weights_offset = filling_weights_offset + filter_index * layer_depth;
-        for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
-        {
-            if (d >= layer_depth)
+            //#pragma HLS UNROLL
+            if (filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index + starting_filter >= layer_num_filters)
             {
                 break;
             }
-            weights_tile[filter_index][d] = on_chip_weights[current_filling_weights_offset + d][0];
+            for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
+            {
+                if (d >= layer_depth)
+                {
+                    break;
+                }
+                weights_tile[filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index][d] =
+                    on_chip_weights[current_filling_weights_offset + d][filter_index]; // TODO
+            }
         }
     }
 }

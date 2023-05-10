@@ -8,6 +8,7 @@
 #include "pipelined_engines_specs.h"
 #include "pipelined_engines.h"
 
-void pipelined_engines_caller(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
+void pipelined_engines_caller(weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
+                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
 
 #endif
