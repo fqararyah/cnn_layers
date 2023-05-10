@@ -1,5 +1,4 @@
 #include "prepare_weights_and_inputs.h"
-#include "../model_components/model/pipelined_engines/pipelined_engines_specs.h"
 
 using namespace pipelined_engines;
 

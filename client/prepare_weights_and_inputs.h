@@ -2,6 +2,8 @@
 #define PREPARE_WEIGHTS_INPUTS
 #include "../model_components/basic_defs/basic_defs_glue.h"
 #include "../model_components/model/headers/model_glue.h"
+#include "../model_components/model/pipelined_engines/pipelined_engines_specs.h"
+
 #include <fstream>
 #if HW == _FPGA
 #include "ap_int.h"
