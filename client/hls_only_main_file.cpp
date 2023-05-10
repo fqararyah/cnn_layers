@@ -4,7 +4,7 @@
 void top_func(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	weights_grp_dt off_chip_weights[all_pw_s_weights],
-	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights],
+	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 	fms_dt fc_input[fc_layer_input_size],
 	int *ready_to_receive_a_new_input_ptr)
 {
@@ -27,7 +27,7 @@ void top_func(
 							 tmp_channels);
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
-#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && ! ONLY_SEML
+#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && !ONLY_SEML
 	_0_1_bottlenecks_chain(input_image,
 						   channels);
 #if DEBUGGING
@@ -53,18 +53,26 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
-	weights_grp_dt on_chip_weights[all_on_chip_pw_s_weights/ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
-if(! on_chip_weights_filled){
-	on_chip_weights_filled = true;
+	weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
+	if (!on_chip_weights_filled)
+	{
+		on_chip_weights_filled = true;
 #if HW == CPU
-	fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
+		fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
+#elif HW == _FPGA
+		fill_on_chip_weights_fpga(on_chip_weights_src,
+								  on_chip_weights,0);
 #endif
-}
+	}
 #if ONLY_SEML == 0
 	pipelined_engines_caller(on_chip_weights, channels);
+
+#if HW == CPU
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
- channels, layer_14_dw_specs);
+					  channels, layer_14_dw_specs);
 	copy_channels_to_tmp_channels(channels, tmp_channels);
+#endif
+
 #endif
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif

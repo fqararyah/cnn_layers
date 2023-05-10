@@ -56,6 +56,6 @@ void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_P
 								  const layer_specs layer_specs_struct);
 
 void glue_on_chip_weights_cpu(string file_name,
-				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights]);
+				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
 
 #endif

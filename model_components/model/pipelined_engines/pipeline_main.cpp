@@ -133,7 +133,7 @@ void write_pipe_seml_communication_buffer(
     }
 }
 
-void pipelined_engines_caller(weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
+void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
     const int tmp_channels_height = PW_BUFFER_HEIGHT + 1;

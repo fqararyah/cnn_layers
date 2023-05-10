@@ -14,8 +14,10 @@
 using namespace std;
 
 void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src,
-							  weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS]);
-void fill_on_chip_weights_fpga(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+							  weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS]);
+
+void fill_on_chip_weights_fpga(weights_grp_dt *on_chip_weights_src,
+							   weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
 							   const int starting_filter);
 
 void fill_layers_weights_cpu(weights_dt *weights,
@@ -25,11 +27,11 @@ void fill_layers_weights_cpu(weights_dt *weights,
 							 const int layer_num_fils);
 
 void fill_layers_weights_cpu_pw_conv(weights_dt *weights,
-							 weights_dt weights_buffer[][max_conv_d][max_filter_area],
-							 int starting_filter, const int layer_depth,
-							 const int layer_weights_offset,
-							 const int layer_num_fils);
-							 
+									 weights_dt weights_buffer[][max_conv_d][max_filter_area],
+									 int starting_filter, const int layer_depth,
+									 const int layer_weights_offset,
+									 const int layer_num_fils);
+
 void fill_layers_weights_cpu(weights_dt *weights,
 							 weights_dt weights_buffer[][max_conv_d],
 							 int starting_filter, const int layer_depth,
@@ -87,7 +89,7 @@ void fill_fused_scales_and_zero_points(
 void copy_channels_to_tmp_channels(fms_dt channels[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]);
 void copy_channels_to_tmp_channels(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 								   fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
-								   
+
 // void v1_3_fill_layers_weights(layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 //                          dw_weights_dt dw_weights_2[layer_1_dw_depth][v1_layer_2_dw_specs.filter_size][v1_layer_2_dw_specs.filter_size],
 //                          weights_dt pw_weights_3[v1_layer_3_pw_specs.num_fils][v1_layer_2_pw_depth]);

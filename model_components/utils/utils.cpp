@@ -23,13 +23,16 @@ void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 		for (int weight_grp_index = 0;
 			 weight_grp_index < num_of_weight_groups; weight_grp_index++)
 		{
-			weight_groups_buffer[weight_grp_index] = weights[current_fill_offset + weight_grp_index];
+			if (current_fill_offset + weight_grp_index < all_on_chip_pw_s_weights_groups)
+			{
+				weight_groups_buffer[weight_grp_index] = weights[current_fill_offset + weight_grp_index];
+			}
 		}
 	}
 }
 
 void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src,
-							  weights_grp_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS])
+							  weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS])
 {
 	for (int i = 0; i < all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS; i++)
 	{
@@ -41,32 +44,49 @@ void fill_on_chip_weights_cpu(weights_grp_dt *on_chip_weights_src,
 }
 
 #if HW == _FPGA
-void fill_on_chip_weights_fpga(weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile],
+void fill_on_chip_weights_fpga(weights_grp_dt *on_chip_weights_src,
+							   weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
 							   const int starting_filter)
 {
-	for (int weight_grp_index = 0;
-		 weight_grp_index < num_of_weight_groups_in_the_largest_weight_tile; weight_grp_index++)
+	const int num_ierations = (all_on_chip_pw_s_weights + num_of_weight_groups_in_the_largest_weight_tile - 1) /
+							  num_of_weight_groups_in_the_largest_weight_tile;
+
+	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
+	for (int iter = 0; iter < num_ierations; iter++)
 	{
-		weights_grp_dt chunck = weight_groups_buffer[weight_grp_index];
-		for (int within_filter_index = 0;
-			 within_filter_index < num_of_weights_in_the_same_filter_and_group_on_chip;
-			 within_filter_index++)
+		fill_layer_weight_groups_tile_off_chip(on_chip_weights_src, weight_groups_buffer,
+											   0,
+											   0,
+											   num_of_weight_groups_in_the_largest_weight_tile,
+											   iter * num_of_weight_groups_in_the_largest_weight_tile,
+											   1);
+		int current_fill_offset =
+			iter * num_of_weight_groups_in_the_largest_weight_tile * weights_group_items / ON_CHIP_WEIGHTS_PORTS;
+		for (int weight_grp_index = 0;
+			 weight_grp_index < num_of_weight_groups_in_the_largest_weight_tile; weight_grp_index++)
 		{
-#pragma HLS UNROLL
-			for (int filter_index = 0; filter_index < ON_CHIP_WEIGHTS_PORTS;
-				 filter_index++)
+			weights_grp_dt chunck = weight_groups_buffer[weight_grp_index];
+			for (int within_filter_index = 0;
+				 within_filter_index < num_of_weights_in_the_same_filter_and_group_on_chip;
+				 within_filter_index++)
 			{
 #pragma HLS UNROLL
-				on_chip_weights[filter_index][starting_filter + weight_grp_index * num_of_weights_in_the_same_filter_and_group_on_chip +
-											  within_filter_index] = (weights_dt)chunck((within_filter_index *
-																							 ON_CHIP_WEIGHTS_PORTS +
-																						 filter_index) *
-																								weights_dt_width +
-																							weights_dt_offset,
-																						(within_filter_index *
-																							 ON_CHIP_WEIGHTS_PORTS +
-																						 filter_index) *
-																							weights_dt_width);
+				for (int filter_index = 0; filter_index < ON_CHIP_WEIGHTS_PORTS;
+					 filter_index++)
+				{
+#pragma HLS UNROLL
+					on_chip_weights[filter_index][current_fill_offset +
+												  weight_grp_index * num_of_weights_in_the_same_filter_and_group_on_chip +
+												  within_filter_index] = (weights_dt)chunck((within_filter_index *
+																								 ON_CHIP_WEIGHTS_PORTS +
+																							 filter_index) *
+																									weights_dt_width +
+																								weights_dt_offset,
+																							(within_filter_index *
+																								 ON_CHIP_WEIGHTS_PORTS +
+																							 filter_index) *
+																								weights_dt_width);
+				}
 			}
 		}
 	}

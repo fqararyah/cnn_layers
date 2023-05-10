@@ -51,7 +51,8 @@ int main(int argc, char **argv)
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
 	weights_dt *weights = (weights_dt *)malloc(num_of_pw_weights * weights_dt_width / 8);
-	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *) malloc(all_on_chip_pw_s_weights * weights_dt_width / 8);
+	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
+																	 weights_group_items * weights_dt_width / 8);
 	fms_dt input_image[input_image_depth * input_image_hw];
 #endif
 
@@ -64,11 +65,13 @@ int main(int argc, char **argv)
 	int top5[5];
 
 #if HW == _FPGA
+	glue_on_chip_weights_fpga(on_chip_weights_file,
+							  glued_on_chip_weights);
 	glue_weights(weights_file, weights);
 	validate_weights(weights_file, weights);
 #elif HW == CPU
 	glue_on_chip_weights_cpu(on_chip_weights_file,
-							glued_on_chip_weights);
+							 glued_on_chip_weights);
 	load_weights(weights_file, weights);
 #endif
 

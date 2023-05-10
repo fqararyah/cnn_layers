@@ -88,7 +88,7 @@ void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER
 }
 
 void glue_on_chip_weights_cpu(string file_name,
-				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights])
+							  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups])
 {
 	int a;
 	std::ifstream infile(file_name);
@@ -97,7 +97,29 @@ void glue_on_chip_weights_cpu(string file_name,
 	while (infile >> a)
 	{
 		weights_grp_dt weight = (weights_grp_dt)a;
-		glued_on_chip_weights[line_num]= weight;
+		glued_on_chip_weights[line_num] = weight;
 		line_num++;
 	}
 }
+
+#if HW == _FPGA
+
+void glue_on_chip_weights_fpga(string file_name,
+							   weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups])
+{
+	int a;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+	int line_num = 0;
+	while (infile >> a)
+	{
+		weights_dt weight = (weights_dt)a;
+		int external_index = line_num / weights_group_items;
+		int internal_index = line_num % weights_group_items;
+		glued_weights[external_index](
+			internal_index * weights_dt_width + weights_dt_offset,
+			internal_index * weights_dt_width) = weight;
+		line_num++;
+	}
+}
+#endif

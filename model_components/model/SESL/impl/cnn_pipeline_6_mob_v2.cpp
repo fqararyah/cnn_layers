@@ -1,6 +1,9 @@
 #include "../headers/sesl.h"
 #include <iostream>
+
+#if HW == CPU
 #include "../../../../tests/test_utils.h"
+#endif
 
 using namespace std;
 

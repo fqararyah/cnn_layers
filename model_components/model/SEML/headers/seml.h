@@ -1,7 +1,9 @@
 #ifndef SEML
 #define SEML
+#if HW == CPU
 #include "../../../../tests/test_utils.h"
 #include "../../../../client/prepare_weights_and_inputs.h"
+#endif
 #include "../../../utils/utils.h"
 #include "../../../layers/headers/layers_glue.h"
 
