@@ -112,20 +112,24 @@ void write_pipe_seml_communication_buffer(
     const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
     const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 
-    for (int d = 0; d < layer_depth; d++)
+    const int initial_h_offset = starting_h % CHANNELS_TILE_HEIGHT;
+
+    for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
     {
-        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        if (offset_h_in_communication_buffer + h >= PW_BUFFER_HEIGHT || h + starting_h >= layer_ifms_height)
         {
-            if (offset_h_in_communication_buffer + h >= PW_BUFFER_HEIGHT || h + starting_h >= layer_ifms_height)
+            break;
+        }
+        int h_in_tile = initial_h_offset + h >= CHANNELS_TILE_HEIGHT ? initial_h_offset + h - CHANNELS_TILE_HEIGHT : initial_h_offset + h;
+        int tile_offset_h = ((h + starting_h) / CHANNELS_TILE_HEIGHT) * num_of_tiles_w;
+        for (int w = 0; w < layer_ifms_width; w++)
+        {
+            int w_in_tile = w % CHANNELS_TILE_WIDTH;
+            int h_w_offset = tile_offset_h + w / CHANNELS_TILE_WIDTH;
+            for (int d = 0; d < layer_depth; d++)
             {
-                break;
-            }
-            for (int w = 0; w < layer_ifms_width; w++)
-            {
-                int tile_index = d * num_of_tiles_hw + ((h + starting_h) / CHANNELS_TILE_HEIGHT) * num_of_tiles_w +
-                                 w / CHANNELS_TILE_WIDTH;
-                int h_in_tile = (h + starting_h) % CHANNELS_TILE_HEIGHT;
-                int w_in_tile = w % CHANNELS_TILE_WIDTH;
+#pragma HLS PIPELINE
+                int tile_index = d * num_of_tiles_hw + h_w_offset;
                 result[tile_index][h_in_tile + offset_h_in_communication_buffer][w_in_tile] =
                     pipe_seml_communication_buffer[d][h + offset_h_in_communication_buffer][w];
             }
@@ -139,24 +143,27 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     const int tmp_channels_height = PW_BUFFER_HEIGHT + 1;
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
-#pragma HLS ARRAY_PARTITION variable=channels_buffer type=complete dim = 2
-#pragma HLS ARRAY_PARTITION variable=channels_buffer type=cyclic factor=4 dim = 3
+#pragma HLS ARRAY_PARTITION variable = channels_buffer type = complete dim = 2
 
     fms_dt result_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
-#pragma HLS ARRAY_PARTITION variable=result_buffer type=complete dim = 2
-#pragma HLS ARRAY_PARTITION variable=result_buffer type=cyclic factor=4 dim = 3
+#pragma HLS ARRAY_PARTITION variable = result_buffer type = complete dim = 2
 
     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][tmp_channels_height][MAX_PW_BUFFER_WIDTH];
+
+#pragma HLS ARRAY_PARTITION variable = tmp_channels type = complete dim = 2
+
     fms_dt dw_pipe_overlap_buffer[DW_PIPE_OVERLAP_BUFFER_DEPTH][DW_PIPE_OVERLAP_BUFFER_WIDTH];
+
+#pragma HLS ARRAY_PARTITION variable = dw_pipe_overlap_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 2
 
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
 
-#pragma HLS ARRAY_PARTITION variable=dw_channels_tile type=complete dim = 2
-#pragma HLS ARRAY_PARTITION variable=dw_channels_tile type=complete dim = 3
-#pragma HLS ARRAY_PARTITION variable=dw_channels_tile_copy type=complete dim = 2
-#pragma HLS ARRAY_PARTITION variable=dw_channels_tile_copy type=complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = dw_channels_tile type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = dw_channels_tile type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = dw_channels_tile_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = dw_channels_tile_copy type = complete dim = 3
 
     layer_specs first_layer_in_second_part = layer_15_pw_specs;
 
@@ -169,7 +176,6 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     const int switching_layer_strides = layer_9_dw_specs.strides;
     const int pipe_rows_produced_in_a_pass = PARALLELISM_PW_H;
-    const int rows_filled_to_produce_one_row = 2;
 
     //######################################################
 #if HW == CPU
@@ -223,8 +229,8 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     {
         for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
         {
-            result_buffer[d][2][w] = result_buffer[d][0][w];
-            result_buffer[d][3][w] = result_buffer[d][1][w];
+            result_buffer[d][PW_BUFFER_HEIGHT - 2][w] = result_buffer[d][0][w];
+            result_buffer[d][PW_BUFFER_HEIGHT - 1][w] = result_buffer[d][1][w];
         }
     }
     pw_dw_conv(on_chip_weights,

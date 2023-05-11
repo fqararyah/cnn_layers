@@ -32,7 +32,7 @@ namespace pipelined_engines
 
     void pw_conv_engine(weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
                         fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                        pss_dt engine_result[PARALLELISM_PW_OFMS][PARALLELISM_PW_H][PARALLELISM_PW_W],
+                        pss_dt engine_result[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                         const int starting_filter,
                         const int starting_w,
                         const layer_specs layer_specs_struct);
@@ -57,16 +57,23 @@ namespace pipelined_engines
                                              const int starting_h,
                                              const int starting_w,
                                              layer_specs layer_specs_struct);
-    
+
+    void write_next_overlap_and_read_current_only_p2(
+        fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+        fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
+        fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+        const int starting_d, const int starting_h, const int starting_w,
+        layer_specs layer_specs_struct);
+
     void padd_left_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                                fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                                layer_specs layer_specs_struct);
+                                    fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+                                    layer_specs layer_specs_struct);
 
     void fill_dw_weights_tile(const dw_weights_dt weights[][MAX_DW_FILTER_AREA_IN_PIPE],
                               dw_weights_dt weights_tile[][MAX_DW_FILTER_AREA_IN_PIPE],
                               int starting_d, const int current_dw_layer_weights_offset);
 
-    void dw_normalize_and_write_back_result_tile(dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PARALLELISM_PW_W],
+    void dw_normalize_and_write_back_result_tile(dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                                                  fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                                  const fms_quantization_scheme normalization_buffer[],
                                                  const int starting_d,
@@ -80,10 +87,12 @@ namespace pipelined_engines
         dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
         layer_specs layer_specs_struct);
 
-    void pw_write_back_result_tile(fms_dt result_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                                   fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                                   const int starting_d,
-                                   const int starting_w);
+    void pw_write_back_result_tile(
+        fms_dt result_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+        fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
+        const int starting_d, const int starting_w,
+        const layer_specs layer_specs_struct);
 
     void pw_dw_conv(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                     const dw_weights_dt weights[][3 * 3],
