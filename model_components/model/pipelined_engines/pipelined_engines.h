@@ -37,17 +37,23 @@ namespace pipelined_engines
                         const int starting_w,
                         const layer_specs layer_specs_struct);
 
-    void pw_normalize_engine_result(pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
-                                    fms_dt normalized_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                                    fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
-                                    fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
-                                    const fms_quantization_scheme normalization_buffer[],
-                                    const int starting_d,
-                                    const int starting_h,
-                                    const int starting_w,
-                                    const bool fused_pw_dw,
-                                    const layer_specs layer_specs_struct,
-                                    const layer_specs dw_layer_specs_struct);
+    void pw_normalize_engine_result(
+        pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
+        fms_dt normalized_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+        fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
+        const fms_quantization_scheme normalization_buffer[],
+        const int starting_d, const int starting_h, const int starting_w,
+        const layer_specs layer_specs_struct,
+        const layer_specs dw_layer_specs_struct);
+
+    void pw_only_normalize_engine_result(
+        pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
+        fms_dt normalized_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+        fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
+        const fms_quantization_scheme normalization_buffer[],
+        const int starting_d, const int starting_h, const int starting_w,
+        const layer_specs layer_specs_struct,
+        const layer_specs dw_layer_specs_struct);
 
     void write_next_overlap_and_read_current(fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
                                              fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH]
