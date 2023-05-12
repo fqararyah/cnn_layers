@@ -155,7 +155,7 @@ pw_engine_ls:
 }
 
 void first_pass_pw_normalize_engine_result(
-    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+    fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
     pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
     fms_dt normalized_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
     fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
@@ -163,7 +163,8 @@ void first_pass_pw_normalize_engine_result(
     const fms_quantization_scheme normalization_buffer[],
     const int starting_d, const int starting_h, const bool fused_pw_dw,
     const layer_specs layer_specs_struct,
-    const layer_specs dw_layer_specs_struct)
+    const layer_specs dw_layer_specs_struct,
+    const int read_end)
 {
 #pragma HLs INLINE off
 
@@ -214,8 +215,8 @@ void first_pass_pw_normalize_engine_result(
                 if (h_in_overlap_buffer >= 0)
                 {
                     normalized_tile[f][h_in_overlap_buffer][w] =
-                        dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][w - padding_left];
-                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][w - padding_left] = scaled_val;
+                        dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][read_end][w - padding_left];
+                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][1 - read_end][w - padding_left] = scaled_val;
                 }
                 if (starting_h + h < layer_ifms_height && (DW_BUFFER_HEIGHT - filter_dim != h + write_offset_h_in_normalized_tile || padding_top == 0 || starting_h != 0))
                 { // first time, we start from the last filter_dim rows, hence the row DW_BUFFER_HEIGHT - filter_dim should pe a padding
@@ -349,7 +350,8 @@ void pipelined_engines::pw_normalize_engine_result(
                         {
                             normalized_val = dw_layer_ifms_zero_point;
                         }
-                        if(w >= PW_BUFFER_WIDTH){
+                        if (w >= PW_BUFFER_WIDTH)
+                        {
                             dw_vertical_overlap_buffer[f][h][w - PW_BUFFER_WIDTH] = normalized_val;
                         }
                     }
@@ -364,11 +366,12 @@ void pipelined_engines::pw_normalize_engine_result(
 }
 
 void pipelined_engines::write_next_overlap_and_read_current_only_p2(
-    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+    fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
     fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
     const int starting_d, const int starting_h, const int starting_w,
-    layer_specs layer_specs_struct)
+    layer_specs layer_specs_struct,
+    const int read_end)
 {
 #pragma HLS INLINE off
 
@@ -393,8 +396,6 @@ void pipelined_engines::write_next_overlap_and_read_current_only_p2(
 
         const int columns_filled_by_pw_in_the_firts_pass = filter_minus_strides - padding_left;
 
-        fms_dt read_val;
-
         for (int h = 0; h < MAX_FILTER_MINUS_STRIDES; h++)
         {
             if (h >= filter_minus_strides)
@@ -405,69 +406,109 @@ void pipelined_engines::write_next_overlap_and_read_current_only_p2(
             {
 #pragma HLS PIPELINE
 
-                int current_write_offset_in_overlap_buffer =
+                fms_dt first_read_val;
+                fms_dt second_read_val;
+                int current_offset_in_overlap_buffer =
                     d_offset_in_overlap_buffer + d * filter_minus_strides * num_of_tiles_in_w + (h * layer_ifms_width + starting_w) / DW_PIPE_OVERLAP_BUFFER_WIDTH;
-                int current_read_offset_in_overlap_buffer =
-                    d_offset_in_overlap_buffer + d * filter_minus_strides * num_of_tiles_in_w + (h * layer_ifms_width + starting_w) / DW_PIPE_OVERLAP_BUFFER_WIDTH;
 
-                if (starting_h != 0)
-                {
-                    read_val =
-                        dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
-                }
-                dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
-                    dw_channels_tile[d][write_offset_h_in_channels_tile + h][filter_minus_strides];
-
-                dw_channels_tile[d][h][filter_minus_strides] = read_val;
-
-                if (filter_minus_strides == PW_BUFFER_WIDTH)
-                {
-                    dw_vertical_overlap_buffer[d][h][0] = read_val;
-                }
-
-                //***********************************************
-                const int current_w = PW_BUFFER_WIDTH - 1;
-
-                if (current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass == DW_PIPE_OVERLAP_BUFFER_WIDTH && current_w + starting_w + columns_filled_by_pw_in_the_firts_pass < layer_ifms_width)
+                if (read_end == 0) // this is because the stupid HLS synthesis is unable to recognaize that there is no dependence even with the dependence pragma
                 {
                     if (starting_h != 0)
                     {
-                        read_val =
-                            dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer + 1][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH];
+                        first_read_val =
+                            dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][0][inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
                     }
-                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer + 1][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH] =
-                        dw_channels_tile[d][write_offset_h_in_channels_tile + h][current_w + filter_minus_strides];
-                }
-                else if (current_w + starting_w + columns_filled_by_pw_in_the_firts_pass < layer_ifms_width)
-                {
-                    if (starting_h != 0)
+                    dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][1][inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
+                        dw_channels_tile[d][write_offset_h_in_channels_tile + h][filter_minus_strides];
+
+                    //***********************************************
+
+                    if (1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass == DW_PIPE_OVERLAP_BUFFER_WIDTH && 1 + starting_w + columns_filled_by_pw_in_the_firts_pass < layer_ifms_width)
                     {
-                        read_val =
-                            dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
+                        if (starting_h != 0)
+                        {
+                            second_read_val =
+                                dw_pipe_overlap_buffer[current_offset_in_overlap_buffer + 1][0][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH];
+                        }
+                        dw_pipe_overlap_buffer[current_offset_in_overlap_buffer + 1][1][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH] =
+                            dw_channels_tile[d][write_offset_h_in_channels_tile + h][1 + filter_minus_strides];
                     }
-                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
-                        dw_channels_tile[d][write_offset_h_in_channels_tile + h][current_w + filter_minus_strides];
+                    else if (1 + starting_w + columns_filled_by_pw_in_the_firts_pass < layer_ifms_width)
+                    {
+                        if (starting_h != 0)
+                        {
+                            second_read_val =
+                                dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][0][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
+                        }
+                        dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][1][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
+                            dw_channels_tile[d][write_offset_h_in_channels_tile + h][1 + filter_minus_strides];
+                    }
+                    else
+                    {
+                        second_read_val = dw_layer_ifms_zero_point;
+                    }
                 }
                 else
                 {
-                    read_val = dw_layer_ifms_zero_point;
+                    if (starting_h != 0)
+                    {
+                        first_read_val =
+                            dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][1][inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
+                    }
+                    dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][0][inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
+                        dw_channels_tile[d][write_offset_h_in_channels_tile + h][filter_minus_strides];
+
+                    //***********************************************
+
+                    if (1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass == DW_PIPE_OVERLAP_BUFFER_WIDTH && 1 + starting_w + columns_filled_by_pw_in_the_firts_pass < layer_ifms_width)
+                    {
+                        if (starting_h != 0)
+                        {
+                            second_read_val =
+                                dw_pipe_overlap_buffer[current_offset_in_overlap_buffer + 1][1][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH];
+                        }
+                        dw_pipe_overlap_buffer[current_offset_in_overlap_buffer + 1][0][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH] =
+                            dw_channels_tile[d][write_offset_h_in_channels_tile + h][1 + filter_minus_strides];
+                    }
+                    else if (1 + starting_w + columns_filled_by_pw_in_the_firts_pass < layer_ifms_width)
+                    {
+                        if (starting_h != 0)
+                        {
+                            second_read_val =
+                                dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][1][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
+                        }
+                        dw_pipe_overlap_buffer[current_offset_in_overlap_buffer][0][1 + inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
+                            dw_channels_tile[d][write_offset_h_in_channels_tile + h][1 + filter_minus_strides];
+                    }
+                    else
+                    {
+                        second_read_val = dw_layer_ifms_zero_point;
+                    }
                 }
 
-                dw_channels_tile[d][h][current_w + filter_minus_strides] =
-                    read_val;
+                dw_channels_tile[d][h][filter_minus_strides] = first_read_val;
 
-                dw_vertical_overlap_buffer[d][h][current_w + filter_minus_strides - PW_BUFFER_WIDTH] = read_val;
+                if (filter_minus_strides == PW_BUFFER_WIDTH)
+                {
+                    dw_vertical_overlap_buffer[d][h][0] = first_read_val;
+                }
+
+                dw_channels_tile[d][h][1 + filter_minus_strides] =
+                    second_read_val;
+
+                dw_vertical_overlap_buffer[d][h][1 + filter_minus_strides - PW_BUFFER_WIDTH] = second_read_val;
             }
         }
     }
 }
 
 void pipelined_engines::write_next_overlap_and_read_current(
-    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+    fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
     fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
     const int starting_d, const int starting_h, const int starting_w,
-    layer_specs layer_specs_struct)
+    layer_specs layer_specs_struct,
+    const int read_end)
 {
 #pragma HLS INLINE off
 
@@ -518,9 +559,9 @@ void pipelined_engines::write_next_overlap_and_read_current(
                             if (starting_h != 0)
                             {
                                 read_val =
-                                    dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
+                                    dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][read_end][w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass];
                             }
-                            dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
+                            dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][1 - read_end][w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass] =
                                 dw_channels_tile[d][write_offset_h_in_channels_tile + h][w + filter_minus_strides];
                         }
                     }
@@ -560,9 +601,9 @@ void pipelined_engines::write_next_overlap_and_read_current(
                     if (starting_h != 0)
                     {
                         read_val =
-                            dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer + 1][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH];
+                            dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer + 1][read_end][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH];
                     }
-                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer + 1][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH] =
+                    dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer + 1][1 - read_end][current_w + inner_offset_w + columns_filled_by_pw_in_the_firts_pass - DW_PIPE_OVERLAP_BUFFER_WIDTH] =
                         dw_channels_tile[d][write_offset_h_in_channels_tile + h][current_w + filter_minus_strides];
 
                     dw_channels_tile[d][h][current_w + filter_minus_strides] =
@@ -656,22 +697,27 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(
         const int layer_relu = layer_specs_struct.layer_activation;
         const int offset_w = (starting_w >> (strides - 1));
 
-        for (int w = 0; w < PW_BUFFER_WIDTH; w++)
+        for (int d = 0; d < DW_TILE_DEPTH; d++)
         {
-            if (w >= (PW_BUFFER_WIDTH >> (strides - 1)))
-            {
-                break;
-            }
-            for (int d = 0; d < DW_TILE_DEPTH; d++)
-            {
 #pragma HLS PIPELINE
-                for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+            for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+            {
+#pragma HLS UNROLL
+                for (int w = 0; w < PW_BUFFER_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    if (h + h_offset_in_result < PW_BUFFER_HEIGHT && h < (PW_BUFFER_HEIGHT >> (strides - 1)))
+                    fms_dt scaled_val = dw_relu_norm(result_tile[d][h][w],
+                                                     normalization_buffer[d], layer_relu);
+                    if (h_offset_in_result)
                     {
-                        result[starting_d + d][h + h_offset_in_result][offset_w + w] = dw_relu_norm(result_tile[d][h][w],
-                                                                                                    normalization_buffer[d], layer_relu);
+                        if (h + h_offset_in_result < PW_BUFFER_HEIGHT && h < (PW_BUFFER_HEIGHT >> (strides - 1)) && w < (PW_BUFFER_WIDTH >> (strides - 1)))
+                        {
+                            result[starting_d + d][h + OFFSET_H_IN_RESULTS][offset_w + w] = scaled_val;
+                        }
+                    }
+                    else
+                    {
+                        result[starting_d + d][h][offset_w + w] = scaled_val;
                     }
                 }
             }
@@ -722,7 +768,7 @@ void pipelined_engines::pw_dw_conv(
     fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
-    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+    fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
     const int starting_h, const int h_offset_in_result, bool fused_pw_dw,
@@ -731,7 +777,8 @@ void pipelined_engines::pw_dw_conv(
     const fused_scales_dt fused_scales[],
     const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
     const relu_6_fused_scales_dt relu_6_fused_scales[],
-    const biases_dt fused_zero_points[])
+    const biases_dt fused_zero_points[],
+    const int odd_even)
 {
 #pragma HLS INLINE off
 
@@ -809,7 +856,7 @@ void pipelined_engines::pw_dw_conv(
             first_pass_pw_normalize_engine_result(dw_pipe_overlap_buffer,
                                                   pw_engine_result_tile_copy, dw_channels_tile, result,
                                                   tmp_channels, pw_normalization_buffer, d, starting_h,
-                                                  fused_pw_dw, pw_layer_specs_struct, dw_layer_specs_struct);
+                                                  fused_pw_dw, pw_layer_specs_struct, dw_layer_specs_struct, odd_even);
 
             for (int w = 0; w < ifms_width; w += PW_BUFFER_WIDTH)
             {
@@ -834,7 +881,7 @@ void pipelined_engines::pw_dw_conv(
                     write_next_overlap_and_read_current_only_p2(
                         dw_pipe_overlap_buffer, dw_vertical_overlap_buffer,
                         dw_channels_tile_copy, d, starting_h, prev_w,
-                        dw_layer_specs_struct);
+                        dw_layer_specs_struct, odd_even);
                     //###############################
                     pw_conv_engine(weights_tile, channels,
                                    pw_engine_result_tile, d, w + 1,
@@ -858,7 +905,7 @@ void pipelined_engines::pw_dw_conv(
                     write_next_overlap_and_read_current_only_p2(
                         dw_pipe_overlap_buffer, dw_vertical_overlap_buffer,
                         dw_channels_tile, d, starting_h, prev_w,
-                        dw_layer_specs_struct);
+                        dw_layer_specs_struct, odd_even);
                     //###############################
                     pw_conv_engine(weights_tile, channels,
                                    pw_engine_result_tile_copy, d, w + 1,
@@ -884,7 +931,7 @@ void pipelined_engines::pw_dw_conv(
                 write_next_overlap_and_read_current_only_p2(
                     dw_pipe_overlap_buffer, dw_vertical_overlap_buffer,
                     dw_channels_tile_copy, d, starting_h,
-                    ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct);
+                    ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct, odd_even);
                 //#######################################################################################
                 dw_normalize_and_write_back_result_tile(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
@@ -915,7 +962,7 @@ void pipelined_engines::pw_dw_conv(
                 write_next_overlap_and_read_current_only_p2(
                     dw_pipe_overlap_buffer, dw_vertical_overlap_buffer,
                     dw_channels_tile, d, starting_h,
-                    ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct);
+                    ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct, odd_even);
                 //#######################################################################################
                 dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
                                                         result, dw_normalization_buffer_copy, d,

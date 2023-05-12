@@ -32,5 +32,7 @@ namespace pipelined_engines
 
     const int DW_PIPE_OVERLAP_BUFFER_DEPTH = 4 * 32 + 2 * 96 + 2 * 144 + 144;
     const int DW_PIPE_OVERLAP_BUFFER_WIDTH = 56;
+
+    const int OFFSET_H_IN_RESULTS = PW_BUFFER_HEIGHT / 2;
 }
 #endif

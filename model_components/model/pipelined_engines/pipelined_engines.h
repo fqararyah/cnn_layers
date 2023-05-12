@@ -55,21 +55,23 @@ namespace pipelined_engines
         const layer_specs layer_specs_struct,
         const layer_specs dw_layer_specs_struct);
 
-    void write_next_overlap_and_read_current(fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+    void write_next_overlap_and_read_current(fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
                                              fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH]
                                                                               [DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
                                              fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                                              const int starting_d,
                                              const int starting_h,
                                              const int starting_w,
-                                             layer_specs layer_specs_struct);
+                                             layer_specs layer_specs_struc,
+                                             const int read_end);
 
     void write_next_overlap_and_read_current_only_p2(
-        fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+        fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
         fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES],
         fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
         const int starting_d, const int starting_h, const int starting_w,
-        layer_specs layer_specs_struct);
+        layer_specs layer_specs_struct,
+        const int read_end);
 
     void padd_left_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                                     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
@@ -105,7 +107,7 @@ namespace pipelined_engines
                     fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
-                    fms_dt dw_pipe_overlap_buffer[][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+                    fms_dt dw_pipe_overlap_buffer[][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
                     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
                     const int starting_h,
@@ -116,7 +118,8 @@ namespace pipelined_engines
                     const fused_scales_dt fused_scales[],
                     const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
                     const relu_6_fused_scales_dt relu_6_fused_scales[],
-                    const biases_dt fused_zero_points[]);
+                    const biases_dt fused_zero_points[],
+                    const int odd_even);
 }
 
 #endif
