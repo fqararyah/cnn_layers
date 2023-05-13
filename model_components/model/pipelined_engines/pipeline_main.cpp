@@ -144,20 +144,24 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = channels_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = channels_buffer type = cyclic factor=PW_BUFFER_WIDTH dim = 3
+
 
     fms_dt result_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = result_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = result_buffer type = cyclic factor=PW_BUFFER_WIDTH dim = 3
 
     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][tmp_channels_height][MAX_PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = tmp_channels type = complete dim = 2
 
-    fms_dt dw_pipe_overlap_buffer[DW_PIPE_OVERLAP_BUFFER_DEPTH][2][DW_PIPE_OVERLAP_BUFFER_WIDTH];
+    fms_dt dw_pipe_overlap_buffer[DW_PIPE_OVERLAP_BUFFER_DEPTH][2][2][DW_PIPE_OVERLAP_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = dw_pipe_overlap_buffer type = cyclic factor = 2 dim = 1
 #pragma HLS ARRAY_PARTITION variable = dw_pipe_overlap_buffer type = complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = dw_pipe_overlap_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 3
+#pragma HLS ARRAY_PARTITION variable = dw_pipe_overlap_buffer type = complete dim = 3
+#pragma HLS ARRAY_PARTITION variable = dw_pipe_overlap_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 4
 
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
     fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH];
