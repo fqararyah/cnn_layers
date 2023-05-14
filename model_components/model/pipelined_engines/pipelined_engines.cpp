@@ -188,12 +188,14 @@ void first_pass_pw_normalize_engine_result(
     const fms_dt dw_layer_ifms_zero_point =
         dw_layer_specs_struct.layer_ifms_zero_point;
 
-    for (int f = 0; f < PARALLELISM_PW_OFMS; f++)
+    for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
     {
-        fms_quantization_scheme current_normaliztion_scheme =
-            normalization_buffer[f];
-        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        for (int f = 0; f < PARALLELISM_PW_OFMS; f++)
         {
+#pragma HLS PIPELINE
+
+            fms_quantization_scheme current_normaliztion_scheme =
+                normalization_buffer[f];
             int h_in_overlap_buffer = h - (PW_BUFFER_HEIGHT - filter_dim_minus_strides);
             int current_read_offset_in_overlap_buffer =
                 d_offset_in_overlap_buffer + f * filter_dim_minus_strides * num_of_tiles_in_w;
@@ -201,10 +203,6 @@ void first_pass_pw_normalize_engine_result(
                 d_offset_in_overlap_buffer + f * filter_dim_minus_strides * num_of_tiles_in_w;
             for (int w = 0; w < MAX_FILTER_MINUS_STRIDES; w++)
             {
-                if (w >= filter_dim_minus_strides)
-                {
-                    break;
-                }
                 if (w < padding_left)
                 {
                     continue;
@@ -212,10 +210,14 @@ void first_pass_pw_normalize_engine_result(
                 fms_dt scaled_val = pw_relu_norm_6(
                     engine_result_tile[f][h][w - padding_left],
                     current_normaliztion_scheme, layer_relu);
-                if (h_in_overlap_buffer >= 0)
+
+                if (h < filter_dim_minus_strides)
                 {
-                    normalized_tile[f][h_in_overlap_buffer][w] =
-                        dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][read_end][h_in_overlap_buffer][w - padding_left];
+                    normalized_tile[f][h][w] =
+                        dw_pipe_overlap_buffer[current_read_offset_in_overlap_buffer][read_end][h][w - padding_left];
+                }
+                else if (h_in_overlap_buffer >= 0)
+                {
                     dw_pipe_overlap_buffer[current_write_offset_in_overlap_buffer][1 - read_end][h_in_overlap_buffer][w - padding_left] = scaled_val;
                 }
                 if (starting_h + h < layer_ifms_height && (DW_BUFFER_HEIGHT - filter_dim != h + write_offset_h_in_normalized_tile || padding_top == 0 || starting_h != 0))
@@ -328,21 +330,30 @@ void pipelined_engines::pw_normalize_engine_result(
             for (int h = 0; h < DW_BUFFER_HEIGHT; h++)
             {
 #pragma HLS UNROLL
-                for (int w = 0; w < DW_BUFFER_WIDTH; w++)
+                for (int w = 0; w < MAX_FILTER_MINUS_STRIDES; w++)
                 {
 #pragma HLS UNROLL
-                    fms_dt normalized_val;
                     if (w < filter_minus_strides)
                     {
-                        normalized_val =
-                            dw_vertical_overlap_buffer[f][h][w];
+                        if (starting_w > 0)
+                        {
+                            normalized_tile[f][h][w] =
+                                dw_vertical_overlap_buffer[f][h][w];
+                        }
                     }
-                    else if (h >= filter_minus_strides)
+                }
+                if (h >= filter_minus_strides)
+                {
+                    for (int w = MAX_FILTER_MINUS_STRIDES; w < DW_BUFFER_WIDTH; w++)
                     {
-                        pss_dt tmp_pss = engine_result_tile[f][h - filter_minus_strides][w - filter_minus_strides];
+#pragma HLS UNROLL
+                        int current_w = w - MAX_FILTER_MINUS_STRIDES + filter_minus_strides;
+
+                        fms_dt normalized_val;
+                        pss_dt tmp_pss = engine_result_tile[f][h - filter_minus_strides][current_w - filter_minus_strides];
                         if (starting_h + (h - filter_minus_strides) < layer_ifms_height &&
                             (DW_BUFFER_HEIGHT - filter_dim != h || padding_top == 0 || starting_h != 0) &&
-                            starting_w + w < layer_ifms_width + padding_left)
+                            starting_w + current_w < layer_ifms_width + padding_left)
                         {
                             normalized_val = pw_relu_norm_6(tmp_pss,
                                                             current_normaliztion_scheme, layer_relu);
@@ -351,19 +362,16 @@ void pipelined_engines::pw_normalize_engine_result(
                         {
                             normalized_val = dw_layer_ifms_zero_point;
                         }
-                        if (w >= PW_BUFFER_WIDTH)
+                        if (current_w >= PW_BUFFER_WIDTH)
                         {
-                            dw_vertical_overlap_buffer[f][h][w - PW_BUFFER_WIDTH] = normalized_val;
+                            dw_vertical_overlap_buffer[f][h][current_w - PW_BUFFER_WIDTH] = normalized_val;
                         }
-                        if (h >= DW_BUFFER_HEIGHT - MAX_FILTER_MINUS_STRIDES && w - filter_minus_strides < PW_BUFFER_WIDTH)
+                        if (h >= DW_BUFFER_HEIGHT - MAX_FILTER_MINUS_STRIDES && current_w - filter_minus_strides < PW_BUFFER_WIDTH)
                         {
                             dw_horizontal_overlap_buffer[f]
-                                                        [h - (DW_BUFFER_HEIGHT - MAX_FILTER_MINUS_STRIDES)][w - filter_minus_strides] = normalized_val;
+                                                        [h - (DW_BUFFER_HEIGHT - MAX_FILTER_MINUS_STRIDES)][current_w - filter_minus_strides] = normalized_val;
                         }
-                    }
-                    if (starting_w > 0 || w >= filter_minus_strides)
-                    {
-                        normalized_tile[f][h][w] = normalized_val;
+                        normalized_tile[f][h][current_w] = normalized_val;
                     }
                 }
             }
@@ -823,7 +831,7 @@ void pipelined_engines::pw_dw_conv(
     dw_pss_dt dw_result_tile_copy[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH];
 
     fms_dt dw_vertical_overlap_buffer[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][MAX_FILTER_MINUS_STRIDES];
-fms_dt dw_horizontal_overlap_buffer[DW_TILE_DEPTH][MAX_FILTER_MINUS_STRIDES][PW_BUFFER_WIDTH];
+    fms_dt dw_horizontal_overlap_buffer[DW_TILE_DEPTH][MAX_FILTER_MINUS_STRIDES][PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = dw_vertical_overlap_buffer type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = dw_vertical_overlap_buffer type = complete dim = 3
@@ -841,17 +849,6 @@ fms_dt dw_horizontal_overlap_buffer[DW_TILE_DEPTH][MAX_FILTER_MINUS_STRIDES][PW_
         {
             //###############################
 
-            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-                                       dw_layer_specs_struct);
-
-            fill_fused_scales_and_zps_buffer(fused_scales,
-                                             fused_scales_log_2_shifts, relu_6_fused_scales,
-                                             fused_zero_points, dw_normalization_buffer,
-                                             d, // starting_d
-                                             pipe_layers_fused_parameters_offsets[dw_layer],
-                                             DW_TILE_DEPTH, dw_layer_specs_struct);
-            pipelined_engines::fill_dw_weights_tile(weights, dw_weights_tile, d,
-                                                    dw_layers_weights_offsets[dw_layer]);
             fill_fused_scales_and_zps_buffer(fused_scales,
                                              fused_scales_log_2_shifts, relu_6_fused_scales,
                                              fused_zero_points, pw_normalization_buffer,
@@ -869,6 +866,18 @@ fms_dt dw_horizontal_overlap_buffer[DW_TILE_DEPTH][MAX_FILTER_MINUS_STRIDES][PW_
                                                   pw_engine_result_tile_copy, dw_channels_tile, result,
                                                   tmp_channels, pw_normalization_buffer, d, starting_h,
                                                   fused_pw_dw, pw_layer_specs_struct, dw_layer_specs_struct, odd_even);
+
+            padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
+                                       dw_layer_specs_struct);
+
+            fill_fused_scales_and_zps_buffer(fused_scales,
+                                             fused_scales_log_2_shifts, relu_6_fused_scales,
+                                             fused_zero_points, dw_normalization_buffer,
+                                             d, // starting_d
+                                             pipe_layers_fused_parameters_offsets[dw_layer],
+                                             DW_TILE_DEPTH, dw_layer_specs_struct);
+            pipelined_engines::fill_dw_weights_tile(weights, dw_weights_tile, d,
+                                                    dw_layers_weights_offsets[dw_layer]);
 
             for (int w = 0; w < ifms_width; w += PW_BUFFER_WIDTH)
             {
