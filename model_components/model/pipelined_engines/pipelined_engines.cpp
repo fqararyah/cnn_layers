@@ -781,6 +781,7 @@ void pipelined_engines::pw_write_back_result_tile(
 void pipelined_engines::pw_dw_conv(
     weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
     const dw_weights_dt weights[][3 * 3],
+    fms_dt channels_aux[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
@@ -848,24 +849,14 @@ void pipelined_engines::pw_dw_conv(
         for (int d = 0; d < num_of_filters; d += PARALLELISM_PW_OFMS)
         {
             //###############################
-
+            load_pw_weights(on_chip_weights, weights_tile, d,
+                            pw_layer_specs_struct);
             fill_fused_scales_and_zps_buffer(fused_scales,
                                              fused_scales_log_2_shifts, relu_6_fused_scales,
                                              fused_zero_points, pw_normalization_buffer,
                                              d, // starting_d
                                              pipe_layers_fused_parameters_offsets[pw_layer],
                                              PARALLELISM_PW_OFMS, pw_layer_specs_struct);
-
-            load_pw_weights(on_chip_weights, weights_tile, d,
-                            pw_layer_specs_struct);
-
-            pw_conv_engine(weights_tile, channels, pw_engine_result_tile_copy,
-                           d, 0, pw_layer_specs_struct);
-
-            first_pass_pw_normalize_engine_result(dw_pipe_overlap_buffer,
-                                                  pw_engine_result_tile_copy, dw_channels_tile, result,
-                                                  tmp_channels, pw_normalization_buffer, d, starting_h,
-                                                  fused_pw_dw, pw_layer_specs_struct, dw_layer_specs_struct, odd_even);
 
             padd_left_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
                                        dw_layer_specs_struct);
@@ -878,6 +869,14 @@ void pipelined_engines::pw_dw_conv(
                                              DW_TILE_DEPTH, dw_layer_specs_struct);
             pipelined_engines::fill_dw_weights_tile(weights, dw_weights_tile, d,
                                                     dw_layers_weights_offsets[dw_layer]);
+
+            pw_conv_engine(weights_tile, channels, pw_engine_result_tile_copy,
+                           d, 0, pw_layer_specs_struct);
+
+            first_pass_pw_normalize_engine_result(dw_pipe_overlap_buffer,
+                                                  pw_engine_result_tile_copy, dw_channels_tile, result,
+                                                  tmp_channels, pw_normalization_buffer, d, starting_h,
+                                                  fused_pw_dw, pw_layer_specs_struct, dw_layer_specs_struct, odd_even);
 
             for (int w = 0; w < ifms_width; w += PW_BUFFER_WIDTH)
             {

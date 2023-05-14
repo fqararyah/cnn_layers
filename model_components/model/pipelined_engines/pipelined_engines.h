@@ -106,6 +106,7 @@ namespace pipelined_engines
 
     void pw_dw_conv(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                     const dw_weights_dt weights[][3 * 3],
+                    fms_dt channels_aux[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],

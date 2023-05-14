@@ -141,16 +141,21 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
     const int tmp_channels_height = PW_BUFFER_HEIGHT + 1;
+
+    fms_dt channels_buffer_0[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
+
+#pragma HLS ARRAY_PARTITION variable = channels_buffer_0 type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = channels_buffer_0 type = cyclic factor = PW_BUFFER_WIDTH dim = 3
+
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = channels_buffer type = complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = channels_buffer type = cyclic factor=PW_BUFFER_WIDTH dim = 3
-
+#pragma HLS ARRAY_PARTITION variable = channels_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 3
 
     fms_dt result_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = result_buffer type = complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = result_buffer type = cyclic factor=PW_BUFFER_WIDTH dim = 3
+#pragma HLS ARRAY_PARTITION variable = result_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 3
 
     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][tmp_channels_height][MAX_PW_BUFFER_WIDTH];
 
@@ -189,11 +194,31 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     //######################################################
 #if HW == CPU
     fill_pipe_layer_input_buffer(
-        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
-        channels_buffer, 0, start_filling_offset_in_buffer_first_time, layer_4_pw_specs);
+        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
+        channels_buffer_0, 0, start_filling_offset_in_buffer_first_time, layer_3_pw_specs);
 #endif
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
+               result_buffer,
+               channels_buffer_0,
+               channels_buffer,
+               tmp_channels,
+               dw_pipe_overlap_buffer,
+               dw_channels_tile,
+               dw_channels_tile_copy,
+               0, // starting_h
+               0, // h_offset_in_result,
+               0,
+               layer_3_pw_specs,
+               layer_6_dw_specs,
+               pipe_fused_scales,
+               pipe_fused_scales_log_2_shifts,
+               pipe_relu_6_fused_scales,
+               pipe_fused_zero_points,
+               0);
+    pw_dw_conv(on_chip_weights,
+               pipe_dw_weights_3x3,
+               channels_buffer_0,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -214,12 +239,34 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     //######################################################
 #if HW == CPU
     fill_pipe_layer_input_buffer(
-        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
-        channels_buffer, rows_to_fill_first_time,
-        start_filling_offset_in_buffer_non_first, layer_4_pw_specs);
+        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
+        channels_buffer_0, rows_to_fill_first_time,
+        start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
 #endif
+
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
+               result_buffer,
+               channels_buffer_0,
+               channels_buffer,
+               tmp_channels,
+               dw_pipe_overlap_buffer,
+               dw_channels_tile,
+               dw_channels_tile_copy,
+               rows_to_fill_first_time, // starting_h
+               0,                       // h_offset_in_result,
+               0,
+               layer_3_pw_specs,
+               layer_6_dw_specs,
+               pipe_fused_scales,
+               pipe_fused_scales_log_2_shifts,
+               pipe_relu_6_fused_scales,
+               pipe_fused_zero_points,
+               0);
+
+    pw_dw_conv(on_chip_weights,
+               pipe_dw_weights_3x3,
+               channels_buffer_0,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -246,24 +293,25 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
             result_buffer[d][PW_BUFFER_HEIGHT - 1][w] = result_buffer[d][1][w];
         }
     }
-   pw_dw_conv(on_chip_weights,
-              pipe_dw_weights_3x3,
-              result_buffer,
-              channels_buffer,
-              tmp_channels,
-              dw_pipe_overlap_buffer,
-              dw_channels_tile,
-              dw_channels_tile_copy,
-              0, // starting_h
-              0, // h_offset_in_result,
-              0,
-              layer_7_pw_specs,
-              layer_6_dw_specs,
-              pipe_fused_scales,
-              pipe_fused_scales_log_2_shifts,
-              pipe_relu_6_fused_scales,
-              pipe_fused_zero_points,
-              0);
+    pw_dw_conv(on_chip_weights,
+               pipe_dw_weights_3x3,
+               channels_buffer_0,
+               result_buffer,
+               channels_buffer,
+               tmp_channels,
+               dw_pipe_overlap_buffer,
+               dw_channels_tile,
+               dw_channels_tile_copy,
+               0, // starting_h
+               0, // h_offset_in_result,
+               0,
+               layer_7_pw_specs,
+               layer_6_dw_specs,
+               pipe_fused_scales,
+               pipe_fused_scales_log_2_shifts,
+               pipe_relu_6_fused_scales,
+               pipe_fused_zero_points,
+               0);
 
     for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
     {
@@ -275,6 +323,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
+               channels_buffer_0,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -293,27 +342,29 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
                dw_9_odd_even);
     dw_9_odd_even = 1 - dw_9_odd_even;
 
-   pw_dw_conv(on_chip_weights,
-              pipe_dw_weights_3x3,
-              result_buffer,
-              channels_buffer,
-              tmp_channels,
-              dw_pipe_overlap_buffer,
-              dw_channels_tile,
-              dw_channels_tile_copy,
-              0, // starting_h
-              0, // h_offset_in_result,
-              0,
-              layer_10_pw_specs,
-              layer_6_dw_specs,
-              pipe_fused_scales,
-              pipe_fused_scales_log_2_shifts,
-              pipe_relu_6_fused_scales,
-              pipe_fused_zero_points,
-              0);
+    pw_dw_conv(on_chip_weights,
+               pipe_dw_weights_3x3,
+               channels_buffer_0,
+               result_buffer,
+               channels_buffer,
+               tmp_channels,
+               dw_pipe_overlap_buffer,
+               dw_channels_tile,
+               dw_channels_tile_copy,
+               0, // starting_h
+               0, // h_offset_in_result,
+               0,
+               layer_10_pw_specs,
+               layer_6_dw_specs,
+               pipe_fused_scales,
+               pipe_fused_scales_log_2_shifts,
+               pipe_relu_6_fused_scales,
+               pipe_fused_zero_points,
+               0);
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
+               channels_buffer_0,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -348,12 +399,32 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
             { // todo change 2
 #if HW == CPU
                 fill_pipe_layer_input_buffer(
-                    "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_4.txt",
-                    channels_buffer, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
-                    start_filling_offset_in_buffer_non_first, layer_4_pw_specs);
+                    "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
+                    channels_buffer_0, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
+                    start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
 #endif
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
+                           result_buffer,
+                           channels_buffer_0,
+                           channels_buffer,
+                           tmp_channels,
+                           dw_pipe_overlap_buffer,
+                           dw_channels_tile,
+                           dw_channels_tile_copy,
+                           h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
+                           0,
+                           0,
+                           layer_3_pw_specs,
+                           layer_6_dw_specs,
+                           pipe_fused_scales,
+                           pipe_fused_scales_log_2_shifts,
+                           pipe_relu_6_fused_scales,
+                           pipe_fused_zero_points,
+                           0);
+                pw_dw_conv(on_chip_weights,
+                           pipe_dw_weights_3x3,
+                           channels_buffer_0,
                            channels_buffer,
                            result_buffer,
                            tmp_channels,
@@ -373,28 +444,30 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
                 dw_6_odd_even = 1 - dw_6_odd_even;
             }
 
-           pw_dw_conv(on_chip_weights,
-                      pipe_dw_weights_3x3,
-                      result_buffer,
-                      channels_buffer,
-                      tmp_channels,
-                      dw_pipe_overlap_buffer,
-                      dw_channels_tile,
-                      dw_channels_tile_copy,
-                      h * 2 + o_i * pipe_rows_produced_in_a_pass +
-                          rows_produced_in_pipeline_filling_phase + 1, // starting_h
-                      0,                                               // h_offset_in_result,
-                      0,
-                      layer_7_pw_specs,
-                      layer_6_dw_specs,
-                      pipe_fused_scales,
-                      pipe_fused_scales_log_2_shifts,
-                      pipe_relu_6_fused_scales,
-                      pipe_fused_zero_points,
-                      0);
+            pw_dw_conv(on_chip_weights,
+                       pipe_dw_weights_3x3,
+                       channels_buffer_0,
+                       result_buffer,
+                       channels_buffer,
+                       tmp_channels,
+                       dw_pipe_overlap_buffer,
+                       dw_channels_tile,
+                       dw_channels_tile_copy,
+                       h * 2 + o_i * pipe_rows_produced_in_a_pass +
+                           rows_produced_in_pipeline_filling_phase + 1, // starting_h
+                       0,                                               // h_offset_in_result,
+                       0,
+                       layer_7_pw_specs,
+                       layer_6_dw_specs,
+                       pipe_fused_scales,
+                       pipe_fused_scales_log_2_shifts,
+                       pipe_relu_6_fused_scales,
+                       pipe_fused_zero_points,
+                       0);
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
+                       channels_buffer_0,
                        channels_buffer,
                        result_buffer,
                        tmp_channels,
@@ -415,28 +488,30 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
             dw_9_odd_even = 1 - dw_9_odd_even;
 
-           pw_dw_conv(on_chip_weights,
-                      pipe_dw_weights_3x3,
-                      result_buffer,
-                      channels_buffer,
-                      tmp_channels,
-                      dw_pipe_overlap_buffer,
-                      dw_channels_tile,
-                      dw_channels_tile_copy,
-                      h * 2 + o_i * pipe_rows_produced_in_a_pass +
-                          rows_produced_in_pipeline_filling_phase + 1, // starting_h
-                      0,                                               // h_offset_in_result,
-                      0,
-                      layer_10_pw_specs,
-                      layer_6_dw_specs,
-                      pipe_fused_scales,
-                      pipe_fused_scales_log_2_shifts,
-                      pipe_relu_6_fused_scales,
-                      pipe_fused_zero_points,
-                      0);
+            pw_dw_conv(on_chip_weights,
+                       pipe_dw_weights_3x3,
+                       channels_buffer_0,
+                       result_buffer,
+                       channels_buffer,
+                       tmp_channels,
+                       dw_pipe_overlap_buffer,
+                       dw_channels_tile,
+                       dw_channels_tile_copy,
+                       h * 2 + o_i * pipe_rows_produced_in_a_pass +
+                           rows_produced_in_pipeline_filling_phase + 1, // starting_h
+                       0,                                               // h_offset_in_result,
+                       0,
+                       layer_10_pw_specs,
+                       layer_6_dw_specs,
+                       pipe_fused_scales,
+                       pipe_fused_scales_log_2_shifts,
+                       pipe_relu_6_fused_scales,
+                       pipe_fused_zero_points,
+                       0);
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
+                       channels_buffer_0,
                        channels_buffer,
                        result_buffer,
                        tmp_channels,
