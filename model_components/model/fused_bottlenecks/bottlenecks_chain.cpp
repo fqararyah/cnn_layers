@@ -1,6 +1,6 @@
 #include "../../basic_defs/simulation_constants.h"
 
-#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && FIBHA_VERSION == 1 && CHAIN_LENGTH == 6 && MODEL_ID != 1  && ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH == 6 && MODEL_ID != 1  && ! ONLY_SEML
 
 #include "bottlenecks_chain.h"
 
@@ -561,7 +561,7 @@ void write_chain_seml_communication_buffer(
 {
 #pragma HLS INLINE off
 
-	const int num_tiles_hw = layer_10_pw_specs.layer_num_of_ofm_tiles_h * layer_10_pw_specs.layer_num_of_ofm_tiles_w;
+	const int num_tiles_hw = layer_8_pw_specs.layer_num_of_ifm_tiles_h * layer_8_pw_specs.layer_num_of_ifm_tiles_w;
 	const int tile_in_h = starting_h / pw_tile_h;
 	const int in_tile_h = starting_h % pw_tile_h;
 
@@ -573,7 +573,7 @@ void write_chain_seml_communication_buffer(
 		{
 #pragma HLS PIPELINE
 			const int tile_in_w = w / pw_tile_w;
-			const int tile_index = tile_in_d * num_tiles_hw + tile_in_h * layer_10_pw_specs.layer_num_of_ofm_tiles_w + tile_in_w;
+			const int tile_index = tile_in_d * num_tiles_hw + tile_in_h * layer_8_pw_specs.layer_num_of_ofm_tiles_w + tile_in_w;
 
 			const int in_tile_w = w % pw_tile_w;
 			const int in_tile_index = in_tile_d * pw_tile_hw + in_tile_h * pw_tile_w + in_tile_w;
@@ -585,11 +585,38 @@ void write_chain_seml_communication_buffer(
 	}
 }
 
+void write_chain_seml_communication_buffer(
+	fms_dt chain_seml_communication_buffer[bottleneck_1_ofms_depth][bottleneck_1_ofms_width],
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH], const int starting_h)
+{
+#pragma HLS INLINE off
+
+	const int num_of_tiles_w = layer_8_pw_specs.layer_num_of_ofm_tiles_w;
+	const int num_tiles_hw = layer_8_pw_specs.layer_num_of_ifm_tiles_h * num_of_tiles_w;
+	const int tile_in_h = starting_h / pw_tile_h;
+	const int in_tile_h = starting_h % pw_tile_h;
+
+	for (int d = 0; d < chain_0_1_ofms_depth; d++)
+	{
+		const int tile_in_d = d / pw_tile_d;
+		const int in_tile_d = d % pw_tile_d;
+		for (int w = 0; w < chain_0_1_ofms_width; w++)
+		{
+#pragma HLS PIPELINE
+			const int tile_in_w = w / pw_tile_w;
+			const int tile_index = tile_in_d * num_tiles_hw + tile_in_h * num_of_tiles_w + tile_in_w;
+			const int in_tile_w = w % pw_tile_w;
+
+			result[tile_index][in_tile_h][in_tile_w] = chain_seml_communication_buffer[d][w];
+		}
+	}
+}
+
 //##########################################################################################################################
 
 void _0_1_bottlenecks_chain(
 	fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_dt result[max_fms_size])
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
 #pragma HLS INLINE off
 

@@ -78,7 +78,8 @@ weights_zero_points_declaration_string = 'const static fms_dt weights_zero_point
 last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    wf.write('#if FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION) +
+    wf.write('#if (FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION) + \
+    (' || FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE)' if cgc.FIBHA_VERSION == 1 else ')') +
              " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
@@ -103,6 +104,8 @@ with open(h_file, 'w') as wf:
     to_generate_for_layers = cgc.LAST_LAYER_TO_GENERATE if cgc.LAST_LAYER_TO_GENERATE > 0 else len(
         model_dag)
     num_of_generated_for_layers = 0
+
+    first_conv_layer = True
     for layer_index in range(to_generate_for_layers):
         layers_fused_parameters_offsets[layer_index +
                                         1] = layers_fused_parameters_offsets[layer_index]
@@ -216,24 +219,26 @@ with open(h_file, 'w') as wf:
         if ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
                 or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 1:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
-                layer_index, layer_type)
+                layer_index, layer_type)  if not first_conv_layer else 'const static biases_dt first_conv_layer_fused_zero_points[] ='
             fused_zero_points_declaration_string += '{ ' + str(
                 fused_zero_points).replace('[', '').replace(']', '') + '};\n'
 
             fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_{}_fused_scales[] ='.format(
-                layer_index, layer_type)
+                layer_index, layer_type) if not first_conv_layer else 'const static fused_scales_dt first_conv_layer_fused_scales[] = '
             fused_scales_declaration_string += '{ ' + str(
                 fused_scales).replace('[', '').replace(']', '') + '};\n'
 
             fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt layer_{}_{}_fused_scales_log_2_shifts[] ='.format(
-                layer_index, layer_type)
+                layer_index, layer_type)  if not first_conv_layer  else 'const static fused_scales_log_2_shifts_dt first_conv_layer_fused_scales_log_2_shifts[] ='
             fused_scales_log_2_shifts_declaration_string += '{ ' + str(
                 fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
             relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_{}_relu_6_fused_scales[] ='.format(
-                layer_index, layer_type) if layer_index != 0 else 'const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ='
+                layer_index, layer_type) if not first_conv_layer else 'const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ='
             relu_6_fused_scales_declaration_string += '{ ' + str(
                 relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
+            
+            first_conv_layer = False
 
             wf.write(fused_zero_points_declaration_string)
             wf.write(fused_scales_declaration_string)

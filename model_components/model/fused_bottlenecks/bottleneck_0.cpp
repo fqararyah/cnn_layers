@@ -181,7 +181,7 @@ mob_v2_bottleneck_0:
 		if (starting_h * first_conv_layer_specs.strides < bottleneck_0_ifms_height + first_conv_layer_specs.padding_top &&
 			expansion_kernel_starting_w < first_conv_layer_specs.padding_right + bottleneck_0_ifms_width / first_conv_layer_specs.strides - 1)
 		{
-			pss_dt expansion_pss = conv_kernel(bottleneck_input, weights_1,
+			pss_dt expansion_pss = conv_kernel(bottleneck_input, first_layer_weights,
 											   first_conv_layer_filter_dim, d_in_out);
 			expansion_result = conv_relu_norm(expansion_pss,
 											  expansion_layer_normalization,

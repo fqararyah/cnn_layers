@@ -61,19 +61,36 @@ void top_func(
 		fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
 #elif HW == _FPGA
 		fill_on_chip_weights_fpga(on_chip_weights_src,
-								  on_chip_weights,0);
+								  on_chip_weights, 0);
 #endif
 	}
 #if ONLY_SEML == 0
-	pipelined_engines_caller(on_chip_weights, channels);
 
-#if HW == CPU
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+#if CHAIN_LENGTH == 9 && MODEL_ID == 2
+	_0_1_2_bottlenecks_chain(input_image,
+							 tmp_channels);
+	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+					  tmp_channels, 56 * 56 * 24, 56, 56);
+#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && !ONLY_SEML
+	_0_1_bottlenecks_chain(input_image,
+						   channels);
+#if DEBUGGING
+	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+					  channels, layer_7_pw_specs);
+#endif
+#endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
+	copy_channels_to_tmp_channels(channels, tmp_channels);
+#else
+	pipelined_engines_caller(on_chip_weights, channels);
+#if DEBUGGING
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);
-	copy_channels_to_tmp_channels(channels, tmp_channels);
 #endif
 
-#endif
+#endif//PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
+#endif//ONLY_SEML == 0
+
 #endif
 }

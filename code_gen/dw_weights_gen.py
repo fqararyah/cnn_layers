@@ -11,7 +11,8 @@ weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scrip
     cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-dw_weights_h_file = '../model_components/model/headers/dw_weights{}.h'.format(cgc.FIBHA_VERSION_POSTFIX)
+dw_weights_h_file = '../model_components/model/headers/{}_dw_weights{}.h'.format(
+    cgc.MODEL_NAME, cgc.FIBHA_VERSION_POSTFIX)
 
 pipe_dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_dim * layer_*i*_dw_filter_dim]'
 pipe_dw_weights_declaration_string_v2 = 'const static dw_weights_dt pipe_dw_weights_3x3[][9] = {\n'
@@ -37,7 +38,9 @@ current_index = 0
 num_of_layers_generated_for = 0
 with open(dw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    f.write("#if FIBHA_VERSION == " + str(cgc.FIBHA_VERSION) + '\n')
+    f.write("#if FIBHA_VERSION == " + str(cgc.FIBHA_VERSION) +
+            (' || FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE' if cgc.FIBHA_VERSION == 1 else \
+                 ' && FIRST_PART_IMPLEMENTATION != BOTTLENECK_CHAIN_MODE') + '\n')
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
@@ -45,7 +48,7 @@ with open(dw_weights_h_file, 'w') as f:
         layer_specs = model_dag[ii]
         current_index += 1
         layer_type = ''
-        
+
         dw_layers_weights_offsets[ii + 1] = dw_layers_weights_offsets[ii]
         if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
             num_of_layers_generated_for += 1
@@ -84,12 +87,14 @@ with open(dw_weights_h_file, 'w') as f:
             dw_layers_weights_offsets[ii + 1] += num_of_filters
             current_weights = np.loadtxt(weights_file).astype(np.int8)
             filter_dim = layer_weights_shape[-1]
-            current_weights = np.reshape(current_weights, (int(current_weights.size / (filter_dim**2)), filter_dim**2))
+            current_weights = np.reshape(current_weights, (int(
+                current_weights.size / (filter_dim**2)), filter_dim**2))
             if pipe_dw_weights_v2 is not None:
-                pipe_dw_weights_v2 = np.concatenate((pipe_dw_weights_v2, current_weights))
+                pipe_dw_weights_v2 = np.concatenate(
+                    (pipe_dw_weights_v2, current_weights))
             else:
                 pipe_dw_weights_v2 = current_weights
-    
+
     if cgc.FIBHA_VERSION == 2 and pipe_dw_weights_v2 is not None:
         f.write(pipe_dw_weights_declaration_string_v2)
         for i in range(pipe_dw_weights_v2.shape[0]):
@@ -100,7 +105,6 @@ with open(dw_weights_h_file, 'w') as f:
                 f.write(str(pipe_dw_weights_v2[i][j]))
             f.write('},\n')
         f.write('};\n')
-            
 
     if cgc.PIPELINE == False or last_layer > last_pipeline_layer:
         f.write(seml_dw_weights_declaration_string)
@@ -110,7 +114,8 @@ with open(dw_weights_h_file, 'w') as f:
             if ii == current_index:
                 dw_layers_weights_offsets[ii] = 0
             if ii > 0:
-                dw_layers_weights_offsets[ii + 1] = dw_layers_weights_offsets[ii]
+                dw_layers_weights_offsets[ii +
+                                          1] = dw_layers_weights_offsets[ii]
             if 'type' not in layer_specs or layer_specs['type'] != 'dw':
                 continue
 

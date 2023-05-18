@@ -6,7 +6,11 @@
 #include "../basic_defs/basic_defs_glue.h"
 
 #if MODEL_ID == MOB_V2
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+#include "../model/headers/mob_v2_on_chip_weights.h"
+#else
 #include "../model/headers/mob_v2_on_chip_weights_v2.h"
+#endif
 #endif
 
 #include "../model/headers/model_glue.h"

@@ -1,5 +1,5 @@
 #include "../../basic_defs/basic_defs_glue.h"
-#if FIBHA_VERSION ==2 && MODEL_ID == MOB_V2
+#if (FIBHA_VERSION ==2) && MODEL_ID == MOB_V2
 #ifndef BIAS_QUANT
 #define BIAS_QUANT
 const static int layers_fused_parameters_offsets[] = { 

@@ -78,7 +78,7 @@ const int bottleneck_1_2_communication_buffer_partitioning_factor_in_d = 2;
 void _0_1_bottlenecks_chain(
 		fms_grp_dt channels[input_image_depth
 				* input_image_num_fms_groups_in_a_channel],
-		fms_dt result[max_fms_size]);
+		fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
 
 void _0_1_2_bottlenecks_chain(
     fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],

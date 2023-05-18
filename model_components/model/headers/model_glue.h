@@ -4,12 +4,16 @@
 #elif MODEL_ID == RESNET50
 #include "resnet50_layers_specs.h"
 #endif
-#include "dw_weights.h"
-#include "dw_weights_v2.h"
 #if MODEL_ID == MOB_V2
-#include "mob_v2_on_chip_weights_v2.h"
-#include "../../model/headers/quantization_and_biases.h"
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+#include "mob_v2_dw_weights.h"
+#include "../../model/headers/mob_v2_on_chip_weights.h"
+#include "../../model/headers/mob_v2_quantization_and_biases.h"
+#else
+#include "../../model/headers/mob_v2_on_chip_weights_v2.h"
 #include "../../model/headers/mob_v2_quantization_and_biases_v2.h"
+#include "mob_v2_dw_weights_v2.h"
+#endif
 #elif MODEL_ID == RESNET50
 #include "../../model/headers/resnet50_quantization_and_biases_v2.h"
 #endif
