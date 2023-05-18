@@ -55,16 +55,18 @@ fc_specs_struct = 'const fc_layer_specs layer_{}_specs = {}\n\
                 {};\n'
 
 specs_block = "//****************************\n \
-const int layer_{}_{}_num_fils = {} / alpha;\n\
+const int layer_{}_{}_num_fils = {};\n\
 const int layer_{}_{}_depth = {};\n\
 const int layer_{}_{}_filter_dim = {};\n \
 const int layer_{}_{}_ifm_width = {};\n \
 //****************************\n"
 
 first_layer_specs_block = "//****************************\n \
-const int first_conv_layer_num_fils = {} / alpha;\n\
+const int first_conv_layer_num_fils = {};\n\
 const int first_conv_layer_depth = {};\n\
 const int first_conv_layer_filter_dim = {};\n \
+const int first_conv_layer_padding_left = {};\n \
+const int first_conv_layer_padding_right = {};\n \
 const int first_conv_layer_ifm_width = {};\n \
 //****************************\n"
 
@@ -255,7 +257,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                                                         layer_index, layer_type, layer_width)
             else:
                 current_block_indx += 1
-                to_write_specs_block = first_layer_specs_block.format(layer_num_fils, layer_ifms_depth, layer_filter_dim, layer_width)
+                to_write_specs_block = first_layer_specs_block.format(layer_num_fils, layer_ifms_depth, layer_filter_dim, \
+                    padding_left, padding_right, layer_width)
             f.write(to_write_specs_block)
 
             f.write(specs_struct.format(*replacement_list))

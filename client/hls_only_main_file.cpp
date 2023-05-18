@@ -82,15 +82,16 @@ void top_func(
 #endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 #else
-	pipelined_engines_caller(on_chip_weights, channels);
+	fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
+	pipelined_engines_caller(on_chip_weights, pipelined_engines_input_buffer, channels);
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);
 #endif
 
-#endif//PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
+#endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
-#endif//ONLY_SEML == 0
+#endif // ONLY_SEML == 0
 
 #endif
 }

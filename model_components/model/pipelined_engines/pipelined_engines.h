@@ -19,6 +19,24 @@
 
 namespace pipelined_engines
 {
+    fms_dt first_layer_conv_kernel(fms_dt ifms_buffer[input_image_depth][input_image_width +
+                                                                         first_conv_layer_padding_left +
+                                                                         first_conv_layer_padding_right]
+                                                     [first_conv_layer_filter_dim],
+                                   const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth]
+                                                                     [first_conv_layer_filter_dim]
+                                                                     [first_conv_layer_filter_dim],
+                                   const int starting_filter,
+                                   const int starting_h,
+                                   const int starting_w,
+                                   const fms_quantization_scheme normalization);
+
+    fms_dt first_dw_layer_kernel(fms_dt ifms_buffer[],
+                                 const dw_weights_dt weights[],
+                                 const int filter_dim,
+                                 const fms_quantization_scheme normalization,
+                                 const int layer_activation);
+
     void fill_fused_scales_and_zps_buffer(const fused_scales_dt fused_scales[],
                                           const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
                                           const relu_6_fused_scales_dt relu_6_fused_scales[],

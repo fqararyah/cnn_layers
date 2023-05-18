@@ -138,14 +138,13 @@ void write_pipe_seml_communication_buffer(
 }
 
 void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
+                              fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
     const int tmp_channels_height = PW_BUFFER_HEIGHT + 1;
 
-    fms_dt channels_buffer_0[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
-
-#pragma HLS ARRAY_PARTITION variable = channels_buffer_0 type = complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = channels_buffer_0 type = cyclic factor = PW_BUFFER_WIDTH dim = 3
+#pragma HLS ARRAY_PARTITION variable = pipelined_engines_input_buffer type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = pipelined_engines_input_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 3
 
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
@@ -195,12 +194,12 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 #if HW == CPU
     fill_pipe_layer_input_buffer(
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
-        channels_buffer_0, 0, start_filling_offset_in_buffer_first_time, layer_3_pw_specs);
+        pipelined_engines_input_buffer, 0, start_filling_offset_in_buffer_first_time, layer_3_pw_specs);
 #endif
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
                result_buffer,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                channels_buffer,
                tmp_channels,
                dw_pipe_overlap_buffer,
@@ -218,7 +217,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
                0);
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -240,14 +239,14 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 #if HW == CPU
     fill_pipe_layer_input_buffer(
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
-        channels_buffer_0, rows_to_fill_first_time,
+        pipelined_engines_input_buffer, rows_to_fill_first_time,
         start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
 #endif
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
                result_buffer,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                channels_buffer,
                tmp_channels,
                dw_pipe_overlap_buffer,
@@ -266,7 +265,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -295,7 +294,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     }
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                result_buffer,
                channels_buffer,
                tmp_channels,
@@ -323,7 +322,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -344,7 +343,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                result_buffer,
                channels_buffer,
                tmp_channels,
@@ -364,7 +363,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
-               channels_buffer_0,
+               pipelined_engines_input_buffer,
                channels_buffer,
                result_buffer,
                tmp_channels,
@@ -400,13 +399,13 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 #if HW == CPU
                 fill_pipe_layer_input_buffer(
                     "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
-                    channels_buffer_0, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
+                    pipelined_engines_input_buffer, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
                     start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
 #endif
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
                            result_buffer,
-                           channels_buffer_0,
+                           pipelined_engines_input_buffer,
                            channels_buffer,
                            tmp_channels,
                            dw_pipe_overlap_buffer,
@@ -424,7 +423,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
                            0);
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
-                           channels_buffer_0,
+                           pipelined_engines_input_buffer,
                            channels_buffer,
                            result_buffer,
                            tmp_channels,
@@ -446,7 +445,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       channels_buffer_0,
+                       pipelined_engines_input_buffer,
                        result_buffer,
                        channels_buffer,
                        tmp_channels,
@@ -467,7 +466,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       channels_buffer_0,
+                       pipelined_engines_input_buffer,
                        channels_buffer,
                        result_buffer,
                        tmp_channels,
@@ -490,7 +489,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       channels_buffer_0,
+                       pipelined_engines_input_buffer,
                        result_buffer,
                        channels_buffer,
                        tmp_channels,
@@ -511,7 +510,7 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       channels_buffer_0,
+                       pipelined_engines_input_buffer,
                        channels_buffer,
                        result_buffer,
                        tmp_channels,

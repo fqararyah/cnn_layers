@@ -2,9 +2,11 @@
 #ifndef LAYERS_SPECS
 #define LAYERS_SPECS
 //****************************
- const int first_conv_layer_num_fils = 32 / alpha;
+ const int first_conv_layer_num_fils = 32;
 const int first_conv_layer_depth = 3;
 const int first_conv_layer_filter_dim = 3;
+ const int first_conv_layer_padding_left = 0;
+ const int first_conv_layer_padding_right = 1;
  const int first_conv_layer_ifm_width = 224;
  //****************************
 const layer_specs first_conv_layer_specs = {
@@ -45,7 +47,7 @@ const layer_specs first_conv_layer_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_2_dw_num_fils = 32 / alpha;
+ const int layer_2_dw_num_fils = 32;
 const int layer_2_dw_depth = 32;
 const int layer_2_dw_filter_dim = 3;
  const int layer_2_dw_ifm_width = 112;
@@ -88,7 +90,7 @@ const layer_specs layer_2_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_3_pw_num_fils = 16 / alpha;
+ const int layer_3_pw_num_fils = 16;
 const int layer_3_pw_depth = 32;
 const int layer_3_pw_filter_dim = 1;
  const int layer_3_pw_ifm_width = 112;
@@ -131,7 +133,7 @@ const layer_specs layer_3_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_4_pw_num_fils = 96 / alpha;
+ const int layer_4_pw_num_fils = 96;
 const int layer_4_pw_depth = 16;
 const int layer_4_pw_filter_dim = 1;
  const int layer_4_pw_ifm_width = 112;
@@ -174,7 +176,7 @@ const layer_specs layer_4_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_6_dw_num_fils = 96 / alpha;
+ const int layer_6_dw_num_fils = 96;
 const int layer_6_dw_depth = 96;
 const int layer_6_dw_filter_dim = 3;
  const int layer_6_dw_ifm_width = 112;
@@ -217,7 +219,7 @@ const layer_specs layer_6_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_7_pw_num_fils = 24 / alpha;
+ const int layer_7_pw_num_fils = 24;
 const int layer_7_pw_depth = 96;
 const int layer_7_pw_filter_dim = 1;
  const int layer_7_pw_ifm_width = 56;
@@ -260,7 +262,7 @@ const layer_specs layer_7_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_8_pw_num_fils = 144 / alpha;
+ const int layer_8_pw_num_fils = 144;
 const int layer_8_pw_depth = 24;
 const int layer_8_pw_filter_dim = 1;
  const int layer_8_pw_ifm_width = 56;
@@ -303,7 +305,7 @@ const layer_specs layer_8_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_9_dw_num_fils = 144 / alpha;
+ const int layer_9_dw_num_fils = 144;
 const int layer_9_dw_depth = 144;
 const int layer_9_dw_filter_dim = 3;
  const int layer_9_dw_ifm_width = 56;
@@ -346,7 +348,7 @@ const layer_specs layer_9_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_10_pw_num_fils = 24 / alpha;
+ const int layer_10_pw_num_fils = 24;
 const int layer_10_pw_depth = 144;
 const int layer_10_pw_filter_dim = 1;
  const int layer_10_pw_ifm_width = 56;
@@ -389,7 +391,7 @@ const layer_specs layer_10_pw_specs = {
                 -11//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_12_pw_num_fils = 144 / alpha;
+ const int layer_12_pw_num_fils = 144;
 const int layer_12_pw_depth = 24;
 const int layer_12_pw_filter_dim = 1;
  const int layer_12_pw_ifm_width = 56;
@@ -432,7 +434,7 @@ const layer_specs layer_12_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_14_dw_num_fils = 144 / alpha;
+ const int layer_14_dw_num_fils = 144;
 const int layer_14_dw_depth = 144;
 const int layer_14_dw_filter_dim = 3;
  const int layer_14_dw_ifm_width = 56;
@@ -475,7 +477,7 @@ const layer_specs layer_14_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_15_pw_num_fils = 32 / alpha;
+ const int layer_15_pw_num_fils = 32;
 const int layer_15_pw_depth = 144;
 const int layer_15_pw_filter_dim = 1;
  const int layer_15_pw_ifm_width = 28;
@@ -518,7 +520,7 @@ const layer_specs layer_15_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_16_pw_num_fils = 192 / alpha;
+ const int layer_16_pw_num_fils = 192;
 const int layer_16_pw_depth = 32;
 const int layer_16_pw_filter_dim = 1;
  const int layer_16_pw_ifm_width = 28;
@@ -561,7 +563,7 @@ const layer_specs layer_16_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_17_dw_num_fils = 192 / alpha;
+ const int layer_17_dw_num_fils = 192;
 const int layer_17_dw_depth = 192;
 const int layer_17_dw_filter_dim = 3;
  const int layer_17_dw_ifm_width = 28;
@@ -604,7 +606,7 @@ const layer_specs layer_17_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_18_pw_num_fils = 32 / alpha;
+ const int layer_18_pw_num_fils = 32;
 const int layer_18_pw_depth = 192;
 const int layer_18_pw_filter_dim = 1;
  const int layer_18_pw_ifm_width = 28;
@@ -647,7 +649,7 @@ const layer_specs layer_18_pw_specs = {
                 -6//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_20_pw_num_fils = 192 / alpha;
+ const int layer_20_pw_num_fils = 192;
 const int layer_20_pw_depth = 32;
 const int layer_20_pw_filter_dim = 1;
  const int layer_20_pw_ifm_width = 28;
@@ -690,7 +692,7 @@ const layer_specs layer_20_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_21_dw_num_fils = 192 / alpha;
+ const int layer_21_dw_num_fils = 192;
 const int layer_21_dw_depth = 192;
 const int layer_21_dw_filter_dim = 3;
  const int layer_21_dw_ifm_width = 28;
@@ -733,7 +735,7 @@ const layer_specs layer_21_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_22_pw_num_fils = 32 / alpha;
+ const int layer_22_pw_num_fils = 32;
 const int layer_22_pw_depth = 192;
 const int layer_22_pw_filter_dim = 1;
  const int layer_22_pw_ifm_width = 28;
@@ -776,7 +778,7 @@ const layer_specs layer_22_pw_specs = {
                 3//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_24_pw_num_fils = 192 / alpha;
+ const int layer_24_pw_num_fils = 192;
 const int layer_24_pw_depth = 32;
 const int layer_24_pw_filter_dim = 1;
  const int layer_24_pw_ifm_width = 28;
@@ -819,7 +821,7 @@ const layer_specs layer_24_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_26_dw_num_fils = 192 / alpha;
+ const int layer_26_dw_num_fils = 192;
 const int layer_26_dw_depth = 192;
 const int layer_26_dw_filter_dim = 3;
  const int layer_26_dw_ifm_width = 28;
@@ -862,7 +864,7 @@ const layer_specs layer_26_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_27_pw_num_fils = 64 / alpha;
+ const int layer_27_pw_num_fils = 64;
 const int layer_27_pw_depth = 192;
 const int layer_27_pw_filter_dim = 1;
  const int layer_27_pw_ifm_width = 14;
@@ -905,7 +907,7 @@ const layer_specs layer_27_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_28_pw_num_fils = 384 / alpha;
+ const int layer_28_pw_num_fils = 384;
 const int layer_28_pw_depth = 64;
 const int layer_28_pw_filter_dim = 1;
  const int layer_28_pw_ifm_width = 14;
@@ -948,7 +950,7 @@ const layer_specs layer_28_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_29_dw_num_fils = 384 / alpha;
+ const int layer_29_dw_num_fils = 384;
 const int layer_29_dw_depth = 384;
 const int layer_29_dw_filter_dim = 3;
  const int layer_29_dw_ifm_width = 14;
@@ -991,7 +993,7 @@ const layer_specs layer_29_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_30_pw_num_fils = 64 / alpha;
+ const int layer_30_pw_num_fils = 64;
 const int layer_30_pw_depth = 384;
 const int layer_30_pw_filter_dim = 1;
  const int layer_30_pw_ifm_width = 14;
@@ -1034,7 +1036,7 @@ const layer_specs layer_30_pw_specs = {
                 -2//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_32_pw_num_fils = 384 / alpha;
+ const int layer_32_pw_num_fils = 384;
 const int layer_32_pw_depth = 64;
 const int layer_32_pw_filter_dim = 1;
  const int layer_32_pw_ifm_width = 14;
@@ -1077,7 +1079,7 @@ const layer_specs layer_32_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_33_dw_num_fils = 384 / alpha;
+ const int layer_33_dw_num_fils = 384;
 const int layer_33_dw_depth = 384;
 const int layer_33_dw_filter_dim = 3;
  const int layer_33_dw_ifm_width = 14;
@@ -1120,7 +1122,7 @@ const layer_specs layer_33_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_34_pw_num_fils = 64 / alpha;
+ const int layer_34_pw_num_fils = 64;
 const int layer_34_pw_depth = 384;
 const int layer_34_pw_filter_dim = 1;
  const int layer_34_pw_ifm_width = 14;
@@ -1163,7 +1165,7 @@ const layer_specs layer_34_pw_specs = {
                 -14//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_36_pw_num_fils = 384 / alpha;
+ const int layer_36_pw_num_fils = 384;
 const int layer_36_pw_depth = 64;
 const int layer_36_pw_filter_dim = 1;
  const int layer_36_pw_ifm_width = 14;
@@ -1206,7 +1208,7 @@ const layer_specs layer_36_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_37_dw_num_fils = 384 / alpha;
+ const int layer_37_dw_num_fils = 384;
 const int layer_37_dw_depth = 384;
 const int layer_37_dw_filter_dim = 3;
  const int layer_37_dw_ifm_width = 14;
@@ -1249,7 +1251,7 @@ const layer_specs layer_37_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_38_pw_num_fils = 64 / alpha;
+ const int layer_38_pw_num_fils = 64;
 const int layer_38_pw_depth = 384;
 const int layer_38_pw_filter_dim = 1;
  const int layer_38_pw_ifm_width = 14;
@@ -1292,7 +1294,7 @@ const layer_specs layer_38_pw_specs = {
                 -10//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_40_pw_num_fils = 384 / alpha;
+ const int layer_40_pw_num_fils = 384;
 const int layer_40_pw_depth = 64;
 const int layer_40_pw_filter_dim = 1;
  const int layer_40_pw_ifm_width = 14;
@@ -1335,7 +1337,7 @@ const layer_specs layer_40_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_41_dw_num_fils = 384 / alpha;
+ const int layer_41_dw_num_fils = 384;
 const int layer_41_dw_depth = 384;
 const int layer_41_dw_filter_dim = 3;
  const int layer_41_dw_ifm_width = 14;
@@ -1378,7 +1380,7 @@ const layer_specs layer_41_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_42_pw_num_fils = 96 / alpha;
+ const int layer_42_pw_num_fils = 96;
 const int layer_42_pw_depth = 384;
 const int layer_42_pw_filter_dim = 1;
  const int layer_42_pw_ifm_width = 14;
@@ -1421,7 +1423,7 @@ const layer_specs layer_42_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_43_pw_num_fils = 576 / alpha;
+ const int layer_43_pw_num_fils = 576;
 const int layer_43_pw_depth = 96;
 const int layer_43_pw_filter_dim = 1;
  const int layer_43_pw_ifm_width = 14;
@@ -1464,7 +1466,7 @@ const layer_specs layer_43_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_44_dw_num_fils = 576 / alpha;
+ const int layer_44_dw_num_fils = 576;
 const int layer_44_dw_depth = 576;
 const int layer_44_dw_filter_dim = 3;
  const int layer_44_dw_ifm_width = 14;
@@ -1507,7 +1509,7 @@ const layer_specs layer_44_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_45_pw_num_fils = 96 / alpha;
+ const int layer_45_pw_num_fils = 96;
 const int layer_45_pw_depth = 576;
 const int layer_45_pw_filter_dim = 1;
  const int layer_45_pw_ifm_width = 14;
@@ -1550,7 +1552,7 @@ const layer_specs layer_45_pw_specs = {
                 12//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_47_pw_num_fils = 576 / alpha;
+ const int layer_47_pw_num_fils = 576;
 const int layer_47_pw_depth = 96;
 const int layer_47_pw_filter_dim = 1;
  const int layer_47_pw_ifm_width = 14;
@@ -1593,7 +1595,7 @@ const layer_specs layer_47_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_48_dw_num_fils = 576 / alpha;
+ const int layer_48_dw_num_fils = 576;
 const int layer_48_dw_depth = 576;
 const int layer_48_dw_filter_dim = 3;
  const int layer_48_dw_ifm_width = 14;
@@ -1636,7 +1638,7 @@ const layer_specs layer_48_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_49_pw_num_fils = 96 / alpha;
+ const int layer_49_pw_num_fils = 96;
 const int layer_49_pw_depth = 576;
 const int layer_49_pw_filter_dim = 1;
  const int layer_49_pw_ifm_width = 14;
@@ -1679,7 +1681,7 @@ const layer_specs layer_49_pw_specs = {
                 5//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_51_pw_num_fils = 576 / alpha;
+ const int layer_51_pw_num_fils = 576;
 const int layer_51_pw_depth = 96;
 const int layer_51_pw_filter_dim = 1;
  const int layer_51_pw_ifm_width = 14;
@@ -1722,7 +1724,7 @@ const layer_specs layer_51_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_53_dw_num_fils = 576 / alpha;
+ const int layer_53_dw_num_fils = 576;
 const int layer_53_dw_depth = 576;
 const int layer_53_dw_filter_dim = 3;
  const int layer_53_dw_ifm_width = 14;
@@ -1765,7 +1767,7 @@ const layer_specs layer_53_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_54_pw_num_fils = 160 / alpha;
+ const int layer_54_pw_num_fils = 160;
 const int layer_54_pw_depth = 576;
 const int layer_54_pw_filter_dim = 1;
  const int layer_54_pw_ifm_width = 7;
@@ -1808,7 +1810,7 @@ const layer_specs layer_54_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_55_pw_num_fils = 960 / alpha;
+ const int layer_55_pw_num_fils = 960;
 const int layer_55_pw_depth = 160;
 const int layer_55_pw_filter_dim = 1;
  const int layer_55_pw_ifm_width = 7;
@@ -1851,7 +1853,7 @@ const layer_specs layer_55_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_56_dw_num_fils = 960 / alpha;
+ const int layer_56_dw_num_fils = 960;
 const int layer_56_dw_depth = 960;
 const int layer_56_dw_filter_dim = 3;
  const int layer_56_dw_ifm_width = 7;
@@ -1894,7 +1896,7 @@ const layer_specs layer_56_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_57_pw_num_fils = 160 / alpha;
+ const int layer_57_pw_num_fils = 160;
 const int layer_57_pw_depth = 960;
 const int layer_57_pw_filter_dim = 1;
  const int layer_57_pw_ifm_width = 7;
@@ -1937,7 +1939,7 @@ const layer_specs layer_57_pw_specs = {
                 1//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_59_pw_num_fils = 960 / alpha;
+ const int layer_59_pw_num_fils = 960;
 const int layer_59_pw_depth = 160;
 const int layer_59_pw_filter_dim = 1;
  const int layer_59_pw_ifm_width = 7;
@@ -1980,7 +1982,7 @@ const layer_specs layer_59_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_60_dw_num_fils = 960 / alpha;
+ const int layer_60_dw_num_fils = 960;
 const int layer_60_dw_depth = 960;
 const int layer_60_dw_filter_dim = 3;
  const int layer_60_dw_ifm_width = 7;
@@ -2023,7 +2025,7 @@ const layer_specs layer_60_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_61_pw_num_fils = 160 / alpha;
+ const int layer_61_pw_num_fils = 160;
 const int layer_61_pw_depth = 960;
 const int layer_61_pw_filter_dim = 1;
  const int layer_61_pw_ifm_width = 7;
@@ -2066,7 +2068,7 @@ const layer_specs layer_61_pw_specs = {
                 4//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_63_pw_num_fils = 960 / alpha;
+ const int layer_63_pw_num_fils = 960;
 const int layer_63_pw_depth = 160;
 const int layer_63_pw_filter_dim = 1;
  const int layer_63_pw_ifm_width = 7;
@@ -2109,7 +2111,7 @@ const layer_specs layer_63_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_64_dw_num_fils = 960 / alpha;
+ const int layer_64_dw_num_fils = 960;
 const int layer_64_dw_depth = 960;
 const int layer_64_dw_filter_dim = 3;
  const int layer_64_dw_ifm_width = 7;
@@ -2152,7 +2154,7 @@ const layer_specs layer_64_dw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_65_pw_num_fils = 320 / alpha;
+ const int layer_65_pw_num_fils = 320;
 const int layer_65_pw_depth = 960;
 const int layer_65_pw_filter_dim = 1;
  const int layer_65_pw_ifm_width = 7;
@@ -2195,7 +2197,7 @@ const layer_specs layer_65_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_66_pw_num_fils = 1280 / alpha;
+ const int layer_66_pw_num_fils = 1280;
 const int layer_66_pw_depth = 320;
 const int layer_66_pw_filter_dim = 1;
  const int layer_66_pw_ifm_width = 7;
