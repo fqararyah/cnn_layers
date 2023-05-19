@@ -314,7 +314,6 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
                                          first_conv_layer_specs.layer_ifms_zero_point);
 #endif
 
-    int even_odd = 1;
     fms_dt first_layer_input_buffer[FIRST_CONV_LAYER_BUFFER_SIZE];
     fms_dt first_layer_input_buffer_new_cols[FIRST_CONV_LAYER_BUFFER_SIZE];
 
@@ -322,16 +321,14 @@ pre_first_pipeline_layers_mob_v2:
     for (int h = 0; h < PRE_FIRST_PIPELINE_OUTPUT_HEIGHT / first_conv_layer_strides; h++)
     {
         fill_first_cols_of_first_layer_input(first_layers_input, first_layer_input_buffer, h * first_conv_layer_strides);
-        shift_and_fill_first_layer_input(first_layers_input, first_layer_input_buffer, 0, h, first_conv_layer_specs.layer_ifms_zero_point);
+        shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols, first_layer_input_buffer);
         for (int w = 0; w < input_image_dt_width / first_conv_layer_strides; w++)
         {
-            if (even_odd)
-            {
-            }
-            else
-            {
-            }
-            even_odd = 1 - even_odd;
+            first_conv_and_dw_layers_pipeline(first_layer_input_buffer, pre_first_pipeline_layers_output,
+                                              dw_layer_weights, h, w);
+            fill_first_layer_input_new_cols(first_layers_input, first_layer_input_buffer_new_cols, w * first_conv_layer_strides,
+                                            h * first_conv_layer_strides, first_conv_layer_specs.layer_ifms_zero_point);
+            shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols, first_layer_input_buffer);
         }
     }
 }
