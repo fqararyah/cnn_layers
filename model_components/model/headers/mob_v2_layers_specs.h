@@ -5,6 +5,7 @@
  const int first_conv_layer_num_fils = 32;
 const int first_conv_layer_depth = 3;
 const int first_conv_layer_filter_dim = 3;
+ const int first_conv_layer_strides = 2;
  const int first_conv_layer_padding_left = 0;
  const int first_conv_layer_padding_right = 1;
  const int first_conv_layer_ifm_width = 224;

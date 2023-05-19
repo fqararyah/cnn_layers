@@ -34,5 +34,22 @@ namespace pipelined_engines
     const int DW_PIPE_OVERLAP_BUFFER_WIDTH = 56;
 
     const int OFFSET_H_IN_RESULTS = PW_BUFFER_HEIGHT / 2;
+
+    const int STRIDES_PRODUCT_IN_PIPELINE = 8; // TODO automate
+    const int PRE_FIRST_PIPELINE_INPUT_HEIGHT = STRIDES_PRODUCT_IN_PIPELINE * PARALLELISM_PW_H +
+                                                first_conv_layer_filter_dim - first_conv_layer_strides;
+
+    const int PRE_FIRST_PIPELINE_OUTPUT_DEPTH = layer_2_dw_depth;
+    const int PRE_FIRST_PIPELINE_OUTPUT_HEIGHT = (PRE_FIRST_PIPELINE_INPUT_HEIGHT -
+                                                  (first_conv_layer_filter_dim - first_conv_layer_strides)) /
+                                                 first_conv_layer_strides;
+    const int PRE_FIRST_PIPELINE_OUTPUT_WIDTH = layer_2_dw_ifm_width;
+
+    const int INPUT_IMAGE_ROWS_FILLED_EACH_TIME = STRIDES_PRODUCT_IN_PIPELINE * PARALLELISM_PW_H;
+    const int FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME = PRE_FIRST_PIPELINE_INPUT_HEIGHT - INPUT_IMAGE_ROWS_FILLED_EACH_TIME;
+
+    const int FIRST_CONV_LAYER_BUFFER_SIZE = first_conv_layer_filter_dim * first_conv_layer_filter_dim * input_image_depth;
+    const int FIRST_CONV_LAYER_NEW_COLS_BUFFER_SIZE = first_conv_layer_filter_dim * first_conv_layer_strides * input_image_depth;
+
 }
 #endif

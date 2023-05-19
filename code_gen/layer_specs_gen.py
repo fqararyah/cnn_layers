@@ -4,7 +4,8 @@ import code_generation_constants as cgc
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-out_file = '../model_components/model/headers/{}_layers_specs.h'  # './out/layers_specs.h'
+# './out/layers_specs.h'
+out_file = '../model_components/model/headers/{}_layers_specs.h'
 
 specs_struct = 'const layer_specs {} = {}\n\
                 {},//layer_index;\n\
@@ -65,6 +66,7 @@ first_layer_specs_block = "//****************************\n \
 const int first_conv_layer_num_fils = {};\n\
 const int first_conv_layer_depth = {};\n\
 const int first_conv_layer_filter_dim = {};\n \
+const int first_conv_layer_strides = {};\n \
 const int first_conv_layer_padding_left = {};\n \
 const int first_conv_layer_padding_right = {};\n \
 const int first_conv_layer_ifm_width = {};\n \
@@ -110,7 +112,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             if first_conv_layer:
                 replacement_list.append('first_conv_layer_specs')
             else:
-                replacement_list.append('layer_' + str(layer_index) + '_' + layer_type + '_specs')
+                replacement_list.append(
+                    'layer_' + str(layer_index) + '_' + layer_type + '_specs')
             replacement_list.append('{')
             replacement_list.append(layer_index)
             if layer_type == 'pw':
@@ -183,9 +186,10 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
 
             replacement_list.append(
                 str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
-            
+
             if (layer_type == 'pw' or layer_type == 's') and not first_conv_layer:
-                replacement_list.append(str(cumulative_s_pw_weights) + ' / weights_group_items')
+                replacement_list.append(
+                    str(cumulative_s_pw_weights) + ' / weights_group_items')
                 replacement_list.append(cumulative_s_pw_weights_on_chip)
                 replacement_list.append(0)
                 if num_conv_layers_so_far > cgc.PIPELINE_LEN and cgc.PIPELINE == True:
@@ -216,9 +220,9 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
 
             layer_children = layer_specs['children']
             for i in range(len(layer_children)):
-                if layer_children[i] - i != layer_index + 1: 
+                if layer_children[i] - i != layer_index + 1:
                     write_to_tmp = 1
-             
+
             if model_dag[layer_children[0]]['name'] == 'add' and model_dag[layer_children[0]]['id'] == layer_index + 1:
                 add_layer_specs = model_dag[layer_children[0]]
                 the_other_conv_layer_specs = model_dag[add_layer_specs['parents'][0]]
@@ -235,7 +239,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             if write_to_tmp == 1 and fused_with_add == 0 and len(layer_children) <= 1:
                 write_to_result_or_channels = 0
 
-            replacement_list.append(write_to_result_or_channels)    
+            replacement_list.append(write_to_result_or_channels)
             replacement_list.append(write_to_tmp)
             replacement_list.append(fused_with_add)
 
@@ -252,13 +256,13 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
 
             if current_block_indx > 0:
                 to_write_specs_block = specs_block.format(layer_index, layer_type, layer_num_fils,
-                                                        layer_index, layer_type, layer_ifms_depth,
-                                                        layer_index, layer_type, layer_filter_dim,
-                                                        layer_index, layer_type, layer_width)
+                                                          layer_index, layer_type, layer_ifms_depth,
+                                                          layer_index, layer_type, layer_filter_dim,
+                                                          layer_index, layer_type, layer_width)
             else:
                 current_block_indx += 1
-                to_write_specs_block = first_layer_specs_block.format(layer_num_fils, layer_ifms_depth, layer_filter_dim, \
-                    padding_left, padding_right, layer_width)
+                to_write_specs_block = first_layer_specs_block.format(layer_num_fils, layer_ifms_depth, layer_filter_dim,
+                                                                      strides, padding_left, padding_right, layer_width)
             f.write(to_write_specs_block)
 
             f.write(specs_struct.format(*replacement_list))
@@ -275,7 +279,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 parent_layer_specs = model_dag[layer_specs['parents'][0]]
                 pooling_ofms_scale = layer_specs['ofms_scales']
                 pooling_ifms_scale = parent_layer_specs['ofms_scales']
-                replacement_list.append(pooling_ifms_scale / pooling_ofms_scale)
+                replacement_list.append(
+                    pooling_ifms_scale / pooling_ofms_scale)
 
                 replacement_list.append(layer_specs['ofms_zero_points'])
                 replacement_list.append(parent_layer_specs['ofms_zero_points'])
