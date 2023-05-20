@@ -137,6 +137,37 @@ void write_pipe_seml_communication_buffer(
     }
 }
 
+void fill_first_dw_layer_weights(weights_dt dw_layer_weights[layer_2_dw_num_fils][layer_2_dw_filter_dim * layer_2_dw_filter_dim])
+{
+    for (int f = 0; f < layer_2_dw_num_fils; f++)
+    {
+        for (int hw = 0; hw < layer_2_dw_filter_dim * layer_2_dw_filter_dim; hw++)
+        {
+            dw_layer_weights[f][hw] = pipe_dw_weights_3x3[f][hw];
+        }
+    }
+}
+
+void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_layer_quantization_params[], const int starting_offset)
+{
+    for (int f = 0; f < first_conv_layer_num_fils; f++)
+    {
+        fms_quantization_scheme normalization;
+        normalization.fused_scales =
+            pipe_fused_scales[f + starting_offset];
+        normalization.fused_scales_log_2_shift =
+            pipe_fused_scales_log_2_shifts[f + + starting_offset];
+        normalization.relu_6_fused_scale =
+            pipe_fused_scales_log_2_shifts[f + + starting_offset];
+        normalization.fused_zero_point =
+            pipe_fused_zero_points[f + starting_offset];
+        normalization.layer_0_relu_6_fused_scale =
+            pipe_relu_6_fused_scales[f + starting_offset];
+
+        first_layer_quantization_params[f] = normalization;
+    }
+}
+
 void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                               fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
@@ -177,8 +208,13 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
 
     layer_specs first_layer_in_second_part = layer_15_pw_specs;
 
-    // padd_top_dw_channels_tile(dw_channels_tile, dw_channels_tile_copy,
-    //                           layer_6_dw_specs);
+    weights_dt dw_layer_weights[layer_2_dw_num_fils][layer_2_dw_filter_dim * layer_2_dw_filter_dim];
+    fill_first_dw_layer_weights(dw_layer_weights);
+
+    fms_quantization_scheme first_layer_quantization_params[layer_2_dw_num_fils];
+    fms_quantization_scheme first_dw_layer_quantization_params[layer_2_dw_num_fils];
+    fill_first_conv_layers_quantization_params(first_layer_quantization_params, 0);
+    fill_first_conv_layers_quantization_params(first_dw_layer_quantization_params, first_conv_layer_num_fils);
 
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = PW_BUFFER_HEIGHT - rows_to_fill_first_time;

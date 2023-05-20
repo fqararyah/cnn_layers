@@ -6,36 +6,34 @@ using namespace pipelined_engines;
 #ifndef PIPELINED_PW_CONV
 #define PIPELINED_PW_CONV
 
-fms_dt pipelined_engines::first_dw_layer_kernel(fms_dt ifms_buffer[],
-					const dw_weights_dt weights[],
-					const int filter_dim,
-                    const fms_quantization_scheme normalization,
-                    const int layer_activation)
+fms_dt pipelined_engines::first_dw_layer_kernel(fms_dt ifms_buffer[][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
+                                                const dw_weights_dt weights[][layer_2_dw_filter_dim * layer_2_dw_filter_dim],
+                                                const int filter_dim,
+                                                const int current_d,
+                                                const fms_quantization_scheme normalization,
+                                                const int layer_activation)
 {
 #pragma HLS INLINE
 
-	dw_pss_dt pss = 0;
+    dw_pss_dt pss = 0;
     fms_dt result;
 dw_kernel:
-	for (int c_h = 0; c_h < filter_dim; c_h++)
-	{
+    for (int c_h = 0; c_h < filter_dim; c_h++)
+    {
 #pragma HLS UNROLL
-		for (int c_w = 0; c_w < filter_dim; c_w++)
-		{
+        for (int c_w = 0; c_w < filter_dim; c_w++)
+        {
 #pragma HLS UNROLL
-			pss += ifms_buffer[c_h * filter_dim + c_w] * weights[c_h * filter_dim + c_w];
-		}
-	}
+            pss += ifms_buffer[current_d][c_h][c_w] * weights[current_d][c_h * filter_dim + c_w];
+        }
+    }
 
     result = dw_relu_norm(pss, normalization, layer_activation);
-    
-	return result;
+
+    return result;
 }
 
-fms_dt pipelined_engines::first_layer_conv_kernel(fms_dt ifms_buffer[input_image_depth][input_image_width +
-                                                                                        first_conv_layer_padding_left +
-                                                                                        first_conv_layer_padding_right]
-                                                                    [first_conv_layer_filter_dim],
+fms_dt pipelined_engines::first_layer_conv_kernel(fms_dt ifms_buffer[FIRST_CONV_LAYER_BUFFER_SIZE],
                                                   const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth]
                                                                                     [first_conv_layer_filter_dim]
                                                                                     [first_conv_layer_filter_dim],
@@ -48,6 +46,10 @@ fms_dt pipelined_engines::first_layer_conv_kernel(fms_dt ifms_buffer[input_image
 
     pss_dt pss;
     fms_dt result = 0;
+
+    const int ifms_buffer_w = first_conv_layer_specs.filter_size;
+    const int ifms_buffer_hw = ifms_buffer_w * first_conv_layer_specs.filter_size;
+
 conv_kernel:
     for (int d = 0; d < input_image_depth; d++)
     {
@@ -58,7 +60,7 @@ conv_kernel:
             for (int c_w = 0; c_w < first_conv_layer_filter_dim; c_w++)
             {
 #pragma HLS UNROLL
-                pss += ifms_buffer[d][c_h][c_w] *
+                pss += ifms_buffer[d * ifms_buffer_hw + c_h * ifms_buffer_w + c_w] *
                        weights_1[starting_filter][d][c_h][c_w];
             }
         }

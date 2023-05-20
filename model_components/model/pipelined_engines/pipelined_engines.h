@@ -19,10 +19,7 @@
 
 namespace pipelined_engines
 {
-    fms_dt first_layer_conv_kernel(fms_dt ifms_buffer[input_image_depth][input_image_width +
-                                                                         first_conv_layer_padding_left +
-                                                                         first_conv_layer_padding_right]
-                                                     [first_conv_layer_filter_dim],
+    fms_dt first_layer_conv_kernel(fms_dt ifms_buffer[FIRST_CONV_LAYER_BUFFER_SIZE],
                                    const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth]
                                                                      [first_conv_layer_filter_dim]
                                                                      [first_conv_layer_filter_dim],
@@ -31,9 +28,10 @@ namespace pipelined_engines
                                    const int starting_w,
                                    const fms_quantization_scheme normalization);
 
-    fms_dt first_dw_layer_kernel(fms_dt ifms_buffer[],
-                                 const dw_weights_dt weights[],
+    fms_dt first_dw_layer_kernel(fms_dt ifms_buffer[][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
+                                 const dw_weights_dt weights[][layer_2_dw_filter_dim * layer_2_dw_filter_dim],
                                  const int filter_dim,
+                                 const int current_d,
                                  const fms_quantization_scheme normalization,
                                  const int layer_activation);
 
