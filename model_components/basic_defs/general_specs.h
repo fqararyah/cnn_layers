@@ -30,8 +30,12 @@ const int switch_point_fms_depth = 144; // not really, but the max of ...
 const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
 const int max_tmp_fms_size = 56 * 56 * 24;
 
-#if MODEL_ID == MOB_V2
+#if MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH == 6
+const int MAX_FMS_BUFFER_DEPTH = 144 * 64;//
+#else
 const int MAX_FMS_BUFFER_DEPTH = 192 * 16; // 192 * (28/7) * (28/7)
+#endif
 #elif MODEL_ID == RESNET50
 const int MAX_FMS_BUFFER_DEPTH = 512 * 16; // 192 * (28/7) * (28/7)
 #endif
@@ -53,7 +57,7 @@ const int alpha = 1;
 // fc_layer
 #if MODEL_ID == RESNET50
 const int fc_layer_input_size = 2048;
-#elif MODEL_ID == MOB_V2
+#elif MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
 const int fc_layer_input_size = 1280;
 #endif
 const int fc_cols = 1000;
@@ -71,14 +75,15 @@ const int DF = 1;
 const int start_with_pw = 1;
 
 // maxs for buffers
-#if MODEL_ID == MOB_V2
+#if MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
 const int max_conv_d = 1280 / alpha; // to_automate
 #elif MODEL_ID == RESNET50
 const int max_conv_d = 2048; // to_automate
 #endif
 const int min_strides = 1;
 const int max_strides = 2;
-#if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2 || MODEL_ID == RESNET50
+#if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2 || MODEL_ID == RESNET50 || MODEL_ID == MOB_V2_0_5 \
+|| MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
 const int max_filter_hw_dim = 3;
 const int max_conv_filter_hw_dim = 3;
 const int max_padding_lr = 2;

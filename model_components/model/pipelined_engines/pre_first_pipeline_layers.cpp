@@ -3,7 +3,7 @@
 void fill_input_image_groups_buffer(
     fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
     fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * INPUT_IMAGE_ROWS_FILLED_EACH_TIME],
-    int starting_h,
+    const int starting_h,
     const int elements_to_fill_from_an_ifm)
 { // chain_0_1_layer_0_s_in_rows_at_once * input_image_num_fms_groups_in_width
 #pragma HLS INLINE off
@@ -50,8 +50,17 @@ void input_image_fill_row_from_groups_buffer(
                 if (o_w_offset + w < input_image_width)
                 {
 #if HW == _FPGA
-                    channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
-                        w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
+                    if (channels_buffer_start_filling_h + row < PRE_FIRST_PIPELINE_INPUT_HEIGHT)
+                    {
+                        channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
+                            w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
+                    }
+                    else
+                    {
+                        channels_buffer_0[d][channels_buffer_start_filling_h + row - PRE_FIRST_PIPELINE_INPUT_HEIGHT]
+                                         [o_w_offset + w] = (fms_dt)chunck(
+                                             w * fms_dt_width + fms_dt_offset, w * fms_dt_width);
+                    }
 #endif
                 }
             }
@@ -59,29 +68,30 @@ void input_image_fill_row_from_groups_buffer(
     }
 }
 
-void input_image_shift_channels_buffer_rows(
-    fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
-    const int rows_to_shift)
-{
-#pragma HLS INLINE
+// void input_image_shift_channels_buffer_rows(
+//     fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
+//     const int rows_to_shift)
+// {
+// #pragma HLS INLINE
 
-    for (int w = 0; w < input_image_width; w++)
-    {
-#pragma HLS PIPELINE
-        for (int d = 0; d < input_image_depth; d++)
-        {
-#pragma HLS UNROLL
-            for (int h = 0; h < rows_to_shift; h++)
-            {
-#pragma HLS UNROLL
-                channels_buffer_0[d][h][w] = channels_buffer_0[d][h + INPUT_IMAGE_ROWS_FILLED_EACH_TIME][w];
-            }
-        }
-    }
-}
+//     for (int w = 0; w < input_image_width; w++)
+//     {
+// #pragma HLS PIPELINE
+//         for (int d = 0; d < input_image_depth; d++)
+//         {
+// #pragma HLS UNROLL
+//             for (int h = 0; h < rows_to_shift; h++)
+//             {
+// #pragma HLS UNROLL
+//                 channels_buffer_0[d][h][w] = channels_buffer_0[d][h + INPUT_IMAGE_ROWS_FILLED_EACH_TIME][w];
+//             }
+//         }
+//     }
+// }
 
 void input_image_padd_bottom_channels_buffer_rows(
     fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
+    const int padding_starting_h,
     const fms_dt zero_point)
 {
 #pragma HLS INLINE
@@ -92,11 +102,17 @@ void input_image_padd_bottom_channels_buffer_rows(
         for (int d = 0; d < input_image_depth; d++)
         {
 #pragma HLS UNROLL
-            for (int h = PRE_FIRST_PIPELINE_INPUT_HEIGHT - first_conv_layer_specs.padding_bottom;
-                 h < PRE_FIRST_PIPELINE_INPUT_HEIGHT; h++)
+            for (int h = 0; h < first_conv_layer_padding_right; h++) // right is = bottom
             {
 #pragma HLS UNROLL
-                channels_buffer_0[d][h][w] = zero_point;
+                if (h + padding_starting_h < PRE_FIRST_PIPELINE_INPUT_HEIGHT)
+                {
+                    channels_buffer_0[d][h + padding_starting_h][w] = zero_point;
+                }
+                else
+                {
+                    channels_buffer_0[d][h + padding_starting_h - PRE_FIRST_PIPELINE_INPUT_HEIGHT][w] = zero_point;
+                }
             }
         }
     }
@@ -105,17 +121,17 @@ void input_image_padd_bottom_channels_buffer_rows(
 void input_image_fill_channels_buffer_from_groups_buffer(
     fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * INPUT_IMAGE_ROWS_FILLED_EACH_TIME],
     fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
-    int starting_h, bool shift, const fms_dt zero_point)
+    const int starting_h, const int channels_buffer_start_filling_h, const fms_dt zero_point)
 {
 #pragma HLS INLINE off
 
     const int rows_to_shift = PRE_FIRST_PIPELINE_INPUT_HEIGHT - INPUT_IMAGE_ROWS_FILLED_EACH_TIME;
-    if (shift)
-    {
-        input_image_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
-    }
-    const int channels_buffer_start_filling_h =
-        starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
+    // if (shift)
+    // {
+    //     input_image_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
+    // }
+    // const int channels_buffer_start_filling_h =
+    //     starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
     for (int h = 0; h < INPUT_IMAGE_ROWS_FILLED_EACH_TIME; h++)
     {
         if (starting_h + h < input_image_height)
@@ -125,7 +141,7 @@ void input_image_fill_channels_buffer_from_groups_buffer(
         }
         else
         {
-            input_image_padd_bottom_channels_buffer_rows(channels_buffer_0,
+            input_image_padd_bottom_channels_buffer_rows(channels_buffer_0, channels_buffer_start_filling_h + h,
                                                          zero_point);
         }
     }
@@ -138,6 +154,10 @@ void fill_first_cols_of_first_layer_input(
 {
 
     const int first_layer_input_buffer_hw = first_conv_layer_filter_dim * first_conv_layer_filter_dim;
+    const int filter_dim = first_conv_layer_specs.filter_size;
+    const int strides = first_conv_layer_specs.strides;
+    const int filter_dim_minus_strides = filter_dim - strides;
+
 fill_first_cols_of_first_layer_input:
     for (int d = 0;
          d < input_image_depth; d++)
@@ -145,12 +165,21 @@ fill_first_cols_of_first_layer_input:
         for (int h = 0; h < PRE_FIRST_PIPELINE_INPUT_HEIGHT; h++)
         {
             for (int w = 0;
-                 w < first_conv_layer_filter_dim - first_conv_layer_strides;
+                 w < filter_dim_minus_strides;
                  w++)
             {
-                first_layer_input_buffer[d * first_layer_input_buffer_hw + h * first_conv_layer_filter_dim +
-                                         w] =
-                    channels_buffer_0[d][starting_h + h][w];
+                if (starting_h + h < PRE_FIRST_PIPELINE_INPUT_HEIGHT)
+                {
+                    first_layer_input_buffer[d * first_layer_input_buffer_hw + h * first_conv_layer_filter_dim +
+                                             w + (filter_dim - filter_dim_minus_strides)] =
+                        channels_buffer_0[d][starting_h + h][w];
+                }
+                else
+                {
+                    first_layer_input_buffer[d * first_layer_input_buffer_hw + h * first_conv_layer_filter_dim +
+                                             w + (filter_dim - filter_dim_minus_strides)] =
+                        channels_buffer_0[d][starting_h + h - PRE_FIRST_PIPELINE_INPUT_HEIGHT][w];
+                }
             }
         }
     }
@@ -169,15 +198,31 @@ void fill_first_layer_input_new_cols(
         {
             for (int w = 0; w < first_conv_layer_strides; w++)
             {
-                if (starting_w + w < input_image_width + first_conv_layer_padding_left)
+                if (h + starting_h < PRE_FIRST_PIPELINE_INPUT_HEIGHT)
                 {
-                    first_layer_input_new_cols[d * buffer_hw + h * first_conv_layer_strides + w] =
-                        channels_buffer_0[d][h + starting_h][starting_w + w];
+                    if (starting_w + w < input_image_width + first_conv_layer_padding_left)
+                    {
+                        first_layer_input_new_cols[d * buffer_hw + h * first_conv_layer_strides + w] =
+                            channels_buffer_0[d][h + starting_h][starting_w + w];
+                    }
+                    else
+                    {
+                        first_layer_input_new_cols[d * buffer_hw + h * first_conv_layer_strides + w] =
+                            zero_point;
+                    }
                 }
                 else
                 {
-                    first_layer_input_new_cols[d * buffer_hw + h * first_conv_layer_strides + w] =
-                        zero_point;
+                    if (starting_w + w < input_image_width + first_conv_layer_padding_left)
+                    {
+                        first_layer_input_new_cols[d * buffer_hw + h * first_conv_layer_strides + w] =
+                            channels_buffer_0[d][h + starting_h - PRE_FIRST_PIPELINE_INPUT_HEIGHT][starting_w + w];
+                    }
+                    else
+                    {
+                        first_layer_input_new_cols[d * buffer_hw + h * first_conv_layer_strides + w] =
+                            zero_point;
+                    }
                 }
             }
         }
@@ -192,6 +237,7 @@ void shift_and_fill_first_layer_input(
 
     const int to_be_shifted = first_conv_layer_filter_dim - first_conv_layer_strides;
     const int first_layer_input_buffer_hw = first_conv_layer_filter_dim * first_conv_layer_filter_dim;
+    const int first_layer_input_buffer_cols_hw = first_conv_layer_filter_dim * first_conv_layer_strides;
 
 fill_bottleneck_0_input:
     for (int d = 0; d < input_image_depth; d++)
@@ -211,7 +257,7 @@ fill_bottleneck_0_input:
             {
 #pragma HLS UNROLL
                 first_layer_input[d * first_layer_input_buffer_hw + h * first_conv_layer_filter_dim + w + to_be_shifted] =
-                    first_layer_input_new_cols[d * first_layer_input_buffer_hw + h * first_conv_layer_filter_dim + w];
+                    first_layer_input_new_cols[d * first_layer_input_buffer_cols_hw + h * first_conv_layer_strides + w];
             }
         }
     }
@@ -220,17 +266,17 @@ fill_bottleneck_0_input:
 void input_image_fill_channels_buffer_cpu(
     fms_dt channels[input_image_depth * input_image_hw],
     fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
-    int starting_h, bool shift, const fms_dt zero_point)
+    int starting_h, const int channels_buffer_start_filling_h, const fms_dt zero_point)
 {
 #pragma HLS INLINE off
 
     const int rows_to_shift = FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME;
-    if (shift)
-    {
-        input_image_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
-    }
-    const int channels_buffer_start_filling_h =
-        starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
+    // if (shift)
+    // {
+    //     input_image_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
+    // }
+    // const int channels_buffer_start_filling_h =
+    //     starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
     for (int h = 0; h < INPUT_IMAGE_ROWS_FILLED_EACH_TIME; h++)
     {
         if (starting_h + h < input_image_height)
@@ -239,14 +285,22 @@ void input_image_fill_channels_buffer_cpu(
             {
                 for (int w = 0; w < input_image_width; w++)
                 {
-                    channels_buffer_0[d][h + channels_buffer_start_filling_h][w] =
-                        channels[d * input_image_hw + (h + starting_h) * input_image_width + w];
+                    if (h + channels_buffer_start_filling_h < PRE_FIRST_PIPELINE_INPUT_HEIGHT)
+                    {
+                        channels_buffer_0[d][h + channels_buffer_start_filling_h][w] =
+                            channels[d * input_image_hw + (h + starting_h) * input_image_width + w];
+                    }
+                    else
+                    {
+                        channels_buffer_0[d][h + channels_buffer_start_filling_h - PRE_FIRST_PIPELINE_INPUT_HEIGHT][w] =
+                            channels[d * input_image_hw + (h + starting_h) * input_image_width + w];
+                    }
                 }
             }
         }
         else
         {
-            input_image_padd_bottom_channels_buffer_rows(channels_buffer_0,
+            input_image_padd_bottom_channels_buffer_rows(channels_buffer_0, channels_buffer_start_filling_h + h,
                                                          zero_point);
         }
     }
@@ -286,6 +340,81 @@ void first_conv_and_dw_layers_pipeline(fms_dt first_layer_input[FIRST_CONV_LAYER
     }
 }
 
+void fill_conv_dw_communication_buffer_intra_first_time(fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
+                                                                                                 [layer_2_dw_ifm_width],
+                                                        fms_dt conv_dw_communication_buffer_intra[first_conv_layer_num_fils]
+                                                                                                 [layer_2_dw_filter_dim][layer_2_dw_filter_dim],
+                                                        const int starting_h,
+                                                        const layer_specs specs_struct)
+{
+
+    const int filter_dim = specs_struct.filter_size;
+    const int ifms_depth = specs_struct.layer_depth;
+    const int ifms_width = specs_struct.layer_ifm_width;
+    const int padding_top = specs_struct.padding_top;
+    const fms_dt layer_ifm_zero_point = specs_struct.layer_ifms_zero_point;
+
+    for (int d = 0; d < ifms_depth; d++)
+    {
+#pragma HLs PIPELINE
+        for (int h = 0; h < filter_dim; h++)
+        {
+            for (int w = 0; w < filter_dim; w++)
+            {
+                if (h + starting_h - padding_top >= 0)
+                {
+                    conv_dw_communication_buffer_intra[d][h][w] = conv_dw_communication_buffer_inter[d][starting_h + h][w];
+                }
+                else
+                {
+                    conv_dw_communication_buffer_intra[d][h][w] = layer_ifm_zero_point;
+                }
+            }
+        }
+    }
+}
+
+void fill_conv_dw_communication_buffer_intra(fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
+                                                                                      [layer_2_dw_ifm_width],
+                                             fms_dt conv_dw_communication_buffer_intra[first_conv_layer_num_fils]
+                                                                                      [layer_2_dw_filter_dim][layer_2_dw_filter_dim],
+                                             const int starting_h, const int starting_w,
+                                             const layer_specs specs_struct)
+{
+
+    const int ifms_depth = specs_struct.layer_depth;
+    const int ifms_width = specs_struct.layer_ifm_width;
+    const int filter_dim = specs_struct.filter_size;
+    const int strides = specs_struct.strides;
+    const int filter_dim_minus_strides = filter_dim - strides;
+    const int padding_top = specs_struct.padding_top;
+    const fms_dt layer_ifm_zero_point = specs_struct.layer_ifms_zero_point;
+
+    for (int d = 0; d < ifms_depth; d++)
+    {
+#pragma HLs PIPELINE
+        for (int h = 0; h < filter_dim; h++)
+        {
+            for (int w = 0; w < filter_dim_minus_strides; w++)
+            {
+                conv_dw_communication_buffer_intra[d][h][w] = conv_dw_communication_buffer_intra[d][h][w + strides];
+            }
+            if (h < filter_dim_minus_strides)
+            {
+                if (h + starting_h - padding_top >= 0)
+                {
+                    conv_dw_communication_buffer_intra[d][h][filter_dim - strides] =
+                        conv_dw_communication_buffer_inter[d][h + starting_h - padding_top][starting_w + filter_dim_minus_strides];
+                }
+                else
+                {
+                    conv_dw_communication_buffer_intra[d][h][filter_dim - strides] = layer_ifm_zero_point;
+                }
+            }
+        }
+    }
+}
+
 void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
                                       fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                                                              [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
@@ -295,7 +424,8 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
                                       fms_quantization_scheme first_dw_layer_quantization_params[layer_2_dw_num_fils],
                                       fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                                                                [layer_2_dw_ifm_width],
-                                      const int starting_h)
+                                      int starting_h,
+                                      const int end_h)
 {
 
     const int num_of_ifm_groups_read_each_time =
@@ -305,51 +435,120 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
     fms_dt first_layers_input[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width];
 
 #if HW == _FPGA
-    fill_input_image_groups_buffer(channels, fms_groups_buffer,
-                                   0,
-                                   input_image_num_fms_groups_in_width); // to do
-    input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-                                                        first_layers_input, 0, false,
-                                                        first_conv_layer_specs.layer_ifms_zero_point);
-    fill_input_image_groups_buffer(channels, fms_groups_buffer,
-                                   FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME,
-                                   num_of_ifm_groups_read_each_time); // to do
-    input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-                                                        first_layer_input, FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME, false,
-                                                        first_conv_layer_specs.layer_ifms_zero_point);
+    if (starting_h == 0)
+    {
+        fill_input_image_groups_buffer(channels, fms_groups_buffer,
+                                       0,
+                                       input_image_num_fms_groups_in_width); // to do
+        input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+                                                            first_layers_input, 0, 0,
+                                                            first_conv_layer_specs.layer_ifms_zero_point);
+
+        starting_h += FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME;
+
+        fill_input_image_groups_buffer(channels, fms_groups_buffer,
+                                       FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME,
+                                       num_of_ifm_groups_read_each_time); // to do
+        input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+                                                            first_layer_input, FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME,
+                                                            FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME,
+                                                            first_conv_layer_specs.layer_ifms_zero_point);
+    }
+    else
+    {
+        fill_input_image_groups_buffer(channels, fms_groups_buffer,
+                                       starting_h,
+                                       num_of_ifm_groups_read_each_time); // to do
+        input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+                                                            first_layer_input, starting_h, starting_h % PRE_FIRST_PIPELINE_INPUT_HEIGHT,
+                                                            first_conv_layer_specs.layer_ifms_zero_point);
+    }
 #elif HW == CPU
-    input_image_fill_channels_buffer_cpu(channels, first_layers_input, 0, false, first_conv_layer_specs.layer_ifms_zero_point);
-    input_image_fill_channels_buffer_cpu(channels,
-                                         first_layers_input, FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME, false,
-                                         first_conv_layer_specs.layer_ifms_zero_point);
+    if (starting_h == 0)
+    {
+        input_image_fill_channels_buffer_cpu(channels, first_layers_input, 0, false, first_conv_layer_specs.layer_ifms_zero_point);
+
+        starting_h += FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME;
+
+        input_image_fill_channels_buffer_cpu(channels,
+                                             first_layers_input, FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME,
+                                             FIRST_CONV_LAYER_EXTRA_ROWS_FILLED_FIRST_TIME,
+                                             first_conv_layer_specs.layer_ifms_zero_point);
+    }
+    else
+    {
+        input_image_fill_channels_buffer_cpu(channels,
+                                             first_layers_input, starting_h, starting_h % PRE_FIRST_PIPELINE_INPUT_HEIGHT,
+                                             first_conv_layer_specs.layer_ifms_zero_point);
+    }
+
 #endif
 
     fms_dt first_layer_input_buffer[FIRST_CONV_LAYER_BUFFER_SIZE];
-    fms_dt first_layer_input_buffer_new_cols[FIRST_CONV_LAYER_BUFFER_SIZE];
+    fms_dt first_layer_input_buffer_new_cols[FIRST_CONV_LAYER_NEW_COLS_BUFFER_SIZE];
 
     fms_dt conv_dw_communication_buffer_intra[first_conv_layer_num_fils]
                                              [layer_2_dw_filter_dim][layer_2_dw_filter_dim];
 
     int writing_row = starting_h % layer_2_dw_filter_dim;
+    const int first_conv_layer_filter_dim_minus_strides = first_conv_layer_filter_dim - first_conv_layer_strides;
 
 pre_first_pipeline_layers_mob_v2:
-    for (int h = 0; h < PRE_FIRST_PIPELINE_OUTPUT_HEIGHT / first_conv_layer_strides; h++)
+    for (int h = 0; h < PRE_FIRST_PIPELINE_OUTPUT_HEIGHT; h++)
     {
-        fill_first_cols_of_first_layer_input(first_layers_input, first_layer_input_buffer, h * first_conv_layer_strides);
+        int h_in_first_layer_input_buffer = ((starting_h + (h + 1) * first_conv_layer_strides)) %
+                                            PRE_FIRST_PIPELINE_INPUT_HEIGHT;
+
+        fill_first_cols_of_first_layer_input(first_layers_input, first_layer_input_buffer, h_in_first_layer_input_buffer);
+        fill_first_layer_input_new_cols(first_layers_input, first_layer_input_buffer_new_cols, first_conv_layer_filter_dim_minus_strides,
+                                        h_in_first_layer_input_buffer, first_conv_layer_specs.layer_ifms_zero_point);
         shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols, first_layer_input_buffer);
-        for (int w = 0; w < input_image_dt_width / first_conv_layer_strides; w++)
+        int w = 1;
+        for (; w <= layer_2_dw_filter_dim; w++)
         {
             first_conv_and_dw_layers_pipeline(first_layer_input_buffer, dw_layer_weights,
                                               conv_dw_communication_buffer_inter,
                                               conv_dw_communication_buffer_intra,
                                               pre_first_pipeline_layers_output,
-                                              h, w, writing_row,
+                                              h, w - 1, writing_row,
+                                              first_layer_quantization_params,
+                                              first_dw_layer_quantization_params);
+            fill_first_layer_input_new_cols(first_layers_input, first_layer_input_buffer_new_cols,
+                                            w * first_conv_layer_strides + first_conv_layer_filter_dim_minus_strides,
+                                            h_in_first_layer_input_buffer, first_conv_layer_specs.layer_ifms_zero_point);
+            shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols, first_layer_input_buffer);
+        }
+
+        fill_conv_dw_communication_buffer_intra_first_time(conv_dw_communication_buffer_inter,
+                                                           conv_dw_communication_buffer_intra, h, layer_2_dw_specs);
+
+        for (; w < input_image_dt_width / first_conv_layer_strides; w++)
+        {
+            first_conv_and_dw_layers_pipeline(first_layer_input_buffer, dw_layer_weights,
+                                              conv_dw_communication_buffer_inter,
+                                              conv_dw_communication_buffer_intra,
+                                              pre_first_pipeline_layers_output,
+                                              h, w - 1, writing_row,
                                               first_layer_quantization_params,
                                               first_dw_layer_quantization_params);
             fill_first_layer_input_new_cols(first_layers_input, first_layer_input_buffer_new_cols, w * first_conv_layer_strides,
-                                            h * first_conv_layer_strides, first_conv_layer_specs.layer_ifms_zero_point);
+                                            h_in_first_layer_input_buffer, first_conv_layer_specs.layer_ifms_zero_point);
             shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols, first_layer_input_buffer);
         }
+#if HW == _FPGA
+        fill_input_image_groups_buffer(channels, fms_groups_buffer,
+                                       (starting_h + (h + 1) * first_conv_layer_strides),
+                                       num_of_ifm_groups_read_each_time); // to do
+        input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+                                                            first_layer_input, (starting_h + (h + 1) * first_conv_layer_strides),
+                                                            h_in_first_layer_input_buffer,
+                                                            first_conv_layer_specs.layer_ifms_zero_point);
+#elif HW == CPU
+        input_image_fill_channels_buffer_cpu(channels,
+                                             first_layers_input, (starting_h + (h + 1) * first_conv_layer_strides),
+                                             h_in_first_layer_input_buffer,
+                                             first_conv_layer_specs.layer_ifms_zero_point);
+#endif
         writing_row++;
         if (writing_row == 3)
         {

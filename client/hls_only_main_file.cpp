@@ -22,12 +22,12 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = cyclic factor = main_buffers_partitining_factor
 	//#pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
-#if CHAIN_LENGTH == 9 && MODEL_ID == 2
+#if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25 )
 	_0_1_2_bottlenecks_chain(input_image,
 							 tmp_channels);
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
-#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && !ONLY_SEML
+#elif CHAIN_LENGTH == 6 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_75 ) && !ONLY_SEML
 	_0_1_bottlenecks_chain(input_image,
 						   channels);
 #if DEBUGGING
@@ -53,10 +53,12 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
 	if (!on_chip_weights_filled)
 	{
 		on_chip_weights_filled = true;
+
 #if HW == CPU
 		fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
 #elif HW == _FPGA
@@ -64,15 +66,17 @@ void top_func(
 								  on_chip_weights, 0);
 #endif
 	}
+#endif // #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
+
 #if ONLY_SEML == 0
 
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
-#if CHAIN_LENGTH == 9 && MODEL_ID == 2
+#if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25)
 	_0_1_2_bottlenecks_chain(input_image,
 							 tmp_channels);
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
-#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && !ONLY_SEML
+#elif CHAIN_LENGTH == 6 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25) && !ONLY_SEML
 	_0_1_bottlenecks_chain(input_image,
 						   channels);
 #if DEBUGGING
@@ -83,7 +87,7 @@ void top_func(
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 #else
 	fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
-	pipelined_engines_caller(on_chip_weights, pipelined_engines_input_buffer, channels);
+	pipelined_engines_caller(input_image,on_chip_weights, pipelined_engines_input_buffer, channels);
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);

@@ -1,7 +1,15 @@
 #ifndef PREPARE_WEIGHTS_INPUTS
 #define PREPARE_WEIGHTS_INPUTS
 #include "../model_components/basic_defs/basic_defs_glue.h"
-#include "../model_components/model/headers/model_glue.h"
+#if MODEL_ID == MOB_V2
+#include "../model_components/model/headers/mob_v2_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_5
+#include "../model_components/model/headers/mob_v2_0_5_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_75
+#include "../model_components/model/headers/mob_v2_0_75_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_25
+#include "../model_components/model/headers/mob_v2_0_25_layers_specs.h"
+#endif
 #include "../model_components/model/pipelined_engines/pipelined_engines_specs.h"
 
 #include <fstream>

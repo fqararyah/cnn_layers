@@ -188,6 +188,15 @@ string get_model_prefix()
 	case MOB_V2:
 		model_name = "mob_v2";
 		break;
+	case MOB_V2_0_25:
+		model_name = "mob_v2_0_25";
+		break;
+	case MOB_V2_0_5:
+		model_name = "mob_v2_0_5";
+		break;
+	case MOB_V2_0_75:
+		model_name = "mob_v2_0_75";
+		break;
 	case RESNET50:
 		model_name = "resnet50";
 	default:

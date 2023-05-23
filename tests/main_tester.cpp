@@ -12,8 +12,6 @@ using namespace std;
 // typedef ap_uint<512> weights_grp_dt;
 int main(int argc, char **argv)
 {
-	string num_of_pw_weights_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_num_of_pw_weights.txt";
 
 #if HW == CPU
 	string weights_file =
@@ -22,7 +20,7 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #elif HW == _FPGA
 	string weights_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/off_chip_weights__FPGA.txt";
+		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "off_chip_weights_FPGA.txt";
 #endif
 	string input_images_folder =
 		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
@@ -45,12 +43,11 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_cpu.json";
 #endif
 
-	const int num_of_pw_weights = get_num_of_pw_weights(num_of_pw_weights_file);
 #if HW == _FPGA
 	weights_grp_dt weights[num_of_pw_weights / weights_group_items];
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
-	weights_dt *weights = (weights_dt *)malloc(num_of_pw_weights * weights_dt_width / 8);
+	weights_dt *weights = (weights_dt *)malloc(all_pw_s_weights * weights_dt_width / 8);
 	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
 																	 weights_group_items * weights_dt_width / 8);
 	fms_dt input_image[input_image_depth * input_image_hw];
@@ -125,7 +122,7 @@ int main(int argc, char **argv)
 // 		<< (int)fc_input[81] << " " << (int)fc_input[340] << " ";
 #if MODEL_ID == RESNET50
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_74_fc_specs);
-#elif MODEL_ID == MOB_V2
+#elif MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_68_fc_specs);
 #endif
 			//			dump_ouput(output_folder + ent->d_name, fc_input,

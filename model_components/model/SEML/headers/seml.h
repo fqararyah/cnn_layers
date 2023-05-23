@@ -1,8 +1,12 @@
 #ifndef SEML
 #define SEML
-#include "../../../../tests/test_utils.h"
+
 #if HW == CPU
+#if DEBUGGING
+#include "../../../../tests/test_utils.h"
+#endif
 #include "../../../../client/prepare_weights_and_inputs.h"
+#include <iostream>
 #endif
 #include "../../../utils/utils.h"
 #include "../../../layers/headers/layers_glue.h"
@@ -10,8 +14,6 @@
 //#include "../pipeline/headers/pipeline_glue.h"
 
 //#include "../cnn_functions_v1.h"
-
-#include <iostream>
 
 using namespace std;
 

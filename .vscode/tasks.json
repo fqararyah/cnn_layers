@@ -30,6 +30,7 @@
                 "/media/SSD2TB/wd/cnn_layers/model_components/model/fused_bottlenecks/bottlenecks_chain_0_1_2.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/model/pipelined_engines/pipelined_engines.cpp",
                 "/media/SSD2TB/wd/cnn_layers/model_components/model/pipelined_engines/pipeline_main.cpp",
+                "/media/SSD2TB/wd/cnn_layers/model_components/model/pipelined_engines/pre_first_pipeline_layers.cpp",
                 "/media/SSD2TB/wd/cnn_layers/tests/test_utils.cpp",
                 "/media/SSD2TB/wd/cnn_layers/tests/main_tester.cpp",
                 "-o",

@@ -34,9 +34,9 @@ else:
     import prepare_off_chip_weights
     print('prepare_off_chip_weights done!')
     
-    with open(prepare_off_chip_weights_file, 'r') as src, open(prepare_off_chip_weights_cached_file, 'w') as dst:
-        for line in src:
-            dst.write(line)
+    # with open(prepare_off_chip_weights_file, 'r') as src, open(prepare_off_chip_weights_cached_file, 'w') as dst:
+    #     for line in src:
+    #         dst.write(line)
 #...................................................................................
 prepare_off_chip_weights_file = 'prepare_off_chip_weights_fpga.py'
 prepare_off_chip_weights_cached_file = '__cached_prepare_off_chip_weights_fpga.py'
@@ -49,9 +49,9 @@ else:
     import prepare_off_chip_weights_fpga
     print('prepare_off_chip_weights_fpga done!')
 
-    with open(prepare_off_chip_weights_file, 'r') as src, open(prepare_off_chip_weights_cached_file, 'w') as dst:
-        for line in src:
-            dst.write(line)
+    # with open(prepare_off_chip_weights_file, 'r') as src, open(prepare_off_chip_weights_cached_file, 'w') as dst:
+    #     for line in src:
+    #         dst.write(line)
 #...................................................................................
 
 import on_chip_conv_and_pw_weights_gen

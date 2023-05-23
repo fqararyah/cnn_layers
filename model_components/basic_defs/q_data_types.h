@@ -32,8 +32,11 @@ const int weights_group_items = 1;
 //fms
 const int fms_dt_width = 8;
 const int fms_dt_offset = fms_dt_width - 1;
+#if HW == _FPGA
 const int input_image_group_items = 512 / fms_dt_width;
-
+#elif HW == CPU
+const int input_image_group_items = 1;
+#endif
 //scales, zero points, and biases
 const int scales_bit_width = 24;//48
 const int scales_integer_part_width = 0;

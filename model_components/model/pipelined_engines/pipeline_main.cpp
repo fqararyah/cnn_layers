@@ -153,12 +153,21 @@ void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_la
     for (int f = 0; f < first_conv_layer_num_fils; f++)
     {
         fms_quantization_scheme normalization;
+        if (starting_offset == 0)
+        {
+            normalization.ofm_scale = first_conv_layer_specs.layer_ofms_scale;
+            normalization.ofm_zero_point = first_conv_layer_specs.layer_ofms_zero_point;
+        } else{
+            normalization.ofm_scale = layer_2_dw_specs.layer_ofms_scale;
+            normalization.ofm_zero_point = layer_2_dw_specs.layer_ofms_zero_point;
+        }
+
         normalization.fused_scales =
             pipe_fused_scales[f + starting_offset];
         normalization.fused_scales_log_2_shift =
-            pipe_fused_scales_log_2_shifts[f + + starting_offset];
+            pipe_fused_scales_log_2_shifts[f + +starting_offset];
         normalization.relu_6_fused_scale =
-            pipe_fused_scales_log_2_shifts[f + + starting_offset];
+            pipe_fused_scales_log_2_shifts[f + +starting_offset];
         normalization.fused_zero_point =
             pipe_fused_zero_points[f + starting_offset];
         normalization.layer_0_relu_6_fused_scale =
@@ -168,7 +177,8 @@ void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_la
     }
 }
 
-void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
+void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
+                              weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
                               fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
@@ -216,6 +226,9 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     fill_first_conv_layers_quantization_params(first_layer_quantization_params, 0);
     fill_first_conv_layers_quantization_params(first_dw_layer_quantization_params, first_conv_layer_num_fils);
 
+    fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
+                                             [layer_2_dw_ifm_width];
+
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = PW_BUFFER_HEIGHT - rows_to_fill_first_time;
     const int start_filling_offset_in_buffer_non_first = 0;
@@ -227,6 +240,17 @@ void pipelined_engines_caller(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS
     int dw_9_odd_even = 0;
     int dw_14_odd_even = 0;
     //######################################################
+    fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
+                                           [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
+                                           [PRE_FIRST_PIPELINE_OUTPUT_WIDTH];
+    pre_first_pipeline_layers_mob_v2(input_image,
+                                     pre_first_pipeline_layers_output,
+                                     dw_layer_weights,
+                                     first_layer_quantization_params,
+                                     first_dw_layer_quantization_params,
+                                     conv_dw_communication_buffer_inter,
+                                     0,
+                                     1);
 #if HW == CPU
     fill_pipe_layer_input_buffer(
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",

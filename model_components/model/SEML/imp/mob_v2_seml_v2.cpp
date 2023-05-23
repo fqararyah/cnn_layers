@@ -182,6 +182,10 @@ pw_conv(off_chip_weights, result , channels, tmp_channels, 65, layer_65_pw_specs
 pw_conv(off_chip_weights, channels , result, tmp_channels, 66, layer_66_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_66.txt",
+ result, layer_66_pw_specs);
+#endif
 // 	//end_code_generation
 #if MODEL_ID == RESNET50
     avgpool(channels, fc_input, layer_73_avgpool_specs);

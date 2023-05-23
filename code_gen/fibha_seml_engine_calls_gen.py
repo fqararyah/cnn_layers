@@ -49,23 +49,6 @@ def replace(replacement_dic, block):
 
     return block
 
-
-defines_str = ''
-file_replacement = ''
-if cgc.DEBUGGING:
-    file_replacement += debugging_includes_block
-with open(in_out_header_file, 'r') as f:
-    for line in f:
-        if '#ifndef' in line or '#define ' in line:
-            defines_str = defines_str + line
-        else:
-            if len(line.replace(' ', '').replace('\t', '').replace('\n', '')) > 1 and line in debugging_includes_block:
-                continue
-            file_replacement += line
-
-with open(in_out_header_file, 'w') as f:
-    f.write(defines_str + file_replacement)
-
 file_replacement = ''
 in_a_code_gen_area = False
 insert_index = -1

@@ -44,7 +44,7 @@ fms_dt pipelined_engines::first_layer_conv_kernel(fms_dt ifms_buffer[FIRST_CONV_
 {
 #pragma HLS INLINE
 
-    pss_dt pss;
+    pss_dt pss = 0;
     fms_dt result = 0;
 
     const int ifms_buffer_w = first_conv_layer_specs.filter_size;

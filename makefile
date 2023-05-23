@@ -1,6 +1,12 @@
 zbc: ./model_components/utils/utils.cpp \
 	./model_components/model/SEML/imp/mob_v2_seml.cpp \
 	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_5_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_5_seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_75_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_75_seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_25_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_25_seml_v2.cpp \
 	./model_components/model/SEML/imp/resnet50_seml_v2.cpp \
 	./model_components/layers/impl/pw_conv_v1_2.cpp \
 	./model_components/layers/impl/pw_conv_v2.cpp \
@@ -22,11 +28,18 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/model/fused_bottlenecks/bottlenecks_chain_0_1_2.cpp \
 	./model_components/model/pipelined_engines/pipelined_engines.cpp \
 	./model_components/model/pipelined_engines/pipeline_main.cpp \
+	./model_components/model/pipelined_engines/pre_first_pipeline_layers.cpp \
 	./tests/test_utils.cpp \
 	./tests/main_tester.cpp
 	g++ -o main_tester ./model_components/utils/utils.cpp \
 	./model_components/model/SEML/imp/mob_v2_seml.cpp \
 	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_5_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_5_seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_75_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_75_seml_v2.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_25_seml.cpp \
+	./model_components/model/SEML/imp/mob_v2_0_25_seml_v2.cpp \
 	./model_components/model/SEML/imp/resnet50_seml_v2.cpp \
 	./model_components/layers/impl/pw_conv_v1_2.cpp \
 	./model_components/layers/impl/pw_conv_v2.cpp \
@@ -48,5 +61,6 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/model/fused_bottlenecks/bottlenecks_chain_0_1_2.cpp \
 	./model_components/model/pipelined_engines/pipelined_engines.cpp \
 	./model_components/model/pipelined_engines/pipeline_main.cpp \
+	./model_components/model/pipelined_engines/pre_first_pipeline_layers.cpp \
 	./tests/test_utils.cpp \
 	./tests/main_tester.cpp

@@ -1,6 +1,7 @@
 #include "../../basic_defs/simulation_constants.h"
 
-#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH >= 6 && MODEL_ID == 2 && ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH >= 6 && \
+(MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25) && ! ONLY_SEML
 
 #include "bottleneck.h"
 

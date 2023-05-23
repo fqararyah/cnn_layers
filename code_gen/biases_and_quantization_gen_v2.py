@@ -192,7 +192,7 @@ with open(h_file, 'w') as wf:
                     ofms_scale
                 fused_scales.append(ofm_ifm_weigh_fused_scale)
                 assert(ofm_ifm_weigh_fused_scale <
-                       1) or 'mob_v1' in cgc.MODEL_NAME or 'mob_v2_0_5' in cgc.MODEL_NAME
+                       1) or 'mob_v1' in cgc.MODEL_NAME or 'mob_v2_0_' in cgc.MODEL_NAME
                 assert(ofm_ifm_weigh_fused_scale > 0)
                 current_log = math.log2(fused_scales[-1]) + 1
                 abs_current_log_int = abs(int(current_log))
@@ -214,7 +214,7 @@ with open(h_file, 'w') as wf:
 
                     assert(relu_6_fused_scales[-1] > 256) or \
                         utils.NET_PREFIX in [
-                            'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5']
+                            'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5', 'mob_v2_0_75']
 
         if ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
                 or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 1:

@@ -11,6 +11,24 @@
 #else
 #include "../model/headers/mob_v2_on_chip_weights_v2.h"
 #endif
+#elif MODEL_ID == MOB_V2_0_5
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+#include "../model/headers/mob_v2_0_5_on_chip_weights.h"
+#else
+#include "../model/headers/mob_v2_0_5_on_chip_weights_v2.h"
+#endif
+#elif MODEL_ID == MOB_V2_0_25
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+#include "../model/headers/mob_v2_0_25_on_chip_weights.h"
+#else
+#include "../model/headers/mob_v2_0_25_on_chip_weights_v2.h"
+#endif
+#elif MODEL_ID == MOB_V2_0_75
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+#include "../model/headers/mob_v2_0_75_on_chip_weights.h"
+#else
+#include "../model/headers/mob_v2_0_75_on_chip_weights_v2.h"
+#endif
 #endif
 
 #include "../model/headers/model_glue.h"
