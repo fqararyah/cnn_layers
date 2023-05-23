@@ -522,7 +522,7 @@ pre_first_pipeline_layers_mob_v2:
         fill_conv_dw_communication_buffer_intra_first_time(conv_dw_communication_buffer_inter,
                                                            conv_dw_communication_buffer_intra, h, layer_2_dw_specs);
 
-        for (; w < input_image_dt_width / first_conv_layer_strides; w++)
+        for (; w < input_image_width / first_conv_layer_strides; w++)
         {
             first_conv_and_dw_layers_pipeline(first_layer_input_buffer, dw_layer_weights,
                                               conv_dw_communication_buffer_inter,
@@ -531,7 +531,8 @@ pre_first_pipeline_layers_mob_v2:
                                               h, w - 1, writing_row,
                                               first_layer_quantization_params,
                                               first_dw_layer_quantization_params);
-            fill_first_layer_input_new_cols(first_layers_input, first_layer_input_buffer_new_cols, w * first_conv_layer_strides,
+            fill_first_layer_input_new_cols(first_layers_input, first_layer_input_buffer_new_cols,
+                                            w * first_conv_layer_strides + first_conv_layer_filter_dim_minus_strides,
                                             h_in_first_layer_input_buffer, first_conv_layer_specs.layer_ifms_zero_point);
             shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols, first_layer_input_buffer);
         }
