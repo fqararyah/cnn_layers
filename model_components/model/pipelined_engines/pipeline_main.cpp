@@ -157,7 +157,9 @@ void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_la
         {
             normalization.ofm_scale = first_conv_layer_specs.layer_ofms_scale;
             normalization.ofm_zero_point = first_conv_layer_specs.layer_ofms_zero_point;
-        } else{
+        }
+        else
+        {
             normalization.ofm_scale = layer_2_dw_specs.layer_ofms_scale;
             normalization.ofm_zero_point = layer_2_dw_specs.layer_ofms_zero_point;
         }
@@ -174,6 +176,21 @@ void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_la
             pipe_relu_6_fused_scales[f + starting_offset];
 
         first_layer_quantization_params[f] = normalization;
+    }
+}
+
+void padd_top_conv_dw_communication_buffer_inter(fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
+                                                                                          [layer_2_dw_ifm_width])
+{
+    for (int d = 0; d < first_conv_layer_num_fils; d++)
+    {
+        for (int h = 0; h < layer_2_dw_specs.padding_top; h++)
+        {
+            for (int w = 0; w < layer_2_dw_ifm_width; w++)
+            {
+                conv_dw_communication_buffer_inter[d][h][w] = layer_2_dw_specs.layer_ifms_zero_point;
+            }
+        }
     }
 }
 
@@ -228,6 +245,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                              [layer_2_dw_ifm_width];
+
+    padd_top_conv_dw_communication_buffer_inter(conv_dw_communication_buffer_inter);
 
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = PW_BUFFER_HEIGHT - rows_to_fill_first_time;
