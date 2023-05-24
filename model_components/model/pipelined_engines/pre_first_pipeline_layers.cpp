@@ -343,7 +343,7 @@ void first_conv_and_dw_layers_pipeline(fms_dt first_layer_input[FIRST_CONV_LAYER
     int dw_starting_h = starting_h;
     if (abs_conv_starting_h < layer_2_dw_filter_dim - layer_2_dw_specs.strides)
     {
-       dw_starting_h = starting_h - (layer_2_dw_filter_dim - layer_2_dw_specs.padding_top - 1);
+        dw_starting_h = starting_h - (layer_2_dw_filter_dim - layer_2_dw_specs.padding_top - 1);
     }
     const int dw_starting_w = starting_w - (layer_2_dw_filter_dim - layer_2_dw_specs.padding_left);
 
@@ -473,7 +473,7 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
     fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * INPUT_IMAGE_ROWS_FILLED_EACH_TIME];
     fms_dt first_layers_input[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width];
 
-    int conv_dw_comm_buffer_reading_row = 0;
+    int conv_dw_comm_buffer_reading_row;
     const int first_conv_layer_filter_dim_minus_strides = first_conv_layer_filter_dim - first_conv_layer_strides;
     const int layer_2_dw_padding_left = layer_2_dw_specs.padding_left;
     const int layer_2_dw_padding_top = layer_2_dw_specs.padding_top;
@@ -592,14 +592,14 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
         {
             conv_dw_comm_buffer_writing_row = 0;
         }
-        conv_dw_comm_buffer_reading_row = conv_dw_comm_buffer_writing_row -
-                                          (layer_2_dw_filter_dim - layer_2_dw_specs.padding_top);
-        if (conv_dw_comm_buffer_reading_row < 0)
-        {
-            conv_dw_comm_buffer_reading_row = conv_dw_comm_buffer_reading_row + 3;
-        }
     }
 
+    conv_dw_comm_buffer_reading_row = conv_dw_comm_buffer_writing_row -
+                                      (layer_2_dw_filter_dim - layer_2_dw_specs.padding_top);
+    if (conv_dw_comm_buffer_reading_row < 0)
+    {
+        conv_dw_comm_buffer_reading_row = conv_dw_comm_buffer_reading_row + 3;
+    }
 
 pre_first_pipeline_layers_mob_v2:
     for (; (conv_h - 1) * first_conv_layer_strides + starting_reading_h < end_reading_h; conv_h++)

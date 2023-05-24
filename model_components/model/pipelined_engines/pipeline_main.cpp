@@ -280,6 +280,15 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                      5,
                                      5 + PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
 
+    pre_first_pipeline_layers_mob_v2(input_image,
+                                     pre_first_pipeline_layers_output,
+                                     dw_layer_weights,
+                                     first_layer_quantization_params,
+                                     first_dw_layer_quantization_params,
+                                     conv_dw_communication_buffer_inter,
+                                     5 + PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides,
+                                     5 + 2 * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
+
 #if HW == CPU
     fill_pipe_layer_input_buffer(
         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
