@@ -45,6 +45,8 @@ const int MAX_FILTER_DIM_STRIDE_1 = 3;
 const int MAX_FILTER_DIM_STRIDE_2 = 3;
 const int MAX_DW_LAYER_D = 960;
 
+const int ON_CHIP_WEIGHTS_PORTS = 8;
+
 // assumptions
 // CHANNELS_TILE_WIDTH = CHANNELS_TILE_HEIGHT
 // CHANNELS_TILE_WIDTH is even

@@ -248,6 +248,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     padd_top_conv_dw_communication_buffer_inter(conv_dw_communication_buffer_inter);
 
+    fms_dt first_layers_input[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width];
+
     const int rows_to_fill_first_time = 1;
     const int start_filling_offset_in_buffer_first_time = PW_BUFFER_HEIGHT - rows_to_fill_first_time;
     const int start_filling_offset_in_buffer_non_first = 0;
@@ -268,32 +270,31 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                      first_layer_quantization_params,
                                      first_dw_layer_quantization_params,
                                      conv_dw_communication_buffer_inter,
+                                     first_layers_input,
                                      0,
-                                     5);
-    
-    pre_first_pipeline_layers_mob_v2(input_image,
-                                     pre_first_pipeline_layers_output,
-                                     dw_layer_weights,
-                                     first_layer_quantization_params,
-                                     first_dw_layer_quantization_params,
-                                     conv_dw_communication_buffer_inter,
-                                     5,
-                                     5 + PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
+                                     5 + 4 * first_conv_layer_strides);
 
-    pre_first_pipeline_layers_mob_v2(input_image,
-                                     pre_first_pipeline_layers_output,
-                                     dw_layer_weights,
-                                     first_layer_quantization_params,
-                                     first_dw_layer_quantization_params,
-                                     conv_dw_communication_buffer_inter,
-                                     5 + PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides,
-                                     5 + 2 * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
+    // #if HW == CPU
+    //     fill_pipe_layer_input_buffer(
+    //         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
+    //         pipelined_engines_input_buffer, 0, start_filling_offset_in_buffer_first_time, layer_3_pw_specs);
+    // #endif
 
-#if HW == CPU
-    fill_pipe_layer_input_buffer(
-        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
-        pipelined_engines_input_buffer, 0, start_filling_offset_in_buffer_first_time, layer_3_pw_specs);
-#endif
+    for (int d = 0; d < layer_3_pw_depth; d++)
+    {
+        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        {
+            if (h + start_filling_offset_in_buffer_first_time < PW_BUFFER_HEIGHT)
+            {
+                for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+                {
+                    pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_first_time][w] =
+                        pre_first_pipeline_layers_output[d][h][w];
+                }
+            }
+        }
+    }
+
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
                result_buffer,
@@ -334,12 +335,53 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                dw_6_odd_even);
     dw_6_odd_even = 1 - dw_6_odd_even;
     //######################################################
-#if HW == CPU
-    fill_pipe_layer_input_buffer(
-        "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
-        pipelined_engines_input_buffer, rows_to_fill_first_time,
-        start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
-#endif
+    //   fms_dt pipelined_engines_input_buffer_tmp[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
+    // #if HW == CPU
+    //     fill_pipe_layer_input_buffer(
+    //         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
+    //         pipelined_engines_input_buffer_tmp, rows_to_fill_first_time,
+    //         start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
+    // #endif
+
+    // pre_first_pipeline_layers_mob_v2(input_image,
+    //                                  pre_first_pipeline_layers_output,
+    //                                  dw_layer_weights,
+    //                                  first_layer_quantization_params,
+    //                                  first_dw_layer_quantization_params,
+    //                                  conv_dw_communication_buffer_inter,
+    //                                  first_layers_input,
+    //                                  5,
+    //                                  5 + 4 * first_conv_layer_strides);
+
+    for (int d = 0; d < layer_3_pw_depth; d++)
+    {
+        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        {
+            if (h + start_filling_offset_in_buffer_non_first < PW_BUFFER_HEIGHT)
+            {
+                for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+                {
+                    pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_non_first][w] =
+                        pre_first_pipeline_layers_output[d][h + rows_to_fill_first_time][w];
+                }
+            }
+        }
+    }
+
+    // for (int d = 0; d < layer_3_pw_depth; d++)
+    // {
+    //     for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+    //     {
+    //         for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+    //         {
+    //             if (pipelined_engines_input_buffer[d][h][w] != pipelined_engines_input_buffer_tmp[d][h][w])
+    //             {
+    //                 cout << d << " " << h << " " << w << " " << (int)pipelined_engines_input_buffer[d][h][w]
+    //                      << " " << (int)pipelined_engines_input_buffer_tmp[d][h][w] << "\n";
+    //             }
+    //         }
+    //     }
+    // }
 
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
@@ -390,6 +432,7 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
             result_buffer[d][PW_BUFFER_HEIGHT - 1][w] = result_buffer[d][1][w];
         }
     }
+
     pw_dw_conv(on_chip_weights,
                pipe_dw_weights_3x3,
                pipelined_engines_input_buffer,
@@ -490,16 +533,43 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     for (int h = 0; h < first_layer_in_second_part.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
     {
+        pre_first_pipeline_layers_mob_v2(input_image,
+                                         pre_first_pipeline_layers_output,
+                                         dw_layer_weights,
+                                         first_layer_quantization_params,
+                                         first_dw_layer_quantization_params,
+                                         conv_dw_communication_buffer_inter,
+                                         first_layers_input,
+                                         5 + 4 * first_conv_layer_strides +
+                                             (h / pipe_rows_produced_in_a_pass) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides,
+                                         5 + 4 * first_conv_layer_strides +
+                                             (1 + (h / pipe_rows_produced_in_a_pass)) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
         for (int o_i = 0; o_i < 2; o_i++)
         { // todo change 2
             for (int i = 0; i < 2; i++)
             { // todo change 2
-#if HW == CPU
-                fill_pipe_layer_input_buffer(
-                    "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
-                    pipelined_engines_input_buffer, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
-                    start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
-#endif
+                // #if HW == CPU
+                //                 fill_pipe_layer_input_buffer(
+                //                     "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_3.txt",
+                //                     pipelined_engines_input_buffer, h * 4 + (o_i * 2 + i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase,
+                //                     start_filling_offset_in_buffer_non_first, layer_3_pw_specs);
+                // #endif
+
+                for (int d = 0; d < layer_3_pw_depth; d++)
+                {
+                    for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+                    {
+                        if (h + start_filling_offset_in_buffer_non_first < PW_BUFFER_HEIGHT)
+                        {
+                            for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+                            {
+                                pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_non_first][w] =
+                                    pre_first_pipeline_layers_output[d][h +
+                                                                        (o_i * 2 + i) * pipe_rows_produced_in_a_pass][w];
+                            }
+                        }
+                    }
+                }
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
                            result_buffer,

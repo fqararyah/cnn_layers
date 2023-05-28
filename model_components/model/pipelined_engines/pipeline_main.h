@@ -21,6 +21,7 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
                                       fms_quantization_scheme first_dw_layer_quantization_params[layer_2_dw_num_fils],
                                       fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                                                                [layer_2_dw_ifm_width],
+                                      fms_dt first_layers_input[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
                                       const int starting_h,
                                       const int end_h);
 

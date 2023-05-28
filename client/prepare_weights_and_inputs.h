@@ -10,7 +10,10 @@
 #elif MODEL_ID == MOB_V2_0_25
 #include "../model_components/model/headers/mob_v2_0_25_layers_specs.h"
 #endif
+
+#if HW == CPU
 #include "../model_components/model/pipelined_engines/pipelined_engines_specs.h"
+#endif
 
 #include <fstream>
 #if HW == _FPGA
@@ -61,9 +64,11 @@ void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH]
 void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 							 const layer_specs layer_specs_struct);
 
+#if HW == CPU
 void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
 								  const int starting_h, const int start_filling_offset_in_buffer,
 								  const layer_specs layer_specs_struct);
+#endif
 
 void glue_on_chip_weights_cpu(string file_name,
 				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
