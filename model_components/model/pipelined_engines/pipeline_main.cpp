@@ -245,6 +245,7 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                              [layer_2_dw_ifm_width];
+#pragma HLS ARRAY_PARTITION variable = conv_dw_communication_buffer_inter type = complete dim = 2
 
     padd_top_conv_dw_communication_buffer_inter(conv_dw_communication_buffer_inter);
 

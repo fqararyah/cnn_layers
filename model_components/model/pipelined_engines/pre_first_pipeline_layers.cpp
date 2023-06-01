@@ -401,12 +401,12 @@ void fill_conv_dw_communication_buffer_intra(
 	const fms_dt layer_ifm_zero_point = specs_struct.layer_ifms_zero_point;
 
 	for (int d = 0; d < ifms_depth; d++) {
-#pragma HLs PIPELINE
-		for (int h = 0; h < filter_dim; h++) {
+#pragma HLS PIPELINE
+		for (int h = 0; h < MAX_DW_FILTER_DIM_IN_PIPE; h++) {
 #pragma HLS UNROLL
-			for (int w = MIN_FILTER_MINUS_STRIDES; w < filter_dim; w++) {
+			for (int w = MIN_FILTER_MINUS_STRIDES; w < MAX_DW_FILTER_DIM_IN_PIPE; w++) {
 #pragma HLS UNROLL
-				if (w >= filter_dim_minus_strides) {
+				if (w >= filter_dim_minus_strides && h < filter_dim) {
 					if (starting_w + w - filter_dim_minus_strides
 							< layer_2_dw_ifm_width) {
 						if (starting_h + h < layer_2_dw_filter_dim) {
