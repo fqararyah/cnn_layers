@@ -33,37 +33,33 @@ void input_image_fill_row_from_groups_buffer(
 				* INPUT_IMAGE_ROWS_FILLED_EACH_TIME],
 		fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
 		int row, const int channels_buffer_start_filling_h) {
-#pragma HLS INLINE
+#pragma HLS INLINE off
 
 	const int start_filling_offset = row * input_image_num_fms_groups_in_width;
-	xxx_loop: for (int o_w = 0; o_w < input_image_num_fms_groups_in_width;
-			o_w++) {
-#pragma HLS PIPELINE off
+	for (int o_w = 0; o_w < input_image_num_fms_groups_in_width; o_w++) {
 		const int o_w_offset = o_w * input_image_group_items;
 		for (int d = 0; d < input_image_depth; d++) {
-#pragma HLS UNROLL
 			fms_grp_dt chunck = fms_groups_buffer[d][start_filling_offset + o_w];
-			for (int w = 0; w < input_image_group_items; w++)
-				xxy_loop: {
-#pragma HLS PIPELINE off
-					if (o_w_offset + w < input_image_width) {
+			for (int w = 0; w < input_image_group_items; w++) {
+#pragma HLS PIPELINE
+				if (o_w_offset + w < input_image_width) {
 #if HW == _FPGA
-						if (channels_buffer_start_filling_h + row
-								< PRE_FIRST_PIPELINE_INPUT_HEIGHT) {
-							channels_buffer_0[d][channels_buffer_start_filling_h
-									+ row][o_w_offset + w] = (fms_dt) chunck(
-									w * fms_dt_width + fms_dt_offset,
-									w * fms_dt_width);
-						} else {
-							channels_buffer_0[d][channels_buffer_start_filling_h
-									+ row - PRE_FIRST_PIPELINE_INPUT_HEIGHT][o_w_offset
-									+ w] = (fms_dt) chunck(
-									w * fms_dt_width + fms_dt_offset,
-									w * fms_dt_width);
-						}
-#endif
+					if (channels_buffer_start_filling_h + row
+							< PRE_FIRST_PIPELINE_INPUT_HEIGHT) {
+						channels_buffer_0[d][channels_buffer_start_filling_h
+								+ row][o_w_offset + w] = (fms_dt) chunck(
+								w * fms_dt_width + fms_dt_offset,
+								w * fms_dt_width);
+					} else {
+						channels_buffer_0[d][channels_buffer_start_filling_h
+								+ row - PRE_FIRST_PIPELINE_INPUT_HEIGHT][o_w_offset
+								+ w] = (fms_dt) chunck(
+								w * fms_dt_width + fms_dt_offset,
+								w * fms_dt_width);
 					}
+#endif
 				}
+			}
 		}
 	}
 }
@@ -92,7 +88,7 @@ void input_image_fill_row_from_groups_buffer(
 void input_image_padd_bottom_channels_buffer_rows(
 		fms_dt channels_buffer_0[input_image_depth][PRE_FIRST_PIPELINE_INPUT_HEIGHT][input_image_width],
 		const int padding_starting_h, const fms_dt zero_point) {
-#pragma HLS INLINE
+#pragma HLS INLINE off
 
 	for (int w = 0; w < input_image_width; w++) {
 #pragma HLS PIPELINE
@@ -121,26 +117,23 @@ void input_image_fill_channels_buffer_from_groups_buffer(
 		const fms_dt zero_point) {
 #pragma HLS INLINE off
 
-//    const int rows_to_shift = PRE_FIRST_PIPELINE_INPUT_HEIGHT - INPUT_IMAGE_ROWS_FILLED_EACH_TIME;
-//    // if (shift)
-//    // {
-//    //     input_image_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
-//    // }
-//    // const int channels_buffer_start_filling_h =
-//    //     starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
-//    for (int h = 0; h < INPUT_IMAGE_ROWS_FILLED_EACH_TIME; h++)
-//    {
-//        if (starting_h + h < input_image_height)
-//        {
-//            input_image_fill_row_from_groups_buffer(fms_groups_buffer,
-//                                                    channels_buffer_0, h, channels_buffer_start_filling_h);
-//        }
-//        else
-//        {
-//            input_image_padd_bottom_channels_buffer_rows(channels_buffer_0, channels_buffer_start_filling_h + h,
-//                                                         zero_point);
-//        }
-//    }
+	const int rows_to_shift = PRE_FIRST_PIPELINE_INPUT_HEIGHT
+			- INPUT_IMAGE_ROWS_FILLED_EACH_TIME;
+	// if (shift)
+	// {
+	//     input_image_shift_channels_buffer_rows(channels_buffer_0, rows_to_shift);
+	// }
+	// const int channels_buffer_start_filling_h =
+	//     starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
+	for (int h = 0; h < INPUT_IMAGE_ROWS_FILLED_EACH_TIME; h++) {
+		if (starting_h + h < input_image_height) {
+			input_image_fill_row_from_groups_buffer(fms_groups_buffer,
+					channels_buffer_0, h, channels_buffer_start_filling_h);
+		} else {
+			input_image_padd_bottom_channels_buffer_rows(channels_buffer_0,
+					channels_buffer_start_filling_h + h, zero_point);
+		}
+	}
 }
 
 void fill_first_cols_of_first_layer_input(
@@ -187,8 +180,11 @@ void fill_first_layer_input_new_cols(
 	const int buffer_hw = first_conv_layer_filter_dim
 			* first_conv_layer_strides;
 	for (int d = 0; d < input_image_depth; d++) {
+#pragma HLS PIPELINE
 		for (int h = 0; h < first_conv_layer_filter_dim; h++) {
+#pragma HLS UNROLL
 			for (int w = 0; w < first_conv_layer_strides; w++) {
+#pragma HLS UNROLL
 				if (h + starting_h < PRE_FIRST_PIPELINE_INPUT_HEIGHT) {
 					if (starting_w + w < input_image_width) {
 						first_layer_input_new_cols[d * buffer_hw
@@ -395,6 +391,7 @@ void fill_conv_dw_communication_buffer_intra(
 		fms_dt conv_dw_communication_buffer_intra[first_conv_layer_num_fils][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
 		const int starting_h, const int starting_w,
 		const layer_specs specs_struct) {
+#pragma HLS INLINE off
 
 	const int ifms_depth = specs_struct.layer_depth;
 	const int ifms_width = specs_struct.layer_ifm_width;
@@ -406,23 +403,27 @@ void fill_conv_dw_communication_buffer_intra(
 	for (int d = 0; d < ifms_depth; d++) {
 #pragma HLs PIPELINE
 		for (int h = 0; h < filter_dim; h++) {
-			for (int w = filter_dim_minus_strides; w < filter_dim; w++) {
-				if (starting_w + w - filter_dim_minus_strides
-						< layer_2_dw_ifm_width) {
-					if (starting_h + h < layer_2_dw_filter_dim) {
-						conv_dw_communication_buffer_intra[d][h][w] =
-								conv_dw_communication_buffer_inter[d][h
-										+ starting_h][starting_w + w
-										- filter_dim_minus_strides];
+#pragma HLS UNROLL
+			for (int w = MIN_FILTER_MINUS_STRIDES; w < filter_dim; w++) {
+#pragma HLS UNROLL
+				if (w >= filter_dim_minus_strides) {
+					if (starting_w + w - filter_dim_minus_strides
+							< layer_2_dw_ifm_width) {
+						if (starting_h + h < layer_2_dw_filter_dim) {
+							conv_dw_communication_buffer_intra[d][h][w] =
+									conv_dw_communication_buffer_inter[d][h
+											+ starting_h][starting_w + w
+											- filter_dim_minus_strides];
+						} else {
+							conv_dw_communication_buffer_intra[d][h][w] =
+									conv_dw_communication_buffer_inter[d][h
+											+ starting_h - layer_2_dw_filter_dim][starting_w
+											+ w - filter_dim_minus_strides];
+						}
 					} else {
 						conv_dw_communication_buffer_intra[d][h][w] =
-								conv_dw_communication_buffer_inter[d][h
-										+ starting_h - layer_2_dw_filter_dim][starting_w
-										+ w - filter_dim_minus_strides];
+								layer_ifm_zero_point;
 					}
-				} else {
-					conv_dw_communication_buffer_intra[d][h][w] =
-							layer_ifm_zero_point;
 				}
 			}
 		}
@@ -586,7 +587,8 @@ void pre_first_pipeline_layers_mob_v2(
 		conv_dw_comm_buffer_reading_row = conv_dw_comm_buffer_reading_row + 3;
 	}
 
-	pre_first_pipeline_layers_mob_v2: for (int h = 0; h < PRE_FIRST_PIPELINE_OUTPUT_HEIGHT; h++) {
+	pre_first_pipeline_layers_mob_v2: for (int h = 0;
+			h < PRE_FIRST_PIPELINE_OUTPUT_HEIGHT; h++) {
 		int h_in_first_layer_input_buffer = ((starting_reading_h
 				+ conv_h * first_conv_layer_strides))
 				% PRE_FIRST_PIPELINE_INPUT_HEIGHT;
@@ -647,12 +649,12 @@ void pre_first_pipeline_layers_mob_v2(
 							+ first_conv_layer_filter_dim_minus_strides,
 					h_in_first_layer_input_buffer,
 					first_conv_layer_specs.layer_ifms_zero_point);
+			shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols,
+					first_layer_input_buffer);
 			fill_conv_dw_communication_buffer_intra(
 					conv_dw_communication_buffer_inter,
 					conv_dw_communication_buffer_intra,
 					conv_dw_comm_buffer_reading_row, w, layer_2_dw_specs);
-			shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols,
-					first_layer_input_buffer);
 			first_layer_input_filling_w++;
 			w++;
 		}
