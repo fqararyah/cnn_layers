@@ -190,7 +190,7 @@ pw_conv(off_chip_weights, channels , result, tmp_channels, 66, layer_66_pw_specs
 #if MODEL_ID == RESNET50
     avgpool(channels, fc_input, layer_73_avgpool_specs);
 #elif MODEL_ID == MOB_V2
-    avgpool(channels, fc_input, layer_67_avgpool_specs);
+    avgpool(result, fc_input, layer_67_avgpool_specs);
 #endif
     // fc_layer(fc_weights, fc_input, fc_output);
 }

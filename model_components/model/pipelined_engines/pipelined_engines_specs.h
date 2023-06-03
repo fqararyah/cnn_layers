@@ -6,12 +6,14 @@ namespace pipelined_engines
     const int PARALLELISM_PW_OFMS = 24;
     const int PARALLELISM_PW_IFMS = 0; // no parallelism
     const int PARALLELISM_PW_H = 4;
-    const int PARALLELISM_PW_W = 1;
+    const int PARALLELISM_PW_W = 2;
 
     const int MAX_PW_BUFFER_DEPTH = 144;
     const int MAX_PW_BUFFER_WIDTH = 112;
     const int PW_BUFFER_HEIGHT = PARALLELISM_PW_H;
     const int PW_BUFFER_WIDTH = 2;
+
+    const int PIPELINE_TMP_CHANNELS_HEIGHT = PW_BUFFER_HEIGHT + 1;
 
     const int PARALLELISM_DW_OFMS = 0;
     const int PARALLELISM_DW_IFMS = 0;
