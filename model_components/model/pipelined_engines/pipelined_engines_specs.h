@@ -41,7 +41,7 @@ namespace pipelined_engines
     const int STRIDES_PRODUCT_IN_PIPELINE = 8; // TODO automate
 
     const int PRE_FIRST_PIPELINE_OUTPUT_DEPTH = layer_2_dw_depth;
-    const int PRE_FIRST_PIPELINE_OUTPUT_HEIGHT = 16;//TODO
+    const int PRE_FIRST_PIPELINE_OUTPUT_HEIGHT = 8;//TODO
     const int PRE_FIRST_PIPELINE_OUTPUT_WIDTH = layer_2_dw_ifm_width;
 
     const int INPUT_IMAGE_ROWS_FILLED_EACH_TIME = first_conv_layer_strides * 1; // 1 is strides of the first dw layer

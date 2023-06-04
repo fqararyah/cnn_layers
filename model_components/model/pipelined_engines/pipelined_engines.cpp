@@ -147,22 +147,22 @@ void pipelined_engines::load_pw_weights(
     {
         int current_filling_weights_offset = filling_weights_offset + filter_g_index * layer_depth;
 
-        for (int filter_index = 0; filter_index < ON_CHIP_WEIGHTS_PORTS;
-             filter_index++)
+        for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
         {
-            //#pragma HLS UNROLL
-            if (filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index + starting_filter >= layer_num_filters)
+#pragma HLS PIPELINE
+            if (d >= layer_depth)
             {
                 break;
             }
-            for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
+            for (int filter_index = 0; filter_index < ON_CHIP_WEIGHTS_PORTS;
+                 filter_index++)
             {
-                if (d >= layer_depth)
+#pragma HLS UNROLL
+                if (filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index + starting_filter < layer_num_filters)
                 {
-                    break;
-                }
                 weights_tile[filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index][d] =
                     on_chip_weights[current_filling_weights_offset + d][filter_index]; // TODO
+                }
             }
         }
     }

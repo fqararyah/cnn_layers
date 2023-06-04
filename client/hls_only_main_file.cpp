@@ -55,6 +55,9 @@ void top_func(
 
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
+
+#pragma HLS ARRAY_PARTITION variable=on_chip_weights type=complete dim = 2
+
 	if (!on_chip_weights_filled)
 	{
 		on_chip_weights_filled = true;
