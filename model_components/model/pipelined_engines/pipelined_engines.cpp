@@ -6,7 +6,7 @@ using namespace pipelined_engines;
 #ifndef PIPELINED_PW_CONV
 #define PIPELINED_PW_CONV
 
-fms_dt pipelined_engines::first_dw_layer_kernel(fms_dt ifms_buffer[][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
+fms_dt pipelined_engines::first_dw_layer_kernel(fms_dt slice_of_communication_buffer_intra[layer_2_dw_filter_dim * layer_2_dw_filter_dim],
                                                 const dw_weights_dt weights[][layer_2_dw_filter_dim * layer_2_dw_filter_dim],
                                                 const int filter_dim,
                                                 const int current_d,
@@ -24,7 +24,7 @@ dw_kernel:
         for (int c_w = 0; c_w < filter_dim; c_w++)
         {
 #pragma HLS UNROLL
-            pss += ifms_buffer[current_d][c_h][c_w] * weights[current_d][c_h * filter_dim + c_w];
+            pss += slice_of_communication_buffer_intra[c_h * filter_dim + c_w] * weights[current_d][c_h * filter_dim + c_w];
         }
     }
 
@@ -160,8 +160,8 @@ void pipelined_engines::load_pw_weights(
 #pragma HLS UNROLL
                 if (filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index + starting_filter < layer_num_filters)
                 {
-                weights_tile[filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index][d] =
-                    on_chip_weights[current_filling_weights_offset + d][filter_index]; // TODO
+                    weights_tile[filter_g_index * ON_CHIP_WEIGHTS_PORTS + filter_index][d] =
+                        on_chip_weights[current_filling_weights_offset + d][filter_index]; // TODO
                 }
             }
         }
@@ -231,7 +231,7 @@ void first_pass_pw_normalize_engine_result(
     const layer_specs dw_layer_specs_struct,
     const int read_end)
 {
-#pragma HLs INLINE off
+#pragma HLS INLINE off
 
     const int layer_relu = layer_specs_struct.layer_activation;
     const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
@@ -309,7 +309,7 @@ void pipelined_engines::pw_only_normalize_engine_result(
     const layer_specs layer_specs_struct,
     const layer_specs dw_layer_specs_struct)
 {
-#pragma HLs INLINE off
+#pragma HLS INLINE off
 
     scales_dt skip_connection_other_layer_scale =
         layer_specs_struct.skip_connection_other_layer_scale;
@@ -367,7 +367,7 @@ void pipelined_engines::pw_normalize_engine_result(
     const layer_specs layer_specs_struct,
     const layer_specs dw_layer_specs_struct)
 {
-#pragma HLs INLINE off
+#pragma HLS INLINE off
 
     if (starting_w >= 0)
     {

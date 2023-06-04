@@ -28,7 +28,7 @@ namespace pipelined_engines
                                    const int starting_w,
                                    const fms_quantization_scheme normalization);
 
-    fms_dt first_dw_layer_kernel(fms_dt ifms_buffer[][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
+    fms_dt first_dw_layer_kernel(fms_dt slice_of_communication_buffer_intra[layer_2_dw_filter_dim * layer_2_dw_filter_dim],
                                  const dw_weights_dt weights[][layer_2_dw_filter_dim * layer_2_dw_filter_dim],
                                  const int filter_dim,
                                  const int current_d,
