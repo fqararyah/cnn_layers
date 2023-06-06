@@ -137,6 +137,55 @@ void write_pipe_seml_communication_buffer(
     }
 }
 
+void write_pipe_seml_communication_buffer_v2(
+    fms_dt pipe_seml_communication_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+    fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+    const int starting_h,
+    const layer_specs layer_specs_struct)
+{
+#pragma HLS INLINE off
+
+    const int layer_depth = layer_specs_struct.layer_depth;
+    const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
+    const int layer_ifms_height = layer_specs_struct.layer_ifm_height;
+    const int num_of_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
+    const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
+    const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
+
+    const int initial_h_offset = starting_h % CHANNELS_TILE_HEIGHT;
+
+    const int communication_buffer_virtual_slices_in_actual_slice = layer_ifms_width / MAX_PW_BUFFER_WIDTH;
+    const int communication_buffer_virtual_rows_in_actual_row = layer_ifms_width / MAX_PW_BUFFER_WIDTH;
+
+    int d_in_buffer, h_in_buffer, w_in_buffer;
+
+    for (int d = 0; d < layer_depth; d++)
+    {
+        d_in_buffer = USED_CHANNELS_IN_PIPELINE_INPUT + d / communication_buffer_virtual_slices_in_actual_slice;
+        h_in_buffer = d % communication_buffer_virtual_slices_in_actual_slice;
+        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        {
+            h_in_buffer += h / communication_buffer_virtual_rows_in_actual_row;
+            w_in_buffer = h * layer_ifms_width;
+            if (h + starting_h >= layer_ifms_height)
+            {
+                break;
+            }
+            int h_in_tile = initial_h_offset + h >= CHANNELS_TILE_HEIGHT ? initial_h_offset + h - CHANNELS_TILE_HEIGHT : initial_h_offset + h;
+            int tile_offset_h = ((h + starting_h) / CHANNELS_TILE_HEIGHT) * num_of_tiles_w;
+            for (int w = 0; w < layer_ifms_width; w++)
+            {
+                w_in_buffer += w;
+                int w_in_tile = w % CHANNELS_TILE_WIDTH;
+                int h_w_offset = tile_offset_h + w / CHANNELS_TILE_WIDTH;
+                int tile_index = d * num_of_tiles_hw + h_w_offset;
+
+                result[tile_index][h_in_tile][w_in_tile] = pipe_seml_communication_buffer[d_in_buffer][h_in_buffer][w_in_buffer];
+            }
+        }
+    }
+}
+
 void fill_first_dw_layer_weights(weights_dt dw_layer_weights[layer_2_dw_num_fils][layer_2_dw_filter_dim * layer_2_dw_filter_dim])
 {
     for (int f = 0; f < layer_2_dw_num_fils; f++)
@@ -451,7 +500,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                             {
                                 pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_non_first][w] =
                                     pre_first_pipeline_layers_output[d][h +
-                                                                        i * 2 * pipe_rows_produced_in_a_pass][w];//TODO 2
+                                                                        i * 2 * pipe_rows_produced_in_a_pass][w]; // TODO 2
                             }
                         }
                     }
@@ -564,15 +613,15 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       pipelined_engines_input_buffer,
-                       channels_buffer,
                        result_buffer,
+                       channels_buffer,
+                       pipelined_engines_input_buffer,
                        tmp_channels,
                        dw_pipe_overlap_buffer,
                        dw_channels_tile,
                        dw_channels_tile_copy,
                        h * 2 + rows_produced_in_pipeline_filling_phase, // starting_h
-                       0,                                               // h_offset_in_result,
+                       (h % 2) * 2,                                     // h_offset_in_result,
                        1,
                        layer_12_pw_specs,
                        layer_14_dw_specs,
@@ -582,13 +631,6 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                        pipe_fused_zero_points,
                        dw_14_odd_even);
             dw_14_odd_even = 1 - dw_14_odd_even;
-
-            write_pipe_seml_communication_buffer(
-                result_buffer,
-                result,
-                h, // starting_h
-                0,
-                first_layer_in_second_part);
         }
     }
 }
@@ -643,7 +685,7 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                              [layer_2_dw_ifm_width];
-                                             
+
 #pragma HLS ARRAY_PARTITION variable = conv_dw_communication_buffer_inter type = complete dim = 2
 
     padd_top_conv_dw_communication_buffer_inter(conv_dw_communication_buffer_inter);
@@ -739,6 +781,17 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             prev_h,
                                             start_filling_offset_in_buffer_first_time,
                                             rows_to_fill_first_time, false);
+            // write_pipe_seml_communication_buffer(
+            //     pipelined_engines_input_buffer,
+            //     result,
+            //     prev_h, // starting_h
+            //     (prev_h % 2) * 2,
+            //     first_layer_in_second_part);
+            write_pipe_seml_communication_buffer_v2(
+                pipelined_engines_input_buffer,
+                result,
+                prev_h, // starting_h
+                first_layer_in_second_part);
         }
         else
         {
@@ -774,6 +827,17 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             prev_h,
                                             start_filling_offset_in_buffer_first_time,
                                             rows_to_fill_first_time, false);
+            // write_pipe_seml_communication_buffer(
+            //     pipelined_engines_input_buffer,
+            //     result,
+            //     prev_h, // starting_h
+            //     (prev_h % 2) * 2,
+            //     first_layer_in_second_part);
+            write_pipe_seml_communication_buffer_v2(
+                pipelined_engines_input_buffer,
+                result,
+                prev_h, // starting_h
+                first_layer_in_second_part);
         }
         prev_h = h;
         even_odd = 1 - even_odd;
@@ -801,6 +865,17 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                         prev_h,
                                         start_filling_offset_in_buffer_first_time,
                                         rows_to_fill_first_time, false);
+        // write_pipe_seml_communication_buffer(
+        //     pipelined_engines_input_buffer,
+        //     result,
+        //     prev_h, // starting_h
+        //     (prev_h % 2) * 2,
+        //     first_layer_in_second_part);
+        write_pipe_seml_communication_buffer_v2(
+                pipelined_engines_input_buffer,
+                result,
+                prev_h, // starting_h
+                first_layer_in_second_part);
     }
     else
     {
@@ -824,6 +899,17 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                         prev_h,
                                         start_filling_offset_in_buffer_first_time,
                                         rows_to_fill_first_time, false);
+        // write_pipe_seml_communication_buffer(
+        //     pipelined_engines_input_buffer,
+        //     result,
+        //     prev_h, // starting_h
+        //     (prev_h % 2) * 2,
+        //     first_layer_in_second_part);
+        write_pipe_seml_communication_buffer_v2(
+                pipelined_engines_input_buffer,
+                result,
+                prev_h, // starting_h
+                first_layer_in_second_part);
     }
 }
 

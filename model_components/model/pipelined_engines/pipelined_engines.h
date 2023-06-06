@@ -111,6 +111,13 @@ namespace pipelined_engines
                                                  const int starting_w,
                                                  layer_specs layer_specs_struct);
 
+    void dw_normalize_and_write_back_result_tile_v2(
+        dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
+        fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        const fms_quantization_scheme normalization_buffer[],
+        const int starting_d, const int h_offset_in_result,
+        const int starting_w, layer_specs layer_specs_struct);
+        
     void dw_conv_engine(
         dw_weights_dt weights[DW_TILE_DEPTH][MAX_DW_FILTER_AREA_IN_PIPE],
         fms_dt channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],

@@ -793,12 +793,70 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(
                     {
                         if (h + h_offset_in_result < PW_BUFFER_HEIGHT && h < (PW_BUFFER_HEIGHT >> (strides - 1)) && w < (PW_BUFFER_WIDTH >> (strides - 1)))
                         {
-                            result[starting_d + d][h + OFFSET_H_IN_RESULTS][offset_w + w] = scaled_val;
+                            result[starting_d + d][h + OFFSET_H_IN_PIPELINE_RESULTS][offset_w + w] = scaled_val;
                         }
                     }
                     else
                     {
                         result[starting_d + d][h][offset_w + w] = scaled_val;
+                    }
+                }
+            }
+        }
+    }
+}
+
+void pipelined_engines::dw_normalize_and_write_back_result_tile_v2(
+    dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
+    fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+    const fms_quantization_scheme normalization_buffer[],
+    const int starting_d, const int h_offset_in_result,
+    const int starting_w, layer_specs layer_specs_struct)
+{
+#pragma HLS INLINE off
+
+    if (starting_w >= 0)
+    {
+        const int layer_ofms_width = layer_specs_struct.layer_ofm_width;
+        const int strides = layer_specs_struct.strides;
+        const int layer_depth = layer_specs_struct.layer_depth;
+        const int layer_relu = layer_specs_struct.layer_activation;
+        const int offset_w = (starting_w >> (strides - 1));
+
+        int absolute_offset_in_result = USED_CHANNELS_IN_PIPELINE_INPUT * PW_BUFFER_HEIGHT * MAX_PW_BUFFER_WIDTH +
+                                        starting_d * PW_BUFFER_HEIGHT * layer_ofms_width;
+
+        for (int d = 0; d < DW_TILE_DEPTH; d++)
+        {
+#pragma HLS PIPELINE
+            int d_offset, h_offset, w_offset;
+
+            for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+            {
+#pragma HLS UNROLL
+                if (h_offset_in_result)
+                {
+                    absolute_offset_in_result += (d * PW_BUFFER_HEIGHT + (h + h_offset_in_result)) * layer_ofms_width;
+                }
+                for (int w = 0; w < PW_BUFFER_WIDTH; w++)
+                {
+#pragma HLS UNROLL
+                    if (w < layer_ofms_width)
+                    {
+                        fms_dt scaled_val = dw_relu_norm(result_tile[d][h][w],
+                                                         normalization_buffer[d], layer_relu);
+                        if (h_offset_in_result)
+                        {
+                            absolute_offset_in_result += w;
+                            d_offset = absolute_offset_in_result / (PW_BUFFER_HEIGHT * MAX_PW_BUFFER_WIDTH);
+                            h_offset = (absolute_offset_in_result % (PW_BUFFER_HEIGHT * MAX_PW_BUFFER_WIDTH)) / MAX_PW_BUFFER_WIDTH;
+                            w_offset = absolute_offset_in_result % MAX_PW_BUFFER_WIDTH;
+                            result[d_offset][h_offset][w_offset] = scaled_val;
+                        }
+                        else
+                        {
+                            result[starting_d + d][h][offset_w + w] = scaled_val;
+                        }
                     }
                 }
             }
@@ -950,7 +1008,7 @@ void pipelined_engines::pw_dw_conv(
                 prev_prev_prev_w = prev_prev_w - PW_BUFFER_WIDTH;
                 if ((w / PW_BUFFER_WIDTH) % 2 == 0)
                 {
-                    dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
+                    dw_normalize_and_write_back_result_tile_v2(dw_result_tile_copy,
                                                             result, dw_normalization_buffer, d,
                                                             h_offset_in_result, prev_prev_prev_w,
                                                             dw_layer_specs_struct);
@@ -1004,7 +1062,7 @@ void pipelined_engines::pw_dw_conv(
 
             if (((ifms_width / PW_BUFFER_WIDTH) - 1) % 2)
             {
-                dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
+                dw_normalize_and_write_back_result_tile_v2(dw_result_tile_copy,
                                                         result, dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - 3 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct);
@@ -1024,7 +1082,7 @@ void pipelined_engines::pw_dw_conv(
                     dw_channels_tile_copy, d, starting_h,
                     ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct, odd_even);
                 //#######################################################################################
-                dw_normalize_and_write_back_result_tile(dw_result_tile, result,
+                dw_normalize_and_write_back_result_tile_v2(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - 2 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct);
@@ -1032,13 +1090,13 @@ void pipelined_engines::pw_dw_conv(
                 dw_conv_engine(dw_weights_tile, dw_channels_tile_copy,
                                dw_result_tile, dw_layer_specs_struct);
                 //#######################################################################################
-                dw_normalize_and_write_back_result_tile(dw_result_tile, result,
+                dw_normalize_and_write_back_result_tile_v2(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct);
             }
             else
             {
-                dw_normalize_and_write_back_result_tile(dw_result_tile, result,
+                dw_normalize_and_write_back_result_tile_v2(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - 3 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct);
@@ -1057,7 +1115,7 @@ void pipelined_engines::pw_dw_conv(
                     dw_channels_tile, d, starting_h,
                     ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct, odd_even);
                 //#######################################################################################
-                dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
+                dw_normalize_and_write_back_result_tile_v2(dw_result_tile_copy,
                                                         result, dw_normalization_buffer_copy, d,
                                                         h_offset_in_result, ifms_width - 2 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct);
@@ -1065,7 +1123,7 @@ void pipelined_engines::pw_dw_conv(
                 dw_conv_engine(dw_weights_tile, dw_channels_tile,
                                dw_result_tile, dw_layer_specs_struct);
                 //#######################################################################################
-                dw_normalize_and_write_back_result_tile(dw_result_tile, result,
+                dw_normalize_and_write_back_result_tile_v2(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct);
             }

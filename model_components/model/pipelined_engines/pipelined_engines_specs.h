@@ -36,7 +36,7 @@ namespace pipelined_engines
     const int DW_PIPE_OVERLAP_BUFFER_DEPTH = 4 * 32 + 2 * 96 + 2 * 144 + 144;
     const int DW_PIPE_OVERLAP_BUFFER_WIDTH = 56;
 
-    const int OFFSET_H_IN_RESULTS = PW_BUFFER_HEIGHT / 2;
+    const int OFFSET_H_IN_PIPELINE_RESULTS = PW_BUFFER_HEIGHT / 2;
 
     const int STRIDES_PRODUCT_IN_PIPELINE = 8; // TODO automate
 
@@ -50,6 +50,8 @@ namespace pipelined_engines
 
     const int FIRST_CONV_LAYER_BUFFER_SIZE = first_conv_layer_filter_dim * first_conv_layer_filter_dim * input_image_depth;
     const int FIRST_CONV_LAYER_NEW_COLS_BUFFER_SIZE = first_conv_layer_filter_dim * first_conv_layer_strides * input_image_depth;
+
+    const int USED_CHANNELS_IN_PIPELINE_INPUT = layer_2_dw_depth;
 
 }
 #endif
