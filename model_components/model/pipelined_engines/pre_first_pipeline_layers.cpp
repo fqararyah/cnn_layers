@@ -733,6 +733,11 @@ pre_first_pipeline_layers_mob_v2:
 		 h < PRE_FIRST_PIPELINE_OUTPUT_HEIGHT; h++)
 	{
 		int h_in_first_layer_input_buffer = ((starting_reading_h + conv_h * first_conv_layer_strides)) % PRE_FIRST_PIPELINE_INPUT_HEIGHT;
+#if HW == FPGA
+		fill_input_image_groups_buffer(channels, fms_groups_buffer,
+									   (starting_reading_h + conv_h * first_conv_layer_strides),
+									   num_of_ifm_groups_read_each_time); // to do
+#endif
 
 		fill_first_cols_of_first_layer_input(first_layers_input,
 											 first_layer_input_buffer, h_in_first_layer_input_buffer);
@@ -796,17 +801,10 @@ pre_first_pipeline_layers_mob_v2:
 											first_conv_layer_specs.layer_ifms_zero_point);
 			shift_and_fill_first_layer_input(first_layer_input_buffer_new_cols,
 											 first_layer_input_buffer);
-			// fill_conv_dw_communication_buffer_intra(
-			//     conv_dw_communication_buffer_inter,
-			//     conv_dw_communication_buffer_intra,
-			//     conv_dw_comm_buffer_reading_row, w, layer_2_dw_specs);
 			first_layer_input_filling_w++;
 			w++;
 		}
 #if HW == _FPGA
-		fill_input_image_groups_buffer(channels, fms_groups_buffer,
-									   (starting_reading_h + conv_h * first_conv_layer_strides),
-									   num_of_ifm_groups_read_each_time); // to do
 		input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
 															first_layers_input,
 															(starting_reading_h + conv_h * first_conv_layer_strides),

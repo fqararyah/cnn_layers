@@ -51,10 +51,9 @@ namespace pipelined_engines
                          layer_specs layer_specs_struct);
 
     void pw_conv_engine(weights_dt weights_tile[PARALLELISM_PW_OFMS][MAX_PW_BUFFER_DEPTH],
-                        fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+                        fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                         pss_dt engine_result[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                         const int starting_filter,
-                        const int starting_w,
                         const layer_specs layer_specs_struct);
 
     void pw_normalize_engine_result(
@@ -117,7 +116,7 @@ namespace pipelined_engines
         const fms_quantization_scheme normalization_buffer[],
         const int starting_d, const int h_offset_in_result,
         const int starting_w, layer_specs layer_specs_struct);
-        
+
     void dw_conv_engine(
         dw_weights_dt weights[DW_TILE_DEPTH][MAX_DW_FILTER_AREA_IN_PIPE],
         fms_dt channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
@@ -131,25 +130,31 @@ namespace pipelined_engines
         const int starting_d, const int starting_w,
         const layer_specs layer_specs_struct);
 
-    void pw_dw_conv(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                    const dw_weights_dt weights[][3 * 3],
-                    fms_dt channels_aux[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                    fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                    fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                    fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
-                    fms_dt dw_pipe_overlap_buffer[][2][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
-                    fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                    fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
-                    const int starting_h,
-                    const int h_offset_in_result,
-                    bool fused_pw_dw,
-                    const layer_specs pw_layer_specs_struct,
-                    const layer_specs dw_layer_specs_struct,
-                    const fused_scales_dt fused_scales[],
-                    const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-                    const relu_6_fused_scales_dt relu_6_fused_scales[],
-                    const biases_dt fused_zero_points[],
-                    const int odd_even);
+    void pw_dw_conv(
+        weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
+        const dw_weights_dt weights[][3 * 3],
+        fms_dt channels_aux[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
+                                               [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
+                                               [PRE_FIRST_PIPELINE_OUTPUT_WIDTH],
+        fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
+        fms_dt dw_pipe_overlap_buffer[][2][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
+        fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+        fms_dt dw_channels_tile_copy[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
+        const int starting_h, const int h_offset_in_result,
+        const int h_offset_in_pre_first_channels,
+        const int h_offset_in_pre_first_pipeline_layers_output,
+        bool fused_pw_dw,
+        const layer_specs pw_layer_specs_struct,
+        const layer_specs dw_layer_specs_struct,
+        const fused_scales_dt fused_scales[],
+        const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+        const relu_6_fused_scales_dt relu_6_fused_scales[],
+        const biases_dt fused_zero_points[],
+        const int odd_even,
+        const bool first_layer_in_the_pipeline);
 }
 
 #endif
