@@ -914,15 +914,19 @@ void copy_from_pre_first_pipeline_layers_output(fms_dt pre_first_pipeline_layers
 
     if (first_layer_in_the_pipeline)
     {
+
         for (int d = 0; d < layer_depth; d++)
         {
+#pragma HLS PIPELINE
             for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
             {
-                if (h + h_offset_in_pre_first_channels < PW_BUFFER_HEIGHT)
+#pragma HLS UNROLL
+            	if (h + h_offset_in_pre_first_channels < PW_BUFFER_HEIGHT)
                 {
                     for (int w = 0; w < PW_BUFFER_WIDTH; w++)
                     {
-                        if (starting_w + w < layer_ifm_width)
+#pragma HLS UNROLL
+                    	if (starting_w + w < layer_ifm_width)
                         {
                             pw_engine_input_buffer[d][h + h_offset_in_pre_first_channels][w] =
                                 pre_first_pipeline_layers_output[d][h + h_offset_in_pre_first_pipeline_layers_output][starting_w + w];
@@ -936,10 +940,13 @@ void copy_from_pre_first_pipeline_layers_output(fms_dt pre_first_pipeline_layers
     {
         for (int d = 0; d < layer_depth; d++)
         {
+#pragma HLS PIPELINE
             for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
             {
+#pragma HLS UNROLL
                 for (int w = 0; w < PW_BUFFER_WIDTH; w++)
                 {
+#pragma HLS UNROLL
                     if (starting_w + w < layer_ifm_width)
                     {
                         pw_engine_input_buffer[d][h][w] = channels[d][h][starting_w + w];
@@ -953,12 +960,11 @@ void copy_from_pre_first_pipeline_layers_output(fms_dt pre_first_pipeline_layers
 void pipelined_engines::pw_dw_conv(
     weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
     const dw_weights_dt weights[][3 * 3],
-    fms_dt channels_aux[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-    fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-    fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                            [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
                                            [PRE_FIRST_PIPELINE_OUTPUT_WIDTH],
+    fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+    fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
     fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
     fms_dt dw_pipe_overlap_buffer[][2][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
     fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],

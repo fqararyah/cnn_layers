@@ -133,12 +133,11 @@ namespace pipelined_engines
     void pw_dw_conv(
         weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
         const dw_weights_dt weights[][3 * 3],
-        fms_dt channels_aux[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-        fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-        fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
         fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                                [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
                                                [PRE_FIRST_PIPELINE_OUTPUT_WIDTH],
+        fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
         fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
         fms_dt dw_pipe_overlap_buffer[][2][2][DW_PIPE_OVERLAP_BUFFER_WIDTH],
         fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],

@@ -105,69 +105,20 @@ void write_pipe_seml_communication_buffer(
 {
 #pragma HLS INLINE off
 
-    const int layer_depth = layer_specs_struct.layer_depth;
-    const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
-    const int layer_ifms_height = layer_specs_struct.layer_ifm_height;
-    const int num_of_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
-    const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
-    const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
-
-    const int initial_h_offset = starting_h % CHANNELS_TILE_HEIGHT;
-
-    for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+    if (starting_h >= 0)
     {
-        if (offset_h_in_communication_buffer + h >= PW_BUFFER_HEIGHT || h + starting_h >= layer_ifms_height)
-        {
-            break;
-        }
-        int h_in_tile = initial_h_offset + h >= CHANNELS_TILE_HEIGHT ? initial_h_offset + h - CHANNELS_TILE_HEIGHT : initial_h_offset + h;
-        int tile_offset_h = ((h + starting_h) / CHANNELS_TILE_HEIGHT) * num_of_tiles_w;
-        for (int w = 0; w < layer_ifms_width; w++)
-        {
-            int w_in_tile = w % CHANNELS_TILE_WIDTH;
-            int h_w_offset = tile_offset_h + w / CHANNELS_TILE_WIDTH;
-            for (int d = 0; d < layer_depth; d++)
-            {
-#pragma HLS PIPELINE
-                int tile_index = d * num_of_tiles_hw + h_w_offset;
-                result[tile_index][h_in_tile + offset_h_in_communication_buffer][w_in_tile] =
-                    pipe_seml_communication_buffer[d][h + offset_h_in_communication_buffer][w];
-            }
-        }
-    }
-}
+        const int layer_depth = layer_specs_struct.layer_depth;
+        const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
+        const int layer_ifms_height = layer_specs_struct.layer_ifm_height;
+        const int num_of_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
+        const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
+        const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 
-void write_pipe_seml_communication_buffer_v2(
-    fms_dt pipe_seml_communication_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-    fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-    const int starting_h,
-    const layer_specs layer_specs_struct)
-{
-#pragma HLS INLINE off
+        const int initial_h_offset = starting_h % CHANNELS_TILE_HEIGHT;
 
-    const int layer_depth = layer_specs_struct.layer_depth;
-    const int layer_ifms_width = layer_specs_struct.layer_ifm_width;
-    const int layer_ifms_height = layer_specs_struct.layer_ifm_height;
-    const int num_of_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
-    const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
-    const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
-
-    const int initial_h_offset = starting_h % CHANNELS_TILE_HEIGHT;
-
-    const int communication_buffer_virtual_slices_in_actual_slice = layer_ifms_width / MAX_PW_BUFFER_WIDTH;
-    const int communication_buffer_virtual_rows_in_actual_row = layer_ifms_width / MAX_PW_BUFFER_WIDTH;
-
-    int d_in_buffer, h_in_buffer, w_in_buffer;
-
-    for (int d = 0; d < layer_depth; d++)
-    {
-        d_in_buffer = USED_CHANNELS_IN_PIPELINE_INPUT + d / communication_buffer_virtual_slices_in_actual_slice;
-        h_in_buffer = d % communication_buffer_virtual_slices_in_actual_slice;
         for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
         {
-            h_in_buffer += h / communication_buffer_virtual_rows_in_actual_row;
-            w_in_buffer = h * layer_ifms_width;
-            if (h + starting_h >= layer_ifms_height)
+            if (offset_h_in_communication_buffer + h >= PW_BUFFER_HEIGHT || h + starting_h >= layer_ifms_height)
             {
                 break;
             }
@@ -175,12 +126,15 @@ void write_pipe_seml_communication_buffer_v2(
             int tile_offset_h = ((h + starting_h) / CHANNELS_TILE_HEIGHT) * num_of_tiles_w;
             for (int w = 0; w < layer_ifms_width; w++)
             {
-                w_in_buffer += w;
                 int w_in_tile = w % CHANNELS_TILE_WIDTH;
                 int h_w_offset = tile_offset_h + w / CHANNELS_TILE_WIDTH;
-                int tile_index = d * num_of_tiles_hw + h_w_offset;
-
-                result[tile_index][h_in_tile][w_in_tile] = pipe_seml_communication_buffer[d_in_buffer][h_in_buffer][w_in_buffer];
+                for (int d = 0; d < layer_depth; d++)
+                {
+#pragma HLS PIPELINE
+                    int tile_index = d * num_of_tiles_hw + h_w_offset;
+                    result[tile_index][h_in_tile + offset_h_in_communication_buffer][w_in_tile] =
+                        pipe_seml_communication_buffer[d][h + offset_h_in_communication_buffer][w];
+                }
             }
         }
     }
@@ -244,7 +198,6 @@ void padd_top_conv_dw_communication_buffer_inter(fms_dt conv_dw_communication_bu
 }
 
 void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                                     fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                                      fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                                      fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                                                             [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
@@ -271,27 +224,12 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
     if (before_pipeline_main_loop)
     {
-        // for (int d = 0; d < layer_3_pw_depth; d++)
-        // {
-        //     for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
-        //     {
-        //         if (h + start_filling_offset_in_buffer_first_time < PW_BUFFER_HEIGHT)
-        //         {
-        //             for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
-        //             {
-        //                 pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_first_time][w] =
-        //                     pre_first_pipeline_layers_output[d][h][w];
-        //             }
-        //         }
-        //     }
-        // }
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   result_buffer,
-                   pipelined_engines_input_buffer,
-                   channels_buffer,
                    pre_first_pipeline_layers_output,
+                   channels_buffer,
+                   result_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -311,10 +249,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    true);
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   pipelined_engines_input_buffer,
-                   channels_buffer,
-                   result_buffer,
                    pre_first_pipeline_layers_output,
+                   result_buffer,
+                   channels_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -335,27 +272,11 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
         dw_6_odd_even = 1 - dw_6_odd_even;
         //######################################################
 
-        for (int d = 0; d < layer_3_pw_depth; d++)
-        {
-            for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
-            {
-                if (h + start_filling_offset_in_buffer_non_first < PW_BUFFER_HEIGHT)
-                {
-                    for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
-                    {
-                        pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_non_first][w] =
-                            pre_first_pipeline_layers_output[d][h + rows_to_fill_first_time][w];
-                    }
-                }
-            }
-        }
-
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   result_buffer,
-                   pipelined_engines_input_buffer,
-                   channels_buffer,
                    pre_first_pipeline_layers_output,
+                   channels_buffer,
+                   result_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -376,10 +297,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   pipelined_engines_input_buffer,
-                   channels_buffer,
-                   result_buffer,
                    pre_first_pipeline_layers_output,
+                   result_buffer,
+                   channels_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -403,17 +323,16 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
         {
             for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
             {
-                result_buffer[d][PW_BUFFER_HEIGHT - 2][w] = result_buffer[d][0][w];
-                result_buffer[d][PW_BUFFER_HEIGHT - 1][w] = result_buffer[d][1][w];
+                channels_buffer[d][PW_BUFFER_HEIGHT - 2][w] = channels_buffer[d][0][w];
+                channels_buffer[d][PW_BUFFER_HEIGHT - 1][w] = channels_buffer[d][1][w];
             }
         }
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   pipelined_engines_input_buffer,
-                   result_buffer,
-                   channels_buffer,
                    pre_first_pipeline_layers_output,
+                   channels_buffer,
+                   result_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -442,10 +361,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   pipelined_engines_input_buffer,
-                   channels_buffer,
-                   result_buffer,
                    pre_first_pipeline_layers_output,
+                   result_buffer,
+                   channels_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -453,7 +371,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    0, // starting_h
                    0, // h_offset_in_result,
                    0,
-                   0,// h_offset_in_result,
+                   0, // h_offset_in_result,
                    1,
                    layer_8_pw_specs,
                    layer_9_dw_specs,
@@ -467,10 +385,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   pipelined_engines_input_buffer,
-                   result_buffer,
-                   channels_buffer,
                    pre_first_pipeline_layers_output,
+                   channels_buffer,
+                   result_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -491,10 +408,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
-                   pipelined_engines_input_buffer,
-                   channels_buffer,
-                   result_buffer,
                    pre_first_pipeline_layers_output,
+                   result_buffer,
+                   channels_buffer,
                    tmp_channels,
                    dw_pipe_overlap_buffer,
                    dw_channels_tile,
@@ -522,27 +438,11 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
             for (int i = 0; i < 2; i++)
             { // todo change 2
 
-                // for (int d = 0; d < layer_3_pw_depth; d++)
-                // {
-                //     for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
-                //     {
-                //         if (h + start_filling_offset_in_buffer_non_first < PW_BUFFER_HEIGHT)
-                //         {
-                //             for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
-                //             {
-                //                 pipelined_engines_input_buffer[d][h + start_filling_offset_in_buffer_non_first][w] =
-                //                     pre_first_pipeline_layers_output[d][h +
-                //                                                         i * 2 * pipe_rows_produced_in_a_pass][w]; // TODO 2
-                //             }
-                //         }
-                //     }
-                // }
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
-                           result_buffer,
-                           pipelined_engines_input_buffer,
-                           channels_buffer,
                            pre_first_pipeline_layers_output,
+                           channels_buffer,
+                           result_buffer,
                            tmp_channels,
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
@@ -562,18 +462,17 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            true);
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
-                           pipelined_engines_input_buffer,
-                           channels_buffer,
-                           result_buffer,
                            pre_first_pipeline_layers_output,
+                           result_buffer,
+                           channels_buffer,
                            tmp_channels,
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
                            dw_channels_tile_copy,
                            h * 4 + (i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
-                           i * 2,        
+                           i * 2,
                            0,
-                           0,                                                                            // h_offset_in_result,
+                           0, // h_offset_in_result,
                            1,
                            layer_4_pw_specs,
                            layer_6_dw_specs,
@@ -588,10 +487,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       pipelined_engines_input_buffer,
-                       result_buffer,
-                       channels_buffer,
                        pre_first_pipeline_layers_output,
+                       channels_buffer,
+                       result_buffer,
                        tmp_channels,
                        dw_pipe_overlap_buffer,
                        dw_channels_tile,
@@ -600,7 +498,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            rows_produced_in_pipeline_filling_phase + 1, // starting_h
                        0,
                        0,
-                       0,                                               // h_offset_in_result,
+                       0, // h_offset_in_result,
                        0,
                        layer_7_pw_specs,
                        layer_6_dw_specs,
@@ -613,10 +511,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       pipelined_engines_input_buffer,
-                       channels_buffer,
-                       result_buffer,
                        pre_first_pipeline_layers_output,
+                       result_buffer,
+                       channels_buffer,
                        tmp_channels,
                        dw_pipe_overlap_buffer,
                        dw_channels_tile,
@@ -640,10 +537,9 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
-                       pipelined_engines_input_buffer,
-                       result_buffer,
-                       channels_buffer,
                        pre_first_pipeline_layers_output,
+                       channels_buffer,
+                       result_buffer,
                        tmp_channels,
                        dw_pipe_overlap_buffer,
                        dw_channels_tile,
@@ -665,16 +561,15 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
+                       pre_first_pipeline_layers_output,
                        result_buffer,
                        channels_buffer,
-                       pipelined_engines_input_buffer,
-                       pre_first_pipeline_layers_output,
                        tmp_channels,
                        dw_pipe_overlap_buffer,
                        dw_channels_tile,
                        dw_channels_tile_copy,
                        h * 2 + rows_produced_in_pipeline_filling_phase, // starting_h
-                       (h % 2) * 2,                                     // h_offset_in_result,
+                       (h & 1) * OFFSET_H_IN_PIPELINE_RESULTS,          // h_offset_in_result,
                        0,
                        0,
                        1,
@@ -693,12 +588,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
 void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
                               weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                              fms_dt pipelined_engines_input_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
-
-#pragma HLS ARRAY_PARTITION variable = pipelined_engines_input_buffer type = complete dim = 2
-#pragma HLS ARRAY_PARTITION variable = pipelined_engines_input_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 3
 
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
@@ -766,6 +657,9 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                                 [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
                                                 [PRE_FIRST_PIPELINE_OUTPUT_WIDTH];
 
+#pragma HLS ARRAY_PARTITION variable = pre_first_pipeline_layers_output type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = pre_first_pipeline_layers_output_copy type = complete dim = 2
+
     pre_first_pipeline_layers_mob_v2(input_image,
                                      pre_first_pipeline_layers_output,
                                      dw_layer_weights,
@@ -778,10 +672,9 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     const int rows_produced_in_pipeline_filling_phase = 1; // todo
     int even_odd = 1;
-    int prev_h = -1;
+    int prev_h = -pipe_rows_produced_in_a_pass;
 
     main_pipeline_engine_calls_loop(on_chip_weights,
-                                    pipelined_engines_input_buffer,
                                     result,
                                     pre_first_pipeline_layers_output,
                                     channels_buffer,
@@ -801,8 +694,21 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                     start_filling_offset_in_buffer_first_time,
                                     rows_to_fill_first_time, true);
 
-    for (int h = 0; h < first_layer_in_second_part.layer_ifm_height; h += pipe_rows_produced_in_a_pass)
+    const int first_layer_in_second_part_height = first_layer_in_second_part.layer_ifm_height;
+
+    int indices_to_solve_timing_issue[first_layer_in_second_part_height / pipe_rows_produced_in_a_pass][2];
+
+    for (int h = 0; h < first_layer_in_second_part_height / pipe_rows_produced_in_a_pass; h++)
+        {
+    	indices_to_solve_timing_issue[h][0] = 5 + 4 * first_conv_layer_strides +
+        		h * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides;
+    	indices_to_solve_timing_issue[h][1] = 5 + 4 * first_conv_layer_strides +
+    	        		(h + 1) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides;
+        }
+    for (int h = 0; h < first_layer_in_second_part_height / pipe_rows_produced_in_a_pass; h++)
     {
+#pragma HLS PIPELINE off
+
         if (even_odd)
         {
             pre_first_pipeline_layers_mob_v2(input_image,
@@ -812,13 +718,10 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                              first_dw_layer_quantization_params,
                                              conv_dw_communication_buffer_inter,
                                              first_layers_input,
-                                             5 + 4 * first_conv_layer_strides +
-                                                 (h / pipe_rows_produced_in_a_pass) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides,
-                                             5 + 4 * first_conv_layer_strides +
-                                                 (1 + (h / pipe_rows_produced_in_a_pass)) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
+											 indices_to_solve_timing_issue[h][0],
+											 indices_to_solve_timing_issue[h][1]);
 
             main_pipeline_engine_calls_loop(on_chip_weights,
-                                            pipelined_engines_input_buffer,
                                             result,
                                             pre_first_pipeline_layers_output_copy,
                                             channels_buffer,
@@ -838,16 +741,11 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             start_filling_offset_in_buffer_first_time,
                                             rows_to_fill_first_time, false);
             write_pipe_seml_communication_buffer(
-                pipelined_engines_input_buffer,
+                channels_buffer,
                 result,
                 prev_h, // starting_h
-                (prev_h % 2) * 2,
+                0,
                 first_layer_in_second_part);
-            //     write_pipe_seml_communication_buffer_v2(
-            //         pipelined_engines_input_buffer,
-            //         result,
-            //         prev_h, // starting_h
-            //         first_layer_in_second_part);
         }
         else
         {
@@ -858,13 +756,10 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                              first_dw_layer_quantization_params,
                                              conv_dw_communication_buffer_inter,
                                              first_layers_input,
-                                             5 + 4 * first_conv_layer_strides +
-                                                 (h / pipe_rows_produced_in_a_pass) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides,
-                                             5 + 4 * first_conv_layer_strides +
-                                                 (1 + (h / pipe_rows_produced_in_a_pass)) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides);
+											 indices_to_solve_timing_issue[h][0],
+											 indices_to_solve_timing_issue[h][1]);
 
             main_pipeline_engine_calls_loop(on_chip_weights,
-                                            pipelined_engines_input_buffer,
                                             result,
                                             pre_first_pipeline_layers_output,
                                             channels_buffer,
@@ -884,25 +779,19 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             start_filling_offset_in_buffer_first_time,
                                             rows_to_fill_first_time, false);
             write_pipe_seml_communication_buffer(
-                pipelined_engines_input_buffer,
+                channels_buffer,
                 result,
                 prev_h, // starting_h
-                (prev_h % 2) * 2,
+                0,
                 first_layer_in_second_part);
-            // write_pipe_seml_communication_buffer_v2(
-            //     pipelined_engines_input_buffer,
-            //     result,
-            //     prev_h, // starting_h
-            //     first_layer_in_second_part);
         }
-        prev_h = h;
+        prev_h += pipe_rows_produced_in_a_pass;
         even_odd = 1 - even_odd;
     }
 
     if (even_odd)
     {
         main_pipeline_engine_calls_loop(on_chip_weights,
-                                        pipelined_engines_input_buffer,
                                         result,
                                         pre_first_pipeline_layers_output_copy,
                                         channels_buffer,
@@ -922,21 +811,15 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                         start_filling_offset_in_buffer_first_time,
                                         rows_to_fill_first_time, false);
         write_pipe_seml_communication_buffer(
-            pipelined_engines_input_buffer,
+            channels_buffer,
             result,
             prev_h, // starting_h
-            (prev_h % 2) * 2,
+            0,
             first_layer_in_second_part);
-        // write_pipe_seml_communication_buffer_v2(
-        //         pipelined_engines_input_buffer,
-        //         result,
-        //         prev_h, // starting_h
-        //         first_layer_in_second_part);
     }
     else
     {
         main_pipeline_engine_calls_loop(on_chip_weights,
-                                        pipelined_engines_input_buffer,
                                         result,
                                         pre_first_pipeline_layers_output,
                                         channels_buffer,
@@ -956,16 +839,11 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                         start_filling_offset_in_buffer_first_time,
                                         rows_to_fill_first_time, false);
         write_pipe_seml_communication_buffer(
-            pipelined_engines_input_buffer,
+            channels_buffer,
             result,
             prev_h, // starting_h
-            (prev_h % 2) * 2,
+            0,
             first_layer_in_second_part);
-        // write_pipe_seml_communication_buffer_v2(
-        //         pipelined_engines_input_buffer,
-        //         result,
-        //         prev_h, // starting_h
-        //         first_layer_in_second_part);
     }
 }
 
