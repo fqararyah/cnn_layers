@@ -596,6 +596,11 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 #pragma HLS ARRAY_PARTITION variable = channels_buffer type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = channels_buffer type = cyclic factor = PW_BUFFER_WIDTH dim = 3
 
+    fms_dt channels_buffer_copy[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
+
+#pragma HLS ARRAY_PARTITION variable = channels_buffer_copy type = complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = channels_buffer_copy type = cyclic factor = PW_BUFFER_WIDTH dim = 3
+
     fms_dt result_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
 
 #pragma HLS ARRAY_PARTITION variable = result_buffer type = complete dim = 2
@@ -673,6 +678,7 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
     const int rows_produced_in_pipeline_filling_phase = 1; // todo
     int even_odd = 1;
     int prev_h = -pipe_rows_produced_in_a_pass;
+    int prev_prev_h = -2 * pipe_rows_produced_in_a_pass;
 
     main_pipeline_engine_calls_loop(on_chip_weights,
                                     result,
@@ -699,18 +705,24 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
     int indices_to_solve_timing_issue[first_layer_in_second_part_height / pipe_rows_produced_in_a_pass][2];
 
     for (int h = 0; h < first_layer_in_second_part_height / pipe_rows_produced_in_a_pass; h++)
-        {
-    	indices_to_solve_timing_issue[h][0] = 5 + 4 * first_conv_layer_strides +
-        		h * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides;
-    	indices_to_solve_timing_issue[h][1] = 5 + 4 * first_conv_layer_strides +
-    	        		(h + 1) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides;
-        }
+    {
+        indices_to_solve_timing_issue[h][0] = 5 + 4 * first_conv_layer_strides +
+                                              h * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides;
+        indices_to_solve_timing_issue[h][1] = 5 + 4 * first_conv_layer_strides +
+                                              (h + 1) * PRE_FIRST_PIPELINE_OUTPUT_HEIGHT * first_conv_layer_strides;
+    }
     for (int h = 0; h < first_layer_in_second_part_height / pipe_rows_produced_in_a_pass; h++)
     {
 #pragma HLS PIPELINE off
 
         if (even_odd)
         {
+            write_pipe_seml_communication_buffer(
+                channels_buffer_copy,
+                result,
+                prev_prev_h, // starting_h
+                0,
+                first_layer_in_second_part);
             pre_first_pipeline_layers_mob_v2(input_image,
                                              pre_first_pipeline_layers_output,
                                              dw_layer_weights,
@@ -718,8 +730,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                              first_dw_layer_quantization_params,
                                              conv_dw_communication_buffer_inter,
                                              first_layers_input,
-											 indices_to_solve_timing_issue[h][0],
-											 indices_to_solve_timing_issue[h][1]);
+                                             indices_to_solve_timing_issue[h][0],
+                                             indices_to_solve_timing_issue[h][1]);
 
             main_pipeline_engine_calls_loop(on_chip_weights,
                                             result,
@@ -740,15 +752,15 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             prev_h,
                                             start_filling_offset_in_buffer_first_time,
                                             rows_to_fill_first_time, false);
-            write_pipe_seml_communication_buffer(
-                channels_buffer,
-                result,
-                prev_h, // starting_h
-                0,
-                first_layer_in_second_part);
         }
         else
         {
+            write_pipe_seml_communication_buffer(
+                channels_buffer,
+                result,
+                prev_prev_h, // starting_h
+                0,
+                first_layer_in_second_part);
             pre_first_pipeline_layers_mob_v2(input_image,
                                              pre_first_pipeline_layers_output_copy,
                                              dw_layer_weights,
@@ -756,13 +768,13 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                              first_dw_layer_quantization_params,
                                              conv_dw_communication_buffer_inter,
                                              first_layers_input,
-											 indices_to_solve_timing_issue[h][0],
-											 indices_to_solve_timing_issue[h][1]);
+                                             indices_to_solve_timing_issue[h][0],
+                                             indices_to_solve_timing_issue[h][1]);
 
             main_pipeline_engine_calls_loop(on_chip_weights,
                                             result,
                                             pre_first_pipeline_layers_output,
-                                            channels_buffer,
+                                            channels_buffer_copy,
                                             result_buffer,
                                             tmp_channels,
                                             dw_pipe_overlap_buffer,
@@ -778,19 +790,22 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             prev_h,
                                             start_filling_offset_in_buffer_first_time,
                                             rows_to_fill_first_time, false);
-            write_pipe_seml_communication_buffer(
-                channels_buffer,
-                result,
-                prev_h, // starting_h
-                0,
-                first_layer_in_second_part);
         }
         prev_h += pipe_rows_produced_in_a_pass;
+        prev_prev_h += pipe_rows_produced_in_a_pass;
         even_odd = 1 - even_odd;
     }
 
     if (even_odd)
     {
+        write_pipe_seml_communication_buffer(
+            channels_buffer_copy,
+            result,
+            prev_prev_h, // starting_h
+            0,
+            first_layer_in_second_part);
+        prev_prev_h += pipe_rows_produced_in_a_pass;
+        //************************************
         main_pipeline_engine_calls_loop(on_chip_weights,
                                         result,
                                         pre_first_pipeline_layers_output_copy,
@@ -819,6 +834,14 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
     }
     else
     {
+        write_pipe_seml_communication_buffer(
+            channels_buffer,
+            result,
+            prev_prev_h, // starting_h
+            0,
+            first_layer_in_second_part);
+        prev_prev_h += pipe_rows_produced_in_a_pass;
+        //************************************
         main_pipeline_engine_calls_loop(on_chip_weights,
                                         result,
                                         pre_first_pipeline_layers_output,
