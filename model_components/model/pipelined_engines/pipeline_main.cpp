@@ -447,7 +447,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
                            dw_channels_tile_copy,
-                           h * 4 + (i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
+                           h * 4 + i  * 4 + 5, // TODO generate
                            0,
                            start_filling_offset_in_buffer_non_first,
                            i * 2 * pipe_rows_produced_in_a_pass,
@@ -469,7 +469,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
                            dw_channels_tile_copy,
-                           h * 4 + (i + 1) * pipe_rows_produced_in_a_pass + rows_produced_in_pipeline_filling_phase, // starting_h
+                           h * 4 + i  * 4 + 5, // TODO generate
                            i * 2,
                            0,
                            0, // h_offset_in_result,

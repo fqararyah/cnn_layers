@@ -5,6 +5,8 @@
 #include "test_utils.h"
 #include "../client/cpp_fc.cpp"
 
+#include <chrono>
+
 //#include "ap_int.h"
 //#include "ap_fixed.h"
 using namespace std;
@@ -115,16 +117,23 @@ int main(int argc, char **argv)
 			top_func(input_image, weights, glued_on_chip_weights, fc_input,
 					 ready_to_receive_new_input_ptr);
 #endif
-// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
-// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "
-// 		<< (int)fc_input[338] << " " << (int)fc_input[328] << " "
-// 		<< (int)fc_input[327] << " " << (int)fc_input[335] << " "
-// 		<< (int)fc_input[81] << " " << (int)fc_input[340] << " ";
+			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
+			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "
+			// 		<< (int)fc_input[338] << " " << (int)fc_input[328] << " "
+			// 		<< (int)fc_input[327] << " " << (int)fc_input[335] << " "
+			// 		<< (int)fc_input[81] << " " << (int)fc_input[340] << " ";
+			auto start = chrono::steady_clock::now();
+
 #if MODEL_ID == RESNET50
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_74_fc_specs);
 #elif MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_68_fc_specs);
 #endif
+			auto end = chrono::steady_clock::now();
+
+			cout << "Elapsed time in nanoseconds: "
+				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
+				 << " ms" << endl;
 			//			dump_ouput(output_folder + ent->d_name, fc_input,
 			//					   fc_layer_input_size);
 			predictions_file_content += top_5_to_predictions_dict(top5,
