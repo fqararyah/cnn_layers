@@ -12,6 +12,6 @@ void top_func(
 	weights_grp_dt off_chip_weights[all_pw_s_weights],
 	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights],
 	fms_dt fc_input[fc_layer_input_size],
-	int *ready_to_receive_a_new_input_ptr);
+	const int model_config_list_src[2 * max_conv_layers]);
 
 #endif

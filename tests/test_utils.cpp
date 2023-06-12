@@ -204,3 +204,18 @@ string get_model_prefix()
 	}
 	return model_name;
 }
+
+void read_model_configs(string file_name, int configs_list[])
+{
+
+	int a;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+
+	int line_num = 0;
+	while (infile >> a)
+	{
+		configs_list[line_num] = a;
+		line_num++;
+	}
+}

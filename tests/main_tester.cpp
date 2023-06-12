@@ -82,9 +82,22 @@ int main(int argc, char **argv)
 	int img_count = 0;
 	int images_to_test = 1;
 
+	
+	int model_config_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
+
 	if (argc > 1)
 	{
 		images_to_test = stoi(argv[1]);
+	}
+	if (argc > 2)
+	{
+		read_model_configs(argv[2], model_config_list);
+		cout << "model_configs:\n";
+		for (int i = 0; i < max_conv_layers; i++)
+		{
+			cout << model_config_list[2 * i] << " " << model_config_list[2 * i + 1] << "\n";
+		}
+		cout << "*************\n";
 	}
 
 	struct dirent *ent;
@@ -115,7 +128,7 @@ int main(int argc, char **argv)
 						  ready_to_receive_new_input_ptr);
 #elif HW == CPU
 			top_func(input_image, weights, glued_on_chip_weights, fc_input,
-					 ready_to_receive_new_input_ptr);
+					 model_config_list);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
 			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "

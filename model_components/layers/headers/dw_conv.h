@@ -33,7 +33,8 @@ namespace seml_engines
 					 const fused_scales_dt fused_scales_part2[],
 					 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
 					 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
-					 const biases_dt fused_zero_points_part2[]);
+					 const biases_dt fused_zero_points_part2[],
+					 const int model_configs_list[2 * max_conv_layers]);
 
 	void dw_conv_5x5(dw_weights_dt weights[max_conv_d][5][5],
 					 fms_dt channels[max_fms_size], fms_dt result[max_fms_size],

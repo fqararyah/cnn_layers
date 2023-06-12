@@ -328,3 +328,12 @@ void copy_channels_to_tmp_channels(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS
 		}
 	}
 }
+
+void fill_model_configs_list(const int model_config_list_src[2 * max_conv_layers],
+							 int model_config_list[2 * max_conv_layers])
+{
+	for (int i = 0; i < 2 * max_conv_layers; i++)
+	{
+		model_config_list[i] = model_config_list_src[i];
+	}
+}

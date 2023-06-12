@@ -7,6 +7,9 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 # './out/layers_specs.h'
 out_file = '../model_components/model/headers/{}_layers_specs.h'
 
+model_config_file = '../model_config/{}.txt'.format(cgc.MODEL_NAME)
+model_config_list = []
+
 specs_struct = 'const layer_specs {} = {}\n\
                 {},//layer_index;\n\
                 {},//conv_layer_type;; \n\
@@ -266,6 +269,10 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             f.write(to_write_specs_block)
 
             f.write(specs_struct.format(*replacement_list))
+
+            model_config_list.append(layer_depth)
+            model_config_list.append(num_of_filters)
+
         elif 'type' in layer_specs:
             layer_type = layer_specs['type']
             layer_specs_struct_str = '\nstruct{}\n{}{}{};\n'
@@ -295,3 +302,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 f.write(fc_specs_struct.format(*replacement_list))
 
     f.write('#endif\n')
+
+with open(model_config_file, 'w') as f:
+    for i in model_config_list:
+        f.write(str(i) + '\n')

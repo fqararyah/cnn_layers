@@ -97,8 +97,8 @@ void fill_scales_tiles(const fused_scales_dt fused_scales[],
 }
 
 void seml_engines::fill_dw_weights_tile(const dw_weights_dt weights[][3 * 3],
-                          dw_weights_dt weights_tile[][3 * 3],
-                          int starting_d, const int current_dw_layer_weights_offset)
+                                        dw_weights_dt weights_tile[][3 * 3],
+                                        int starting_d, const int current_dw_layer_weights_offset)
 {
 #pragma HLS INLINE off
 
@@ -215,17 +215,18 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 }
 
 void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
-                 fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                 fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                 const int layer,
-                 const layer_specs layer_specs_struct,
-                 const fused_scales_dt fused_scales[],
-                 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
-                 const relu_6_fused_scales_dt relu_6_fused_scales[], const biases_dt fused_zero_points[],
-                 const fused_scales_dt fused_scales_part2[],
-                 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
-                 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
-                 const biases_dt fused_zero_points_part2[])
+                               fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                               fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                               const int layer,
+                               const layer_specs layer_specs_struct,
+                               const fused_scales_dt fused_scales[],
+                               const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
+                               const relu_6_fused_scales_dt relu_6_fused_scales[], const biases_dt fused_zero_points[],
+                               const fused_scales_dt fused_scales_part2[],
+                               const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
+                               const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
+                               const biases_dt fused_zero_points_part2[],
+                               const int model_configs_list[2 * max_conv_layers])
 {
 #pragma HLS INLINE off
 
@@ -265,8 +266,11 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
     const int ifms_d = layer_specs_struct.layer_depth;
     const int strides = layer_specs_struct.strides;
 
-    const int num_of_iterations_d = (ifms_d + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH;
-
+    const int num_of_iterations_d = model_configs_list[2 * layer] == 0
+                                        ? (ifms_d + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH
+                                        : (model_configs_list[2 * layer] + CHANNELS_PIPELINE_DEPTH - 1) /
+                                              CHANNELS_PIPELINE_DEPTH;
+    cout<< layer<< " "<< model_configs_list[2 * layer]<<"\n";
     if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
     {
         fill_scales_tiles(fused_scales, fused_scales_tile, fused_scales_log_2_shifts,
@@ -314,8 +318,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 if (dw_pipeline_in_d % 2 == 0)
                 {
                     seml_engines::fill_dw_weights_tile(weights, weights_tile,
-                                         tile_in_d,
-                                         current_dw_layer_weights_offset);
+                                                       tile_in_d,
+                                                       current_dw_layer_weights_offset);
 
                     dw_normalize_and_write_back_result_tile(result,
                                                             engine_result_tile_copy, normalization,
@@ -346,8 +350,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 else
                 {
                     seml_engines::fill_dw_weights_tile(weights, weights_tile,
-                                         tile_in_d,
-                                         current_dw_layer_weights_offset);
+                                                       tile_in_d,
+                                                       current_dw_layer_weights_offset);
 
                     dw_normalize_and_write_back_result_tile(result,
                                                             engine_result_tile, normalization,

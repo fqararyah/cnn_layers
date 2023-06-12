@@ -249,11 +249,14 @@ void pw_conv_pipeline(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_
 					  pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					  layer_specs layer_specs_struct,
 					  int td_o,
-					  int t_in_h, int t_in_w)
+					  int t_in_h, int t_in_w,
+					  const int model_configs_list[])
 {
 #pragma HLS INLINE OFF
 
-	const int num_of_tiles_d_in = layer_specs_struct.layer_num_of_tiles_in_d;
+	const int num_of_tiles_d_in = model_configs_list[2 * layer_specs_struct.layer_index] == 0
+									  ? layer_specs_struct.layer_num_of_tiles_in_d
+									  : model_configs_list[2 * layer_specs_struct.layer_index];
 	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
 	const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ifm_tiles_h * num_of_tiles_w;
 	const int layer_conv_d = layer_specs_struct.layer_depth;
@@ -308,7 +311,8 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 			 fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out],
 			 fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[pw_conv_parallelism_out],
 			 relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out],
-			 biases_dt fused_zero_points_buffer[pw_conv_parallelism_out], int td_o)
+			 biases_dt fused_zero_points_buffer[pw_conv_parallelism_out], int td_o,
+			 const int model_configs_list[])
 {
 
 #pragma HLS INLINE off
@@ -361,7 +365,7 @@ conv2_ith_loop:
 
 			pw_conv_pipeline(channels, result, weights_tile, results_tile,
 							 layer_specs_struct,
-							 td_o, t_in_h, t_in_w);
+							 td_o, t_in_h, t_in_w, model_configs_list);
 			copy_pss_tile(results_tile, prev_results_tile);
 			pw_write_results_tile(scaled_result_tile, result,
 								  prev_tile_index, tmp_channels, tmp_channels_scaled_tile,
@@ -400,7 +404,8 @@ void pw_conv(weights_grp_dt *weights,
 			 const fused_scales_dt fused_scales_part2[],
 			 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
-			 const biases_dt fused_zero_points_part2[])
+			 const biases_dt fused_zero_points_part2[],
+			 const int model_configs_list[2 * max_conv_layers])
 {
 #pragma HLS INLINE off
 
@@ -431,6 +436,11 @@ void pw_conv(weights_grp_dt *weights,
 conv2_ots_loop:
 	for (int td_o = 0; td_o < layer_specs_struct.layer_num_of_tiles_out_d; td_o++)
 	{
+		if (model_configs_list[2 * layer + 1] != 0 &&
+			td_o >= (model_configs_list[2 * layer + 1] + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out)
+		{
+			break;
+		}
 		if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
 		{
 			fill_fused_zero_points_buffer(fused_zero_points,
@@ -462,7 +472,7 @@ conv2_ots_loop:
 #endif
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
-				fused_zero_points_buffer, td_o);
+				fused_zero_points_buffer, td_o, model_configs_list);
 #if HW == _FPGA
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out,

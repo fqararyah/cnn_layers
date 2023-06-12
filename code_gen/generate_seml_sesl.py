@@ -1,5 +1,8 @@
 import filecmp
 import os
+from pickle import FALSE
+
+CACHING = FALSE
 
 class bcolors:
     HEADER = '\033[95m'

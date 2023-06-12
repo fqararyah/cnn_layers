@@ -52,6 +52,7 @@ for i in range(first_off_chip_layer, last_off_chip_layer):
     # print("get_ofms_parallelism", ofms_parallelism)
 
     num_filters = weights.shape[0]
+    #print(num_filters)
     assert(num_filters % ofms_parallelism == 0)
     # if num_filters % ofms_parallelism != 0:
     #     weights = np.append(weights, np.zeros(( int(ofms_parallelism - (num_filters % ofms_parallelism) ), \

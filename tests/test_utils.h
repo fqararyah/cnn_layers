@@ -21,6 +21,7 @@ void dump_pw_channels_tile(string file_name, fms_dt tile[pw_tile_d][pw_tile_h][p
 void dump_pw_weights_tile(string file_name,
 						  weights_dt tile[pw_conv_parallelism_out][max_conv_d], int layer_depth);
 void dump_ouput(string file_name, fms_dt out[], int size);
+void read_model_configs(string file_name, int configs_list[]);
 
 string get_model_prefix();
 

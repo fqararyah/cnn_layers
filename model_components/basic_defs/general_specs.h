@@ -163,5 +163,6 @@ struct fc_layer_specs{
 const fms_dt ifm_zero_point;
 };
 
+const int max_conv_layers = 100;
 
 #endif
