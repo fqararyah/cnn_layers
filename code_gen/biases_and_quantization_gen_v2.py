@@ -217,7 +217,7 @@ with open(h_file, 'w') as wf:
 
                     assert(relu_6_fused_scales[-1] > 256) or \
                         utils.NET_PREFIX in [
-                            'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5', 'mob_v2_0_75', 'nonuniform_mobilenetv2_5']
+                            'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5', 'mob_v2_0_75'] or 'uniform' in utils.NET_PREFIX
 
         if ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
                 or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 1:

@@ -377,7 +377,7 @@ const layer_specs layer_10_pw_specs = {
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 48 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                384 / weights_group_items,//layer_weights_offset;
+                0 / weights_group_items,//layer_weights_offset;
                 1280,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -420,7 +420,7 @@ const layer_specs layer_12_pw_specs = {
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 8 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                768 / weights_group_items,//layer_weights_offset;
+                0 / weights_group_items,//layer_weights_offset;
                 1664,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -506,7 +506,7 @@ const layer_specs layer_15_pw_specs = {
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 48 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1152 / weights_group_items,//layer_weights_offset;
+                0 / weights_group_items,//layer_weights_offset;
                 2048,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -549,7 +549,7 @@ const layer_specs layer_16_pw_specs = {
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 16 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1920 / weights_group_items,//layer_weights_offset;
+                768 / weights_group_items,//layer_weights_offset;
                 2816,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -635,7 +635,7 @@ const layer_specs layer_18_pw_specs = {
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                3456 / weights_group_items,//layer_weights_offset;
+                2304 / weights_group_items,//layer_weights_offset;
                 4352,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -678,7 +678,7 @@ const layer_specs layer_20_pw_specs = {
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 16 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                4992 / weights_group_items,//layer_weights_offset;
+                3840 / weights_group_items,//layer_weights_offset;
                 5888,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -764,7 +764,7 @@ const layer_specs layer_22_pw_specs = {
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                6528 / weights_group_items,//layer_weights_offset;
+                5376 / weights_group_items,//layer_weights_offset;
                 7424,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -807,7 +807,7 @@ const layer_specs layer_24_pw_specs = {
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 16 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                8064 / weights_group_items,//layer_weights_offset;
+                6912 / weights_group_items,//layer_weights_offset;
                 8960,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -893,7 +893,7 @@ const layer_specs layer_27_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                9600 / weights_group_items,//layer_weights_offset;
+                8448 / weights_group_items,//layer_weights_offset;
                 10496,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -936,7 +936,7 @@ const layer_specs layer_28_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                11904 / weights_group_items,//layer_weights_offset;
+                10752 / weights_group_items,//layer_weights_offset;
                 12800,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1022,7 +1022,7 @@ const layer_specs layer_30_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                15360 / weights_group_items,//layer_weights_offset;
+                14208 / weights_group_items,//layer_weights_offset;
                 16256,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1065,7 +1065,7 @@ const layer_specs layer_32_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                18816 / weights_group_items,//layer_weights_offset;
+                17664 / weights_group_items,//layer_weights_offset;
                 19712,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1151,7 +1151,7 @@ const layer_specs layer_34_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                22272 / weights_group_items,//layer_weights_offset;
+                21120 / weights_group_items,//layer_weights_offset;
                 23168,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1194,7 +1194,7 @@ const layer_specs layer_36_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                25728 / weights_group_items,//layer_weights_offset;
+                24576 / weights_group_items,//layer_weights_offset;
                 26624,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1280,7 +1280,7 @@ const layer_specs layer_38_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                29184 / weights_group_items,//layer_weights_offset;
+                28032 / weights_group_items,//layer_weights_offset;
                 30080,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1323,7 +1323,7 @@ const layer_specs layer_40_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                32640 / weights_group_items,//layer_weights_offset;
+                31488 / weights_group_items,//layer_weights_offset;
                 33536,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1409,7 +1409,7 @@ const layer_specs layer_42_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 144 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                36096 / weights_group_items,//layer_weights_offset;
+                34944 / weights_group_items,//layer_weights_offset;
                 36992,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1452,7 +1452,7 @@ const layer_specs layer_43_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                40704 / weights_group_items,//layer_weights_offset;
+                39552 / weights_group_items,//layer_weights_offset;
                 41600,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1538,7 +1538,7 @@ const layer_specs layer_45_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                46848 / weights_group_items,//layer_weights_offset;
+                45696 / weights_group_items,//layer_weights_offset;
                 47744,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1581,7 +1581,7 @@ const layer_specs layer_47_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                52992 / weights_group_items,//layer_weights_offset;
+                51840 / weights_group_items,//layer_weights_offset;
                 53888,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1667,7 +1667,7 @@ const layer_specs layer_49_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                59136 / weights_group_items,//layer_weights_offset;
+                57984 / weights_group_items,//layer_weights_offset;
                 60032,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1710,7 +1710,7 @@ const layer_specs layer_51_pw_specs = {
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                65280 / weights_group_items,//layer_weights_offset;
+                64128 / weights_group_items,//layer_weights_offset;
                 66176,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1796,7 +1796,7 @@ const layer_specs layer_54_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 192 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                71424 / weights_group_items,//layer_weights_offset;
+                70272 / weights_group_items,//layer_weights_offset;
                 72320,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1839,7 +1839,7 @@ const layer_specs layer_55_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 56 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                82176 / weights_group_items,//layer_weights_offset;
+                81024 / weights_group_items,//layer_weights_offset;
                 83072,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1925,7 +1925,7 @@ const layer_specs layer_57_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 336 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                100992 / weights_group_items,//layer_weights_offset;
+                99840 / weights_group_items,//layer_weights_offset;
                 101888,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -1968,7 +1968,7 @@ const layer_specs layer_59_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 56 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                119808 / weights_group_items,//layer_weights_offset;
+                118656 / weights_group_items,//layer_weights_offset;
                 120704,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -2054,7 +2054,7 @@ const layer_specs layer_61_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 336 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                138624 / weights_group_items,//layer_weights_offset;
+                137472 / weights_group_items,//layer_weights_offset;
                 139520,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -2097,7 +2097,7 @@ const layer_specs layer_63_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 56 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                157440 / weights_group_items,//layer_weights_offset;
+                156288 / weights_group_items,//layer_weights_offset;
                 158336,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -2183,7 +2183,7 @@ const layer_specs layer_65_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 336 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                176256 / weights_group_items,//layer_weights_offset;
+                175104 / weights_group_items,//layer_weights_offset;
                 177152,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
@@ -2226,7 +2226,7 @@ const layer_specs layer_66_pw_specs = {
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
                 112 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                213888 / weights_group_items,//layer_weights_offset;
+                212736 / weights_group_items,//layer_weights_offset;
                 214784,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;

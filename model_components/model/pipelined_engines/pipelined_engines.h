@@ -54,7 +54,8 @@ namespace pipelined_engines
                         fms_dt channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                         pss_dt engine_result[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
                         const int starting_filter,
-                        const layer_specs layer_specs_struct);
+                        const layer_specs layer_specs_struct,
+                        const int model_configs_list[]);
 
     void pw_normalize_engine_result(
         pss_dt engine_result_tile[PARALLELISM_PW_OFMS][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
@@ -153,7 +154,8 @@ namespace pipelined_engines
         const relu_6_fused_scales_dt relu_6_fused_scales[],
         const biases_dt fused_zero_points[],
         const int odd_even,
-        const bool first_layer_in_the_pipeline);
+        const bool first_layer_in_the_pipeline,
+        const int model_configs_list[]);
 }
 
 #endif

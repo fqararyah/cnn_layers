@@ -256,7 +256,15 @@ void pw_conv_pipeline(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_
 
 	const int num_of_tiles_d_in = model_configs_list[2 * layer_specs_struct.layer_index] == 0
 									  ? layer_specs_struct.layer_num_of_tiles_in_d
-									  : model_configs_list[2 * layer_specs_struct.layer_index];
+									  : (model_configs_list[2 * layer_specs_struct.layer_index] +
+										 pw_conv_parallelism_in - 1) /
+											pw_conv_parallelism_in;
+
+	// cout << layer_specs_struct.layer_index << " " << layer_specs_struct.layer_num_of_tiles_in_d << " "
+	// 	 << (model_configs_list[2 * layer_specs_struct.layer_index] +
+	// 		 pw_conv_parallelism_in - 1) /
+	// 			pw_conv_parallelism_in<<"\n";
+
 	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
 	const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ifm_tiles_h * num_of_tiles_w;
 	const int layer_conv_d = layer_specs_struct.layer_depth;
@@ -433,11 +441,15 @@ void pw_conv(weights_grp_dt *weights,
 
 	const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
 
+	const int model_configs_list_limit =
+		(model_configs_list[2 * layer + 1] + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out;
+	
+	//cout << layer << " " << layer_specs_struct.layer_num_of_tiles_out_d << " " << model_configs_list_limit << "\n";
+
 conv2_ots_loop:
 	for (int td_o = 0; td_o < layer_specs_struct.layer_num_of_tiles_out_d; td_o++)
 	{
-		if (model_configs_list[2 * layer + 1] != 0 &&
-			td_o >= (model_configs_list[2 * layer + 1] + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out)
+		if (model_configs_list_limit != 0 && td_o >= model_configs_list_limit)
 		{
 			break;
 		}

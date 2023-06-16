@@ -27,7 +27,8 @@ void pre_first_pipeline_layers_mob_v2(fms_grp_dt channels[input_image_depth * in
 
 void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
                               weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
+                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                              const int model_configs_list[]);
 
 #endif //#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 

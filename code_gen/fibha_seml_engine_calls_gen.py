@@ -6,6 +6,11 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format(cgc.MODEL_NAME,
                                                                         cgc.FIBHA_VERSION_POSTFIX)
+
+if 'uniform' in cgc.MODEL_NAME:
+    in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format('mob_v2',
+                                                                            cgc.FIBHA_VERSION_POSTFIX)
+
 constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
 ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
@@ -50,6 +55,7 @@ def replace(replacement_dic, block):
         block = block.replace(key, str(val))
 
     return block
+
 
 file_replacement = ''
 in_a_code_gen_area = False

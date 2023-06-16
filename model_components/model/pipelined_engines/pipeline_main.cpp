@@ -218,7 +218,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                                      const int h,
                                      const int start_filling_offset_in_buffer_first_time,
                                      const int rows_to_fill_first_time,
-                                     const bool before_pipeline_main_loop)
+                                     const bool before_pipeline_main_loop,
+                                     const int model_configs_list[])
 {
 #pragma HLS INLINE off
 
@@ -246,7 +247,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    0,
-                   true);
+                   true,
+                   model_configs_list);
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
                    pre_first_pipeline_layers_output,
@@ -268,7 +270,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    dw_6_odd_even,
-                   false);
+                   false,
+                   model_configs_list);
         dw_6_odd_even = 1 - dw_6_odd_even;
         //######################################################
 
@@ -293,7 +296,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    0,
-                   true);
+                   true,
+                   model_configs_list);
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
@@ -316,7 +320,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    dw_6_odd_even,
-                   false);
+                   false,
+                   model_configs_list);
         dw_6_odd_even = 1 - dw_6_odd_even;
 
         for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
@@ -349,7 +354,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    0,
-                   false);
+                   false,
+                   model_configs_list);
 
         for (int d = 0; d < MAX_PW_BUFFER_DEPTH; d++)
         {
@@ -380,7 +386,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    dw_9_odd_even,
-                   false);
+                   false,
+                   model_configs_list);
         dw_9_odd_even = 1 - dw_9_odd_even;
 
         pw_dw_conv(on_chip_weights,
@@ -404,7 +411,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    0,
-                   false);
+                   false,
+                   model_configs_list);
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
@@ -427,7 +435,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    pipe_relu_6_fused_scales,
                    pipe_fused_zero_points,
                    dw_14_odd_even,
-                   false);
+                   false,
+                   model_configs_list);
         dw_14_odd_even = 1 - dw_14_odd_even;
     }
     else
@@ -447,7 +456,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
                            dw_channels_tile_copy,
-                           h * 4 + i  * 4 + 5, // TODO generate
+                           h * 4 + i * 4 + 5, // TODO generate
                            0,
                            start_filling_offset_in_buffer_non_first,
                            i * 2 * pipe_rows_produced_in_a_pass,
@@ -459,7 +468,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            pipe_relu_6_fused_scales,
                            pipe_fused_zero_points,
                            0,
-                           true);
+                           true,
+                           model_configs_list);
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
                            pre_first_pipeline_layers_output,
@@ -469,7 +479,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            dw_pipe_overlap_buffer,
                            dw_channels_tile,
                            dw_channels_tile_copy,
-                           h * 4 + i  * 4 + 5, // TODO generate
+                           h * 4 + i * 4 + 5, // TODO generate
                            i * 2,
                            0,
                            0, // h_offset_in_result,
@@ -481,7 +491,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            pipe_relu_6_fused_scales,
                            pipe_fused_zero_points,
                            dw_6_odd_even,
-                           false);
+                           false,
+                           model_configs_list);
                 dw_6_odd_even = 1 - dw_6_odd_even;
             }
 
@@ -507,7 +518,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                        pipe_relu_6_fused_scales,
                        pipe_fused_zero_points,
                        0,
-                       false);
+                       false,
+                       model_configs_list);
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
@@ -531,7 +543,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                        pipe_relu_6_fused_scales,
                        pipe_fused_zero_points,
                        dw_9_odd_even,
-                       false);
+                       false,
+                       model_configs_list);
 
             dw_9_odd_even = 1 - dw_9_odd_even;
 
@@ -557,7 +570,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                        pipe_relu_6_fused_scales,
                        pipe_fused_zero_points,
                        0,
-                       false);
+                       false,
+                       model_configs_list);
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
@@ -580,7 +594,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                        pipe_relu_6_fused_scales,
                        pipe_fused_zero_points,
                        dw_14_odd_even,
-                       false);
+                       false,
+                       model_configs_list);
             dw_14_odd_even = 1 - dw_14_odd_even;
         }
     }
@@ -588,7 +603,8 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
 void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
                               weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
+                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                              const int model_configs_list[])
 {
 
     fms_dt channels_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH];
@@ -698,7 +714,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                     dw_14_odd_even,
                                     prev_h,
                                     start_filling_offset_in_buffer_first_time,
-                                    rows_to_fill_first_time, true);
+                                    rows_to_fill_first_time, true,
+                                    model_configs_list);
 
     const int first_layer_in_second_part_height = first_layer_in_second_part.layer_ifm_height;
 
@@ -751,7 +768,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             dw_14_odd_even,
                                             prev_h,
                                             start_filling_offset_in_buffer_first_time,
-                                            rows_to_fill_first_time, false);
+                                            rows_to_fill_first_time, false,
+                                            model_configs_list);
         }
         else
         {
@@ -789,7 +807,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                             dw_14_odd_even,
                                             prev_h,
                                             start_filling_offset_in_buffer_first_time,
-                                            rows_to_fill_first_time, false);
+                                            rows_to_fill_first_time, false,
+                                            model_configs_list);
         }
         prev_h += pipe_rows_produced_in_a_pass;
         prev_prev_h += pipe_rows_produced_in_a_pass;
@@ -824,7 +843,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                         dw_14_odd_even,
                                         prev_h,
                                         start_filling_offset_in_buffer_first_time,
-                                        rows_to_fill_first_time, false);
+                                        rows_to_fill_first_time, false,
+                                        model_configs_list);
         write_pipe_seml_communication_buffer(
             channels_buffer,
             result,
@@ -860,7 +880,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
                                         dw_14_odd_even,
                                         prev_h,
                                         start_filling_offset_in_buffer_first_time,
-                                        rows_to_fill_first_time, false);
+                                        rows_to_fill_first_time, false,
+                                        model_configs_list);
         write_pipe_seml_communication_buffer(
             channels_buffer,
             result,

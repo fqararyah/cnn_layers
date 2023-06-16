@@ -15,3 +15,5 @@ LAYERS_TO_DEBUG = [15, 16, 17, 20, 21, 24, 26, 41, 66]#, 38, 39, 40, 41, 42, 43,
 START_CODE_GENERATION_SIGNAL = 'begin_code_generation'
 END_CODE_GENERATION_SIGNAL = 'end_code_generation'
 ON_CHIP_WEIGHTS_PORTS = 8
+
+#uniform_mobilenetv2_25

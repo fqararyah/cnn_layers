@@ -270,7 +270,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                         ? (ifms_d + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH
                                         : (model_configs_list[2 * layer] + CHANNELS_PIPELINE_DEPTH - 1) /
                                               CHANNELS_PIPELINE_DEPTH;
-    cout<< layer<< " "<< model_configs_list[2 * layer]<<"\n";
+    // cout << layer << " "<< (ifms_d + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH << " "
+    //      << (model_configs_list[2 * layer] + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH << "\n";
     if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
     {
         fill_scales_tiles(fused_scales, fused_scales_tile, fused_scales_log_2_shifts,

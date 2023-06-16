@@ -31,7 +31,8 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/model/pipelined_engines/pre_first_pipeline_layers.cpp \
 	./tests/test_utils.cpp \
 	./tests/main_tester.cpp
-	g++ -o main_tester ./model_components/utils/utils.cpp \
+	g++ -o main_tester \
+	./model_components/utils/utils.cpp \
 	./model_components/model/SEML/imp/mob_v2_seml.cpp \
 	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
 	./model_components/model/SEML/imp/mob_v2_0_5_seml.cpp \

@@ -8,7 +8,6 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 out_file = '../model_components/model/headers/{}_layers_specs.h'
 
 model_config_file = '../model_config/{}.txt'.format(cgc.MODEL_NAME)
-model_config_list = []
 
 specs_struct = 'const layer_specs {} = {}\n\
                 {},//layer_index;\n\
@@ -76,6 +75,7 @@ const int first_conv_layer_ifm_width = {};\n \
 //****************************\n"
 
 model_dag = utils.read_model_dag()
+model_configs_list = [0] * 2 * len(model_dag)
 current_block_indx = 0
 cumulative_s_pw_weights = 0
 cumulative_s_pw_weights_on_chip = 0
@@ -270,8 +270,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
 
             f.write(specs_struct.format(*replacement_list))
 
-            model_config_list.append(layer_depth)
-            model_config_list.append(num_of_filters)
+            model_configs_list[2 * layer_index] = layer_depth
+            model_configs_list[2 * layer_index + 1] = num_of_filters
 
         elif 'type' in layer_specs:
             layer_type = layer_specs['type']
@@ -304,5 +304,5 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
     f.write('#endif\n')
 
 with open(model_config_file, 'w') as f:
-    for i in model_config_list:
+    for i in model_configs_list:
         f.write(str(i) + '\n')

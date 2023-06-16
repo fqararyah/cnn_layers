@@ -112,7 +112,7 @@ void copy_channels_to_tmp_channels(fms_dt channels[max_fms_size], fms_dt tmp_cha
 void copy_channels_to_tmp_channels(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 								   fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
 
-void fill_model_configs_list(const int model_config_list_src[2 * max_conv_layers],
-							 int model_config_list[2 * max_conv_layers]);
+void fill_model_configs_list(const int model_configs_list_src[2 * max_conv_layers],
+							 int model_configs_list[2 * max_conv_layers]);
 
 #endif

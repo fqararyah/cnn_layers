@@ -6,7 +6,7 @@ void top_func(
 	weights_grp_dt off_chip_weights[all_pw_s_weights],
 	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 	fms_dt fc_input[fc_layer_input_size],
-	const int model_config_list_src[2 * max_conv_layers])
+	const int model_configs_list_src[2 * max_conv_layers])
 {
 
 #if FIBHA_VERSION == 1
@@ -63,7 +63,7 @@ void top_func(
 	{
 		on_chip_weights_filled = true;
 
-		fill_model_configs_list(model_config_list_src, model_configs_list);
+		fill_model_configs_list(model_configs_list_src, model_configs_list);
 #if HW == CPU
 		fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
 #elif HW == _FPGA
@@ -91,7 +91,7 @@ void top_func(
 #endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 #else
-	pipelined_engines_caller(input_image, on_chip_weights, channels);
+	pipelined_engines_caller(input_image, on_chip_weights, channels, model_configs_list);
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);
