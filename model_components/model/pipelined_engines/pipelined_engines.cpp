@@ -910,12 +910,15 @@ void copy_from_pre_first_pipeline_layers_output(fms_dt pre_first_pipeline_layers
                                                 const int h_offset_in_pre_first_pipeline_layers_output,
                                                 const int starting_w,
                                                 const bool first_layer_in_the_pipeline,
-                                                layer_specs layer_specs_struct)
+                                                layer_specs layer_specs_struct,
+                                                const int model_configs_list[])
 {
 #pragma HLS INLINE off
 
     const int layer_ifm_width = layer_specs_struct.layer_ifm_width;
-    const int layer_depth = layer_specs_struct.layer_depth;
+    const int layer_depth = model_configs_list[2 * layer_specs_struct.layer_index] != 0
+                                ? model_configs_list[2 * layer_specs_struct.layer_index]
+                                : layer_specs_struct.layer_depth;
 
     if (first_layer_in_the_pipeline)
     {
@@ -1080,7 +1083,7 @@ void pipelined_engines::pw_dw_conv(
 
             copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels, pw_engine_input_buffer, h_offset_in_pre_first_channels,
                                                        h_offset_in_pre_first_pipeline_layers_output, 0, first_layer_in_the_pipeline,
-                                                       pw_layer_specs_struct);
+                                                       pw_layer_specs_struct, model_configs_list);
 
             pw_conv_engine(weights_tile, pw_engine_input_buffer, pw_engine_result_tile_copy,
                            d, pw_layer_specs_struct, model_configs_list);
@@ -1093,7 +1096,7 @@ void pipelined_engines::pw_dw_conv(
             copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels, pw_engine_input_buffer,
                                                        h_offset_in_pre_first_channels,
                                                        h_offset_in_pre_first_pipeline_layers_output, 1,
-                                                       first_layer_in_the_pipeline, pw_layer_specs_struct);
+                                                       first_layer_in_the_pipeline, pw_layer_specs_struct, model_configs_list);
 
             for (int w = 0; w < ifms_width; w += PW_BUFFER_WIDTH)
             {
@@ -1130,7 +1133,7 @@ void pipelined_engines::pw_dw_conv(
                     copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels,
                                                                pw_engine_input_buffer_copy, h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output, next_w + 1,
-                                                               first_layer_in_the_pipeline, pw_layer_specs_struct);
+                                                               first_layer_in_the_pipeline, pw_layer_specs_struct, model_configs_list);
                 }
                 else
                 {
@@ -1161,7 +1164,7 @@ void pipelined_engines::pw_dw_conv(
                     copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels,
                                                                pw_engine_input_buffer, h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output, next_w + 1,
-                                                               first_layer_in_the_pipeline, pw_layer_specs_struct);
+                                                               first_layer_in_the_pipeline, pw_layer_specs_struct, model_configs_list);
                 }
             }
 
@@ -1255,7 +1258,7 @@ void pipelined_engines::pw_dw_conv(
             copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels, pw_engine_input_buffer,
                                                        h_offset_in_pre_first_channels,
                                                        h_offset_in_pre_first_pipeline_layers_output, 0, first_layer_in_the_pipeline,
-                                                       pw_layer_specs_struct);
+                                                       pw_layer_specs_struct, model_configs_list);
 
             for (int w = 0; w < ifms_width; w += PW_BUFFER_WIDTH)
             {
@@ -1280,7 +1283,7 @@ void pipelined_engines::pw_dw_conv(
                                                                h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output, next_w,
                                                                first_layer_in_the_pipeline,
-                                                               pw_layer_specs_struct);
+                                                               pw_layer_specs_struct, model_configs_list);
                 }
                 else
                 {
@@ -1301,7 +1304,7 @@ void pipelined_engines::pw_dw_conv(
                                                                h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output,
                                                                next_w, first_layer_in_the_pipeline,
-                                                               pw_layer_specs_struct);
+                                                               pw_layer_specs_struct, model_configs_list);
                 }
             }
 

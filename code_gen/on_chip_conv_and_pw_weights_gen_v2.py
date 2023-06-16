@@ -16,7 +16,6 @@ on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weig
 on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'
 general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
-on_chip_weights_declaration_string = 'static weights_dt on_chip_weights[all_on_chip_pw_s_weights][ON_CHIP_WEIGHTS_PORTS];\n'
 first_layer_weights_declaration_string = 'const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils]' + \
     '[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim]{\n'
 
@@ -55,6 +54,10 @@ def write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_head
                     f.write('},\n')
             f.write('},\n')
         f.write('};\n')
+
+        assert(all_on_chip_pw_s_weights % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
+        f.write('#endif\n')
+        f.write('#endif\n')
 
 
 first_layer = True
@@ -109,15 +112,7 @@ for ii in range(len(model_dag)):
     combined_weights = combined_weights.reshape(combined_weights.size) 
     formated_weights_all_layers.append(combined_weights)
 
-np.savetxt(on_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_weights_all_layers, 0), fmt='%i')
-
-
-
-with open(on_chip_weights_header_file, 'a') as f:
-    assert(all_on_chip_pw_s_weights % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
-    f.write(on_chip_weights_declaration_string.format(int(all_on_chip_pw_s_weights/ cgc.ON_CHIP_WEIGHTS_PORTS)))
-    f.write('#endif\n')
-    f.write('#endif\n')
+np.savetxt(on_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_weights_all_layers, 0), fmt='%i')    
 
 replacement_string = ''
 with open(general_specs_file, 'r') as f:

@@ -421,10 +421,17 @@ void pw_conv(weights_grp_dt *weights,
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor = num_of_weights_in_the_same_filter_and_group
 
+	const int model_configs_list_num_filters = model_configs_list[2 * layer + 1];
+	const int model_configs_list_layer_depth = model_configs_list[2 * layer];
+
+	const int to_fill_weight_groups_in_a_pass = model_configs_list_layer_depth != 0
+									? model_configs_list_layer_depth * pw_conv_parallelism_out / weights_group_items
+									: layer_specs_struct.layer_num_of_weight_groups_for_one_pass;
+
 #if HW == _FPGA
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
 	fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
-										   layer_specs_struct.layer_depth, layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+										   layer_specs_struct.layer_depth, to_fill_weight_groups_in_a_pass,
 										   layer_specs_struct.layer_weights_offset,
 										   layer_specs_struct.layer_num_fils);
 #elif HW == CPU
@@ -442,9 +449,9 @@ void pw_conv(weights_grp_dt *weights,
 	const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
 
 	const int model_configs_list_limit =
-		(model_configs_list[2 * layer + 1] + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out;
-	
-	//cout << layer << " " << layer_specs_struct.layer_num_of_tiles_out_d << " " << model_configs_list_limit << "\n";
+		(model_configs_list_num_filters + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out;
+
+	// cout << layer << " " << layer_specs_struct.layer_num_of_tiles_out_d << " " << model_configs_list_limit << "\n";
 
 conv2_ots_loop:
 	for (int td_o = 0; td_o < layer_specs_struct.layer_num_of_tiles_out_d; td_o++)
@@ -479,7 +486,7 @@ conv2_ots_loop:
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
 												  weights_tile, td_o * pw_conv_parallelism_out,
 												  layer_specs_struct.layer_depth,
-												  layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+												  to_fill_weight_groups_in_a_pass,
 												  layer_specs_struct.layer_weights_offset);
 #endif
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
@@ -489,7 +496,7 @@ conv2_ots_loop:
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out,
 											   layer_specs_struct.layer_depth,
-											   layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+											   to_fill_weight_groups_in_a_pass,
 											   layer_specs_struct.layer_weights_offset,
 											   layer_specs_struct.layer_num_fils);
 #elif HW == CPU

@@ -549,6 +549,5 @@ const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils][f
 },
 },
 };
-static weights_dt on_chip_weights[all_on_chip_pw_s_weights][ON_CHIP_WEIGHTS_PORTS];
 #endif
 #endif
