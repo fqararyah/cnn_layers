@@ -64,6 +64,7 @@ namespace pipelined_engines
         fms_dt dw_horizontal_overlap_buffer[DW_TILE_DEPTH][MAX_FILTER_MINUS_STRIDES][PW_BUFFER_WIDTH],
         const fms_quantization_scheme normalization_buffer[],
         const int starting_d, const int starting_h, const int starting_w,
+        const int model_configs_list_limit,
         const layer_specs layer_specs_struct,
         const layer_specs dw_layer_specs_struct);
 
@@ -73,6 +74,7 @@ namespace pipelined_engines
         fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
         const fms_quantization_scheme normalization_buffer[],
         const int starting_d, const int starting_h, const int starting_w,
+        const int model_configs_list_limit,
         const layer_specs layer_specs_struct,
         const layer_specs dw_layer_specs_struct);
 
@@ -92,6 +94,7 @@ namespace pipelined_engines
         fms_dt dw_horizontal_overlap_buffer[DW_TILE_DEPTH][MAX_FILTER_MINUS_STRIDES][PW_BUFFER_WIDTH],
         fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
         const int starting_d, const int starting_h, const int starting_w,
+        const int model_configs_list_limit,
         layer_specs layer_specs_struct,
         const int read_end);
 
@@ -103,13 +106,13 @@ namespace pipelined_engines
                               dw_weights_dt weights_tile[][MAX_DW_FILTER_AREA_IN_PIPE],
                               int starting_d, const int current_dw_layer_weights_offset);
 
-    void dw_normalize_and_write_back_result_tile(dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
-                                                 fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-                                                 const fms_quantization_scheme normalization_buffer[],
-                                                 const int starting_d,
-                                                 const int h_offset_in_result,
-                                                 const int starting_w,
-                                                 layer_specs layer_specs_struct);
+    void dw_normalize_and_write_back_result_tile(
+        dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
+        fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
+        const fms_quantization_scheme normalization_buffer[],
+        const int starting_d, const int h_offset_in_result,
+        const int starting_w, layer_specs layer_specs_struct,
+        const int model_configs_list_limit);
 
     void dw_normalize_and_write_back_result_tile_v2(
         dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
@@ -122,6 +125,8 @@ namespace pipelined_engines
         dw_weights_dt weights[DW_TILE_DEPTH][MAX_DW_FILTER_AREA_IN_PIPE],
         fms_dt channels_tile[DW_TILE_DEPTH][DW_BUFFER_HEIGHT][DW_BUFFER_WIDTH],
         dw_pss_dt result_tile[DW_TILE_DEPTH][PW_BUFFER_HEIGHT][PW_BUFFER_WIDTH],
+        const int starting_d,
+        const int model_configs_list_limit,
         layer_specs layer_specs_struct);
 
     void pw_write_back_result_tile(
@@ -129,6 +134,7 @@ namespace pipelined_engines
         fms_dt result[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
         fms_dt tmp_channels[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT + 1][MAX_PW_BUFFER_WIDTH],
         const int starting_d, const int starting_w,
+        const int model_configs_list_limit,
         const layer_specs layer_specs_struct);
 
     void pw_dw_conv(

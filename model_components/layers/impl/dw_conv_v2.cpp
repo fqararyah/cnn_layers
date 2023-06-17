@@ -14,7 +14,8 @@ void dw_conv_engine(
     const int tile_in_h,
     const int tile_in_w,
     const fms_dt current_layer_zero_point,
-    layer_specs layer_specs_struct)
+    layer_specs layer_specs_struct,
+    const int model_configs_list_limit)
 {
 #pragma HLS INLINE off
 
@@ -31,7 +32,8 @@ dw_conv_engine:
                  d_in_pipeline++)
             {
 #pragma HLS PIPELINE
-                if (starting_d + d_in_pipeline >= layer_d)
+                if (starting_d + d_in_pipeline >= layer_d ||
+                    (model_configs_list_limit != 0 && starting_d + d_in_pipeline >= model_configs_list_limit))
                 {
                     break;
                 }
@@ -156,7 +158,8 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                                              const int starting_d,
                                              const int in_tile_h,
                                              const int in_tile_w,
-                                             layer_specs layer_specs_struct)
+                                             layer_specs layer_specs_struct,
+                                             const int model_configs_list_limit)
 {
 #pragma HLS INLINE off
     const int num_of_ofm_tiles_h = layer_specs_struct.layer_num_of_ofm_tiles_h;
@@ -178,7 +181,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
         {
 #pragma HLS PIPELINE
             const int main_tile_index = initial_tile_index + d * num_of_tiles_hw;
-            if (starting_d + d >= ifms_d)
+            if (starting_d + d >= ifms_d || (model_configs_list_limit != 0 && starting_d + d >= model_configs_list_limit))
             {
                 break;
             }
@@ -304,7 +307,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                           tile_in_h,
                           tile_in_w,
                           current_layer_fms_zero_point,
-                          layer_specs_struct);
+                          layer_specs_struct,
+                          model_configs_list[2 * layer]);
 
             for (int dw_pipeline_in_d = 0;
                  dw_pipeline_in_d < num_of_iterations_d;
@@ -329,7 +333,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                             tile_in_h / strides, tile_in_w / strides,
                                                             prev_tile_in_d,
                                                             in_tile_h, in_tile_w,
-                                                            layer_specs_struct);
+                                                            layer_specs_struct, model_configs_list[2 * layer]);
 
                     dw_conv_engine(weights_tile,
                                    channels_tile,
@@ -338,7 +342,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                    tile_in_h,
                                    tile_in_w,
                                    current_layer_fms_zero_point,
-                                   layer_specs_struct);
+                                   layer_specs_struct, model_configs_list[2 * layer]);
 
                     fill_fms_tile(channels,
                                   channels_tile_copy,
@@ -346,7 +350,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                   tile_in_h,
                                   tile_in_w,
                                   current_layer_fms_zero_point,
-                                  layer_specs_struct);
+                                  layer_specs_struct, model_configs_list[2 * layer]);
                 }
                 else
                 {
@@ -361,7 +365,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                             tile_in_h / strides, tile_in_w / strides,
                                                             prev_tile_in_d,
                                                             in_tile_h, in_tile_w,
-                                                            layer_specs_struct);
+                                                            layer_specs_struct,
+                                                            model_configs_list[2 * layer]);
 
                     dw_conv_engine(weights_tile,
                                    channels_tile_copy,
@@ -370,7 +375,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                    tile_in_h,
                                    tile_in_w,
                                    current_layer_fms_zero_point,
-                                   layer_specs_struct);
+                                   layer_specs_struct,
+                                   model_configs_list[2 * layer]);
 
                     fill_fms_tile(channels,
                                   channels_tile,
@@ -378,7 +384,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                   tile_in_h,
                                   tile_in_w,
                                   current_layer_fms_zero_point,
-                                  layer_specs_struct);
+                                  layer_specs_struct,
+                                  model_configs_list[2 * layer]);
                 }
             }
             if ((num_of_iterations_d - 1) % 2 == 0)
@@ -392,7 +399,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                             ? ifms_d - CHANNELS_PIPELINE_DEPTH
                                                             : ifms_d - (ifms_d % CHANNELS_PIPELINE_DEPTH),
                                                         in_tile_h, in_tile_w,
-                                                        layer_specs_struct);
+                                                        layer_specs_struct,
+                                                        model_configs_list[2 * layer]);
             }
             else
             {
@@ -405,7 +413,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                             ? ifms_d - CHANNELS_PIPELINE_DEPTH
                                                             : ifms_d - (ifms_d % CHANNELS_PIPELINE_DEPTH),
                                                         in_tile_h, in_tile_w,
-                                                        layer_specs_struct);
+                                                        layer_specs_struct,
+                                                        model_configs_list[2 * layer]);
             }
         }
     }

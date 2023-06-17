@@ -425,7 +425,7 @@ void pw_conv(weights_grp_dt *weights,
 	const int model_configs_list_layer_depth = model_configs_list[2 * layer];
 
 	const int to_fill_weight_groups_in_a_pass = model_configs_list_layer_depth != 0
-									? model_configs_list_layer_depth * pw_conv_parallelism_out / weights_group_items
+									? (model_configs_list_layer_depth * pw_conv_parallelism_out) / weights_group_items
 									: layer_specs_struct.layer_num_of_weight_groups_for_one_pass;
 
 #if HW == _FPGA

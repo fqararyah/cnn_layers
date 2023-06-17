@@ -269,7 +269,8 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
                    const int tile_in_h,
                    const int tile_in_w,
                    const fms_dt current_layer_zero_point,
-                   const layer_specs layer_specs_struct)
+                   const layer_specs layer_specs_struct,
+                   const int model_configs_list_limit)
 {
 #pragma HLS INLINE off
 
@@ -286,7 +287,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
     {
 #pragma HLS PIPELINE
 
-        if (tile_in_d + d >= layer_ifms_depth)
+        if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit) )
         {
             break;
         }
