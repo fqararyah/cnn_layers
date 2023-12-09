@@ -27,13 +27,13 @@ void top_func(
 #if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25)
 	_0_1_2_bottlenecks_chain(input_image,
 							 tmp_channels);
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
 #elif CHAIN_LENGTH == 6 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_75) && !ONLY_SEML
 	_0_1_bottlenecks_chain(input_image,
 						   channels);
 #if DEBUGGING
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
 					  channels, layer_7_pw_specs);
 #endif
 #endif
@@ -55,9 +55,8 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
+	int model_configs_list[2 * max_conv_layers] = {0};
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
-
-	int model_configs_list[2 * max_conv_layers];
 
 #pragma HLS ARRAY_PARTITION variable = on_chip_weights type = complete dim = 2
 
@@ -81,13 +80,13 @@ void top_func(
 #if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25)
 	_0_1_2_bottlenecks_chain(input_image,
 							 tmp_channels);
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
 					  tmp_channels, 56 * 56 * 24, 56, 56);
 #elif CHAIN_LENGTH == 6 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25) && !ONLY_SEML
 	_0_1_bottlenecks_chain(input_image,
 						   channels);
 #if DEBUGGING
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
 					  channels, layer_7_pw_specs);
 #endif
 #endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
@@ -95,7 +94,7 @@ void top_func(
 #else
 	pipelined_engines_caller(input_image, on_chip_weights, channels, model_configs_list);
 #if DEBUGGING
-	dump_layer_output("/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
+	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);
 #endif
 

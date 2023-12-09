@@ -20,6 +20,57 @@ fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization,
 					  const int layer_relu)
 {
 #pragma HLS INLINE
+
+	pss += normalization.fused_zero_point;
+
+	if (layer_relu == 6 && pss <= 0)
+	{
+		return normalization.ofm_zero_point;
+	}
+
+	pss_f_dt scaled_pss = pss * normalization.fused_scales;
+	if (layer_relu != 6 || scaled_pss <= normalization.relu_6_fused_scale)
+	{
+		scaled_pss += normalization.ofm_zero_point;
+		scaled_pss += quant_half - (scaled_pss < 0);
+		return clamp((fms_dt)scaled_pss);
+	}
+
+	return clamp((fms_dt)(normalization.ofm_zero_point + normalization.relu_6_fused_scale));
+}
+
+fms_dt pw_relu_norm_6_v2(pss_dt pss,
+						 const biases_dt fused_zero_point,
+						 const fms_dt ofm_zero_point,
+						 const scales_dt fused_scales,
+						 const relu_6_fused_scales_dt relu_6_fused_scale,
+						 const int layer_relu)
+{
+#pragma HLS INLINE
+
+	pss += fused_zero_point;
+
+	if (layer_relu == 6 && pss <= 0)
+	{
+		return ofm_zero_point;
+	}
+
+	pss_f_dt scaled_pss = pss * fused_scales;
+	if (layer_relu != 6 || scaled_pss <= relu_6_fused_scale)
+	{
+		scaled_pss += ofm_zero_point;
+		scaled_pss += quant_half - (scaled_pss < 0);
+		return clamp((fms_dt)scaled_pss);
+	}
+
+	return clamp((fms_dt)(ofm_zero_point + relu_6_fused_scale));
+}
+
+fms_dt pw_relu_norm_6_v1(pss_dt pss, fms_quantization_scheme normalization,
+						 const int layer_relu)
+{
+#pragma HLS INLINE
+
 	norm_act_pss_dt na_pss = pss + normalization.fused_zero_point;
 	if (layer_relu == 6)
 	{
@@ -42,7 +93,7 @@ fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization,
 }
 
 fms_dt relu_norm(pss_dt pss, fms_quantization_scheme normalization,
-					const int layer_relu)
+				 const int layer_relu)
 {
 #pragma HLS INLINE
 	norm_act_pss_dt na_pss = pss + normalization.fused_zero_point;
@@ -63,10 +114,25 @@ pss_f_dt pw_relu_norm_no_q_no_relu(pss_dt pss,
 								   fms_quantization_scheme normalization, const int layer_relu)
 {
 #pragma HLS INLINE
+
 	norm_act_pss_dt na_pss = pss + normalization.fused_zero_point;
 	fused_scales_dt multiplier = normalization.fused_scales * normalization.ofm_scale;
 	pss_f_dt scaled_pss = na_pss * multiplier;
-	scaled_pss = scaled_pss / (1 << normalization.fused_scales_log_2_shift);
+
+	return scaled_pss;
+}
+
+pss_f_dt pw_relu_norm_no_q_no_relu_v2(pss_dt pss,
+									  biases_dt fused_zero_point,
+									  scales_dt fused_scale,
+									  scales_dt ofm_scale,
+									  const int layer_relu)
+{
+#pragma HLS INLINE
+
+	norm_act_pss_dt na_pss = pss + fused_zero_point;
+	fused_scales_dt multiplier = fused_scale * ofm_scale;
+	pss_f_dt scaled_pss = na_pss * multiplier;
 
 	return scaled_pss;
 }
@@ -75,6 +141,57 @@ fms_dt dw_relu_norm(dw_pss_dt pss, fms_quantization_scheme normalization,
 					const int layer_relu)
 {
 #pragma HLS INLINE
+
+	pss += normalization.fused_zero_point;
+
+	if (pss <= 0)
+	{
+		return normalization.ofm_zero_point;
+	}
+
+	pss_f_dt scaled_pss = pss * normalization.fused_scales;
+	if (scaled_pss <= normalization.relu_6_fused_scale)
+	{
+		scaled_pss += normalization.ofm_zero_point;
+		scaled_pss += quant_half - (scaled_pss < 0);
+		return clamp((fms_dt)scaled_pss);
+	}
+
+	return clamp((fms_dt)(normalization.ofm_zero_point + normalization.relu_6_fused_scale));
+}
+
+fms_dt dw_relu_norm_v2(pss_dt pss,
+					   const biases_dt fused_zero_point,
+					   const fms_dt ofm_zero_point,
+					   const scales_dt fused_scales,
+					   const relu_6_fused_scales_dt relu_6_fused_scale,
+					   const int layer_relu)
+{
+#pragma HLS INLINE
+
+	pss += fused_zero_point;
+
+	if (layer_relu == 6 && pss <= 0)
+	{
+		return ofm_zero_point;
+	}
+
+	pss_f_dt scaled_pss = pss * fused_scales;
+	if (layer_relu != 6 || scaled_pss <= relu_6_fused_scale)
+	{
+		scaled_pss += ofm_zero_point;
+		scaled_pss += quant_half - (scaled_pss < 0);
+		return clamp((fms_dt)scaled_pss);
+	}
+
+	return clamp((fms_dt)(ofm_zero_point + relu_6_fused_scale));
+}
+
+fms_dt dw_relu_norm_v1(dw_pss_dt pss, fms_quantization_scheme normalization,
+					   const int layer_relu)
+{
+#pragma HLS INLINE
+
 	norm_act_pss_dt na_pss = pss + normalization.fused_zero_point;
 	if (layer_relu == 6)
 	{
@@ -97,10 +214,11 @@ fms_dt dw_relu_norm(dw_pss_dt pss, fms_quantization_scheme normalization,
 	return clamp(scaled_pss);
 }
 
-fms_dt conv_relu_norm(first_conv_pss_dt pss,
-					  fms_quantization_scheme normalization, const int layer_relu)
+fms_dt conv_relu_norm_v1(first_conv_pss_dt pss,
+						 fms_quantization_scheme normalization, const int layer_relu)
 {
 #pragma HLS INLINE
+
 	layer_0_norm_act_pss_dt na_pss = pss + normalization.fused_zero_point;
 	if (layer_relu == 6)
 	{
@@ -121,4 +239,54 @@ fms_dt conv_relu_norm(first_conv_pss_dt pss,
 	scaled_pss = scaled_pss + quant_half - (scaled_pss < 0);
 
 	return clamp(scaled_pss);
+}
+
+fms_dt conv_relu_norm(first_conv_pss_dt pss,
+					  fms_quantization_scheme normalization, const int layer_relu)
+{
+#pragma HLS INLINE
+
+	pss += normalization.fused_zero_point;
+
+	if (layer_relu == 6 && pss <= 0)
+	{
+		return normalization.ofm_zero_point;
+	}
+
+	pss_f_dt scaled_pss = pss * normalization.fused_scales;
+	if (layer_relu != 6 || scaled_pss <= normalization.layer_0_relu_6_fused_scale)
+	{
+		scaled_pss += normalization.ofm_zero_point;
+		scaled_pss += quant_half - (scaled_pss < 0);
+		return clamp((fms_dt)scaled_pss);
+	}
+
+	return clamp((fms_dt)(normalization.ofm_zero_point + normalization.layer_0_relu_6_fused_scale));
+}
+
+fms_dt conv_relu_norm_v2(pss_dt pss,
+						 const biases_dt fused_zero_point,
+						 const fms_dt ofm_zero_point,
+						 const scales_dt fused_scales,
+						 const relu_6_fused_scales_dt relu_6_fused_scale,
+						 const int layer_relu)
+{
+#pragma HLS INLINE
+
+	pss += fused_zero_point;
+
+	if (layer_relu == 6 && pss <= 0)
+	{
+		return ofm_zero_point;
+	}
+
+	pss_f_dt scaled_pss = pss * fused_scales;
+	if (layer_relu != 6 || scaled_pss <= relu_6_fused_scale)
+	{
+		scaled_pss += ofm_zero_point;
+		scaled_pss += quant_half - (scaled_pss < 0);
+		return clamp((fms_dt)scaled_pss);
+	}
+
+	return clamp((fms_dt)(ofm_zero_point + relu_6_fused_scale));
 }

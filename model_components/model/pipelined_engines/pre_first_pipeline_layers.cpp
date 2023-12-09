@@ -1,5 +1,7 @@
 #include "pipeline_main.h"
 
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE && FIBHA_VERSION == 2 && !ONLY_SEML
+
 void fill_input_image_groups_buffer(
 	fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * INPUT_IMAGE_ROWS_FILLED_EACH_TIME], const int starting_h,
@@ -869,3 +871,5 @@ pre_first_pipeline_layers_mob_v2:
 		}
 	}
 }
+
+#endif

@@ -1,6 +1,6 @@
 
 import sys
-sys.path.append("/media/SSD2TB/wd/cnn_layers/")
+sys.path.append("/media/SSD2TB/fareed/wd/cnn_layers/")
 
 from code_gen import code_generation_constants as cgc
 from code_gen import utils

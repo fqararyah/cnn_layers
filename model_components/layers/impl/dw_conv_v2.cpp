@@ -148,7 +148,7 @@ void dw_conv_copy_engine_result_tile(
 
 void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                                              dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
-                                             fms_quantization_scheme normalization,
+                                             fms_dt ofm_zero_point,
                                              const fused_scales_dt fused_scales_tile[],
                                              const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_tile[],
                                              const relu_6_fused_scales_dt relu_6_fused_scales_tile[],
@@ -185,12 +185,10 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
             {
                 break;
             }
-            normalization.fused_scales = fused_scales_tile[starting_d + d];
-            normalization.fused_scales_log_2_shift =
-                fused_scales_log_2_shifts_tile[starting_d + d];
-            normalization.relu_6_fused_scale =
+            const scales_dt fused_scale = fused_scales_tile[starting_d + d];
+            const relu_6_fused_scales_dt relu_6_fused_scale =
                 relu_6_fused_scales_tile[starting_d + d];
-            normalization.fused_zero_point =
+            const biases_dt fused_zero_point =
                 fused_zero_points_tile[starting_d + d];
 
             if (strides == 1)
@@ -198,9 +196,11 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                 for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    result[main_tile_index][h][w] = dw_relu_norm(
-                        result_tile[d][h][w], normalization,
-                        layer_relu);
+                    result[main_tile_index][h][w] =
+                        dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
+                    //  dw_relu_norm(
+                    //     result_tile[d][h][w], normalization,
+                    //     layer_relu);
                 }
             }
             else
@@ -208,9 +208,12 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                 for (int w = 0; w < CHANNELS_TILE_WIDTH / 2; w++)
                 {
 #pragma HLS UNROLL
-                    result[main_tile_index][in_tile_h + h][in_tile_w + w] = dw_relu_norm(
-                        result_tile[d][h][w], normalization,
-                        layer_relu);
+                    result[main_tile_index][in_tile_h + h][in_tile_w + w] =
+                        dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
+
+                    //  dw_relu_norm(
+                    //     result_tile[d][h][w], normalization,
+                    //     layer_relu);
                 }
             }
         }
@@ -233,8 +236,6 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 {
 #pragma HLS INLINE off
 
-    fms_quantization_scheme normalization;
-
     const int current_dw_layer_weights_offset = dw_layers_weights_offsets[layer];
     const int current_layer_fused_parameters_offset =
         layers_fused_parameters_offsets[layer];
@@ -249,8 +250,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 
     const fms_dt current_layer_fms_zero_point = layer_specs_struct.layer_ifms_zero_point;
 
-    normalization.ofm_scale = layer_specs_struct.layer_ofms_scale;
-    normalization.ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
+    const fms_dt ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
 
     fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED];
     fms_dt channels_tile_copy[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED];
@@ -327,7 +327,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                        current_dw_layer_weights_offset);
 
                     dw_normalize_and_write_back_result_tile(result,
-                                                            engine_result_tile_copy, normalization,
+                                                            engine_result_tile_copy, ofm_zero_point,
                                                             fused_scales_tile, fused_scales_log_2_shifts_tile,
                                                             relu_6_fused_scales_tile, fused_zero_points_tile,
                                                             tile_in_h / strides, tile_in_w / strides,
@@ -359,7 +359,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                        current_dw_layer_weights_offset);
 
                     dw_normalize_and_write_back_result_tile(result,
-                                                            engine_result_tile, normalization,
+                                                            engine_result_tile, ofm_zero_point,
                                                             fused_scales_tile, fused_scales_log_2_shifts_tile,
                                                             relu_6_fused_scales_tile, fused_zero_points_tile,
                                                             tile_in_h / strides, tile_in_w / strides,
@@ -391,7 +391,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
             if ((num_of_iterations_d - 1) % 2 == 0)
             {
                 dw_normalize_and_write_back_result_tile(result,
-                                                        engine_result_tile, normalization,
+                                                        engine_result_tile, ofm_zero_point,
                                                         fused_scales_tile, fused_scales_log_2_shifts_tile,
                                                         relu_6_fused_scales_tile, fused_zero_points_tile,
                                                         tile_in_h / strides, tile_in_w / strides,
@@ -405,7 +405,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
             else
             {
                 dw_normalize_and_write_back_result_tile(result,
-                                                        engine_result_tile_copy, normalization,
+                                                        engine_result_tile_copy, ofm_zero_point,
                                                         fused_scales_tile, fused_scales_log_2_shifts_tile,
                                                         relu_6_fused_scales_tile, fused_zero_points_tile,
                                                         tile_in_h / strides, tile_in_w / strides,

@@ -42,8 +42,8 @@ const int scales_bit_width = 24;//48
 const int scales_integer_part_width = 0;
 const int fused_scales_bit_width = 16;//48
 const int fused_scales_integer_part_width = 0;
-const int relu_6_fused_scales_bit_width = 32;
-const int layer_0_relu_6_fused_scales_bit_width = 38;
+const int relu_6_fused_scales_bit_width = 8;
+const int layer_0_relu_6_fused_scales_bit_width = 8;
 const int fused_scales_log_2_shifts_bit_width = 6;//2^6=64
 const int rec_scales_bit_width = 24;//48
 const int rec_scales_integer_part_width = 10;
@@ -86,8 +86,8 @@ typedef ap_ufixed<scales_bit_width, scales_integer_part_width> scales_dt;
 typedef ap_ufixed<fused_scales_bit_width, fused_scales_integer_part_width> fused_scales_dt;
 typedef ap_ufixed<24, 4>  pooling_fused_scales_dt;
 typedef ap_uint<fused_scales_log_2_shifts_bit_width> fused_scales_log_2_shifts_dt;
-typedef ap_int<relu_6_fused_scales_bit_width> relu_6_fused_scales_dt;
-typedef ap_int<layer_0_relu_6_fused_scales_bit_width> layer_0_relu_6_fused_scales_dt;
+typedef ap_uint<relu_6_fused_scales_bit_width> relu_6_fused_scales_dt;
+typedef ap_uint<layer_0_relu_6_fused_scales_bit_width> layer_0_relu_6_fused_scales_dt;
 //typedef scales_dt rec_scales_dt;
 typedef ap_ufixed<rec_scales_bit_width, rec_scales_integer_part_width> rec_scales_dt;
 #elif HW == CPU
@@ -113,8 +113,8 @@ typedef float scales_dt;
 typedef float fused_scales_dt;
 typedef float  pooling_fused_scales_dt;
 typedef uint8_t fused_scales_log_2_shifts_dt;
-typedef int64_t relu_6_fused_scales_dt;
-typedef int64_t layer_0_relu_6_fused_scales_dt;
+typedef uint8_t relu_6_fused_scales_dt;
+typedef uint8_t layer_0_relu_6_fused_scales_dt;
 //typedef scales_dt rec_scales_dt;
 typedef float rec_scales_dt;
 #endif

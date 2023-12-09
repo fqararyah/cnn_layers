@@ -1,7 +1,7 @@
 #include "../../basic_defs/simulation_constants.h"
 
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && CHAIN_LENGTH >= 6 && \
-(MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25) && ! ONLY_SEML
+	(MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25) && !ONLY_SEML
 
 #include "bottleneck.h"
 
@@ -98,7 +98,8 @@ void mob_v2_bottleneck_1(fms_dt bottleneck_input[],
 
 	const fms_dt dw_layer_ofms_zero_point = layer_6_dw_specs.layer_ofms_zero_point;
 	const rec_scales_dt dw_layer_ofms_scale = layer_6_dw_specs.layer_ofms_scale;
-	const fms_dt current_dw_ifms_zero_point = layer_6_dw_specs.layer_ifms_zero_point;;
+	const fms_dt current_dw_ifms_zero_point = layer_6_dw_specs.layer_ifms_zero_point;
+	;
 
 	fms_quantization_scheme expansion_layer_normalization;
 	expansion_layer_normalization.ofm_zero_point = expansion_layer_ofms_zero_point;
@@ -123,13 +124,11 @@ mob_v2_bottleneck_1:
 		weights_dt projection_kernel_weights[bottleneck_1_ofms_depth];
 #pragma HLS ARRAY_PARTITION variable = projection_kernel_weights type = complete
 
-		expansion_layer_normalization.fused_scales =
+		scales_dt expansion_layer_fused_scale =
 			layer_4_pw_fused_scales[d_in_out];
-		expansion_layer_normalization.fused_scales_log_2_shift =
-			layer_4_pw_fused_scales_log_2_shifts[d_in_out];
-		expansion_layer_normalization.relu_6_fused_scale =
+		relu_6_fused_scales_dt expansion_layer_relu_6_fused_scale =
 			layer_4_pw_relu_6_fused_scales[d_in_out];
-		expansion_layer_normalization.fused_zero_point =
+		biases_dt expansion_layer_fused_zero_point =
 			layer_4_pw_fused_zero_points[d_in_out];
 
 		fms_dt expansion_result[bottleneck_1_expansion_parallelism_h][bottleneck_1_expansion_parallelism_w];
@@ -152,9 +151,13 @@ mob_v2_bottleneck_1:
 																pw_weights_4[d_in_out], bottleneck_1_ifms_depth,
 																d_in_out, h, w,
 																bottleneck_1_expansion_parallelism_w);
-						expansion_result[h][first_step_in_w + w] = pw_relu_norm_6(
-							expansion_pss, expansion_layer_normalization,
-							bottleneck_1_expansion_layer_relu);
+						expansion_result[h][first_step_in_w + w] =
+							pw_relu_norm_6_v2(expansion_pss, expansion_layer_fused_zero_point,
+											  expansion_layer_ofms_zero_point, expansion_layer_fused_scale,
+											  expansion_layer_relu_6_fused_scale, bottleneck_1_expansion_layer_relu);
+						//  pw_relu_norm_6(
+						// 	expansion_pss, expansion_layer_normalization,
+						// 	bottleneck_1_expansion_layer_relu);
 					}
 				}
 				else
@@ -168,18 +171,18 @@ mob_v2_bottleneck_1:
 								   dw_input_buffer, expansion_result, d_in_out, dw_kernel_starting_w,
 								   starting_h);
 
-		dw_layer_normalization.fused_scales = layer_6_dw_fused_scales[d_in_out];
-		dw_layer_normalization.fused_scales_log_2_shift =
-			layer_6_dw_fused_scales_log_2_shifts[d_in_out];
-		dw_layer_normalization.relu_6_fused_scale =
+		scales_dt dw_fused_scale = layer_6_dw_fused_scales[d_in_out];
+		relu_6_fused_scales_dt dw_relu_6_fused_scale =
 			layer_6_dw_relu_6_fused_scales[d_in_out];
-		dw_layer_normalization.fused_zero_point =
+		biases_dt dw_fused_zero_point =
 			layer_6_dw_fused_zero_points[d_in_out];
 
 		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_6[d_in_out],
 									 bottleneck_1_dw_filter_dim);
-		fms_dt dw_result = dw_relu_norm(dw_pss, dw_layer_normalization,
-										bottleneck_1_dw_layer_relu);
+		fms_dt dw_result = dw_relu_norm_v2(dw_pss, dw_fused_zero_point, dw_layer_ofms_zero_point,
+										   dw_fused_scale, dw_relu_6_fused_scale, bottleneck_1_dw_layer_relu);
+		// dw_relu_norm(dw_pss, dw_layer_normalization,
+		// 								bottleneck_1_dw_layer_relu);
 
 		if (dw_kernel_starting_w >= 0)
 		{
@@ -205,12 +208,12 @@ mob_v2_bottleneck_1:
 		}
 	}
 
-//	if (dw_kernel_starting_w >= 0)
-//	{
-//		bottleneck_1_update_previous_pass_buffer(previous_pass_dw_input_w,
-//												 dw_lower_buffer, dw_kernel_starting_w,
-//												 bottleneck_1_expanded_ifms_depth - 1);
-//	}
+	//	if (dw_kernel_starting_w >= 0)
+	//	{
+	//		bottleneck_1_update_previous_pass_buffer(previous_pass_dw_input_w,
+	//												 dw_lower_buffer, dw_kernel_starting_w,
+	//												 bottleneck_1_expanded_ifms_depth - 1);
+	//	}
 
 	shift_dw_ifms_buffer_horizontally_3x3_s2(dw_lower_buffer,
 											 bottleneck_1_expanded_ifms_depth);

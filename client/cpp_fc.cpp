@@ -122,11 +122,11 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
 // int main()
 // {
 //     string weights_file =
-//         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weights.txt";
+//         "/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weights.txt";
 //     string weight_sums_file =
-//         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weight_sums.txt";
+//         "/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_weight_sums.txt";
 //     string biases_file =
-//         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_biases.txt";
+//         "/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/weights/fc_biases.txt";
 
 //     int8_t fc_weights[num_classes * fc_layer_input_size];
 //     int weight_sums[num_classes];
@@ -139,7 +139,7 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
 //     read_biases(biases_file, biases);
 
 //     string ifms_folder =
-//         "/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/cpu_out/";
+//         "/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/cpu_out/";
 
 //     string predictions_file = "./predictions.json";
 

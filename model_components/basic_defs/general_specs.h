@@ -9,11 +9,11 @@
 #define RELU 1
 #define RELU6 6
 
-#define MODEL_ACTIVATION RELU
+#define MODEL_ACTIVATION RELU6
 #define ADD_LAYER_ACTIVATION 0
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 8320;
+const int first_quantization_arrays_num_elements = 8344;
 
 static bool on_chip_weights_filled = false;
 // switch point
@@ -101,9 +101,9 @@ const int median_depth = 96;
 const int median_width = 14;
 
 // weights
-const int all_pw_s_weights = 2109952 / weights_group_items;
+const int all_pw_s_weights = 2120320 / weights_group_items;
 const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
-const int all_on_chip_pw_s_weights = 38624;
+const int all_on_chip_pw_s_weights = 12128;
 const int all_on_chip_pw_s_weights_groups = (all_on_chip_pw_s_weights + weights_group_items - 1) / weights_group_items;
 // input specs
 const int input_image_height = 224;

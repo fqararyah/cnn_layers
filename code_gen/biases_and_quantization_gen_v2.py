@@ -7,22 +7,19 @@ import os
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-scales_bit_width = 18
-scales_integer_part_width = 1
-biases_bit_width = 32
 from_files = True
 #########################################################################
-biases_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
+biases_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/' + \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/biases/'.format(
         cgc.MODEL_NAME)
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
+weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/' + \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
         cgc.MODEL_NAME)
 weights_scales_files_location = weights_files_location
-fms_scales_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/' + \
+fms_scales_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/' + \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
         cgc.MODEL_NAME)
-general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/general_specs.h'
+general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 #########################################################################
 
 #########################################################################
@@ -33,7 +30,8 @@ add_layers_activation = '0'
 
 overall_quantization_arrays_num_of_elements = 0
 for layer_specs in model_dag:
-    overall_quantization_arrays_num_of_elements += layer_specs['ifms_shape'][0]
+    if 'ifms_shape' in layer_specs and len(layer_specs['ifms_shape']) > 0:
+        overall_quantization_arrays_num_of_elements += layer_specs['ifms_shape'][0]
 print(overall_quantization_arrays_num_of_elements)
 first_quantization_arrays_elements_threshold = int(
     overall_quantization_arrays_num_of_elements / 2)

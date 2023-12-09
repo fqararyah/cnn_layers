@@ -70,7 +70,7 @@ void bottleneck_0_update_previous_pass_buffer(
 #pragma HLS INLINE
 	//	bottleneck_0_update_previous_pass_buffer: for (int d = 0; d < bottleneck_0_expanded_ifms_depth; d++)
 	//	{
-	//#pragma HLS PIPELINE
+	// #pragma HLS PIPELINE
 	if (starting_h != 0)
 	{
 		previous_pass_dw_input_slice[0][offset_w] =
@@ -142,7 +142,7 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[bottleneck_0_input_buffer_size]
 	const fms_dt dw_layer_ofms_zero_point = layer_2_dw_specs.layer_ofms_zero_point;
 	const rec_scales_dt dw_layer_ofms_scale = layer_2_dw_specs.layer_ofms_scale;
 	const fms_dt current_dw_ifms_zero_point = layer_2_dw_specs.layer_ifms_zero_point; // todo
-												 // conv_fms_zero_points[bottleneck_0_dw_layer_index];
+																					  // conv_fms_zero_points[bottleneck_0_dw_layer_index];
 
 	fms_quantization_scheme expansion_layer_normalization;
 	expansion_layer_normalization.ofm_zero_point =
@@ -166,16 +166,13 @@ mob_v2_bottleneck_0:
 #pragma HLS PIPELINE
 		weights_dt projection_kernel_weights[bottleneck_0_ofms_depth];
 
-		expansion_layer_normalization.fused_scales =
+		scales_dt fused_scale =
 			first_conv_layer_fused_scales[d_in_out];
-		expansion_layer_normalization.fused_scales_log_2_shift =
-			first_conv_layer_fused_scales_log_2_shifts[d_in_out];
-		expansion_layer_normalization.relu_6_fused_scale =
-			first_conv_layer_fused_scales_log_2_shifts[d_in_out];
-		expansion_layer_normalization.fused_zero_point =
-			first_conv_layer_fused_zero_points[d_in_out];
-		expansion_layer_normalization.layer_0_relu_6_fused_scale =
+		relu_6_fused_scales_dt relu_6_fused_scale =
 			first_conv_layer_relu_6_fused_scales[d_in_out];
+		biases_dt fused_zero_point =
+			first_conv_layer_fused_zero_points[d_in_out];
+
 		fms_dt expansion_result;
 
 		if (starting_h * first_conv_layer_specs.strides < bottleneck_0_ifms_height + first_conv_layer_specs.padding_top &&
@@ -183,9 +180,13 @@ mob_v2_bottleneck_0:
 		{
 			pss_dt expansion_pss = conv_kernel(bottleneck_input, first_layer_weights,
 											   first_conv_layer_filter_dim, d_in_out);
-			expansion_result = conv_relu_norm(expansion_pss,
-											  expansion_layer_normalization,
-											  bottleneck_0_expansion_layer_relu);
+			expansion_result =
+				// conv_relu_norm(expansion_pss,
+				// 								  expansion_layer_normalization,
+				// 								  bottleneck_0_expansion_layer_relu);
+				conv_relu_norm_v2(expansion_pss, fused_zero_point,
+								  expansion_layer_ofms_zero_point, fused_scale,
+								  relu_6_fused_scale, bottleneck_0_expansion_layer_relu);
 			const int ifms_buffer_hw = bottlenck_0_input_buffer_height * bottlenck_0_input_buffer_width;
 		}
 		else
@@ -196,18 +197,20 @@ mob_v2_bottleneck_0:
 								   dw_input_buffer, expansion_result, dw_kernel_starting_w,
 								   starting_h);
 
-		dw_layer_normalization.fused_scales = layer_2_dw_fused_scales[d_in_out];
-		dw_layer_normalization.fused_scales_log_2_shift =
-			layer_2_dw_fused_scales_log_2_shifts[d_in_out];
-		dw_layer_normalization.relu_6_fused_scale =
+		scales_dt dw_fused_scale = layer_2_dw_fused_scales[d_in_out];
+		relu_6_fused_scales_dt dw_relu_6_fused_scale =
 			layer_2_dw_relu_6_fused_scales[d_in_out];
-		dw_layer_normalization.fused_zero_point =
+		biases_dt dw_fused_zero_point =
 			layer_2_dw_fused_zero_points[d_in_out];
 
 		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_2[d_in_out],
 									 bottleneck_0_dw_filter_dim);
-		fms_dt dw_result = dw_relu_norm(dw_pss, dw_layer_normalization,
-										bottleneck_0_dw_layer_relu);
+		fms_dt dw_result =
+			dw_relu_norm_v2(dw_pss, dw_fused_zero_point, dw_layer_ofms_zero_point,
+							dw_fused_scale, dw_relu_6_fused_scale, bottleneck_0_dw_layer_relu);
+
+		// dw_relu_norm(dw_pss, dw_layer_normalization,
+		// 								bottleneck_0_dw_layer_relu);
 
 		if (dw_kernel_starting_w >= 0 && d_in_out > 0)
 		{

@@ -1,5 +1,5 @@
 #include "../../basic_defs/simulation_constants.h"
-#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && ! ONLY_SEML
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && !ONLY_SEML
 
 #include "bottleneck_kernels.h"
 
@@ -245,23 +245,16 @@ fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 	const fms_dt projection_layer_ofms_zero_point = layer_specs_struct.layer_ofms_zero_point;
 	const rec_scales_dt projection_layer_ofms_scale = layer_specs_struct.layer_ofms_scale;
 
-	// normalize_projection_kernel_output: for (int i = 0; i < ofms_depth; i++)
-	// {
-	fms_quantization_scheme projection_layer_normalization;
-	projection_layer_normalization.ofm_zero_point =
-		projection_layer_ofms_zero_point;
-	projection_layer_normalization.ofm_scale = projection_layer_ofms_scale;
-
-	projection_layer_normalization.fused_scales =
+	scales_dt fused_scale =
 		projection_layer_fused_scales[offset_d];
-	projection_layer_normalization.fused_scales_log_2_shift =
-		projection_layer_fused_scales_log_2_shifts[offset_d];
-	projection_layer_normalization.relu_6_fused_scale =
+	relu_6_fused_scales_dt relu_6_fused_scale =
 		projection_layer_relu_6_fused_scales[offset_d];
-	projection_layer_normalization.fused_zero_point =
+	biases_dt fused_zero_point =
 		projection_layer_fused_zero_points[offset_d];
 
-	return pw_relu_norm_6(pss_buffer[offset_d], projection_layer_normalization, layer_relu);
+	return pw_relu_norm_6_v2(pss_buffer[offset_d], fused_zero_point,
+							 projection_layer_ofms_zero_point, fused_scale,
+							 relu_6_fused_scale, layer_relu);
 	//	}
 }
 //*************************
@@ -284,7 +277,7 @@ pss_f_dt normalize_projection_kernel_output_no_q(pss_dt pss_buffer[],
 		projection_layer_fused_scales_log_2_shifts[offset_d];
 	projection_layer_normalization.fused_zero_point =
 		projection_layer_fused_zero_points[offset_d];
-		
+
 	return pw_relu_norm_no_q_no_relu(pss_buffer[offset_d], projection_layer_normalization, 0);
 }
 

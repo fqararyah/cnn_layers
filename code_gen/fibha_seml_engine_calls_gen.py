@@ -13,8 +13,8 @@ if 'uniform' in cgc.MODEL_NAME:
 
 constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
-ofms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
-ifms_file_path = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
+ofms_file_path = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/'
+ifms_file_path = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
     cgc.MODEL_NAME)
 
 ifms_file_format = 'ifms_{}.txt'

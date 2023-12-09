@@ -17,32 +17,32 @@ int main(int argc, char **argv)
 
 #if HW == CPU
 	string weights_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
 	string on_chip_weights_file =
-		"/media/SSD2TB/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #elif HW == _FPGA
 	string weights_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "off_chip_weights_FPGA.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "off_chip_weights_FPGA.txt";
 #endif
 	string input_images_folder =
-		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
 	string input_image_v_file =
-		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/inp_img.txt";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/inp_img.txt";
 	string output_folder =
-		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/cpu_out/";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/cpu_out/";
 
 	string fc_weights_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_weights.txt";
 	string weight_sums_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_weight_sums.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_weight_sums.txt";
 	string biases_file =
-		"/media/SSD2TB/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_biases.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_biases.txt";
 #if HW == _FPGA
 	string predictions_file =
-		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_hls.json";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_hls.json";
 #elif HW == CPU
 	string predictions_file =
-		"/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_cpu.json";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_cpu.json";
 #endif
 
 #if HW == _FPGA

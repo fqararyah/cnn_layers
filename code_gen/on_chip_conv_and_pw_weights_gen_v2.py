@@ -7,14 +7,14 @@ import code_generation_constants as cgc
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 on_chip_conv_and_layers = cgc.PIPELINE_LEN if cgc.PIPELINE else 1
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
+weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
     cgc.MODEL_NAME)
 weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
 on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2.h'.format(cgc.MODEL_NAME)
 
 on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'
-general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/general_specs.h'
+general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 first_layer_weights_declaration_string = 'const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils]' + \
     '[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim]{\n'
@@ -59,6 +59,9 @@ def write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_head
         f.write('#endif\n')
         f.write('#endif\n')
 
+
+if cgc.PIPELINE == False:
+    exit(0)
 
 first_layer = True
 num_of_generated_layers = 0

@@ -2,10 +2,10 @@
 #define SEML
 
 #if HW == CPU
-#if DEBUGGING
+#if 1
 #include "../../../../tests/test_utils.h"
-#endif
 #include "../../../../client/prepare_weights_and_inputs.h"
+#endif
 #include <iostream>
 #endif
 #include "../../../utils/utils.h"

@@ -7,7 +7,7 @@ import code_generation_constants as cgc
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 on_chip_conv_and_layers = cgc.PIPELINE_LEN if cgc.PIPELINE else 1
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
+weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 weights_file_format = 'weights_{}.txt'
 conv_pw_weights_h_file = '../model_components/model/headers/{}_on_chip_weights.h'.format(cgc.MODEL_NAME) #'./out/dw_weights.h'
 

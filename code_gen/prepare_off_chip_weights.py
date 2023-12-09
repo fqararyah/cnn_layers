@@ -7,13 +7,13 @@ import os
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/'+ \
+weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/'+ \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 
-biases_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/'+ \
+biases_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/'+ \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/biases/'.format(cgc.MODEL_NAME)
 
-general_specs_file = '/media/SSD2TB/wd/cnn_layers/model_components/basic_defs/general_specs.h'
+general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 weights_file_format = weights_files_location + 'weights_{}.txt'
 fc_weights_file_format = weights_files_location + 'weights_{}.txt'

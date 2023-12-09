@@ -7,7 +7,7 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
-weights_files_location = '/media/SSD2TB/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
+weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
     cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'

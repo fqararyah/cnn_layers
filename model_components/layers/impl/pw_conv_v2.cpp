@@ -115,9 +115,8 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 		rec_scales_dt add_layer_scale_reciprocal = layer_specs_struct.add_layer_scale_reciprocal;
 		biases_dt add_layer_zero_point = layer_specs_struct.add_layer_zero_point;
 
-		fms_quantization_scheme normalization;
-		normalization.ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
-		normalization.ofm_scale = layer_specs_struct.layer_ofms_scale;
+		const fms_dt ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
+		const scales_dt ofm_scale = layer_specs_struct.layer_ofms_scale;
 
 		const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ofm_tiles_h * layer_specs_struct.layer_num_of_ofm_tiles_w;
 		const int layer_relu = layer_specs_struct.layer_activation;
@@ -132,12 +131,10 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 			{
 				const int current_tile_indx = tile_index + tile_offset * num_of_tiles_hw;
 				const int in_tile_index = tile_offset * pw_tile_d + t_d;
-				normalization.fused_zero_point =
+				const biases_dt fused_zero_point =
 					fused_zero_points_buffer[in_tile_index];
-				normalization.fused_scales = fused_scales_buffer[in_tile_index];
-				normalization.fused_scales_log_2_shift =
-					fused_scales_log_2_shifts_buffer[in_tile_index];
-				normalization.relu_6_fused_scale =
+				const scales_dt fused_scale = fused_scales_buffer[in_tile_index];
+				const relu_6_fused_scales_dt relu_6_fused_scale =
 					relu_6_fused_scales_buffer[in_tile_index];
 			tile_h:
 				for (int t_h = 0; t_h < pw_tile_h; t_h++)
@@ -152,9 +149,11 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 						{
 #if MODEL_ACTIVATION == RELU6
 							scaled_val =
-								pw_relu_norm_6(
-									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
-									normalization, layer_relu);
+								pw_relu_norm_6_v2(pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], fused_zero_point,
+												  ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
+							// pw_relu_norm_6(
+							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
+							// 	normalization, layer_relu);
 #elif MODEL_ACTIVATION == RELU
 							scaled_val =
 								relu_norm(
@@ -168,9 +167,12 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 								skip_connection_other_layer_scale *
 								(tmp_channels[current_tile_indx][t_h][t_w] - skip_connection_other_layer_zero_point);
 							pss_f_dt scaled_tmp =
-								pw_relu_norm_no_q_no_relu(
+								pw_relu_norm_no_q_no_relu_v2(
 									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
-									normalization, layer_relu);
+									fused_zero_point, fused_scale, ofm_scale, layer_relu);
+							// pw_relu_norm_no_q_no_relu(
+							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
+							// 	normalization, layer_relu);
 #if ADD_LAYER_ACTIVATION == 0
 							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal + add_layer_zero_point;
 							addition_result = addition_result + quant_half - (addition_result < 0);
@@ -356,12 +358,12 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 conv2_ith_loop:
 	for (int t_in_h = 0; t_in_h < num_of_tiles_h; t_in_h++)
 	{
-		//############width loop##############
+		// ############width loop##############
 	conv2_itw_loop:
 		for (int t_in_w = 0; t_in_w < num_of_tiles_w;
 			 t_in_w++)
 		{
-			//############depth loop##############
+			// ############depth loop##############
 			int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d) * num_of_ofm_tiles_hw + (t_in_h / strides) * num_of_ofm_tiles_w +
 							 (t_in_w / strides);
 
@@ -425,8 +427,8 @@ void pw_conv(weights_grp_dt *weights,
 	const int model_configs_list_layer_depth = model_configs_list[2 * layer];
 
 	const int to_fill_weight_groups_in_a_pass = model_configs_list_layer_depth != 0
-									? (model_configs_list_layer_depth * pw_conv_parallelism_out) / weights_group_items
-									: layer_specs_struct.layer_num_of_weight_groups_for_one_pass;
+													? (model_configs_list_layer_depth * pw_conv_parallelism_out) / weights_group_items
+													: layer_specs_struct.layer_num_of_weight_groups_for_one_pass;
 
 #if HW == _FPGA
 	weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
