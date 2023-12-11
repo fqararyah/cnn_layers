@@ -5,11 +5,11 @@ import os
 
 
 # './out/layers_specs.h'
-model_arch_dir = '/media/SSD2TB/fareed/wd/models/codesign/batch1_model_dags/'
-out_file = '/media/SSD2TB/fareed/wd/models/codesign/batch1_models_schemes/{}_configs.txt'
+model_arch_dir = '/media/SSD2TB/fareed/wd/models/codesign/batch2_model_dags/'
+out_file = '/media/SSD2TB/fareed/wd/models/codesign/batch2_models_schemes/{}_configs.txt'
 
 for model_file_name in os.listdir(model_arch_dir):
-    model_dag = utils.read_model_dag(
+    model_dag = utils.read_model_dag_v2(
         os.path.join(model_arch_dir, model_file_name))
 
     model_file_name = model_file_name[0:model_file_name.find('.')]

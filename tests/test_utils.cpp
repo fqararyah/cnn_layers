@@ -1,5 +1,8 @@
 #include "test_utils.h"
 
+#ifndef TEST_UTILS_FILE
+#define TEST_UTILS_FILE
+
 void fill_layer_input_from_file(string file_name, int input_size)
 {
 }
@@ -219,3 +222,5 @@ void read_model_configs(string file_name, int configs_list[])
 		line_num++;
 	}
 }
+
+#endif

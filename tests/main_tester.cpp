@@ -22,7 +22,9 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #elif HW == _FPGA
 	string weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "off_chip_weights_FPGA.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga.txt";
+	string on_chip_weights_file =
+			"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #endif
 	string input_images_folder =
 		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
@@ -46,8 +48,9 @@ int main(int argc, char **argv)
 #endif
 
 #if HW == _FPGA
-	weights_grp_dt weights[num_of_pw_weights / weights_group_items];
-	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
+	static weights_grp_dt weights[all_pw_s_weights];
+	static weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups];
+	static fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
 	weights_dt *weights = (weights_dt *)malloc(all_pw_s_weights * weights_dt_width / 8);
 	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
@@ -55,10 +58,10 @@ int main(int argc, char **argv)
 	fms_dt input_image[input_image_depth * input_image_hw];
 #endif
 
-	fms_dt fc_input[fc_layer_input_size];
+	static fms_dt fc_input[fc_layer_input_size];
 
-	int8_t fc_weights[fc_cols * fc_layer_input_size];
-	int64_t weight_sums[num_classes];
+	static int8_t fc_weights[fc_cols * fc_layer_input_size];
+	static int64_t weight_sums[num_classes];
 	int biases[num_classes];
 	string predictions_file_content = "[";
 	int top5[5];
@@ -82,7 +85,7 @@ int main(int argc, char **argv)
 	int img_count = 0;
 	int images_to_test = 1;
 
-	
+
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
 	if (argc > 1)
@@ -119,8 +122,8 @@ int main(int argc, char **argv)
 			int ready_to_receive_new_input = 0;
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 #if HW == _FPGA
-			krnl_fibha_v2(input_image, weights, fc_input,
-						  ready_to_receive_new_input_ptr);
+			krnl_fibha_v2(input_image, weights, glued_on_chip_weights, fc_input,
+					model_configs_list, &img_count);
 #elif HW == CPU
 			top_func(input_image, weights, glued_on_chip_weights, fc_input,
 					 model_configs_list);
@@ -164,6 +167,7 @@ int main(int argc, char **argv)
 															   predictions_file_content.length() - 1) +
 							   ']';
 	save_predictions(predictions_file, predictions_file_content);
-
+#if HW == CPU
 	free(weights);
+#endif
 }
