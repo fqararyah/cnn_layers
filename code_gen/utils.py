@@ -199,3 +199,22 @@ def read_model_dag():
 def read_model_dag_v2(dag_file):
     f = open(dag_file)
     return json.load(f)
+
+def get_conv_layer_index_from_offset(model_dag, anchor_layer_index, layer_offset):
+
+    num_conv_layers = 0
+    layer_index = anchor_layer_index + 1
+    while num_conv_layers < layer_offset and layer_index < len(model_dag):
+        layer_specs = model_dag[layer_index]
+        if is_conv_layer(layer_specs):
+            num_conv_layers += 1
+
+        layer_index += 1
+
+    if num_conv_layers != layer_offset:
+        return -1
+    
+    return layer_index - 1
+
+def is_conv_layer(layer_specs):
+    return 'type' in layer_specs and layer_specs['type'] in ['s', 'pw', 'dw']

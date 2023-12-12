@@ -31,6 +31,11 @@ def get_ofms_parallelism(parallelism_file):
 
 formated_weights_all_layers = []
 first_layer = True
+
+if cgc.PIPELINE == True and cgc.PIPELINE_LEN > 0:
+    first_off_chip_layer = utils.get_conv_layer_index_from_offset(model_dag, 0, cgc.PIPELINE_LEN + 1)
+    first_layer = False
+
 for i in range(first_off_chip_layer, last_off_chip_layer):
     layer_specs = model_dag[i]
     if 'type' not in layer_specs or (layer_specs['type'] != 'pw' and layer_specs['type'] != 's'):
