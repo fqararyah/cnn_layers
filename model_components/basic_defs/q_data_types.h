@@ -40,7 +40,7 @@ const int input_image_group_items = 1;
 //scales, zero points, and biases
 const int scales_bit_width = 24;//48
 const int scales_integer_part_width = 0;
-const int fused_scales_bit_width = 16;//48
+const int fused_scales_bit_width = 24;//48
 const int fused_scales_integer_part_width = 0;
 const int relu_6_fused_scales_bit_width = 8;
 const int layer_0_relu_6_fused_scales_bit_width = 8;
@@ -66,6 +66,7 @@ typedef ap_int<layer_0_weights_dt_width> layer_0_weights_dt;
 typedef ap_int<weights_dt_width> weights_dt;
 typedef ap_int<dw_weights_dt_width> dw_weights_dt;
 typedef ap_int<fms_dt_width> fms_dt;
+typedef ap_int<2 * fms_dt_width> scaled_but_unclamped_fms_dt;
 typedef ap_int<pss_dt_width> pss_dt;	   // partial sums
 typedef ap_int<norm_act_pss_dt_width> norm_act_pss_dt;
 typedef ap_int<layer_0_norm_act_pss_dt_width> layer_0_norm_act_pss_dt;
@@ -95,6 +96,7 @@ typedef int8_t layer_0_weights_dt;
 typedef int8_t weights_dt;
 typedef weights_dt weights_grp_dt;
 typedef int8_t dw_weights_dt;
+typedef int16_t scaled_but_unclamped_fms_dt;
 typedef int8_t fms_dt;
 typedef fms_dt fms_grp_dt;
 typedef int64_t pss_dt;	   // partial sums

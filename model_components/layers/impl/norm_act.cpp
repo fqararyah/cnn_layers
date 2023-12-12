@@ -4,7 +4,7 @@
 fms_dt clamp(pss_f_dt val)
 {
 #pragma HLS INLINE
-	fms_dt ret_val = (fms_dt)val;
+	scaled_but_unclamped_fms_dt ret_val = (scaled_but_unclamped_fms_dt)val;
 	if (val > QUANTIZATION_MAX)
 	{
 		ret_val = QUANTIZATION_MAX;
@@ -13,7 +13,7 @@ fms_dt clamp(pss_f_dt val)
 	{
 		ret_val = QUANTIZATION_MIN;
 	}
-	return ret_val;
+	return (fms_dt)ret_val;
 }
 
 fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization,
@@ -33,10 +33,10 @@ fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization,
 	{
 		scaled_pss += normalization.ofm_zero_point;
 		scaled_pss += quant_half - (scaled_pss < 0);
-		return clamp((fms_dt)scaled_pss);
+		return clamp(scaled_pss);
 	}
 
-	return clamp((fms_dt)(normalization.ofm_zero_point + normalization.relu_6_fused_scale));
+	return clamp(normalization.ofm_zero_point + normalization.relu_6_fused_scale + quant_half - (scaled_pss < 0));
 }
 
 fms_dt pw_relu_norm_6_v2(pss_dt pss,
@@ -56,14 +56,14 @@ fms_dt pw_relu_norm_6_v2(pss_dt pss,
 	}
 
 	pss_f_dt scaled_pss = pss * fused_scales;
-	if (layer_relu != 6 || scaled_pss <= relu_6_fused_scale)
+	if (layer_relu == 6 && scaled_pss > relu_6_fused_scale)
 	{
-		scaled_pss += ofm_zero_point;
-		scaled_pss += quant_half - (scaled_pss < 0);
-		return clamp((fms_dt)scaled_pss);
+		scaled_pss = relu_6_fused_scale;
 	}
 
-	return clamp((fms_dt)(ofm_zero_point + relu_6_fused_scale));
+	scaled_pss += ofm_zero_point;
+	scaled_pss += quant_half - (scaled_pss < 0);
+	return clamp(scaled_pss);
 }
 
 fms_dt pw_relu_norm_6_v1(pss_dt pss, fms_quantization_scheme normalization,
@@ -171,20 +171,20 @@ fms_dt dw_relu_norm_v2(pss_dt pss,
 
 	pss += fused_zero_point;
 
-	if (layer_relu == 6 && pss <= 0)
+	if (pss <= 0)
 	{
 		return ofm_zero_point;
 	}
 
 	pss_f_dt scaled_pss = pss * fused_scales;
-	if (layer_relu != 6 || scaled_pss <= relu_6_fused_scale)
+	if (scaled_pss > relu_6_fused_scale)
 	{
-		scaled_pss += ofm_zero_point;
-		scaled_pss += quant_half - (scaled_pss < 0);
-		return clamp((fms_dt)scaled_pss);
+		scaled_pss = relu_6_fused_scale;
 	}
 
-	return clamp((fms_dt)(ofm_zero_point + relu_6_fused_scale));
+	scaled_pss += ofm_zero_point;
+	scaled_pss += quant_half - (scaled_pss < 0);
+	return clamp(scaled_pss);
 }
 
 fms_dt dw_relu_norm_v1(dw_pss_dt pss, fms_quantization_scheme normalization,

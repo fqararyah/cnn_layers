@@ -198,6 +198,24 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 #pragma HLS UNROLL
                     result[main_tile_index][h][w] =
                         dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
+                    // if(layer_specs_struct.layer_index == 9 && starting_d + d == 37 && tile_in_h * 8 + h == 14 && tile_in_w == 5){
+                    //     dw_pss_dt pss = result_tile[d][h][w];
+                    //     pss += fused_zero_point;
+                    //     printf("%d >> ", pss);
+                    //     pss_f_dt scaled_pss = pss * fused_scale;
+                    //     printf("%f >> ", fused_scale);
+                    //     printf("%f >> ", scaled_pss);
+                    //     if (scaled_pss > relu_6_fused_scale)
+                    //     {
+                    //         scaled_pss = relu_6_fused_scale;
+                    //     }
+
+                    //     scaled_pss += ofm_zero_point;
+                    //     printf("%f >> ", scaled_pss);
+                    //     scaled_pss += quant_half - (scaled_pss < 0);
+                    //     printf("%f >> ", scaled_pss);
+                    //     printf("%d \n", clamp(scaled_pss));
+                    // }
                     //  dw_relu_norm(
                     //     result_tile[d][h][w], normalization,
                     //     layer_relu);
