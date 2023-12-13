@@ -151,6 +151,26 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 							scaled_val =
 								pw_relu_norm_6_v2(pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], fused_zero_point,
 												  ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
+
+							if(layer_specs_struct.layer_index == 15 && tile_index == 16 * 8) {
+								pss_dt pss = pss_tile[tile_offset * pw_tile_d
+										+ t_d][t_h][t_w];
+								pss += fused_zero_point;
+								printf("%d >> ", (int) pss);
+
+								pss_f_dt scaled_pss = pss * fused_scale;
+								printf("%f >> ", (float) scaled_pss);
+								printf("%f >> ", (float) fused_scale);
+								if (layer_relu == 6
+										&& scaled_pss > relu_6_fused_scale) {
+									scaled_pss = relu_6_fused_scale;
+								}
+
+								scaled_pss += ofm_zero_point;
+								printf("%f >> ", (float) scaled_pss);
+								scaled_pss += quant_half - (scaled_pss < 0);
+								printf("%f \n ", (float) scaled_pss);
+							}
 							// pw_relu_norm_6(
 							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 							// 	normalization, layer_relu);
@@ -486,11 +506,18 @@ conv2_ots_loop:
 
 #if HW == _FPGA
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
-												  weights_tile, td_o * pw_conv_parallelism_out,
+												  weights_tile,
 												  layer_specs_struct.layer_depth,
-												  to_fill_weight_groups_in_a_pass,
-												  layer_specs_struct.layer_weights_offset);
+												  to_fill_weight_groups_in_a_pass);
 #endif
+if(layer_specs_struct.layer_index == 15 && td_o == 1){
+			for(int ii =0;ii<8;ii++){
+				for(int jj=0;jj<144;jj++){
+					printf("%d, ", (int)weights_tile[ii][jj]);
+				}
+				printf("\n");
+			}
+		}
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
 				fused_zero_points_buffer, td_o, model_configs_list);

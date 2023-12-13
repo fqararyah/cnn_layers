@@ -187,8 +187,8 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             replacement_list.append(
                 '(' + str(int(layer_width / strides)) + ' + pw_tile_w - 1) / pw_tile_w')
 
-            replacement_list.append(
-                str(layer_depth) + ' * pw_conv_parallelism_out / weights_group_items')
+            replacement_list.append( '(' +
+                str(layer_depth) + ' * pw_conv_parallelism_out ) / weights_group_items')
 
             if (layer_type == 'pw' or layer_type == 's') and not first_conv_layer:
                 replacement_list.append(

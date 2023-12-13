@@ -449,8 +449,8 @@ conv2_ots_loop:
 
 #if HW == _FPGA
 		fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
-												  weights_tile, td_o * pw_conv_parallelism_out, layer_conv_d,
-												  num_of_weight_groups, layer_weights_offset);
+												  weights_tile, layer_conv_d,
+												  num_of_weight_groups);
 #endif
 		do_conv(weights_tile, channels, result, layer, layer_conv_d,
 				layer_num_fils, num_of_tiles_d_in, num_of_tiles_d_out,
