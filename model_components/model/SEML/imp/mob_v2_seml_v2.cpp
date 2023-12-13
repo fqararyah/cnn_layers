@@ -20,34 +20,54 @@ void seml(weights_grp_dt off_chip_weights[all_pw_s_weights],
 //			result[i] = i % 127;
 //		}
 //		begin_code_generation
+#if DEBUGGING
+ fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_8.txt",
+ tmp_channels, layer_8_pw_specs);
+#endif
+#if DEBUGGING
+ fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_8.txt",
+ channels, layer_8_pw_specs);
+#endif
+#if DEBUGGING
+ verify_fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_8.txt",
+ channels, layer_8_pw_specs);
+#endif
 pw_conv(off_chip_weights, channels , result, tmp_channels, 8, layer_8_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,
     model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+ result, layer_8_pw_specs);
+#endif
 seml_engines::dw_conv_3x3(seml_dw_weights_3x3, result, channels, 9,layer_9_dw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,
         model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_9.txt",
+ channels, layer_9_dw_specs);
+#endif
 pw_conv(off_chip_weights, channels , result, tmp_channels, 10, layer_10_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,
     model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_10.txt",
+ result, layer_10_pw_specs);
+#endif
 pw_conv(off_chip_weights, result , channels, tmp_channels, 12, layer_12_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,
     model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_12.txt",
+ channels, layer_12_pw_specs);
+#endif
 seml_engines::dw_conv_3x3(seml_dw_weights_3x3, channels, result, 14,layer_14_dw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,
         model_configs_list);
-#if DEBUGGING
- fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_15.txt",
- result, layer_15_pw_specs);
-#endif
-#if DEBUGGING
- verify_fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_15.txt",
- result, layer_15_pw_specs);
-#endif
 pw_conv(off_chip_weights, result , channels, tmp_channels, 15, layer_15_pw_specs,
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,
     fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,

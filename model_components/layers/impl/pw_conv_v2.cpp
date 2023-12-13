@@ -152,25 +152,25 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 								pw_relu_norm_6_v2(pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], fused_zero_point,
 												  ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
 
-							if(layer_specs_struct.layer_index == 15 && tile_index == 16 * 8) {
-								pss_dt pss = pss_tile[tile_offset * pw_tile_d
-										+ t_d][t_h][t_w];
-								pss += fused_zero_point;
-								printf("%d >> ", (int) pss);
-
-								pss_f_dt scaled_pss = pss * fused_scale;
-								printf("%f >> ", (float) scaled_pss);
-								printf("%f >> ", (float) fused_scale);
-								if (layer_relu == 6
-										&& scaled_pss > relu_6_fused_scale) {
-									scaled_pss = relu_6_fused_scale;
-								}
-
-								scaled_pss += ofm_zero_point;
-								printf("%f >> ", (float) scaled_pss);
-								scaled_pss += quant_half - (scaled_pss < 0);
-								printf("%f \n ", (float) scaled_pss);
-							}
+//							if(layer_specs_struct.layer_index == 8 && tile_index == 0) {
+//								pss_dt pss = pss_tile[tile_offset * pw_tile_d
+//										+ t_d][t_h][t_w];
+//								pss += fused_zero_point;
+//								printf("%d >> ", (int) pss);
+//
+//								pss_f_dt scaled_pss = pss * fused_scale;
+//								printf("%f >> ", (float) scaled_pss);
+//								printf("%f >> ", (float) fused_scale);
+//								if (layer_relu == 6
+//										&& scaled_pss > relu_6_fused_scale) {
+//									scaled_pss = relu_6_fused_scale;
+//								}
+//
+//								scaled_pss += ofm_zero_point;
+//								printf("%f >> ", (float) scaled_pss);
+//								scaled_pss += quant_half - (scaled_pss < 0);
+//								printf("%f \n ", (float) scaled_pss);
+//							}
 							// pw_relu_norm_6(
 							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 							// 	normalization, layer_relu);
@@ -189,12 +189,16 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 							pss_f_dt scaled_tmp =
 								pw_relu_norm_no_q_no_relu_v2(
 									pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
-									fused_zero_point, fused_scale, ofm_scale, layer_relu);
+									fused_zero_point, fused_scale, ofm_scale);
 							// pw_relu_norm_no_q_no_relu(
 							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 							// 	normalization, layer_relu);
 #if ADD_LAYER_ACTIVATION == 0
 							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal + add_layer_zero_point;
+							if(layer_specs_struct.layer_index == 10 && tile_offset * pw_tile_d + t_d == 0){
+								printf("(%f + %f) * %f + %d \n",
+										(float)fused_scale, (float)ofm_scale, (float)fused_scale*ofm_scale, (int)add_layer_zero_point);
+							}
 							addition_result = addition_result + quant_half - (addition_result < 0);
 							scaled_val = clamp(addition_result);
 #elif ADD_LAYER_ACTIVATION == RELU
@@ -510,14 +514,15 @@ conv2_ots_loop:
 												  layer_specs_struct.layer_depth,
 												  to_fill_weight_groups_in_a_pass);
 #endif
-if(layer_specs_struct.layer_index == 15 && td_o == 1){
-			for(int ii =0;ii<8;ii++){
-				for(int jj=0;jj<144;jj++){
-					printf("%d, ", (int)weights_tile[ii][jj]);
-				}
-				printf("\n");
-			}
-		}
+//if(layer_specs_struct.layer_index == 8 && td_o == 0){
+//	printf("%d\n\n", to_fill_weight_groups_in_a_pass);
+//			for(int ii =0;ii<8;ii++){
+//				for(int jj=0;jj<144;jj++){
+//					printf("%d, ", (int)weights_tile[ii][jj]);
+//				}
+//				printf("\n");
+//			}
+//		}
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
 				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
 				fused_zero_points_buffer, td_o, model_configs_list);

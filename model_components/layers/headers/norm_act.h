@@ -20,8 +20,7 @@ pss_f_dt pw_relu_norm_no_q_no_relu(pss_dt pss, fms_quantization_scheme normaliza
 pss_f_dt pw_relu_norm_no_q_no_relu_v2(pss_dt pss,
 									  biases_dt fused_zero_point,
 									  scales_dt fused_scale,
-									  scales_dt ofm_scale,
-									  const int layer_relu);
+									  scales_dt ofm_scale);
 
 fms_dt dw_relu_norm_v2(pss_dt pss,
 					   const biases_dt fused_zero_point,

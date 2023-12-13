@@ -125,14 +125,13 @@ pss_f_dt pw_relu_norm_no_q_no_relu(pss_dt pss,
 pss_f_dt pw_relu_norm_no_q_no_relu_v2(pss_dt pss,
 									  biases_dt fused_zero_point,
 									  scales_dt fused_scale,
-									  scales_dt ofm_scale,
-									  const int layer_relu)
+									  scales_dt ofm_scale)
 {
 #pragma HLS INLINE
 
-	norm_act_pss_dt na_pss = pss + fused_zero_point;
+	pss += fused_zero_point;
 	fused_scales_dt multiplier = fused_scale * ofm_scale;
-	pss_f_dt scaled_pss = na_pss * multiplier;
+	pss_f_dt scaled_pss = pss * multiplier;
 
 	return scaled_pss;
 }
