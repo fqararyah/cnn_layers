@@ -1,6 +1,7 @@
 #ifndef PREPARE_WEIGHTS_INPUTS
 #define PREPARE_WEIGHTS_INPUTS
 #include "../model_components/basic_defs/basic_defs_glue.h"
+#include "../model_components/layers/headers/norm_act.h"
 #if MODEL_ID == MOB_V2
 #include "../model_components/model/headers/mob_v2_layers_specs.h"
 #elif MODEL_ID == MOB_V2_0_5
@@ -32,6 +33,9 @@ void load_weights(string file_name,
 
 void load_image(string file_name,
 				fms_dt image[]);
+
+void load_and_quantize_image(string file_name,
+							 fms_dt image[], Quantization_layer_specs quantization_l_specs);
 
 void glue_weights(string file_name,
 				  weights_grp_dt glued_weights[all_pw_s_weights]);
@@ -71,6 +75,6 @@ void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_P
 #endif
 
 void glue_on_chip_weights_cpu(string file_name,
-				  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
+							  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
 
 #endif

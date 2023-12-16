@@ -1,4 +1,6 @@
 #include "prepare_weights_and_inputs.h"
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
 
 bool isNumber(string &str)
 {
@@ -44,6 +46,28 @@ void load_image(string file_name,
 	while (infile >> a)
 	{
 		image[line_num] = a;
+		line_num++;
+	}
+}
+
+void load_and_quantize_image(string file_name,
+				fms_dt image[], Quantization_layer_specs quantization_l_specs)
+{
+	int a;
+	std::ifstream infile(file_name);
+	float fused_scale = quantization_l_specs.fused_scale;
+	fms_dt ifms_zp = quantization_l_specs.ifms_zero_point;
+	fms_dt ofms_zp = quantization_l_specs.ofms_zero_point;
+
+	int width, height, bpp;
+	uint8_t* rgb_image = stbi_load(file_name.c_str(), &width, &height, &bpp, 3);
+
+	assert(!infile.fail());
+	int line_num = 0;
+	while (line_num < width * height * bpp)
+	{
+		float quantized_f = fused_scale * ((float)rgb_image[line_num] - ifms_zp ) + ofms_zp;
+		image[line_num] = clamp_cpu(quantized_f);
 		line_num++;
 	}
 }

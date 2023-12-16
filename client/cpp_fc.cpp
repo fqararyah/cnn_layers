@@ -126,7 +126,7 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[], int t
 #endif
     for (int i = 0; i < 5; i++)
     {
-        double max = -1000000;
+        int64_t max = -100000000;
         for (int j = 0; j < num_classes; j++)
         {
             if (pss_vector[j] > max && top5[0] != j && top5[1] != j && top5[2] != j && top5[3] != j && top5[4] != j)

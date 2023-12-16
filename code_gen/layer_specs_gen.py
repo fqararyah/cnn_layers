@@ -53,6 +53,12 @@ pooling_specs_struct = 'const pooling_layer_specs layer_{}_specs = {}\n\
                 {},//const biases_dt ofms_zero_point;\n\
                 {};\n'
 
+quantize_specs_struct = 'const Quantization_layer_specs quantize_layer_specs = {}\n\
+                {},//const pooling_fused_scales_dt fused_scale; \n\
+                {},//const biases_dt ifms_zero_point;\n\
+                {}//const biases_dt ofms_zero_point;\n\
+                {};\n'
+
 fc_specs_struct = 'const fc_layer_specs layer_{}_specs = {}\n\
                 {},//const fms_dt ifm_zero_point\n\
                 {};\n'
@@ -275,22 +281,16 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
 
         elif 'type' in layer_specs:
             layer_type = layer_specs['type']
-            layer_specs_struct_str = '\nstruct{}\n{}{}{};\n'
-            struct_var_name = 'layer_' + \
-                str(layer_specs['id']) + '_' + layer_type + '_specs'
-            struct_var_body = ''
-
             if layer_type == 'avgpool':
                 replacement_list.append(str(layer_index) + '_' + layer_type)
                 replacement_list.append('{')
-                parent_layer_specs = model_dag[layer_specs['parents'][0]]
+                pooling_ifms_scale = layer_specs['ifms_scales']
                 pooling_ofms_scale = layer_specs['ofms_scales']
-                pooling_ifms_scale = parent_layer_specs['ofms_scales']
                 replacement_list.append(
                     pooling_ifms_scale / pooling_ofms_scale)
 
+                replacement_list.append(layer_specs['ifms_zero_points'])
                 replacement_list.append(layer_specs['ofms_zero_points'])
-                replacement_list.append(parent_layer_specs['ofms_zero_points'])
                 replacement_list.append('}')
                 f.write(pooling_specs_struct.format(*replacement_list))
 
@@ -300,6 +300,17 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
                 replacement_list.append(layer_specs['ifms_zero_points'])
                 replacement_list.append('}')
                 f.write(fc_specs_struct.format(*replacement_list))
+        elif layer_specs['name'] == 'quantize' and first_conv_layer:
+            replacement_list.append('{')
+            ofms_scale = layer_specs['ofms_scales']
+            ifms_scale = layer_specs['ifms_scales']
+            replacement_list.append(
+                ifms_scale / ofms_scale)
+
+            replacement_list.append(layer_specs['ifms_zero_points'])
+            replacement_list.append(layer_specs['ofms_zero_points'])
+            replacement_list.append('}')
+            f.write(quantize_specs_struct.format(*replacement_list))
 
     f.write('#endif\n')
 

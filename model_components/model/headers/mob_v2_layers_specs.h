@@ -1,6 +1,11 @@
 #include "../../basic_defs/basic_defs_glue.h"
 #ifndef LAYERS_SPECS
 #define LAYERS_SPECS
+const Quantization_layer_specs quantize_layer_specs = {
+                1.0,//const pooling_fused_scales_dt fused_scale; 
+                127,//const biases_dt ifms_zero_point;
+                -1//const biases_dt ofms_zero_point;
+                };
 //****************************
  const int first_conv_layer_num_fils = 32;
 const int first_conv_layer_depth = 3;

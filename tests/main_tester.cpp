@@ -15,6 +15,21 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
+	int images_to_test = 1;
+
+
+	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
+
+	if (argc > 1)
+	{
+		images_to_test = stoi(argv[1]);
+	}
+	if (argc > 2)
+	{
+		read_model_configs(argv[2], model_configs_list);
+		cout << "model_configs list is read.\n*************\n";
+	}
+
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
@@ -27,7 +42,8 @@ int main(int argc, char **argv)
 			"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #endif
 	string input_images_folder =
-		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
+	"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized/";
+		//"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
 	string input_image_v_file =
 		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/inp_img.txt";
 	string output_folder =
@@ -41,10 +57,10 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_biases.txt";
 #if HW == _FPGA
 	string predictions_file =
-		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_hls.json";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions/predictions_hls_" + to_string(images_to_test) + ".json";
 #elif HW == CPU
 	string predictions_file =
-		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions_cpu.json";
+		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions/predictions_cpu_" + to_string(images_to_test) + ".json";
 #endif
 
 #if HW == _FPGA
@@ -83,20 +99,6 @@ int main(int argc, char **argv)
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 1;
-
-
-	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
-
-	if (argc > 1)
-	{
-		images_to_test = stoi(argv[1]);
-	}
-	if (argc > 2)
-	{
-		read_model_configs(argv[2], model_configs_list);
-		cout << "model_configs list is read.\n*************\n";
-	}
 
 	struct dirent *ent;
 	if ((dir = opendir(input_images_folder.c_str())) != NULL)
@@ -105,7 +107,7 @@ int main(int argc, char **argv)
 		while ((ent = readdir(dir)) != NULL)
 		{
 			string file_name = input_images_folder + ent->d_name;
-			if (file_name.find(".txt") == std::string::npos)
+			if (file_name.find(".JPEG") == std::string::npos && file_name.find(".jpeg") == std::string::npos)
 			{
 				continue;
 			}
@@ -115,7 +117,8 @@ int main(int argc, char **argv)
 #if HW == _FPGA
 			glue_input_image(file_name, input_image);
 #elif HW == CPU
-			load_image(file_name, input_image);
+			//load_image(file_name, input_image);
+			load_and_quantize_image(file_name, input_image, quantize_layer_specs);
 #endif
 			// verify_glued_image(file_name, input_image);
 			// validate_weights(weights_file, glued_weights);
@@ -138,6 +141,8 @@ int main(int argc, char **argv)
 #if MODEL_ID == RESNET50
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_74_fc_specs);
 #elif MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
+// for(int i=0;i<1000;i++){printf("%d ", (int)fc_input[i]);}
+// 			printf("\n");
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_68_fc_specs);
 #endif
 			auto end = chrono::steady_clock::now();

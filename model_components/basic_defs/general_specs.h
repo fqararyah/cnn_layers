@@ -159,6 +159,12 @@ const biases_dt ifms_zero_point;
 const biases_dt ofms_zero_point;
 };
 
+struct Quantization_layer_specs{
+const float fused_scale;
+const fms_dt ifms_zero_point;
+const biases_dt ofms_zero_point;
+};
+
 struct fc_layer_specs{
 const fms_dt ifm_zero_point;
 };

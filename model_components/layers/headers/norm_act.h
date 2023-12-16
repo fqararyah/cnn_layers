@@ -39,5 +39,6 @@ fms_dt conv_relu_norm_v2(pss_dt pss,
 						 const int layer_relu);
 
 fms_dt clamp(pss_f_dt val);
+fms_dt clamp_cpu(float val);
 
 #endif

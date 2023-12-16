@@ -195,10 +195,10 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 							// 	normalization, layer_relu);
 #if ADD_LAYER_ACTIVATION == 0
 							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal + add_layer_zero_point;
-							if(layer_specs_struct.layer_index == 10 && tile_offset * pw_tile_d + t_d == 0){
-								printf("(%f + %f) * %f + %d \n",
-										(float)fused_scale, (float)ofm_scale, (float)fused_scale*ofm_scale, (int)add_layer_zero_point);
-							}
+							// if(layer_specs_struct.layer_index == 10 && tile_offset * pw_tile_d + t_d == 0){
+							// 	printf("(%f + %f) * %f + %d \n",
+							// 			(float)fused_scale, (float)ofm_scale, (float)fused_scale*ofm_scale, (int)add_layer_zero_point);
+							// }
 							addition_result = addition_result + quant_half - (addition_result < 0);
 							scaled_val = clamp(addition_result);
 #elif ADD_LAYER_ACTIVATION == RELU

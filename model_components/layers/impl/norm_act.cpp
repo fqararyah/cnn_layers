@@ -16,6 +16,21 @@ fms_dt clamp(pss_f_dt val)
 	return (fms_dt)ret_val;
 }
 
+fms_dt clamp_cpu(float val)
+{
+#pragma HLS INLINE
+	int16_t ret_val = (int16_t)val;
+	if (val > QUANTIZATION_MAX)
+	{
+		ret_val = QUANTIZATION_MAX;
+	}
+	else if (val < QUANTIZATION_MIN)
+	{
+		ret_val = QUANTIZATION_MIN;
+	}
+	return (fms_dt)ret_val;
+}
+
 fms_dt pw_relu_norm_6(pss_dt pss, fms_quantization_scheme normalization,
 					  const int layer_relu)
 {
