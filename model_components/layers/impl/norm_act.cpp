@@ -18,7 +18,7 @@ fms_dt clamp(pss_f_dt val)
 
 fms_dt clamp_cpu(float val)
 {
-#pragma HLS INLINE
+
 	int16_t ret_val = (int16_t)val;
 	if (val > QUANTIZATION_MAX)
 	{

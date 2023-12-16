@@ -64,10 +64,12 @@ void load_and_quantize_image(string file_name,
 
 	assert(!infile.fail());
 	int line_num = 0;
-	while (line_num < width * height * bpp)
+	const int image_hw = width * height;
+	while (line_num < image_hw * bpp)
 	{
 		float quantized_f = fused_scale * ((float)rgb_image[line_num] - ifms_zp ) + ofms_zp;
-		image[line_num] = clamp_cpu(quantized_f);
+		//if(line_num < 10)printf("%d >> %f \n", rgb_image[line_num], quantized_f);
+		image[(line_num % 3) * image_hw + (line_num / 3)] = clamp_cpu(quantized_f);
 		line_num++;
 	}
 }
