@@ -1,4 +1,7 @@
 #include "hls_only_main_file.h"
+
+#if HW == CPU
+
 #include "../tests/test_utils.h"
 
 static 	weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
@@ -104,3 +107,5 @@ void top_func(
 
 #endif
 }
+
+#endif

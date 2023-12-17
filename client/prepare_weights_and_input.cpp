@@ -51,7 +51,7 @@ void load_image(string file_name,
 }
 
 void load_and_quantize_image(string file_name,
-				fms_dt image[], Quantization_layer_specs quantization_l_specs)
+							 fms_dt image[], Quantization_layer_specs quantization_l_specs)
 {
 	int a;
 	std::ifstream infile(file_name);
@@ -60,17 +60,23 @@ void load_and_quantize_image(string file_name,
 	fms_dt ofms_zp = quantization_l_specs.ofms_zero_point;
 
 	int width, height, bpp;
-	uint8_t* rgb_image = stbi_load(file_name.c_str(), &width, &height, &bpp, 3);
+	uint8_t *rgb_image = stbi_load(file_name.c_str(), &width, &height, &bpp, 3);
 
 	assert(!infile.fail());
-	int line_num = 0;
+	int pixel_index_in_channel = 0, channel = 0, pixel_index = 0;
 	const int image_hw = width * height;
-	while (line_num < image_hw * bpp)
+	while (pixel_index < image_hw * bpp)
 	{
-		float quantized_f = fused_scale * ((float)rgb_image[line_num] - ifms_zp ) + ofms_zp;
-		//if(line_num < 10)printf("%d >> %f \n", rgb_image[line_num], quantized_f);
-		image[(line_num % 3) * image_hw + (line_num / 3)] = clamp_cpu(quantized_f);
-		line_num++;
+		float quantized_f = fused_scale * ((float)rgb_image[pixel_index] - ifms_zp) + ofms_zp;
+		// if(pixel_index < 10)printf("%d >> %f \n", rgb_image[pixel_index], quantized_f);
+		image[channel * image_hw + pixel_index_in_channel] = clamp_cpu(quantized_f);
+
+		pixel_index++;
+		if (channel == 2)
+		{
+			pixel_index_in_channel++;
+		}
+		channel = channel == 2 ? 0 : channel + 1;
 	}
 }
 
@@ -148,6 +154,48 @@ void glue_input_image(string file_name,
 			internal_index * fms_dt_width + fms_dt_offset,
 			internal_index * fms_dt_width) = val;
 		line_num++;
+	}
+}
+
+void glue_and_quantize_input_image(string file_name,
+								   fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
+								   Quantization_layer_specs quantization_l_specs)
+{
+
+	int a;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+
+	int width, height, bpp;
+	uint8_t *rgb_image = stbi_load(file_name.c_str(), &width, &height, &bpp, 3);
+
+	float fused_scale = quantization_l_specs.fused_scale;
+	fms_dt ifms_zp = quantization_l_specs.ifms_zero_point;
+	fms_dt ofms_zp = quantization_l_specs.ofms_zero_point;
+
+	int pixel_index_in_channel = 0, channel = 0, pixel_index = 0;
+	const int image_hw = width * height;
+	while (pixel_index < image_hw * bpp)
+	{
+		float quantized_f = fused_scale * ((float)rgb_image[pixel_index] - ifms_zp) + ofms_zp;
+		fms_dt val = clamp_cpu(quantized_f);
+		const int z = channel;
+		const int y = pixel_index_in_channel / input_image_width;
+		const int x = pixel_index_in_channel % input_image_width;
+		int external_index = z * input_image_num_fms_groups_in_a_channel + y * input_image_num_fms_groups_in_width + x / input_image_group_items;
+		int internal_index = x % input_image_group_items;
+		//if(pixel_index < 10)printf("%d >> %f \n", rgb_image[pixel_index], quantized_f);
+		//		cout << line_num << " >> " << z << ", " << y << ", " << x << ", "
+		//				<< external_index << ", " << internal_index << "\n";
+		input_image[external_index](
+			internal_index * fms_dt_width + fms_dt_offset,
+			internal_index * fms_dt_width) = val;
+		pixel_index++;
+		if (channel == 2)
+		{
+			pixel_index_in_channel++;
+		}
+		channel = channel == 2 ? 0 : channel + 1;
 	}
 }
 
@@ -273,7 +321,7 @@ void verify_fill_layer_input(string file_name, fms_dt ifms[max_fms_size],
 
 	ofstream myfile;
 	fms_dt to_print_ofms[max_fms_size];
-	
+
 	const int ifms_h = layer_specs_struct.layer_ifm_height;
 	const int ifms_w = layer_specs_struct.layer_ifm_width;
 	const int ifms_hw = ifms_h * ifms_w;

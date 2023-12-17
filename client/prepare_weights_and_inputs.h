@@ -1,5 +1,7 @@
 #ifndef PREPARE_WEIGHTS_INPUTS
 #define PREPARE_WEIGHTS_INPUTS
+
+#if HW == CPU
 #include "../model_components/basic_defs/basic_defs_glue.h"
 #include "../model_components/layers/headers/norm_act.h"
 #if MODEL_ID == MOB_V2
@@ -11,15 +13,24 @@
 #elif MODEL_ID == MOB_V2_0_25
 #include "../model_components/model/headers/mob_v2_0_25_layers_specs.h"
 #endif
-
-#if HW == CPU
 #include "../model_components/model/pipelined_engines/pipelined_engines_specs.h"
+
+#elif HW == _FPGA
+
+#include "../../../fiba_v2_kernels/src/model_components/basic_defs/basic_defs_glue.h"
+#if MODEL_ID == MOB_V2
+#include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_5
+#include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_0_5_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_75
+#include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_0_75_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_25
+#include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_0_25_layers_specs.h"
+#endif
+
 #endif
 
 #include <fstream>
-#if HW == _FPGA
-#include "ap_int.h"
-#endif
 #include <iostream>
 #include <cassert>
 
@@ -45,6 +56,10 @@ void validate_weights(string file_name,
 
 void glue_input_image(string file_name,
 					  fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width / input_image_group_items]);
+
+void glue_and_quantize_input_image(string file_name,
+								   fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
+								   Quantization_layer_specs quantization_l_specs);
 
 void verify_glued_image(string file_name,
 						fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width / input_image_group_items]);

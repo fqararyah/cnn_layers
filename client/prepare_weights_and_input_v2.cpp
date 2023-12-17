@@ -117,7 +117,7 @@ void glue_on_chip_weights_fpga(string file_name,
 		weights_dt weight = (weights_dt)a;
 		int external_index = line_num / weights_group_items;
 		int internal_index = line_num % weights_group_items;
-		glued_weights[external_index](
+		glued_on_chip_weights[external_index](
 			internal_index * weights_dt_width + weights_dt_offset,
 			internal_index * weights_dt_width) = weight;
 		line_num++;

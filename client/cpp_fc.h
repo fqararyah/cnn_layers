@@ -4,7 +4,17 @@
 #include <dirent.h>
 #include <chrono>
 #include <cassert>
+
+#if HW == CPU
 #include "../model_components/basic_defs/basic_defs_glue.h"
+#elif HW == _FPGA
+#include "../../../fiba_v2_kernels/src/model_components/basic_defs/basic_defs_glue.h"
+#if MODEL_ID == MOB_V2
+#include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_layers_specs.h"
+#elif MODEL_ID == MOB_V2_0_25
+#include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_0_25_layers_specs.h"
+#endif
+#endif
 
 using namespace std;
 

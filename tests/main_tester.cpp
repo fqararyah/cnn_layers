@@ -118,7 +118,13 @@ int main(int argc, char **argv)
 			glue_input_image(file_name, input_image);
 #elif HW == CPU
 			//load_image(file_name, input_image);
+			auto start = chrono::steady_clock::now();
 			load_and_quantize_image(file_name, input_image, quantize_layer_specs);
+			auto end = chrono::steady_clock::now();
+
+			cout << "Elapsed time in milliseconds reading: "
+				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
+				 << " ms" << endl;
 #endif
 			// verify_glued_image(file_name, input_image);
 			// validate_weights(weights_file, glued_weights);
@@ -136,7 +142,7 @@ int main(int argc, char **argv)
 			// 		<< (int)fc_input[338] << " " << (int)fc_input[328] << " "
 			// 		<< (int)fc_input[327] << " " << (int)fc_input[335] << " "
 			// 		<< (int)fc_input[81] << " " << (int)fc_input[340] << " ";
-			auto start = chrono::steady_clock::now();
+			 start = chrono::steady_clock::now();
 
 #if MODEL_ID == RESNET50
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_74_fc_specs);
@@ -145,9 +151,9 @@ int main(int argc, char **argv)
 // 			printf("\n");
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_68_fc_specs);
 #endif
-			auto end = chrono::steady_clock::now();
+			 end = chrono::steady_clock::now();
 
-			cout << "Elapsed time in nanoseconds: "
+			cout << "Elapsed time in milliseconds: "
 				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
 				 << " ms" << endl;
 			//			dump_ouput(output_folder + ent->d_name, fc_input,
