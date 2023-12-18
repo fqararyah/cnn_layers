@@ -159,6 +159,14 @@ void mob_v2_bottleneck_0(fms_dt bottleneck_input[bottleneck_0_input_buffer_size]
 	fms_dt dw_input_buffer[bottleneck_0_dw_filter_dim * bottleneck_0_dw_filter_dim];
 #pragma HLS ARRAY_PARTITION variable = dw_input_buffer type = complete dim = 0
 
+	relu_6_fused_scales_dt relu_6_fused_scale =
+		first_conv_layer_relu_6_fused_scales[0];
+
+	relu_6_fused_scales_dt dw_relu_6_fused_scale =
+		layer_2_dw_relu_6_fused_scales[0];
+
+	relu_6_fused_scales_dt layer_3_pw_relu_6_fused_scale = layer_3_pw_relu_6_fused_scales[0];
+
 mob_v2_bottleneck_0:
 	for (int d_in_out = 0;
 		 d_in_out < bottleneck_0_expanded_ifms_depth; d_in_out++)
@@ -168,8 +176,6 @@ mob_v2_bottleneck_0:
 
 		scales_dt fused_scale =
 			first_conv_layer_fused_scales[d_in_out];
-		relu_6_fused_scales_dt relu_6_fused_scale =
-			first_conv_layer_relu_6_fused_scales[d_in_out];
 		biases_dt fused_zero_point =
 			first_conv_layer_fused_zero_points[d_in_out];
 
@@ -198,8 +204,7 @@ mob_v2_bottleneck_0:
 								   starting_h);
 
 		scales_dt dw_fused_scale = layer_2_dw_fused_scales[d_in_out];
-		relu_6_fused_scales_dt dw_relu_6_fused_scale =
-			layer_2_dw_relu_6_fused_scales[d_in_out];
+
 		biases_dt dw_fused_zero_point =
 			layer_2_dw_fused_zero_points[d_in_out];
 
@@ -230,7 +235,7 @@ mob_v2_bottleneck_0:
 				projection_kernel_output_buffer_prev,
 				layer_3_pw_fused_scales,
 				layer_3_pw_fused_scales_log_2_shifts,
-				layer_3_pw_relu_6_fused_scales,
+				layer_3_pw_relu_6_fused_scale,
 				layer_3_pw_fused_zero_points, d_in_out, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
 		}
 	}

@@ -304,6 +304,8 @@ void bottleneck_0_pipeline_filling_stage(
 {
 #pragma HLS INLINE off
 
+	relu_6_fused_scales_dt layer_3_pw_relu_6_fused_scale = layer_3_pw_relu_6_fused_scales[0];
+
 	bottleneck_0_padding_top_right(bottleneck_0_previous_pass_dw_input,
 								   bottleneck_0_dw_ifms_zero_point);
 
@@ -345,13 +347,14 @@ void bottleneck_0_pipeline_filling_stage(
 		}
 		//##########################corner cases###################################
 		// normalize last col in each row
+
 		for (int d = 0; d < bottleneck_0_ofms_depth; d++)
 		{
 			bottleneck_0_1_communication_buffer[d][h][bottleneck_0_ofms_width - 1] = normalize_projection_kernel_output(
 				bottleneck_0_projection_kernel_output_prev,
 				layer_3_pw_fused_scales,
 				layer_3_pw_fused_scales_log_2_shifts,
-				layer_3_pw_relu_6_fused_scales,
+				layer_3_pw_relu_6_fused_scale,
 				layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
 		}
 		// perform last update for the dw inter step buffer
@@ -385,7 +388,11 @@ void bottleneck_0_within_pipeline_stage(
 {
 #pragma HLS INLINE off
 
+	relu_6_fused_scales_dt layer_3_pw_relu_6_fused_scale = layer_3_pw_relu_6_fused_scales[0];
+	relu_6_fused_scales_dt layer_7_pw_relu_6_fused_scale = layer_7_pw_relu_6_fused_scales[0];
+
 	int bottleneck_0_h = starting_h * chain_0_1_bottleneck_0_rows_at_once;
+
 	for (int h = 0; h < chain_0_1_bottleneck_0_rows_at_once; h++)
 	{
 		fill_first_cols_of_first_bottleneck_input(chain_input,
@@ -425,7 +432,7 @@ void bottleneck_0_within_pipeline_stage(
 				bottleneck_0_projection_kernel_output_prev,
 				layer_3_pw_fused_scales,
 				layer_3_pw_fused_scales_log_2_shifts,
-				layer_3_pw_relu_6_fused_scales,
+				layer_3_pw_relu_6_fused_scale,
 				layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
 		}
 		// perform last update for the dw inter step buffer
@@ -464,6 +471,7 @@ void bottleneck_1_within_pipeline_stage(
 {
 #pragma HLS INLINE off
 
+	relu_6_fused_scales_dt layer_7_pw_relu_6_fused_scale = layer_7_pw_relu_6_fused_scales[0];
 	const int bottleneck_1_first_fill_offset = 1;
 	const int bottleneck_1_warm_up_rows = bottleneck_1_dw_filter_dim - bottleneck_1_dw_strides;
 	int bottleneck_1_h =
@@ -521,7 +529,7 @@ void bottleneck_1_within_pipeline_stage(
 				bottleneck_1_projection_kernel_output_prev,
 				layer_7_pw_fused_scales,
 				layer_7_pw_fused_scales_log_2_shifts,
-				layer_7_pw_relu_6_fused_scales,
+				layer_7_pw_relu_6_fused_scale,
 				layer_7_pw_fused_zero_points, d, layer_7_pw_specs.layer_activation, layer_7_pw_specs);
 	}
 }

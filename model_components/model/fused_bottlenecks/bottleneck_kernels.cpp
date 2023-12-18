@@ -234,7 +234,7 @@ copy_projection_kernel_output_buffer:
 fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 										  const fused_scales_dt projection_layer_fused_scales[],
 										  const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
-										  const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
+										  const relu_6_fused_scales_dt projection_layer_relu_6_fused_scale,
 										  const biases_dt projection_layer_fused_zero_points[],
 										  const int offset_d,
 										  const int layer_relu,
@@ -247,14 +247,13 @@ fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 
 	scales_dt fused_scale =
 		projection_layer_fused_scales[offset_d];
-	relu_6_fused_scales_dt relu_6_fused_scale =
-		projection_layer_relu_6_fused_scales[offset_d];
+
 	biases_dt fused_zero_point =
 		projection_layer_fused_zero_points[offset_d];
 
 	return pw_relu_norm_6_v2(pss_buffer[offset_d], fused_zero_point,
 							 projection_layer_ofms_zero_point, fused_scale,
-							 relu_6_fused_scale, layer_relu);
+							 projection_layer_relu_6_fused_scale, layer_relu);
 	//	}
 }
 //*************************

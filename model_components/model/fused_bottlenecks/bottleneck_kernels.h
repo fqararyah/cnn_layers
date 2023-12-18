@@ -38,7 +38,7 @@ void copy_projection_kernel_output_buffer(pss_dt projection_kernel_output_buffer
 fms_dt normalize_projection_kernel_output(pss_dt pss_buffer[],
 										const fused_scales_dt projection_layer_fused_scales[],
 										const fused_scales_log_2_shifts_dt projection_layer_fused_scales_log_2_shifts[],
-										const relu_6_fused_scales_dt projection_layer_relu_6_fused_scales[],
+										const relu_6_fused_scales_dt projection_layer_relu_6_fused_scale,
 										const biases_dt projection_layer_fused_zero_points[],
 										const int offset_d,
 										const int layer_relu,

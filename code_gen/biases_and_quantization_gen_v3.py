@@ -95,11 +95,11 @@ with open(h_file, 'w') as wf:
     seml_fused_zero_points = []
     seml_fused_scales = []
     seml_fused_scales_log_2_shifts = []
-    seml_relu_6_fused_scales = []
+    seml_relu_6_fused_scales = [0] * len(model_dag)
     pipe_fused_zero_points = []
     pipe_fused_scales = []
     pipe_fused_scales_log_2_shifts = []
-    pipe_relu_6_fused_scales = []
+    pipe_relu_6_fused_scales = [0] * len(model_dag)
     to_generate_for_layers = cgc.LAST_LAYER_TO_GENERATE if cgc.LAST_LAYER_TO_GENERATE > 0 else len(
         model_dag)
     num_of_generated_for_layers = 0
@@ -183,6 +183,18 @@ with open(h_file, 'w') as wf:
         with open(weights_scales_file_format.format(layer_index), 'r') as f:
             ifms_scale = layer_specs['ifms_scales']
             ofms_scale = layer_specs['ofms_scales']
+
+            if utils.NET_PREFIX not in ['eff', 'eff_b0']:
+                    relu_6_fused_scale = round(6 / ofms_scale)
+
+            if layer_index > 0 and relu_6_fused_scale > 2**32 - 1:
+                        relu_6_fused_scale = 2**32 - 1
+            assert(relu_6_fused_scale <= 2**32 - 1 or (layer_index ==
+                                                        0 and relu_6_fused_scale <= 2**38 - 1))
+            
+            assert(relu_6_fused_scale < 256)
+            relu_6_fused_scales.append(relu_6_fused_scale)
+
             for line in f:
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
                 ifm_weight_fused_scale = weight_scale * ifms_scale
@@ -205,17 +217,9 @@ with open(h_file, 'w') as wf:
                        (2 ** -abs_current_log_int))
                 fused_scales_log_2_shifts.append(abs_current_log_int)
                 #fused_scales[-1] = decomposed_val
-                if utils.NET_PREFIX not in ['eff', 'eff_b0']:
-                    relu_6_fused_scale = round(6 / ofms_scale)
+                
                     # if layer_index == 3:
                     #     print('>>>>>>>>',ofms_scale)
-                    if layer_index > 0 and relu_6_fused_scale > 2**32 - 1:
-                        relu_6_fused_scale = 2**32 - 1
-                    assert(relu_6_fused_scale <= 2**32 - 1 or (layer_index ==
-                                                               0 and relu_6_fused_scale <= 2**38 - 1))
-                    
-                    assert(relu_6_fused_scale < 256)
-                    relu_6_fused_scales.append(relu_6_fused_scale)
 
                     # assert(relu_6_fused_scales[-1] > 256) or \
                     #     utils.NET_PREFIX in [
@@ -253,14 +257,14 @@ with open(h_file, 'w') as wf:
               or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 2:
             pipe_fused_scales.extend(fused_scales)
             pipe_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
-            pipe_relu_6_fused_scales.extend(relu_6_fused_scales)
+            pipe_relu_6_fused_scales[layer_index] = relu_6_fused_scales[0]
             pipe_fused_zero_points.extend(fused_zero_points)
         else:
             if first_quantization_arrays_num_of_elements < first_quantization_arrays_elements_threshold:
                 first_quantization_arrays_num_of_elements += len(fused_scales)
             seml_fused_scales.extend(fused_scales)
             #seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
-            seml_relu_6_fused_scales.extend(relu_6_fused_scales)
+            seml_relu_6_fused_scales[layer_index] = relu_6_fused_scales[0]
             seml_fused_zero_points.extend(fused_zero_points)
 
         num_of_generated_for_layers += 1

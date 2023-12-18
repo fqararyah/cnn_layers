@@ -116,6 +116,11 @@ void mob_v2_bottleneck_1(fms_dt bottleneck_input[],
 
 	const int ifms_buffer_hw = bottlenck_0_input_buffer_height * bottlenck_0_input_buffer_width;
 
+	relu_6_fused_scales_dt expansion_layer_relu_6_fused_scale =
+			layer_4_pw_relu_6_fused_scales[0];
+	relu_6_fused_scales_dt dw_relu_6_fused_scale =
+			layer_6_dw_relu_6_fused_scales[0];
+
 mob_v2_bottleneck_1:
 	for (int d_in_out = 0;
 		 d_in_out < bottleneck_1_expanded_ifms_depth; d_in_out++)
@@ -126,10 +131,10 @@ mob_v2_bottleneck_1:
 
 		scales_dt expansion_layer_fused_scale =
 			layer_4_pw_fused_scales[d_in_out];
-		relu_6_fused_scales_dt expansion_layer_relu_6_fused_scale =
-			layer_4_pw_relu_6_fused_scales[d_in_out];
 		biases_dt expansion_layer_fused_zero_point =
 			layer_4_pw_fused_zero_points[d_in_out];
+
+		biases_dt layer_7_pw_relu_6_fused_scale = layer_7_pw_relu_6_fused_scales[0];
 
 		fms_dt expansion_result[bottleneck_1_expansion_parallelism_h][bottleneck_1_expansion_parallelism_w];
 		fms_dt dw_input_buffer[bottleneck_1_dw_filter_dim * bottleneck_1_dw_filter_dim];
@@ -172,8 +177,7 @@ mob_v2_bottleneck_1:
 								   starting_h);
 
 		scales_dt dw_fused_scale = layer_6_dw_fused_scales[d_in_out];
-		relu_6_fused_scales_dt dw_relu_6_fused_scale =
-			layer_6_dw_relu_6_fused_scales[d_in_out];
+		
 		biases_dt dw_fused_zero_point =
 			layer_6_dw_fused_zero_points[d_in_out];
 
@@ -202,7 +206,7 @@ mob_v2_bottleneck_1:
 					projection_kernel_output_buffer_prev,
 					layer_7_pw_fused_scales,
 					layer_7_pw_fused_scales_log_2_shifts,
-					layer_7_pw_relu_6_fused_scales,
+					layer_7_pw_relu_6_fused_scale,
 					layer_7_pw_fused_zero_points, d_in_out,
 					layer_7_pw_specs.layer_activation, layer_7_pw_specs);
 		}
