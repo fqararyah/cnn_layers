@@ -7,8 +7,8 @@
 
 #include <chrono>
 
-//#include "ap_int.h"
-//#include "ap_fixed.h"
+// #include "ap_int.h"
+// #include "ap_fixed.h"
 using namespace std;
 
 // typedef ap_uint<512> weights_grp_dt;
@@ -16,7 +16,6 @@ int main(int argc, char **argv)
 {
 
 	int images_to_test = 1;
-
 
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
@@ -30,6 +29,9 @@ int main(int argc, char **argv)
 		cout << "model_configs list is read.\n*************\n";
 	}
 
+string dw_weights_file =
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
+		"_off_chip_dw_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
@@ -39,11 +41,11 @@ int main(int argc, char **argv)
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga.txt";
 	string on_chip_weights_file =
-			"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #endif
 	string input_images_folder =
-	"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized/";
-		//"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
+		"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized/";
+	//"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
 	string input_image_v_file =
 		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/inp_img.txt";
 	string output_folder =
@@ -65,10 +67,12 @@ int main(int argc, char **argv)
 
 #if HW == _FPGA
 	static weights_grp_dt weights[all_pw_s_weights];
+	static weights_dt dw_weights[all_dw_off_chip_weights];
 	static weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups];
 	static fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 #elif HW == CPU
 	weights_dt *weights = (weights_dt *)malloc(all_pw_s_weights * weights_dt_width / 8);
+	weights_dt *dw_weights = (weights_dt *)malloc(all_dw_off_chip_weights);
 	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
 																	 weights_group_items * weights_dt_width / 8);
 	fms_dt input_image[input_image_depth * input_image_hw];
@@ -93,6 +97,7 @@ int main(int argc, char **argv)
 	load_weights(weights_file, weights);
 #endif
 
+	load_weights(dw_weights_file, dw_weights);
 	read_fc_weights(fc_weights_file, fc_weights);
 	read_weight_sums(weight_sums_file, weight_sums);
 	read_biases(biases_file, biases);
@@ -117,7 +122,7 @@ int main(int argc, char **argv)
 #if HW == _FPGA
 			glue_input_image(file_name, input_image);
 #elif HW == CPU
-			//load_image(file_name, input_image);
+			// load_image(file_name, input_image);
 			auto start = chrono::steady_clock::now();
 			load_and_quantize_image(file_name, input_image, quantize_layer_specs);
 			auto end = chrono::steady_clock::now();
@@ -132,9 +137,9 @@ int main(int argc, char **argv)
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 #if HW == _FPGA
 			krnl_fibha_v2(input_image, weights, glued_on_chip_weights, fc_input,
-					model_configs_list, &img_count);
+						  model_configs_list, &img_count);
 #elif HW == CPU
-			top_func(input_image, weights, glued_on_chip_weights, fc_input,
+			top_func(input_image, weights, dw_weights, glued_on_chip_weights, fc_input,
 					 model_configs_list);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
@@ -142,16 +147,16 @@ int main(int argc, char **argv)
 			// 		<< (int)fc_input[338] << " " << (int)fc_input[328] << " "
 			// 		<< (int)fc_input[327] << " " << (int)fc_input[335] << " "
 			// 		<< (int)fc_input[81] << " " << (int)fc_input[340] << " ";
-			 start = chrono::steady_clock::now();
+			start = chrono::steady_clock::now();
 
 #if MODEL_ID == RESNET50
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_74_fc_specs);
 #elif MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
-// for(int i=0;i<1000;i++){printf("%d ", (int)fc_input[i]);}
-// 			printf("\n");
+			// for(int i=0;i<1000;i++){printf("%d ", (int)fc_input[i]);}
+			// 			printf("\n");
 			fc_layer(fc_input, fc_weights, weight_sums, top5, biases, layer_68_fc_specs);
 #endif
-			 end = chrono::steady_clock::now();
+			end = chrono::steady_clock::now();
 
 			cout << "Elapsed time in milliseconds: "
 				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000

@@ -5,6 +5,10 @@
 
 namespace seml_engines
 {
+	void fill_layer_dw_weights_off_chip(const dw_weights_dt *dw_weights,
+										dw_weights_dt layer_dw_weights[][3 * 3],
+										const int current_dw_layer_weights_offset,
+										const int layer_depth);
 	void fill_dw_weights_tile(const dw_weights_dt weights[][3 * 3],
 							  dw_weights_dt weights_tile[][3 * 3],
 							  int starting_d, const int current_dw_layer_weights_offset);

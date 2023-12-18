@@ -33,6 +33,8 @@ pw_block = 'pw_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_pw_s
     model_configs_list);\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
+fill_dw_weights_block = 'seml_engines::fill_layer_dw_weights_off_chip\n\
+    (off_chip_dw_weights, seml_dw_weights_3x3, dw_layers_weights_offsets[{}], layer_{}_dw_specs.layer_depth);\n'
 dw_block = \
     'seml_engines::dw_conv_3x3(seml_dw_weights_3x3, {}, {}, *i*,layer_*i*_dw_specs,\n\
     fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
@@ -98,7 +100,10 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     if layer_index == 0:
         target_block = layer_0_s_block
     if layer_type == 'dw':
-        target_block = dw_block
+        if cgc.DW_WEIGHTS_OFF_CHIP:
+            target_block = fill_dw_weights_block.format(layer_index, layer_index) + dw_block 
+        else:
+            target_block = dw_block
     elif layer_type == 'pw':
         target_block = pw_block
     elif layer_type == 's':

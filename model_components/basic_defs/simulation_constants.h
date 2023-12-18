@@ -5,6 +5,7 @@
 #define CPU 1
 #define _FPGA 0
 #define HW CPU
+#define PIPELINE_LENGTH 6
 #define CHAIN_LENGTH 6
 #define MOB_V1 1
 #define MOB_V2 2
@@ -24,4 +25,5 @@
 #define BOTTLENECK_CHAIN_MODE 1
 #define PIPELINED_ENGINES_MODE 2
 #define FIRST_PART_IMPLEMENTATION BOTTLENECK_CHAIN_MODE 
+#define DW_WEIGHTS_OFF_CHIP 1
 #endif

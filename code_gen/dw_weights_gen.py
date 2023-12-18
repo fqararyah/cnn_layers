@@ -13,10 +13,21 @@ reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
 dw_weights_h_file = '../model_components/model/headers/{}_dw_weights{}.h'.format(
     cgc.MODEL_NAME, cgc.FIBHA_VERSION_POSTFIX)
+general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
+
+if cgc.PIPELINE:
+    dw_off_chip_weights_file = '../off_chip_weights/{}_off_chip_dw_weights_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+else:
+    dw_off_chip_weights_file = '../off_chip_weights/{}_off_chip_dw_weights.txt'.format(cgc.MODEL_NAME)
+
+dw_off_chip_weights = []
 
 pipe_dw_weights_declaration_string = 'const static dw_weights_dt dw_weights_*i*[layer_*i*_dw_depth][layer_*i*_dw_filter_dim * layer_*i*_dw_filter_dim]'
 pipe_dw_weights_declaration_string_v2 = 'const static dw_weights_dt pipe_dw_weights_3x3[][9] = {\n'
-seml_dw_weights_declaration_string = 'const static dw_weights_dt seml_dw_weights_3x3[][9] = {\n'
+if cgc.DW_WEIGHTS_OFF_CHIP:
+    seml_dw_weights_declaration_string = 'static dw_weights_dt seml_dw_weights_3x3[{}][9];\n'
+else:
+    seml_dw_weights_declaration_string = 'const static dw_weights_dt seml_dw_weights_3x3[][9] = {\n'
 dw_layers_weights_offsets_declaration_string = 'const static int dw_layers_weights_offsets[] ={'
 dw_layers_weights_offsets = [0]
 
@@ -84,7 +95,7 @@ with open(dw_weights_h_file, 'w') as f:
                     f.write('},\n')
                 f.write('};\n')
         elif cgc.FIBHA_VERSION == 2:
-            dw_layers_weights_offsets[ii + 1] += num_of_filters
+            dw_layers_weights_offsets[ii + 1] += num_of_filters * filter_height * filter_width
             current_weights = np.loadtxt(weights_file).astype(np.int8)
             filter_dim = layer_weights_shape[-1]
             current_weights = np.reshape(current_weights, (int(
@@ -107,7 +118,10 @@ with open(dw_weights_h_file, 'w') as f:
         f.write('};\n')
 
     if cgc.PIPELINE == False or last_layer > last_pipeline_layer:
-        f.write(seml_dw_weights_declaration_string)
+        max_dw_num_filters = 0
+        if cgc.DW_WEIGHTS_OFF_CHIP == False:
+            f.write(seml_dw_weights_declaration_string)
+            
         for ii in range(current_index, last_layer):
             layer_specs = model_dag[ii]
             layer_type = ''
@@ -124,24 +138,54 @@ with open(dw_weights_h_file, 'w') as f:
             filter_height = layer_weights_shape[1]
             filter_width = layer_weights_shape[2]
 
-            dw_layers_weights_offsets[ii + 1] += num_of_filters
+            dw_layers_weights_offsets[ii + 1] += num_of_filters * filter_height * filter_width
+            max_dw_num_filters = max(max_dw_num_filters, num_of_filters)
             weights_file = weights_files_location + \
                 reading_weights_file_format.format(str(ii))
-            with open(weights_file, 'r') as f2:
-                for i in range(num_of_filters):
-                    f.write('{')
-                    for j in range(filter_height):
-                        for k in range(filter_width):
-                            f.write(f2.readline().replace(
-                                ' ', '').replace('\n', ''))
-                            if(k < filter_width - 1):
-                                f.write(', ')
-                        if j != filter_height - 1:
-                            f.write(',\n')
-                    f.write('},\n')
+            
+            if cgc.DW_WEIGHTS_OFF_CHIP == False:
+                with open(weights_file, 'r') as f2:
+                    for i in range(num_of_filters):
+                        f.write('{')
+                        for j in range(filter_height):
+                            for k in range(filter_width):
+                                f.write(f2.readline().replace(
+                                    ' ', '').replace('\n', ''))
+                                if(k < filter_width - 1):
+                                    f.write(', ')
+                            if j != filter_height - 1:
+                                f.write(',\n')
+                        f.write('},\n')
+            else:
+                with open(weights_file, 'r') as f2:
+                    for i in range(num_of_filters):
+                        for j in range(filter_height):
+                            for k in range(filter_width):
+                                dw_off_chip_weights.append(f2.readline().replace(
+                                    ' ', '').replace('\n', ''))
 
-        f.write('};\n')
+        if cgc.DW_WEIGHTS_OFF_CHIP == False:
+            f.write('};\n')
+        else:
+            f.write(seml_dw_weights_declaration_string.format(max_dw_num_filters))
+
         f.write(dw_layers_weights_offsets_declaration_string +
                 str(dw_layers_weights_offsets).replace('[', '').replace(']', '') + '};\n')
     f.write('#endif\n')
     f.write('#endif\n')
+
+with open(dw_off_chip_weights_file, 'w') as f:
+    for i in range(len(dw_off_chip_weights)):
+        f.write(dw_off_chip_weights[i] + '\n')
+
+
+replacement_string = ''
+with open(general_specs_file, 'r') as f:
+    for line in f:
+        if 'const int all_dw_off_chip_weights =' in line:
+            replacement_string += 'const int all_dw_off_chip_weights = {};\n'.format(len(dw_off_chip_weights))
+        else:
+            replacement_string += line
+
+with open(general_specs_file, 'w') as f:
+    f.write(replacement_string)

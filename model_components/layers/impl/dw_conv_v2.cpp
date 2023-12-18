@@ -6,8 +6,22 @@ using namespace seml_engines;
 
 #if FIBHA_VERSION == 2
 
+void seml_engines::fill_layer_dw_weights_off_chip(const dw_weights_dt *dw_weights,
+                                    dw_weights_dt layer_dw_weights[][3 * 3],
+                                    const int current_dw_layer_weights_offset,
+                                    const int layer_depth)
+{
+    int i = 0;
+    for (int d = 0; d < layer_depth * 9; d++)
+    {
+#pragma HLS PIPELINE II = 1
+        layer_dw_weights[d / 9][i] = dw_weights[current_dw_layer_weights_offset + d];
+        i = i == 8 ? 0 : i + 1;
+    }
+}
+
 void dw_conv_engine(
-    dw_weights_dt weights[CHANNELS_PIPELINE_DEPTH][max_filter_hw_dim * max_filter_hw_dim],
+    const dw_weights_dt weights[][max_filter_hw_dim * max_filter_hw_dim],
     fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
     dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
     const int starting_d,
@@ -43,6 +57,9 @@ dw_conv_engine:
                     for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                     {
 #pragma HLS UNROLL
+// if(layer_specs_struct.layer_index == 14 && h == 0 && w == 0 && starting_d + d_in_pipeline == 0 && tile_in_h == 0 && tile_in_w == 2){
+//     printf("%d ", (int)weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w]);
+// }
                         if (c_w >= filter_dim || c_h >= filter_dim || h >= dw_tile_h / strides || w >= dw_tile_w / strides)
                         {
                             break;
@@ -52,14 +69,14 @@ dw_conv_engine:
                             result_tile[d_in_pipeline][h][w] =
                                 channels_tile[d_in_pipeline][h * strides + c_h]
                                              [w * strides + c_w] *
-                                weights[d_in_pipeline][c_h * max_filter_hw_dim + c_w];
+                                weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w];
                         }
                         else
                         {
                             result_tile[d_in_pipeline][h][w] +=
                                 channels_tile[d_in_pipeline][h * strides + c_h]
                                              [w * strides + c_w] *
-                                weights[d_in_pipeline][c_h * max_filter_hw_dim + c_w];
+                                weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w];
                         }
                     }
                 }
@@ -198,7 +215,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 #pragma HLS UNROLL
                     result[main_tile_index][h][w] =
                         dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
-                    // if(layer_specs_struct.layer_index == 9 && starting_d + d == 37 && tile_in_h * 8 + h == 14 && tile_in_w == 5){
+                    // if(layer_specs_struct.layer_index == 14 && starting_d + d == 0 && tile_in_h == 0 && tile_in_w == 2){
                     //     dw_pss_dt pss = result_tile[d][h][w];
                     //     pss += fused_zero_point;
                     //     printf("%d >> ", pss);
@@ -216,9 +233,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                     //     printf("%f >> ", scaled_pss);
                     //     printf("%d \n", clamp(scaled_pss));
                     // }
-                    //  dw_relu_norm(
-                    //     result_tile[d][h][w], normalization,
-                    //     layer_relu);
+                     
                 }
             }
             else
@@ -229,6 +244,24 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                     result[main_tile_index][in_tile_h + h][in_tile_w + w] =
                         dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
 
+                    // if(layer_specs_struct.layer_index == 14 && starting_d + d == 0 && tile_in_h + in_tile_h + h == 0 && tile_in_w == 2 && in_tile_w == 0){
+                    //     dw_pss_dt pss = result_tile[d][h][w];
+                    //     pss += fused_zero_point;
+                    //     printf("%d >> ", pss);
+                    //     pss_f_dt scaled_pss = pss * fused_scale;
+                    //     printf("%f >> ", fused_scale);
+                    //     printf("%f >> ", scaled_pss);
+                    //     if (scaled_pss > relu_6_fused_scale)
+                    //     {
+                    //         scaled_pss = relu_6_fused_scale;
+                    //     }
+
+                    //     scaled_pss += ofm_zero_point;
+                    //     printf("%f >> ", scaled_pss);
+                    //     scaled_pss += quant_half - (scaled_pss < 0);
+                    //     printf("%f >> ", scaled_pss);
+                    //     printf("%d \n", clamp(scaled_pss));
+                    // }
                     //  dw_relu_norm(
                     //     result_tile[d][h][w], normalization,
                     //     layer_relu);
@@ -254,12 +287,17 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 {
 #pragma HLS INLINE off
 
+#if DW_WEIGHTS_OFF_CHIP
+    const int current_dw_layer_weights_offset = 0;
+#else
     const int current_dw_layer_weights_offset = dw_layers_weights_offsets[layer];
+#endif
+
     const int current_layer_fused_parameters_offset =
         layers_fused_parameters_offsets[layer];
 
-    dw_weights_dt weights_tile[CHANNELS_PIPELINE_DEPTH][3 * 3];
-#pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 2
+//     dw_weights_dt weights_tile[CHANNELS_PIPELINE_DEPTH][3 * 3];
+// #pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 2
 
     fused_scales_dt fused_scales_tile[MAX_DW_LAYER_D];
     fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_tile[MAX_DW_LAYER_D];
@@ -340,10 +378,6 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 
                 if (dw_pipeline_in_d % 2 == 0)
                 {
-                    seml_engines::fill_dw_weights_tile(weights, weights_tile,
-                                                       tile_in_d,
-                                                       current_dw_layer_weights_offset);
-
                     dw_normalize_and_write_back_result_tile(result,
                                                             engine_result_tile_copy, ofm_zero_point,
                                                             fused_scales_tile, fused_scales_log_2_shifts_tile,
@@ -353,7 +387,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                             in_tile_h, in_tile_w,
                                                             layer_specs_struct, model_configs_list[2 * layer]);
 
-                    dw_conv_engine(weights_tile,
+                    dw_conv_engine(weights,
                                    channels_tile,
                                    engine_result_tile,
                                    tile_in_d,
@@ -372,10 +406,6 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 }
                 else
                 {
-                    seml_engines::fill_dw_weights_tile(weights, weights_tile,
-                                                       tile_in_d,
-                                                       current_dw_layer_weights_offset);
-
                     dw_normalize_and_write_back_result_tile(result,
                                                             engine_result_tile, ofm_zero_point,
                                                             fused_scales_tile, fused_scales_log_2_shifts_tile,
@@ -386,7 +416,7 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                                             layer_specs_struct,
                                                             model_configs_list[2 * layer]);
 
-                    dw_conv_engine(weights_tile,
+                    dw_conv_engine(weights,
                                    channels_tile_copy,
                                    engine_result_tile_copy,
                                    tile_in_d,
