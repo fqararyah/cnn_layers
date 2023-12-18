@@ -24,12 +24,12 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 layer_0_s_block = 'layer_0_s_3x3(weights_1, input_image, result);\n'
 
 s_pw_block = 'pw_and_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_s_specs,\n\
-    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
-    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
+    fused_scales, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
 
 pw_block = 'pw_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_pw_specs,\n\
-    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
-    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,\n\
+    fused_scales, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales_part2, relu_6_fused_scales_part2, fused_zero_points_part2,\n\
     model_configs_list);\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
@@ -37,8 +37,8 @@ fill_dw_weights_block = 'seml_engines::fill_layer_dw_weights_off_chip\n\
     (off_chip_dw_weights, seml_dw_weights_3x3, dw_layers_weights_offsets[{}], layer_{}_dw_specs.layer_depth);\n'
 dw_block = \
     'seml_engines::dw_conv_3x3(seml_dw_weights_3x3, {}, {}, *i*,layer_*i*_dw_specs,\n\
-    fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points,\n\
-    fused_scales_part2, fused_scales_log_2_shifts_part2, relu_6_fused_scales_part2, fused_zero_points_part2,\n\
+    fused_scales, relu_6_fused_scales, fused_zero_points,\n\
+    fused_scales_part2, relu_6_fused_scales_part2, fused_zero_points_part2,\n\
         model_configs_list);\n'
 
 debugging_dump_ofms_block = '#if DEBUGGING\n dump_layer_output("{}",\n {}, {});\n#endif\n'

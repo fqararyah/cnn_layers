@@ -259,7 +259,7 @@ with open(h_file, 'w') as wf:
             if first_quantization_arrays_num_of_elements < first_quantization_arrays_elements_threshold:
                 first_quantization_arrays_num_of_elements += len(fused_scales)
             seml_fused_scales.extend(fused_scales)
-            seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
+            #seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
             seml_relu_6_fused_scales.extend(relu_6_fused_scales)
             seml_fused_zero_points.extend(fused_zero_points)
 

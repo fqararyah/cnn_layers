@@ -90,7 +90,6 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 					fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					layer_specs layer_specs_struct,
 					fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out],
-					fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[pw_conv_parallelism_out],
 					relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out],
 					biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
 					const int tile_index)
@@ -343,7 +342,6 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 			 fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 			 const int layer, const layer_specs layer_specs_struct,
 			 fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out],
-			 fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[pw_conv_parallelism_out],
 			 relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out],
 			 biases_dt fused_zero_points_buffer[pw_conv_parallelism_out], int td_o,
 			 const int model_configs_list[])
@@ -393,7 +391,6 @@ conv2_ith_loop:
 
 			scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
 						   layer_specs_struct, fused_scales_buffer,
-						   fused_scales_log_2_shifts_buffer,
 						   relu_6_fused_scales_buffer, fused_zero_points_buffer,
 						   prev_tile_index);
 
@@ -414,7 +411,6 @@ conv2_ith_loop:
 	}
 	scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
 				   layer_specs_struct, fused_scales_buffer,
-				   fused_scales_log_2_shifts_buffer,
 				   relu_6_fused_scales_buffer, fused_zero_points_buffer,
 				   prev_tile_index);
 
@@ -432,11 +428,9 @@ void pw_conv(weights_grp_dt *weights,
 			 fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 			 int layer, const layer_specs layer_specs_struct,
 			 const fused_scales_dt fused_scales[],
-			 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],
 			 const biases_dt fused_zero_points[],
 			 const fused_scales_dt fused_scales_part2[],
-			 const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
 			 const biases_dt fused_zero_points_part2[],
 			 const int model_configs_list[2 * max_conv_layers])
@@ -469,7 +463,6 @@ void pw_conv(weights_grp_dt *weights,
 
 	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
 	fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out];
-	fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[pw_conv_parallelism_out];
 	relu_6_fused_scales_dt relu_6_fused_scales_buffer[pw_conv_parallelism_out];
 
 	const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
@@ -492,7 +485,6 @@ conv2_ots_loop:
 										  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
 										  layer, current_layer_fused_parameters_offset);
 			fill_fused_scales_buffer(fused_scales, fused_scales_buffer,
-									 fused_scales_log_2_shifts, fused_scales_log_2_shifts_buffer,
 									 relu_6_fused_scales, relu_6_fused_scales_buffer,
 									 td_o * pw_conv_parallelism_out, layer, current_layer_fused_parameters_offset);
 		}
@@ -502,7 +494,6 @@ conv2_ots_loop:
 										  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
 										  layer, current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
 			fill_fused_scales_buffer(fused_scales_part2, fused_scales_buffer,
-									 fused_scales_log_2_shifts_part2, fused_scales_log_2_shifts_buffer,
 									 relu_6_fused_scales_part2, relu_6_fused_scales_buffer,
 									 td_o * pw_conv_parallelism_out, layer,
 									 current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
@@ -524,7 +515,7 @@ conv2_ots_loop:
 //			}
 //		}
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
-				fused_scales_log_2_shifts_buffer, relu_6_fused_scales_buffer,
+				relu_6_fused_scales_buffer,
 				fused_zero_points_buffer, td_o, model_configs_list);
 #if HW == _FPGA
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
