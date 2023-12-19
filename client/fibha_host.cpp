@@ -44,16 +44,15 @@
 #include <stdlib.h>
 #include <fstream>
 #include <iostream>
-#include "ap_int.h"
 #include "cstdlib"
 #include <chrono>
 #include <dirent.h>
 
 #include "fibha_host.h"
 #include "../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_layers_specs.h"
-#include "client/prepare_weights_and_inputs.h"
-#include "tests/test_utils.h"
-#include "client/cpp_fc.h"
+#include "client/fpga_cpp_fc.h"
+#include "tests/fpga_test_utils.h"
+#include "client/fpga_prepare_weights_and_inputs.h"
 
 #define OCL_CHECK(error, call)                                                                   \
     call;                                                                                        \

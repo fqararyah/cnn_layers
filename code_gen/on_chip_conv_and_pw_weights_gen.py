@@ -24,7 +24,8 @@ num_of_generated_layers = 0
 with open(conv_pw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#include "{}_layers_specs.h"\n'.format(cgc.MODEL_NAME))
-    f.write("#if FIBHA_VERSION == 1 || FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE\n")
+    f.write("#if FIRST_PART_IMPLEMENTATION == " + cgc.BOTTLENECK_CHAIN_MODE + \
+             " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
     f.write("#ifndef CONV_PW_WEIGHTS\n")
     f.write("#define CONV_PW_WEIGHTS\n")
 

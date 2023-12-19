@@ -10,6 +10,8 @@ void top_func(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	weights_grp_dt off_chip_weights[all_pw_s_weights],
 	weights_dt off_chip_dw_weights[all_dw_off_chip_weights],
+	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps],
+	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps],
 	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 	fms_dt fc_input[fc_layer_input_size],
 	const int model_configs_list_src[2 * max_conv_layers])
@@ -96,14 +98,14 @@ void top_func(
 #endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
 	copy_channels_to_tmp_channels(channels, tmp_channels);
 #else
-	pipelined_engines_caller(input_image, on_chip_weights, channels, model_configs_list);
+	//pipelined_engines_caller(input_image, on_chip_weights, channels, model_configs_list);
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);
 #endif
 
 #endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
-	seml(off_chip_weights, off_chip_dw_weights, channels, result, tmp_channels, fc_input, model_configs_list);
+	seml(off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints, channels, result, tmp_channels, fc_input, model_configs_list);
 #endif // ONLY_SEML == 0
 
 #endif

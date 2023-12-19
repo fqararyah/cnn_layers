@@ -24,7 +24,7 @@ model_dag = utils.read_model_dag()
 with open(on_chip_weights_header_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#include "' + cgc.MODEL_NAME + '_layers_specs.h"\n')
-    f.write("#if FIBHA_VERSION == 2\n")
+    f.write("#if FIRST_PART_IMPLEMENTATION ==" + cgc.PIPELINED_ENGINES_MODE + "\n")
     f.write("#ifndef ON_CHIP_WEIGHTS\n")
     f.write("#define ON_CHIP_WEIGHTS\n")
 

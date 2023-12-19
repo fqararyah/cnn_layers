@@ -7,14 +7,19 @@ using namespace seml_engines;
 #if FIBHA_VERSION == 2
 
 void seml_engines::fill_layer_dw_weights_off_chip(const dw_weights_dt *dw_weights,
-                                    dw_weights_dt layer_dw_weights[][3 * 3],
-                                    const int current_dw_layer_weights_offset,
-                                    const int layer_depth)
+                                                  dw_weights_dt layer_dw_weights[][3 * 3],
+                                                  const int current_dw_layer_weights_offset,
+                                                  const int layer_depth)
 {
     int i = 0;
-    for (int d = 0; d < layer_depth * 9; d++)
+    const int num_of_weights_to_load = layer_depth * 9;
+    for (int d = 0; d < MAX_DW_LAYER_D * 9; d++)
     {
 #pragma HLS PIPELINE II = 1
+        if (d >= num_of_weights_to_load)
+        {
+            break;
+        }
         layer_dw_weights[d / 9][i] = dw_weights[current_dw_layer_weights_offset + d];
         i = i == 8 ? 0 : i + 1;
     }
@@ -57,9 +62,9 @@ dw_conv_engine:
                     for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
                     {
 #pragma HLS UNROLL
-// if(layer_specs_struct.layer_index == 14 && h == 0 && w == 0 && starting_d + d_in_pipeline == 0 && tile_in_h == 0 && tile_in_w == 2){
-//     printf("%d ", (int)weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w]);
-// }
+                        // if(layer_specs_struct.layer_index == 14 && h == 0 && w == 0 && starting_d + d_in_pipeline == 0 && tile_in_h == 0 && tile_in_w == 2){
+                        //     printf("%d ", (int)weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w]);
+                        // }
                         if (c_w >= filter_dim || c_h >= filter_dim || h >= dw_tile_h / strides || w >= dw_tile_w / strides)
                         {
                             break;
@@ -160,7 +165,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                                              fms_dt ofm_zero_point,
                                              const fused_scales_dt fused_scales_tile[],
                                              const relu_6_fused_scales_dt relu_6_fused_scale,
-                                             const biases_dt fused_zero_points_tile[],
+                                             const biases_dt fused_zero_points[],
                                              const int tile_in_h,
                                              const int tile_in_w,
                                              const int starting_d,
@@ -195,7 +200,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
             }
             const scales_dt fused_scale = fused_scales_tile[starting_d + d];
             const biases_dt fused_zero_point =
-                fused_zero_points_tile[starting_d + d];
+                fused_zero_points[starting_d + d];
 
             if (strides == 1)
             {
@@ -204,7 +209,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 #pragma HLS UNROLL
                     result[main_tile_index][h][w] =
                         dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
-                    // if(layer_specs_struct.layer_index == 14 && starting_d + d == 0 && tile_in_h == 0 && tile_in_w == 2){
+                    // if(layer_specs_struct.layer_index == 17 && starting_d + d == 0 && tile_in_h == 0 && tile_in_w == 0){
                     //     dw_pss_dt pss = result_tile[d][h][w];
                     //     pss += fused_zero_point;
                     //     printf("%d >> ", pss);
@@ -222,7 +227,6 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
                     //     printf("%f >> ", scaled_pss);
                     //     printf("%d \n", clamp(scaled_pss));
                     // }
-                     
                 }
             }
             else
@@ -267,9 +271,6 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                const layer_specs layer_specs_struct,
                                const fused_scales_dt fused_scales[],
                                const relu_6_fused_scales_dt relu_6_fused_scales[], const biases_dt fused_zero_points[],
-                               const fused_scales_dt fused_scales_part2[],
-                               const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
-                               const biases_dt fused_zero_points_part2[],
                                const int model_configs_list[2 * max_conv_layers])
 {
 #pragma HLS INLINE off
@@ -283,12 +284,10 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
     const int current_layer_fused_parameters_offset =
         layers_fused_parameters_offsets[layer];
 
-//     dw_weights_dt weights_tile[CHANNELS_PIPELINE_DEPTH][3 * 3];
-// #pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 2
+    //     dw_weights_dt weights_tile[CHANNELS_PIPELINE_DEPTH][3 * 3];
+    // #pragma HLS ARRAY_PARTITION variable = weights_tile type = complete dim = 2
 
-    fused_scales_dt fused_scales_tile[MAX_DW_LAYER_D];
     relu_6_fused_scales_dt relu_6_fused_scale = relu_6_fused_scales[layer_specs_struct.layer_index];
-    biases_dt fused_zero_points_tile[MAX_DW_LAYER_D];
 
     const fms_dt current_layer_fms_zero_point = layer_specs_struct.layer_ifms_zero_point;
 
@@ -317,20 +316,6 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                                               CHANNELS_PIPELINE_DEPTH;
     // cout << layer << " "<< (ifms_d + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH << " "
     //      << (model_configs_list[2 * layer] + CHANNELS_PIPELINE_DEPTH - 1) / CHANNELS_PIPELINE_DEPTH << "\n";
-    if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
-    {
-        fill_scales_tiles(fused_scales, fused_scales_tile, fused_zero_points,
-                          fused_zero_points_tile,
-                          ifms_d,
-                          current_layer_fused_parameters_offset);
-    }
-    else
-    {
-        fill_scales_tiles(fused_scales_part2, fused_scales_tile,fused_zero_points_part2,
-                          fused_zero_points_tile,
-                          ifms_d,
-                          current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
-    }
 
     for (int tile_in_h = 0; tile_in_h < layer_specs_struct.layer_num_of_ifm_tiles_h; tile_in_h++)
     {
@@ -362,8 +347,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 {
                     dw_normalize_and_write_back_result_tile(result,
                                                             engine_result_tile_copy, ofm_zero_point,
-                                                            fused_scales_tile,
-                                                            relu_6_fused_scale, fused_zero_points_tile,
+                                                            fused_scales,
+                                                            relu_6_fused_scale, fused_zero_points,
                                                             tile_in_h / strides, tile_in_w / strides,
                                                             prev_tile_in_d,
                                                             in_tile_h, in_tile_w,
@@ -390,8 +375,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                 {
                     dw_normalize_and_write_back_result_tile(result,
                                                             engine_result_tile, ofm_zero_point,
-                                                            fused_scales_tile,
-                                                            relu_6_fused_scale, fused_zero_points_tile,
+                                                            fused_scales,
+                                                            relu_6_fused_scale, fused_zero_points,
                                                             tile_in_h / strides, tile_in_w / strides,
                                                             prev_tile_in_d,
                                                             in_tile_h, in_tile_w,
@@ -422,8 +407,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
             {
                 dw_normalize_and_write_back_result_tile(result,
                                                         engine_result_tile, ofm_zero_point,
-                                                        fused_scales_tile,
-                                                        relu_6_fused_scale, fused_zero_points_tile,
+                                                        fused_scales,
+                                                        relu_6_fused_scale, fused_zero_points,
                                                         tile_in_h / strides, tile_in_w / strides,
                                                         ifms_d % CHANNELS_PIPELINE_DEPTH == 0
                                                             ? ifms_d - CHANNELS_PIPELINE_DEPTH
@@ -436,8 +421,8 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
             {
                 dw_normalize_and_write_back_result_tile(result,
                                                         engine_result_tile_copy, ofm_zero_point,
-                                                        fused_scales_tile,
-                                                        relu_6_fused_scale, fused_zero_points_tile,
+                                                        fused_scales,
+                                                        relu_6_fused_scale, fused_zero_points,
                                                         tile_in_h / strides, tile_in_w / strides,
                                                         ifms_d % CHANNELS_PIPELINE_DEPTH == 0
                                                             ? ifms_d - CHANNELS_PIPELINE_DEPTH

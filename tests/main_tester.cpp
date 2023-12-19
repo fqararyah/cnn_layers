@@ -29,9 +29,15 @@ int main(int argc, char **argv)
 		cout << "model_configs list is read.\n*************\n";
 	}
 
-string dw_weights_file =
+	string dw_weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
 		"_off_chip_dw_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string fused_scales_file =
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
+		"_fused_scales_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string fused_zps_file =
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
+		"_fused_zps_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";	
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
@@ -70,12 +76,16 @@ string dw_weights_file =
 	static weights_dt dw_weights[all_dw_off_chip_weights];
 	static weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups];
 	static fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
+	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps];
+	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps];
 #elif HW == CPU
 	weights_dt *weights = (weights_dt *)malloc(all_pw_s_weights * weights_dt_width / 8);
 	weights_dt *dw_weights = (weights_dt *)malloc(all_dw_off_chip_weights);
 	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
 																	 weights_group_items * weights_dt_width / 8);
 	fms_dt input_image[input_image_depth * input_image_hw];
+	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps];
+	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps];
 #endif
 
 	static fms_dt fc_input[fc_layer_input_size];
@@ -96,7 +106,8 @@ string dw_weights_file =
 							 glued_on_chip_weights);
 	load_weights(weights_file, weights);
 #endif
-
+	load_fused_scales(fused_scales_file, off_chip_fused_scales);
+	load_fused_zps(fused_zps_file, off_chip_fused_zeropoints);
 	load_weights(dw_weights_file, dw_weights);
 	read_fc_weights(fc_weights_file, fc_weights);
 	read_weight_sums(weight_sums_file, weight_sums);
@@ -139,7 +150,8 @@ string dw_weights_file =
 			krnl_fibha_v2(input_image, weights, glued_on_chip_weights, fc_input,
 						  model_configs_list, &img_count);
 #elif HW == CPU
-			top_func(input_image, weights, dw_weights, glued_on_chip_weights, fc_input,
+			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
+					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
 					 model_configs_list);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "

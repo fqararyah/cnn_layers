@@ -20,6 +20,14 @@ fms_scales_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/' 
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
         cgc.MODEL_NAME)
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
+
+if cgc.PIPELINE:
+    off_chip_fused_scales_file = '../off_chip_weights/{}_fused_scales_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+    dw_off_chip_fused_zps_file = '../off_chip_weights/{}_fused_zps_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+else:
+    off_chip_fused_scales_file = '../off_chip_weights/{}_fused_scales.txt'.format(cgc.MODEL_NAME)
+    dw_off_chip_fused_zps_file = '../off_chip_weights/{}_fused_zps.txt'.format(cgc.MODEL_NAME)
+
 #########################################################################
 
 #########################################################################
@@ -62,11 +70,11 @@ weights_zero_points_file_format = weights_scales_files_location + \
     'weights_{}_zps.txt'
 biases_file_format = biases_files_location + 'biases_{}.txt'
 #########################################################################
-
+max_layer_d = 0
 
 # './out/dw_weights.h'
-h_file = '../model_components/model/headers/{}_quantization_and_biases{}.h'.format(cgc.MODEL_NAME,
-                                                                                   cgc.FIBHA_VERSION_POSTFIX)
+h_file = '../model_components/model/headers/{}_quantization_and_biases_{}.h'.format(cgc.MODEL_NAME,
+                                                                                   cgc.FIRST_PART_IMPLEMENTATION)
 
 layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
 pipe_layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
@@ -77,8 +85,7 @@ weights_zero_points_declaration_string = 'const static fms_dt weights_zero_point
 last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    wf.write('#if (FIBHA_VERSION ==' + str(cgc.FIBHA_VERSION) + \
-    (' || FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE)' if cgc.FIBHA_VERSION == 1 else ')') +
+    wf.write('#if FIRST_PART_IMPLEMENTATION ==' + str(cgc.FIRST_PART_IMPLEMENTATION) +
              " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
@@ -158,6 +165,9 @@ with open(h_file, 'w') as wf:
             weights = np.reshape(
                 weights, (layer_weight_shape[0], layer_weight_shape[1], layer_weight_shape[2], layer_weight_shape[3]))
 
+        if layer_weight_shape[0] > max_layer_d:
+            max_layer_d = layer_weight_shape[0]
+
         for i in range(layer_weight_shape[0]):
             filter_weights_sum = 0
             if layer_type == 'pw':
@@ -226,7 +236,7 @@ with open(h_file, 'w') as wf:
                     #         'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5', 'mob_v2_0_75'] or 'uniform' in utils.NET_PREFIX
 
         if ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
-                or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 1:
+                or num_of_generated_for_layers == 0) and cgc.FIRST_PART_IMPLEMENTATION == cgc.BOTTLENECK_CHAIN_MODE:
             fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
                 layer_index, layer_type)  if not first_conv_layer else 'const static biases_dt first_conv_layer_fused_zero_points[] ='
             fused_zero_points_declaration_string += '{ ' + str(
@@ -253,15 +263,7 @@ with open(h_file, 'w') as wf:
             wf.write(fused_scales_declaration_string)
             wf.write(fused_scales_log_2_shifts_declaration_string)
             wf.write(relu_6_fused_scales_declaration_string)
-        elif ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
-              or num_of_generated_for_layers == 0) and cgc.FIBHA_VERSION == 2:
-            pipe_fused_scales.extend(fused_scales)
-            pipe_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
-            pipe_relu_6_fused_scales[layer_index] = relu_6_fused_scales[0]
-            pipe_fused_zero_points.extend(fused_zero_points)
         else:
-            if first_quantization_arrays_num_of_elements < first_quantization_arrays_elements_threshold:
-                first_quantization_arrays_num_of_elements += len(fused_scales)
             seml_fused_scales.extend(fused_scales)
             #seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
             seml_relu_6_fused_scales[layer_index] = relu_6_fused_scales[0]
@@ -276,7 +278,7 @@ with open(h_file, 'w') as wf:
     wf.write(pipe_layers_fused_parameters_offsets_declaration_string +
              str(pipe_layers_fused_parameters_offsets).replace('[', '').replace(']', '};\n'))
 ########################################################################################################
-    if cgc.FIBHA_VERSION == 2 and cgc.PIPELINE_LEN > 0:
+    if cgc.FIRST_PART_IMPLEMENTATION == cgc.PIPELINED_ENGINES_MODE and cgc.PIPELINE_LEN > 0:
         pipe_fused_zero_points_declaration_string = 'const static biases_dt pipe_fused_zero_points[] = \n'
 
         pipe_fused_zero_points_declaration_string += '{ ' + str(
@@ -300,45 +302,17 @@ with open(h_file, 'w') as wf:
             wf.write(pipe_fused_scales_log_2_shifts_declaration_string)
             wf.write(pipe_relu_6_fused_scales_declaration_string)
 ########################################################################################################
-    seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points[] = \n'
+    seml_fused_zero_points_declaration_string = 'static biases_dt seml_fused_zero_points_buffer[{}];\n'.format(max_layer_d)
 
-    seml_fused_zero_points_declaration_string += '{ ' + str(
-        seml_fused_zero_points[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
-
-    seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales[] ='
-    seml_fused_scales_declaration_string += '{ ' + str(
-        seml_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+    seml_fused_scales_declaration_string = 'static fused_scales_dt seml_fused_scales_buffer[{}];\n'.format(max_layer_d)
 
     seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[] ='
     seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
-        seml_fused_scales_log_2_shifts[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+        seml_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
     seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales[] ='
     seml_relu_6_fused_scales_declaration_string += '{ ' + str(
-        seml_relu_6_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
-
-    if cgc.LAST_LAYER_TO_GENERATE >= cgc.PIPELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
-        wf.write(seml_fused_zero_points_declaration_string)
-        wf.write(seml_fused_scales_declaration_string)
-        wf.write(seml_fused_scales_log_2_shifts_declaration_string)
-        wf.write(seml_relu_6_fused_scales_declaration_string)
-########################################################################################################
-    seml_fused_zero_points_declaration_string = 'const static biases_dt fused_zero_points_part2[] = \n'
-
-    seml_fused_zero_points_declaration_string += '{ ' + str(
-        seml_fused_zero_points[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
-
-    seml_fused_scales_declaration_string = 'const static fused_scales_dt fused_scales_part2[] ='
-    seml_fused_scales_declaration_string += '{ ' + str(
-        seml_fused_scales[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
-
-    seml_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_part2[] ='
-    seml_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
-        seml_fused_scales_log_2_shifts[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
-
-    seml_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt relu_6_fused_scales_part2[] ='
-    seml_relu_6_fused_scales_declaration_string += '{ ' + str(
-        seml_relu_6_fused_scales[first_quantization_arrays_num_of_elements:]).replace('[', '').replace(']', '') + '};\n'
+        seml_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
     if cgc.LAST_LAYER_TO_GENERATE >= cgc.PIPELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
         wf.write(seml_fused_zero_points_declaration_string)
@@ -349,6 +323,13 @@ with open(h_file, 'w') as wf:
     wf.write("#endif\n")
     wf.write("#endif\n")
 
+with open(off_chip_fused_scales_file, 'w') as f:
+    for scale in seml_fused_scales:
+        f.write(str(scale) + '\n')
+
+with open(dw_off_chip_fused_zps_file, 'w') as f:
+    for zp in seml_fused_zero_points:
+        f.write(str(zp) + '\n')
 
 # for i in range(len(add_layers_fms_scales_rec)):
 #     print(i, add_layers_fms_scales[i], add_layers_fms_scales_rec[i])
@@ -356,13 +337,17 @@ with open(h_file, 'w') as wf:
 replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
-        if 'const int first_quantization_arrays_num_elements' in line:
+        if 'const int all_off_chip_fused_scales_zps =' in line:
+            replacement_string += 'const int all_off_chip_fused_scales_zps = {};\n'.format(len(seml_fused_scales))
+        elif 'const int first_quantization_arrays_num_elements' in line:
             replacement_string += 'const int first_quantization_arrays_num_elements = ' + \
                 str(first_quantization_arrays_num_of_elements) + ';\n'
         elif '#define MODEL_ACTIVATION' in line:
             replacement_string += '#define MODEL_ACTIVATION ' + model_activation + '\n'
         elif '#define ADD_LAYER_ACTIVATION' in line:
             replacement_string += '#define ADD_LAYER_ACTIVATION ' + add_layers_activation + '\n'
+        elif 'const int MAX_LAYER_D' in line:
+            replacement_string += 'const int MAX_LAYER_D = ' + str(max_layer_d) + ';\n'
         else:
             replacement_string += line
 

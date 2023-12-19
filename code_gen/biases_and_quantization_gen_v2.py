@@ -66,7 +66,7 @@ biases_file_format = biases_files_location + 'biases_{}.txt'
 
 # './out/dw_weights.h'
 h_file = '../model_components/model/headers/{}_quantization_and_biases{}.h'.format(cgc.MODEL_NAME,
-                                                                                   cgc.FIBHA_VERSION_POSTFIX)
+                                                                                   cgc.FIRST_PART_IMPLEMENTATION)
 
 layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
 pipe_layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)

@@ -5,6 +5,19 @@
 #include "../../basic_defs/basic_defs_glue.h"
 #include "../../model/headers/model_glue.h"
 
+namespace seml_engines
+{
+    void fill_fused_scales(const fused_scales_dt *off_chip_fused_scales,
+                           fused_scales_dt layer_fused_scales[],
+                           const int current_dw_layer_fused_scales_offset,
+                           const int layer_num_filters);
+
+    void fill_fused_zero_points(const biases_dt *off_chip_fused_zero_points,
+                                biases_dt layer_fused_zero_points[],
+                                const int current_dw_layer_fused_zps_offset,
+                                const int layer_num_filters);
+}
+
 void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                             fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
                             fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],

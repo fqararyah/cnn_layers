@@ -1,6 +1,6 @@
 #include "../../basic_defs/basic_defs_glue.h"
 #include "mob_v2_layers_specs.h"
-#if FIBHA_VERSION == 2
+#if FIRST_PART_IMPLEMENTATION ==PIPELINED_ENGINES_MODE
 #ifndef ON_CHIP_WEIGHTS
 #define ON_CHIP_WEIGHTS
 const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim]{

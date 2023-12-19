@@ -51,6 +51,34 @@ void load_weights(string file_name,
 	}
 }
 
+void load_fused_scales(string file_name,
+				  fused_scales_dt fused_scales[])
+{
+	float a;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+	int line_num = 0;
+	while (infile >> a)
+	{
+		fused_scales[line_num] = (fused_scales_dt)a;
+		line_num++;
+	}
+}
+
+void load_fused_zps(string file_name,
+				  biases_dt biases[])
+{
+	int a;
+	std::ifstream infile(file_name);
+	assert(!infile.fail());
+	int line_num = 0;
+	while (infile >> a)
+	{
+		biases[line_num] = (biases_dt)a;
+		line_num++;
+	}
+}
+
 void load_image(string file_name,
 				fms_dt image[])
 {

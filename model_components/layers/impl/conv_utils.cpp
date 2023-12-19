@@ -1,6 +1,43 @@
 
 #include "../headers/conv_utils.h"
 
+void seml_engines::fill_fused_scales(const fused_scales_dt *off_chip_fused_scales,
+                                     fused_scales_dt layer_fused_scales[],
+                                     const int current_dw_layer_fused_scales_offset,
+                                     const int layer_num_filters)
+{
+#pragma HLS INLINE off
+
+    for (int i = 0; i < MAX_LAYER_D; i++)
+    {
+#pragma HLS PIPELINE II = 1
+        if (i >= layer_num_filters)
+        {
+            break;
+        }
+        layer_fused_scales[i] = off_chip_fused_scales[current_dw_layer_fused_scales_offset + i];
+    }
+}
+
+void seml_engines::fill_fused_zero_points(const biases_dt *off_chip_fused_zero_points,
+                                          biases_dt layer_fused_zero_points[],
+                                          const int current_dw_layer_fused_zps_offset,
+                                          const int layer_num_filters)
+{
+#pragma HLS INLINE off
+
+    for (int i = 0; i < MAX_LAYER_D; i++)
+    {
+#pragma HLS PIPELINE II = 1
+
+        if (i >= layer_num_filters)
+        {
+            break;
+        }
+        layer_fused_zero_points[i] = off_chip_fused_zero_points[current_dw_layer_fused_zps_offset + i];
+    }
+}
+
 void padd_fms_tile_top_left(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                             fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
                             fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],
@@ -287,7 +324,7 @@ void fill_fms_tile(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS
     {
 #pragma HLS PIPELINE
 
-        if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit) )
+        if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit))
         {
             break;
         }

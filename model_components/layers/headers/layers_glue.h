@@ -7,5 +7,7 @@
 #include "pooling.h"
 #include "fc.h"
 #include "norm_act.h"
+#include "layers_imp_common_includes.h"
+#include "conv_utils.h"
 
 #endif

@@ -42,6 +42,12 @@ int get_num_of_pw_weights(string file_name);
 void load_weights(string file_name,
 				  weights_dt weights[]);
 
+void load_fused_scales(string file_name,
+					   fused_scales_dt fused_scales[]);
+
+void load_fused_zps(string file_name,
+					biases_dt biases[]);
+
 void load_image(string file_name,
 				fms_dt image[]);
 

@@ -11,8 +11,8 @@ weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflit
     cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-dw_weights_h_file = '../model_components/model/headers/{}_dw_weights{}.h'.format(
-    cgc.MODEL_NAME, cgc.FIBHA_VERSION_POSTFIX)
+dw_weights_h_file = '../model_components/model/headers/{}_dw_weights_{}.h'.format(
+    cgc.MODEL_NAME, cgc.FIRST_PART_IMPLEMENTATION)
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 if cgc.PIPELINE:
@@ -29,11 +29,11 @@ if cgc.DW_WEIGHTS_OFF_CHIP:
 else:
     seml_dw_weights_declaration_string = 'const static dw_weights_dt seml_dw_weights_3x3[][9] = {\n'
 dw_layers_weights_offsets_declaration_string = 'const static int dw_layers_weights_offsets[] ={'
-dw_layers_weights_offsets = [0]
+model_dag = utils.read_model_dag()
+dw_layers_weights_offsets = [0] * (len(model_dag) + 1)
 
 pipe_dw_weights_v2 = None
 
-model_dag = utils.read_model_dag()
 
 last_layer = cgc.LAST_LAYER_TO_GENERATE + 1 if \
     cgc.LAST_LAYER_TO_GENERATE != -1 else len(model_dag)
@@ -42,16 +42,14 @@ first_layer = cgc.FIRST_LAYER_TO_GENERATE
 last_pipeline_layer = cgc.PIPELINE_LEN if cgc.PIPELINE == True else 0
 first_pipeline_layer = 0
 
-for i in range(len(model_dag) + 1):
-    dw_layers_weights_offsets.append(0)
+
 
 current_index = 0
 num_of_layers_generated_for = 0
 with open(dw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
-    f.write("#if FIBHA_VERSION == " + str(cgc.FIBHA_VERSION) +
-            (' || FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE' if cgc.FIBHA_VERSION == 1 else \
-                 ' && FIRST_PART_IMPLEMENTATION != BOTTLENECK_CHAIN_MODE') + '\n')
+    f.write("#if FIRST_PART_IMPLEMENTATION == " + str(cgc.FIRST_PART_IMPLEMENTATION) + \
+            " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
@@ -78,7 +76,7 @@ with open(dw_weights_h_file, 'w') as f:
         filter_height = layer_weights_shape[1]
         filter_width = layer_weights_shape[2]
 
-        if cgc.FIBHA_VERSION == 1:
+        if cgc.FIRST_PART_IMPLEMENTATION == cgc.BOTTLENECK_CHAIN_MODE:
             f.write(pipe_dw_weights_declaration_string.replace(
                 '*i*', str(ii)) + '= {\n')
             with open(weights_file, 'r') as f2:
@@ -94,7 +92,7 @@ with open(dw_weights_h_file, 'w') as f:
                             f.write(',\n')
                     f.write('},\n')
                 f.write('};\n')
-        elif cgc.FIBHA_VERSION == 2:
+        elif cgc.FIRST_PART_IMPLEMENTATION == cgc.PIPELINED_ENGINES_MODE :
             dw_layers_weights_offsets[ii + 1] += num_of_filters * filter_height * filter_width
             current_weights = np.loadtxt(weights_file).astype(np.int8)
             filter_dim = layer_weights_shape[-1]
@@ -106,7 +104,7 @@ with open(dw_weights_h_file, 'w') as f:
             else:
                 pipe_dw_weights_v2 = current_weights
 
-    if cgc.FIBHA_VERSION == 2 and pipe_dw_weights_v2 is not None:
+    if cgc.FIRST_PART_IMPLEMENTATION == cgc.PIPELINED_ENGINES_MODE and pipe_dw_weights_v2 is not None:
         f.write(pipe_dw_weights_declaration_string_v2)
         for i in range(pipe_dw_weights_v2.shape[0]):
             f.write('{')
@@ -184,6 +182,8 @@ with open(general_specs_file, 'r') as f:
     for line in f:
         if 'const int all_dw_off_chip_weights =' in line:
             replacement_string += 'const int all_dw_off_chip_weights = {};\n'.format(len(dw_off_chip_weights))
+        elif 'const int MAX_DW_LAYER_D' in line:
+            replacement_string += 'const int MAX_DW_LAYER_D = ' + str(max_dw_num_filters) + ';\n'
         else:
             replacement_string += line
 

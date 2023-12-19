@@ -24,12 +24,20 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 layer_0_s_block = 'layer_0_s_3x3(weights_1, input_image, result);\n'
 
 s_pw_block = 'pw_and_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_s_specs,\n\
-    fused_scales, relu_6_fused_scales, fused_zero_points,\n\
-    fused_scales_part2, relu_6_fused_scales_part2, fused_zero_points_part2);\n'
+    fused_scales, relu_6_fused_scales, fused_zero_points);\n'
+
+fill_scales_block = 'seml_engines::fill_fused_scales(off_chip_fused_scales,\n\
+                                     seml_fused_scales_buffer,\n\
+                                     layers_fused_parameters_offsets[{}],\n\
+                                     layer_{}_{}_specs.layer_num_fils);\n'
+
+fill_zps_block = 'seml_engines::fill_fused_zero_points(off_chip_fused_zero_points, \n\
+                                seml_fused_zero_points_buffer, \n\
+                                layers_fused_parameters_offsets[{}], \n\
+                                layer_{}_{}_specs.layer_num_fils);\n'
 
 pw_block = 'pw_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_pw_specs,\n\
-    fused_scales, relu_6_fused_scales, fused_zero_points,\n\
-    fused_scales_part2, relu_6_fused_scales_part2, fused_zero_points_part2,\n\
+    seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,\n\
     model_configs_list);\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
@@ -37,8 +45,7 @@ fill_dw_weights_block = 'seml_engines::fill_layer_dw_weights_off_chip\n\
     (off_chip_dw_weights, seml_dw_weights_3x3, dw_layers_weights_offsets[{}], layer_{}_dw_specs.layer_depth);\n'
 dw_block = \
     'seml_engines::dw_conv_3x3(seml_dw_weights_3x3, {}, {}, *i*,layer_*i*_dw_specs,\n\
-    fused_scales, relu_6_fused_scales, fused_zero_points,\n\
-    fused_scales_part2, relu_6_fused_scales_part2, fused_zero_points_part2,\n\
+    seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,\n\
         model_configs_list);\n'
 
 debugging_dump_ofms_block = '#if DEBUGGING\n dump_layer_output("{}",\n {}, {});\n#endif\n'
@@ -101,13 +108,22 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         target_block = layer_0_s_block
     if layer_type == 'dw':
         if cgc.DW_WEIGHTS_OFF_CHIP:
-            target_block = fill_dw_weights_block.format(layer_index, layer_index) + dw_block 
-        else:
-            target_block = dw_block
+            target_block = fill_dw_weights_block.format(layer_index, layer_index)
+        
+        target_block += fill_scales_block.format(layer_index, layer_index, 'dw')
+        target_block += fill_zps_block.format(layer_index, layer_index, 'dw')
+        target_block += dw_block
     elif layer_type == 'pw':
-        target_block = pw_block
+        target_block += fill_scales_block.format(layer_index, layer_index, 'pw')
+        target_block += fill_zps_block.format(layer_index, layer_index, 'pw')
+        target_block += pw_block
+        target_block += '\n'
     elif layer_type == 's':
-        target_block = s_pw_block
+        target_block += fill_scales_block.format(layer_index, layer_index, 's')
+        target_block += fill_zps_block.format(layer_index, layer_index, 's')
+        target_block += s_pw_block
+        target_block += '\n'
+
 
     target_block = target_block.replace('*i*', str(layer_index))
 

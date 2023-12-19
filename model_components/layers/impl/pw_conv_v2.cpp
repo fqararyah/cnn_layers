@@ -89,10 +89,11 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 					pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					layer_specs layer_specs_struct,
-					fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out],
-					relu_6_fused_scales_dt relu_6_fused_scale,
-					biases_dt fused_zero_points_buffer[pw_conv_parallelism_out],
-					const int tile_index)
+					const fused_scales_dt fused_scales_buffer[],
+					const relu_6_fused_scales_dt relu_6_fused_scale,
+					const biases_dt fused_zero_points_buffer[],
+					const int tile_index,
+					const int starting_d)
 {
 #pragma HLS INLINE off
 
@@ -131,8 +132,8 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 				const int current_tile_indx = tile_index + tile_offset * num_of_tiles_hw;
 				const int in_tile_index = tile_offset * pw_tile_d + t_d;
 				const biases_dt fused_zero_point =
-					fused_zero_points_buffer[in_tile_index];
-				const scales_dt fused_scale = fused_scales_buffer[in_tile_index];
+					fused_zero_points_buffer[starting_d + in_tile_index];
+				const scales_dt fused_scale = fused_scales_buffer[starting_d + in_tile_index];
 			tile_h:
 				for (int t_h = 0; t_h < pw_tile_h; t_h++)
 				{
@@ -149,28 +150,26 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 								pw_relu_norm_6_v2(pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], fused_zero_point,
 												  ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
 
-//							if(layer_specs_struct.layer_index == 8 && tile_index == 0) {
-//								pss_dt pss = pss_tile[tile_offset * pw_tile_d
-//										+ t_d][t_h][t_w];
-//								pss += fused_zero_point;
-//								printf("%d >> ", (int) pss);
-//
-//								pss_f_dt scaled_pss = pss * fused_scale;
-//								printf("%f >> ", (float) scaled_pss);
-//								printf("%f >> ", (float) fused_scale);
-//								if (layer_relu == 6
-//										&& scaled_pss > relu_6_fused_scale) {
-//									scaled_pss = relu_6_fused_scale;
-//								}
-//
-//								scaled_pss += ofm_zero_point;
-//								printf("%f >> ", (float) scaled_pss);
-//								scaled_pss += quant_half - (scaled_pss < 0);
-//								printf("%f \n ", (float) scaled_pss);
-//							}
-							// pw_relu_norm_6(
-							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
-							// 	normalization, layer_relu);
+							// if(layer_specs_struct.layer_index == 15 && tile_index == 0) {
+							// 	pss_dt pss = pss_tile[tile_offset * pw_tile_d
+							// 			+ t_d][t_h][t_w];
+							// 	pss += fused_zero_point;
+							// 	printf("%d >> ", (int) pss);
+
+							// 	pss_f_dt scaled_pss = pss * fused_scale;
+							// 	printf("%f >> ", (float) scaled_pss);
+							// 	printf("%f >> ", (float) fused_scale);
+							// 	if (layer_relu == 6
+							// 			&& scaled_pss > relu_6_fused_scale) {
+							// 		scaled_pss = relu_6_fused_scale;
+							// 	}
+
+							// 	scaled_pss += ofm_zero_point;
+							// 	printf("%f >> ", (float) scaled_pss);
+							// 	scaled_pss += quant_half - (scaled_pss < 0);
+							// 	printf("%f \n ", (float) scaled_pss);
+							// }
+
 #elif MODEL_ACTIVATION == RELU
 							scaled_val =
 								relu_norm(
@@ -339,9 +338,9 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 			 fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 			 fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 			 const int layer, const layer_specs layer_specs_struct,
-			 fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out],
+			 const fused_scales_dt fused_scales_buffer[],
 			 relu_6_fused_scales_dt relu_6_fused_scale,
-			 biases_dt fused_zero_points_buffer[pw_conv_parallelism_out], int td_o,
+			 const biases_dt fused_zero_points_buffer[], int td_o,
 			 const int model_configs_list[])
 {
 
@@ -390,7 +389,8 @@ conv2_ith_loop:
 			scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
 						   layer_specs_struct, fused_scales_buffer,
 						   relu_6_fused_scale, fused_zero_points_buffer,
-						   prev_tile_index);
+						   prev_tile_index,
+						   td_o * pw_conv_parallelism_out);
 
 			pw_conv_pipeline(channels, result, weights_tile, results_tile,
 							 layer_specs_struct,
@@ -410,7 +410,8 @@ conv2_ith_loop:
 	scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
 				   layer_specs_struct, fused_scales_buffer,
 				   relu_6_fused_scale, fused_zero_points_buffer,
-				   prev_tile_index);
+				   prev_tile_index,
+				   td_o * pw_conv_parallelism_out);
 
 	pw_write_results_tile(scaled_result_tile, result,
 						  prev_tile_index, tmp_channels, tmp_channels_scaled_tile,
@@ -428,9 +429,6 @@ void pw_conv(weights_grp_dt *weights,
 			 const fused_scales_dt fused_scales[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],
 			 const biases_dt fused_zero_points[],
-			 const fused_scales_dt fused_scales_part2[],
-			 const relu_6_fused_scales_dt relu_6_fused_scales_part2[],
-			 const biases_dt fused_zero_points_part2[],
 			 const int model_configs_list[2 * max_conv_layers])
 {
 #pragma HLS INLINE off
@@ -459,8 +457,6 @@ void pw_conv(weights_grp_dt *weights,
 							layer_specs_struct.layer_weights_offset, layer_specs_struct.layer_num_fils);
 #endif
 
-	biases_dt fused_zero_points_buffer[pw_conv_parallelism_out];
-	fused_scales_dt fused_scales_buffer[pw_conv_parallelism_out];
 	relu_6_fused_scales_dt relu_6_fused_scale = relu_6_fused_scales[layer_specs_struct.layer_index];
 
 	const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
@@ -476,23 +472,6 @@ conv2_ots_loop:
 		if (model_configs_list_limit != 0 && td_o >= model_configs_list_limit)
 		{
 			break;
-		}
-		if (current_layer_fused_parameters_offset < first_quantization_arrays_num_elements)
-		{
-			fill_fused_zero_points_buffer(fused_zero_points,
-										  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
-										  layer, current_layer_fused_parameters_offset);
-			fill_fused_scales_buffer(fused_scales, fused_scales_buffer,
-									 td_o * pw_conv_parallelism_out, layer, current_layer_fused_parameters_offset);
-		}
-		else
-		{
-			fill_fused_zero_points_buffer(fused_zero_points_part2,
-										  fused_zero_points_buffer, td_o * pw_conv_parallelism_out,
-										  layer, current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
-			fill_fused_scales_buffer(fused_scales_part2, fused_scales_buffer,
-									 td_o * pw_conv_parallelism_out, layer,
-									 current_layer_fused_parameters_offset - first_quantization_arrays_num_elements);
 		}
 
 #if HW == _FPGA
@@ -510,9 +489,8 @@ conv2_ots_loop:
 //				printf("\n");
 //			}
 //		}
-		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales_buffer,
-				relu_6_fused_scale,
-				fused_zero_points_buffer, td_o, model_configs_list);
+		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
+				relu_6_fused_scale, fused_zero_points, td_o, model_configs_list);
 #if HW == _FPGA
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out,
