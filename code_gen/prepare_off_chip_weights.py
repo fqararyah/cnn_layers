@@ -24,9 +24,15 @@ ofms_parallelism_key = 'pw_conv_parallelism_out'
 off_chip_fc_weights_file = '../off_chip_weights/{}_fc_weights.txt'
 off_chip_fc_weight_sums_file = '../off_chip_weights/{}_fc_weight_sums.txt'
 off_chip_fc_biases_file = '../off_chip_weights/{}_fc_biases.txt'
-off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights.txt'
-off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets.txt'
-num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights.txt'
+
+if cgc.PIPELINE == True:
+    off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights_pipeline_{}.txt'
+    off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets_pipeline_{}.txt'
+    num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights_pipeline_{}.txt'
+else:
+    off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights.txt'
+    off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets.txt'
+    num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights.txt'
 
 model_dag = utils.read_model_dag()
 
@@ -94,9 +100,19 @@ for layer_index in layers_indices:
     layers_weights_offsets[layer_index] = weights_combined_so_far
     weights_combined_so_far += layers_weights[layer_index].size
 
-np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(combined_weights, 0), fmt='%i')
-np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME), np.array(layers_weights_offsets), fmt='%i')
-with open(num_of_pw_weights_file.format(cgc.MODEL_NAME), 'w') as f:
+if cgc.PIPELINE == True:
+    np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN), np.concatenate(combined_weights, 0), fmt='%i')
+    np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN), np.array(layers_weights_offsets), fmt='%i')
+else:
+    np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(combined_weights, 0), fmt='%i')
+    np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME), np.array(layers_weights_offsets), fmt='%i')
+
+if cgc.PIPELINE == True:
+    num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+else:
+    num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME)
+
+with open(num_of_pw_weights_file, 'w') as f:
     f.write(str(weights_combined_so_far))
 
 replacement_string = ''

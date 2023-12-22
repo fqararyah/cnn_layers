@@ -40,9 +40,9 @@ int main(int argc, char **argv)
 		"_fused_zps_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";	
 #if HW == CPU
 	string weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
 	string on_chip_weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
 #elif HW == _FPGA
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga.txt";

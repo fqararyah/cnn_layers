@@ -236,33 +236,41 @@ with open(h_file, 'w') as wf:
                     #         'mnas', 'prox', 'mob_v1_0_5', 'mob_v2_0_5', 'mob_v2_0_75'] or 'uniform' in utils.NET_PREFIX
 
         if ((cgc.PIPELINE == True and num_of_generated_for_layers < cgc.PIPELINE_LEN)
-                or num_of_generated_for_layers == 0) and cgc.FIRST_PART_IMPLEMENTATION == cgc.BOTTLENECK_CHAIN_MODE:
-            fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
-                layer_index, layer_type)  if not first_conv_layer else 'const static biases_dt first_conv_layer_fused_zero_points[] ='
-            fused_zero_points_declaration_string += '{ ' + str(
-                fused_zero_points).replace('[', '').replace(']', '') + '};\n'
+                or num_of_generated_for_layers == 0):
+            if cgc.FIRST_PART_IMPLEMENTATION == cgc.BOTTLENECK_CHAIN_MODE or num_of_generated_for_layers == 0:
+                fused_zero_points_declaration_string = 'const static biases_dt layer_{}_{}_fused_zero_points[] = \n'.format(
+                    layer_index, layer_type)  if not first_conv_layer else 'const static biases_dt first_conv_layer_fused_zero_points[] ='
+                fused_zero_points_declaration_string += '{ ' + str(
+                    fused_zero_points).replace('[', '').replace(']', '') + '};\n'
 
-            fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_{}_fused_scales[] ='.format(
-                layer_index, layer_type) if not first_conv_layer else 'const static fused_scales_dt first_conv_layer_fused_scales[] = '
-            fused_scales_declaration_string += '{ ' + str(
-                fused_scales).replace('[', '').replace(']', '') + '};\n'
+                fused_scales_declaration_string = 'const static fused_scales_dt layer_{}_{}_fused_scales[] ='.format(
+                    layer_index, layer_type) if not first_conv_layer else 'const static fused_scales_dt first_conv_layer_fused_scales[] = '
+                fused_scales_declaration_string += '{ ' + str(
+                    fused_scales).replace('[', '').replace(']', '') + '};\n'
 
-            fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt layer_{}_{}_fused_scales_log_2_shifts[] ='.format(
-                layer_index, layer_type)  if not first_conv_layer  else 'const static fused_scales_log_2_shifts_dt first_conv_layer_fused_scales_log_2_shifts[] ='
-            fused_scales_log_2_shifts_declaration_string += '{ ' + str(
-                fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
+                fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt layer_{}_{}_fused_scales_log_2_shifts[] ='.format(
+                    layer_index, layer_type)  if not first_conv_layer  else 'const static fused_scales_log_2_shifts_dt first_conv_layer_fused_scales_log_2_shifts[] ='
+                fused_scales_log_2_shifts_declaration_string += '{ ' + str(
+                    fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
-            relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_{}_relu_6_fused_scales[] ='.format(
-                layer_index, layer_type) if not first_conv_layer else 'const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ='
-            relu_6_fused_scales_declaration_string += '{ ' + str(
-                relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
-            
-            first_conv_layer = False
+                relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt layer_{}_{}_relu_6_fused_scales[] ='.format(
+                    layer_index, layer_type) if not first_conv_layer else 'const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ='
+                relu_6_fused_scales_declaration_string += '{ ' + str(
+                    relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
+                
+                
 
-            wf.write(fused_zero_points_declaration_string)
-            wf.write(fused_scales_declaration_string)
-            wf.write(fused_scales_log_2_shifts_declaration_string)
-            wf.write(relu_6_fused_scales_declaration_string)
+                wf.write(fused_zero_points_declaration_string)
+                wf.write(fused_scales_declaration_string)
+                wf.write(fused_scales_log_2_shifts_declaration_string)
+                wf.write(relu_6_fused_scales_declaration_string)
+        
+            elif cgc.FIRST_PART_IMPLEMENTATION == cgc.PIPELINED_ENGINES_MODE and num_of_generated_for_layers < cgc.PIPELINE_LEN:
+                pipe_fused_scales.extend(fused_scales)
+                #seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
+                pipe_relu_6_fused_scales[layer_index] = relu_6_fused_scales[0]
+                pipe_fused_zero_points.extend(fused_zero_points)    
+
         else:
             seml_fused_scales.extend(fused_scales)
             #seml_fused_scales_log_2_shifts.extend(fused_scales_log_2_shifts)
@@ -270,6 +278,7 @@ with open(h_file, 'w') as wf:
             seml_fused_zero_points.extend(fused_zero_points)
 
         num_of_generated_for_layers += 1
+        first_conv_layer = False
 
     print(first_quantization_arrays_num_of_elements)
 

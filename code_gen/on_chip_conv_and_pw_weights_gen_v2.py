@@ -13,7 +13,11 @@ weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
 on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2.h'.format(cgc.MODEL_NAME)
 
-on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'
+if cgc.PIPELINE == True:
+    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+else:
+    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'.format(cgc.MODEL_NAME)
+
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 first_layer_weights_declaration_string = 'const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils]' + \
@@ -115,7 +119,7 @@ for ii in range(len(model_dag)):
     combined_weights = combined_weights.reshape(combined_weights.size) 
     formated_weights_all_layers.append(combined_weights)
 
-np.savetxt(on_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_weights_all_layers, 0), fmt='%i')    
+np.savetxt(on_chip_weights_file, np.concatenate(formated_weights_all_layers, 0), fmt='%i')    
 
 replacement_string = ''
 with open(general_specs_file, 'r') as f:

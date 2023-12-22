@@ -5,7 +5,7 @@
 #define CPU 1
 #define _FPGA 0
 #define HW CPU
-#define PIPELINE_LENGTH 6
+#define PIPELINE_LENGTH 11
 #define CHAIN_LENGTH 11
 #define MOB_V1 1
 #define MOB_V2 2
@@ -19,7 +19,7 @@
 #define ONLY_SESL 0
 #define ONLY_SEML 0
 #define USE_FIRB 1
-#define DEBUGGING 0
+#define DEBUGGING 1
 #define TESTING 1
 #define FIBHA_VERSION 2
 #define BOTTLENECK_CHAIN_MODE 1
