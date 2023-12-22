@@ -15,7 +15,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
-	int images_to_test = 1;
+	int images_to_test = 10;
 
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
@@ -50,7 +50,7 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
 #endif
 	string input_images_folder =
-		"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized/";
+		"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000/";
 	//"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/preprocessed_tst_images/";
 	string input_image_v_file =
 		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/inp_img.txt";
@@ -130,25 +130,27 @@ int main(int argc, char **argv)
 			string formatted_file_name = ((string)ent->d_name).substr(0, ((string)ent->d_name).find(".", 0) + 1) + "JPEG";
 			cout << file_name << "\n";
 // glue_input_image(file_name, input_image);
+			auto start = chrono::steady_clock::now();
 #if HW == _FPGA
 			glue_input_image(file_name, input_image);
 #elif HW == CPU
 			// load_image(file_name, input_image);
-			auto start = chrono::steady_clock::now();
+
 			load_and_quantize_image(file_name, input_image, quantize_layer_specs);
+#endif
 			auto end = chrono::steady_clock::now();
 
-			cout << "Elapsed time in milliseconds reading: "
-				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
-				 << " ms" << endl;
-#endif
+						cout << "Elapsed time in milliseconds reading: "
+							 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
+							 << " ms" << endl;
 			// verify_glued_image(file_name, input_image);
 			// validate_weights(weights_file, glued_weights);
 			int ready_to_receive_new_input = 0;
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 #if HW == _FPGA
-			krnl_fibha_v2(input_image, weights, glued_on_chip_weights, fc_input,
-						  model_configs_list, &img_count);
+			krnl_fibha_v2(input_image, weights, dw_weights, off_chip_fused_scales,
+					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
+					 model_configs_list, &img_count);
 #elif HW == CPU
 			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
 					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,

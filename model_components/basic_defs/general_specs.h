@@ -109,11 +109,11 @@ const int median_depth = 96;
 const int median_width = 14;
 
 // weights
-const int all_pw_s_weights = 2120320 / weights_group_items;
-const int all_dw_off_chip_weights = 63072;
-const int all_off_chip_fused_scales_zps = 16760;
+const int all_pw_s_weights = 2109952 / weights_group_items;
+const int all_dw_off_chip_weights = 60480;
+const int all_off_chip_fused_scales_zps = 17056;
 const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
-const int all_on_chip_pw_s_weights = 12128;
+const int all_on_chip_pw_s_weights = 38624;
 const int all_on_chip_pw_s_weights_groups = (all_on_chip_pw_s_weights + weights_group_items - 1) / weights_group_items;
 // input specs
 const int input_image_height = 224;

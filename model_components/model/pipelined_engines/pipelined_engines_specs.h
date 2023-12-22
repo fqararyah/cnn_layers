@@ -3,10 +3,10 @@
 
 namespace pipelined_engines
 {
-    const int PARALLELISM_PW_OFMS = 24;
+    const int PARALLELISM_PW_OFMS = 8;
     const int PARALLELISM_PW_IFMS = 0; // no parallelism
     const int PARALLELISM_PW_H = 4;
-    const int PARALLELISM_PW_W = 2;
+    const int PARALLELISM_PW_W = 4;
 
     const int MAX_PW_BUFFER_DEPTH = 144;
     const int MAX_PW_BUFFER_WIDTH = 112;

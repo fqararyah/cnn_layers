@@ -1,6 +1,8 @@
 #ifndef PREPARE_WEIGHTS_INPUTS
 #define PREPARE_WEIGHTS_INPUTS
 
+#include "../../../fiba_v2_kernels/src/model_components/layers/headers/norm_act.h"
+
 #include "../../../fiba_v2_kernels/src/model_components/basic_defs/basic_defs_glue.h"
 #if MODEL_ID == MOB_V2
 #include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_layers_specs.h"
@@ -81,5 +83,8 @@ void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_P
 
 void glue_on_chip_weights_cpu(string file_name,
 							  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
+
+void glue_on_chip_weights_fpga(string file_name,
+							   weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
 
 #endif

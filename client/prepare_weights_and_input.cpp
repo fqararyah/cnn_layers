@@ -31,7 +31,7 @@ void load_weights(string file_name,
 	int line_num = 0;
 	while (infile >> a)
 	{
-		weights[line_num] = a;
+		weights[line_num] = (weights_dt)a;
 		line_num++;
 	}
 }

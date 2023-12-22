@@ -2,6 +2,7 @@
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#if TESTING == 0
 fms_dt clamp_cpu(float val)
 {
 
@@ -14,9 +15,9 @@ fms_dt clamp_cpu(float val)
 	{
 		ret_val = QUANTIZATION_MIN;
 	}
-	return (int8_t)ret_val;
+	return (fms_dt)ret_val;
 }
-
+#endif
 bool isNumber(string &str)
 {
 	for (char const &c : str)
