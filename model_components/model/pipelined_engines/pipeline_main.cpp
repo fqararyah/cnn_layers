@@ -230,7 +230,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
     //     }
     //     printf("\n*************\n");
     // }
-    
+
     if (before_pipeline_main_loop)
     {
 
@@ -257,6 +257,16 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    0,
                    true,
                    model_configs_list);
+
+        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        {
+            for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+            {
+                printf("%d ", result_buffer[0][h][w]);
+            }
+            printf("\n*************\n");
+        }
+
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
                    pre_first_pipeline_layers_output,
@@ -478,6 +488,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            0,
                            true,
                            model_configs_list);
+
                 pw_dw_conv(on_chip_weights,
                            pipe_dw_weights_3x3,
                            pre_first_pipeline_layers_output,
@@ -501,6 +512,21 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            dw_6_odd_even,
                            false,
                            model_configs_list);
+                           if(h==0) { for (int h = 0; h < PW_BUFFER_HEIGHT; h++) {
+           for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+            {
+                printf("%d ", result_buffer[0][h][w]);
+            }
+            printf("\nR*************\n");
+        }
+                           for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        {
+            for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+            {
+                printf("%d ", channels_buffer[0][h][w]);
+            }
+            printf("\nC*************\n");
+        }}
                 dw_6_odd_even = 1 - dw_6_odd_even;
             }
 
@@ -657,7 +683,7 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
     fms_quantization_scheme first_layer_quantization_params[layer_2_dw_num_fils];
     fms_quantization_scheme first_dw_layer_quantization_params[layer_2_dw_num_fils];
     fill_first_conv_layers_quantization_params(first_layer_quantization_params, first_conv_layer_specs.layer_index, 1);
-    fill_first_conv_layers_quantization_params(first_dw_layer_quantization_params, layer_2_dw_specs.layer_index ,0);
+    fill_first_conv_layers_quantization_params(first_dw_layer_quantization_params, layer_2_dw_specs.layer_index, 0);
 
     fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                              [layer_2_dw_ifm_width];

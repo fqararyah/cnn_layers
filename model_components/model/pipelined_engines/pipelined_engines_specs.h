@@ -11,7 +11,7 @@ namespace pipelined_engines
     const int MAX_PW_BUFFER_DEPTH = 144;
     const int MAX_PW_BUFFER_WIDTH = 112;
     const int PW_BUFFER_HEIGHT = PARALLELISM_PW_H;
-    const int PW_BUFFER_WIDTH = 2;
+    const int PW_BUFFER_WIDTH = PARALLELISM_PW_W;
 
     const int PIPELINE_TMP_CHANNELS_HEIGHT = PW_BUFFER_HEIGHT + 1;
 

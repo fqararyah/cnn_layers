@@ -186,7 +186,7 @@ with open(h_file, 'w') as wf:
         if (cgc.PIPELINE == False or num_of_generated_for_layers >= cgc.PIPELINE_LEN):
             layers_fused_parameters_offsets[layer_index +
                                             1] += layer_weight_shape[0]
-        else:
+        elif not first_conv_layer:
             pipe_layers_fused_parameters_offsets[layer_index +
                                                  1] += layer_weight_shape[0]
 

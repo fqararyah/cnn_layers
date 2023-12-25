@@ -137,6 +137,7 @@ void pipelined_engines::fill_fused_scales_and_zps_buffer(
 
     const int absolute_current_layer_fused_parameters_offset =
         current_layer_fused_parameters_offset + starting_d;
+    const int layer_index = layer_specs_struct.layer_index;
     for (int i = 0; i < buffer_size; i++)
     {
         normalization_buffer[i].ofm_scale = layer_specs_struct.layer_ofms_scale;
@@ -144,10 +145,10 @@ void pipelined_engines::fill_fused_scales_and_zps_buffer(
             layer_specs_struct.layer_ofms_zero_point;
         normalization_buffer[i].fused_scales =
             fused_scales[absolute_current_layer_fused_parameters_offset + i];
-        normalization_buffer[i].fused_scales_log_2_shift =
-            fused_scales_log_2_shifts[absolute_current_layer_fused_parameters_offset + i];
+        // normalization_buffer[i].fused_scales_log_2_shift =
+        //     fused_scales_log_2_shifts[absolute_current_layer_fused_parameters_offset + i];
         normalization_buffer[i].relu_6_fused_scale =
-            relu_6_fused_scales[absolute_current_layer_fused_parameters_offset + i];
+            relu_6_fused_scales[layer_index];
         normalization_buffer[i].fused_zero_point =
             fused_zero_points[absolute_current_layer_fused_parameters_offset + i];
     }
@@ -829,11 +830,16 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(
         const int strides = layer_specs_struct.strides;
         const int ifms_d = layer_specs_struct.layer_depth;
         const int layer_relu = layer_specs_struct.layer_activation;
-        const int offset_w = (starting_w >> (strides - 1));
+        const int offset_w = starting_w / strides;
 
         for (int d = 0; d < DW_TILE_DEPTH; d++)
         {
 #pragma HLS PIPELINE
+            fms_quantization_scheme normalization = normalization_buffer[d];
+            const biases_dt fused_zero_point = normalization.fused_zero_point;
+            const fms_dt ofm_zero_point = normalization.ofm_zero_point;
+            const scales_dt fused_scales = normalization.fused_scales;
+            const relu_6_fused_scales_dt relu_6_fused_scale = normalization.relu_6_fused_scale;
             if (starting_d + d >= ifms_d ||
                 (model_configs_list_limit != 0 && starting_d + d >= model_configs_list_limit))
             {
@@ -845,8 +851,8 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(
                 for (int w = 0; w < PW_BUFFER_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    fms_dt scaled_val = dw_relu_norm(result_tile[d][h][w],
-                                                     normalization_buffer[d], layer_relu);
+                    fms_dt scaled_val = dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scales, relu_6_fused_scale
+                                                     , layer_relu);
                     if (h_offset_in_result)
                     {
                         if (h + h_offset_in_result < PW_BUFFER_HEIGHT && h < (PW_BUFFER_HEIGHT >> (strides - 1)) && w < (PW_BUFFER_WIDTH >> (strides - 1)))
@@ -857,6 +863,9 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(
                     else
                     {
                         result[starting_d + d][h][offset_w + w] = scaled_val;
+                        // if(layer_specs_struct.layer_index == 6 && starting_d == 0 && d == 0 && offset_w == 0){
+                        //     printf("%d\n", scaled_val);
+                        // }
                     }
                 }
             }
@@ -1169,7 +1178,6 @@ void pipelined_engines::pw_dw_conv(
                 next_w = w + PW_BUFFER_WIDTH;
                 prev_w = w - PW_BUFFER_WIDTH;
                 prev_prev_w = prev_w - PW_BUFFER_WIDTH;
-                prev_prev_prev_w = prev_prev_w - PW_BUFFER_WIDTH;
                 if ((w / PW_BUFFER_WIDTH) % 2 == 0)
                 {
                     dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
