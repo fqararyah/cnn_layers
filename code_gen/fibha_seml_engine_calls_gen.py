@@ -177,8 +177,8 @@ with open(in_out_file, 'w') as f:
 file_replacement = ''
 with open(constants_header_file, 'r') as f:
     for line in f:
-        if '#define CHAIN_LENGTH' in line:
-            file_replacement += '#define CHAIN_LENGTH ' + \
+        if '#define PIPELINE_LENGTH' in line:
+            file_replacement += '#define PIPELINE_LENGTH ' + \
                 str(cgc.PIPELINE_LEN) + '\n'
         else:
             file_replacement += line

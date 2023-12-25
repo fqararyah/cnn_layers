@@ -6,7 +6,7 @@
 #define _FPGA 0
 #define HW CPU
 #define PIPELINE_LENGTH 11
-#define CHAIN_LENGTH 11
+#define CHAIN_LENGTH PIPELINE_LENGTH
 #define MOB_V1 1
 #define MOB_V2 2
 #define MOB_V2_0_5 25

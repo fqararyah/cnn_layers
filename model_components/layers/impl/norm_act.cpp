@@ -289,18 +289,18 @@ fms_dt conv_relu_norm_v2(pss_dt pss,
 
 	pss += fused_zero_point;
 
-	if (layer_relu == 6 && pss <= 0)
+	if (pss <= 0)
 	{
 		return ofm_zero_point;
 	}
 
 	pss_f_dt scaled_pss = pss * fused_scales;
-	if (layer_relu != 6 || scaled_pss <= relu_6_fused_scale)
+	if (scaled_pss > relu_6_fused_scale)
 	{
-		scaled_pss += ofm_zero_point;
-		scaled_pss += quant_half - (scaled_pss < 0);
-		return clamp((fms_dt)scaled_pss);
+		scaled_pss = relu_6_fused_scale;
 	}
 
-	return clamp((fms_dt)(ofm_zero_point + relu_6_fused_scale));
+	scaled_pss += ofm_zero_point;
+	scaled_pss += quant_half - (scaled_pss < 0);
+	return clamp(scaled_pss);
 }

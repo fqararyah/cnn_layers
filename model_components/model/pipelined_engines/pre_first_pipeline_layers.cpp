@@ -367,7 +367,8 @@ void first_conv_and_dw_layers_pipeline(
 	fms_dt conv_dw_communication_buffer_intra_r[first_conv_layer_num_fils][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
 	fms_dt conv_dw_communication_buffer_intra_w[first_conv_layer_num_fils][layer_2_dw_filter_dim][layer_2_dw_filter_dim],
 	fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH][PRE_FIRST_PIPELINE_OUTPUT_HEIGHT][PRE_FIRST_PIPELINE_OUTPUT_WIDTH],
-	const int abs_conv_starting_h, const int starting_h,
+	const int abs_conv_starting_h, 
+	const int starting_h,
 	const int starting_w,
 	const int conv_dw_comm_buffer_reading_row,
 	const int conv_dw_comm_buffer_writing_row,
@@ -471,6 +472,10 @@ void first_conv_and_dw_layers_pipeline(
 									  dw_layer_weights, layer_2_dw_filter_dim, f,
 									  first_dw_layer_quantization_params[f],
 									  layer_2_dw_specs.layer_activation);
+			// if (dw_starting_h == 0 && dw_starting_w == 0 && f == 0)
+			// {
+			// 	printf("%d \n", (int)pre_first_pipeline_layers_output[f][dw_starting_h][dw_starting_w]);
+			// }
 		}
 		even_odd = 1 - even_odd;
 	}

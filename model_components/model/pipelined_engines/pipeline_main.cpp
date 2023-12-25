@@ -151,32 +151,33 @@ void fill_first_dw_layer_weights(weights_dt dw_layer_weights[layer_2_dw_num_fils
     }
 }
 
-void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_layer_quantization_params[], const int starting_offset)
+void fill_first_conv_layers_quantization_params(fms_quantization_scheme first_layer_quantization_params[], const int layer_index, bool first_layer)
 {
     for (int f = 0; f < first_conv_layer_num_fils; f++)
     {
         fms_quantization_scheme normalization;
-        if (starting_offset == 0)
+        if (first_layer)
         {
             normalization.ofm_scale = first_conv_layer_specs.layer_ofms_scale;
             normalization.ofm_zero_point = first_conv_layer_specs.layer_ofms_zero_point;
+            normalization.fused_scales =
+                first_conv_layer_fused_scales[f];
+            normalization.fused_zero_point =
+                first_conv_layer_fused_zero_points[f];
+            normalization.relu_6_fused_scale =
+                first_conv_layer_relu_6_fused_scales[0];
         }
         else
         {
             normalization.ofm_scale = layer_2_dw_specs.layer_ofms_scale;
             normalization.ofm_zero_point = layer_2_dw_specs.layer_ofms_zero_point;
+            normalization.fused_scales =
+                pipe_fused_scales[f];
+            normalization.fused_zero_point =
+                pipe_fused_zero_points[f];
+            normalization.relu_6_fused_scale =
+                pipe_relu_6_fused_scales[layer_index];
         }
-
-        normalization.fused_scales =
-            pipe_fused_scales[f + starting_offset];
-        normalization.fused_scales_log_2_shift =
-            pipe_fused_scales_log_2_shifts[f + +starting_offset];
-        normalization.relu_6_fused_scale =
-            pipe_fused_scales_log_2_shifts[f + +starting_offset];
-        normalization.fused_zero_point =
-            pipe_fused_zero_points[f + starting_offset];
-        normalization.layer_0_relu_6_fused_scale =
-            pipe_relu_6_fused_scales[f + starting_offset];
 
         first_layer_quantization_params[f] = normalization;
     }
@@ -223,6 +224,13 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 {
 #pragma HLS INLINE off
 
+    // for(int h=0;h<PRE_FIRST_PIPELINE_OUTPUT_HEIGHT;h++){
+    //     for(int w=0;w<PRE_FIRST_PIPELINE_OUTPUT_WIDTH;w++){
+    //         printf("%d ", pre_first_pipeline_layers_output[0][h][w]);
+    //     }
+    //     printf("\n*************\n");
+    // }
+    
     if (before_pipeline_main_loop)
     {
 
@@ -273,7 +281,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    false,
                    model_configs_list);
         dw_6_odd_even = 1 - dw_6_odd_even;
-        //######################################################
+        // ######################################################
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
@@ -648,8 +656,8 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
 
     fms_quantization_scheme first_layer_quantization_params[layer_2_dw_num_fils];
     fms_quantization_scheme first_dw_layer_quantization_params[layer_2_dw_num_fils];
-    fill_first_conv_layers_quantization_params(first_layer_quantization_params, 0);
-    fill_first_conv_layers_quantization_params(first_dw_layer_quantization_params, first_conv_layer_num_fils);
+    fill_first_conv_layers_quantization_params(first_layer_quantization_params, first_conv_layer_specs.layer_index, 1);
+    fill_first_conv_layers_quantization_params(first_dw_layer_quantization_params, layer_2_dw_specs.layer_index ,0);
 
     fms_dt conv_dw_communication_buffer_inter[first_conv_layer_num_fils][layer_2_dw_filter_dim]
                                              [layer_2_dw_ifm_width];
@@ -670,7 +678,7 @@ void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_i
     int dw_6_odd_even = 0;
     int dw_9_odd_even = 0;
     int dw_14_odd_even = 0;
-    //######################################################
+    // ######################################################
     fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                            [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
                                            [PRE_FIRST_PIPELINE_OUTPUT_WIDTH];

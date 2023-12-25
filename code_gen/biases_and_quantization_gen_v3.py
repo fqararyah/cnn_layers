@@ -205,6 +205,8 @@ with open(h_file, 'w') as wf:
             assert(relu_6_fused_scale < 256)
             relu_6_fused_scales.append(relu_6_fused_scale)
 
+            #print(layer_index, relu_6_fused_scales)
+
             for line in f:
                 weight_scale = float(line.replace(' ', '').replace('\n', ''))
                 ifm_weight_fused_scale = weight_scale * ifms_scale
@@ -291,19 +293,19 @@ with open(h_file, 'w') as wf:
         pipe_fused_zero_points_declaration_string = 'const static biases_dt pipe_fused_zero_points[] = \n'
 
         pipe_fused_zero_points_declaration_string += '{ ' + str(
-            pipe_fused_zero_points[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+            pipe_fused_zero_points).replace('[', '').replace(']', '') + '};\n'
 
         pipe_fused_scales_declaration_string = 'const static fused_scales_dt pipe_fused_scales[] ='
         pipe_fused_scales_declaration_string += '{ ' + str(
-            pipe_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+            pipe_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
         pipe_fused_scales_log_2_shifts_declaration_string = 'const static fused_scales_log_2_shifts_dt pipe_fused_scales_log_2_shifts[] ='
         pipe_fused_scales_log_2_shifts_declaration_string += '{ ' + str(
-            pipe_fused_scales_log_2_shifts[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+            pipe_fused_scales_log_2_shifts).replace('[', '').replace(']', '') + '};\n'
 
         pipe_relu_6_fused_scales_declaration_string = 'const static relu_6_fused_scales_dt pipe_relu_6_fused_scales[] ='
         pipe_relu_6_fused_scales_declaration_string += '{ ' + str(
-            pipe_relu_6_fused_scales[0:first_quantization_arrays_num_of_elements]).replace('[', '').replace(']', '') + '};\n'
+            pipe_relu_6_fused_scales).replace('[', '').replace(']', '') + '};\n'
 
         if cgc.LAST_LAYER_TO_GENERATE >= cgc.PIPELINE_LEN or cgc.PIPELINE == False or cgc.LAST_LAYER_TO_GENERATE == -1:
             wf.write(pipe_fused_zero_points_declaration_string)

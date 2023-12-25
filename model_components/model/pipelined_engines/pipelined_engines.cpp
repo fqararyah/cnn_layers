@@ -60,13 +60,37 @@ conv_kernel:
             for (int c_w = 0; c_w < first_conv_layer_filter_dim; c_w++)
             {
 #pragma HLS UNROLL
+                // if (starting_h == 0 && starting_w == 0 && d == 0 && starting_filter == 0)
+                // {
+                //     printf("%d * %d \n", (int)ifms_buffer[d * ifms_buffer_hw + c_h * ifms_buffer_w + c_w], (int)weights_1[starting_filter][d][c_h][c_w]);
+                // }
                 pss += ifms_buffer[d * ifms_buffer_hw + c_h * ifms_buffer_w + c_w] *
                        weights_1[starting_filter][d][c_h][c_w];
             }
         }
     }
 
-    result = conv_relu_norm(pss, normalization, first_conv_layer_specs.layer_activation);
+    result = conv_relu_norm_v2(pss, normalization.fused_zero_point, normalization.ofm_zero_point, normalization.fused_scales,
+                               normalization.relu_6_fused_scale, first_conv_layer_specs.layer_activation);
+    // if (starting_h == 0 && starting_w == 0 && starting_filter == 0)
+    // {
+    // 							pss += normalization.ofm_zero_point;
+    // 							printf("%d >> ", (int) pss);
+
+    // 							pss_f_dt scaled_pss = pss * normalization.fused_scales;
+    // 							printf("%f >> ", (float) scaled_pss);
+    // 							printf("%f >> ", (float) normalization.fused_scales);
+    // 							if (normalization.relu_6_fused_scale == 6
+    // 									&& scaled_pss > normalization.relu_6_fused_scale) {
+    // 								scaled_pss = normalization.relu_6_fused_scale;
+    // 							}
+
+    // 							scaled_pss += normalization.ofm_zero_point;
+    // 							printf("%f >> ", (float) scaled_pss);
+    // 							scaled_pss += quant_half - (scaled_pss < 0);
+    // 							printf("%f \n ", (float) scaled_pss);
+    //     printf("%d\n", (int)result);
+    // }
 
     return result;
 }
@@ -1100,7 +1124,7 @@ void pipelined_engines::pw_dw_conv(
             {
                 break;
             }
-            //###############################
+            // ###############################
             load_pw_weights(on_chip_weights, weights_tile, d,
                             pw_layer_specs_struct);
             fill_fused_scales_and_zps_buffer(fused_scales,
@@ -1152,10 +1176,10 @@ void pipelined_engines::pw_dw_conv(
                                                             result, dw_normalization_buffer, d,
                                                             h_offset_in_result, prev_prev_prev_w,
                                                             dw_layer_specs_struct, model_configs_list_limit_o);
-                    //###############################
+                    // ###############################
                     dw_conv_engine(dw_weights_tile, dw_channels_tile,
                                    dw_result_tile, d, model_configs_list_limit_o, dw_layer_specs_struct);
-                    //###############################
+                    // ###############################
                     pw_normalize_engine_result(pw_engine_result_tile_copy,
                                                dw_channels_tile_copy, dw_vertical_overlap_buffer,
                                                dw_horizontal_overlap_buffer,
@@ -1169,11 +1193,11 @@ void pipelined_engines::pw_dw_conv(
                         dw_channels_tile_copy, d, starting_h, prev_w,
                         model_configs_list_limit_o,
                         dw_layer_specs_struct, odd_even);
-                    //###############################
+                    // ###############################
                     pw_conv_engine(weights_tile, pw_engine_input_buffer,
                                    pw_engine_result_tile, d,
                                    pw_layer_specs_struct, model_configs_list);
-                    //###############################
+                    // ###############################
                     copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels,
                                                                pw_engine_input_buffer_copy, h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output, next_w + 1,
@@ -1186,11 +1210,11 @@ void pipelined_engines::pw_dw_conv(
                                                             h_offset_in_result, prev_prev_prev_w,
                                                             dw_layer_specs_struct,
                                                             model_configs_list_limit_o);
-                    //###############################
+                    // ###############################
                     dw_conv_engine(dw_weights_tile, dw_channels_tile_copy,
                                    dw_result_tile_copy, d, model_configs_list_limit_o,
                                    dw_layer_specs_struct);
-                    //###############################
+                    // ###############################
                     pw_normalize_engine_result(pw_engine_result_tile,
                                                dw_channels_tile, dw_vertical_overlap_buffer,
                                                dw_horizontal_overlap_buffer,
@@ -1204,11 +1228,11 @@ void pipelined_engines::pw_dw_conv(
                         dw_channels_tile, d, starting_h, prev_w,
                         model_configs_list_limit_o,
                         dw_layer_specs_struct, odd_even);
-                    //###############################
+                    // ###############################
                     pw_conv_engine(weights_tile, pw_engine_input_buffer_copy,
                                    pw_engine_result_tile_copy, d,
                                    pw_layer_specs_struct, model_configs_list);
-                    //###############################
+                    // ###############################
                     copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels,
                                                                pw_engine_input_buffer, h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output, next_w + 1,
@@ -1223,10 +1247,10 @@ void pipelined_engines::pw_dw_conv(
                                                         ifms_width - 3 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct,
                                                         model_configs_list_limit_o);
-                //###############################
+                // ###############################
                 dw_conv_engine(dw_weights_tile, dw_channels_tile,
                                dw_result_tile, d, model_configs_list_limit_o, dw_layer_specs_struct);
-                //###############################
+                // ###############################
                 pw_normalize_engine_result(pw_engine_result_tile_copy,
                                            dw_channels_tile_copy, dw_vertical_overlap_buffer,
                                            dw_horizontal_overlap_buffer,
@@ -1241,15 +1265,15 @@ void pipelined_engines::pw_dw_conv(
                     ifms_width - PW_BUFFER_WIDTH,
                     model_configs_list_limit_o,
                     dw_layer_specs_struct, odd_even);
-                //#######################################################################################
+                // #######################################################################################
                 dw_normalize_and_write_back_result_tile(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - 2 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct, model_configs_list_limit_o);
-                //###############################
+                // ###############################
                 dw_conv_engine(dw_weights_tile, dw_channels_tile_copy,
                                dw_result_tile, d, model_configs_list_limit_o, dw_layer_specs_struct);
-                //#######################################################################################
+                // #######################################################################################
                 dw_normalize_and_write_back_result_tile(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct,
@@ -1262,7 +1286,7 @@ void pipelined_engines::pw_dw_conv(
                                                         ifms_width - 3 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct,
                                                         model_configs_list_limit_o);
-                //###############################
+                // ###############################
                 dw_conv_engine(dw_weights_tile, dw_channels_tile_copy,
                                dw_result_tile_copy, d, model_configs_list_limit_o, dw_layer_specs_struct);
                 pw_normalize_engine_result(pw_engine_result_tile,
@@ -1279,16 +1303,16 @@ void pipelined_engines::pw_dw_conv(
                     ifms_width - PW_BUFFER_WIDTH,
                     model_configs_list_limit_o,
                     dw_layer_specs_struct, odd_even);
-                //#######################################################################################
+                // #######################################################################################
                 dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
                                                         result, dw_normalization_buffer_copy, d,
                                                         h_offset_in_result, ifms_width - 2 * PW_BUFFER_WIDTH,
                                                         dw_layer_specs_struct,
                                                         model_configs_list_limit_o);
-                //###############################
+                // ###############################
                 dw_conv_engine(dw_weights_tile, dw_channels_tile,
                                dw_result_tile, d, model_configs_list_limit_o, dw_layer_specs_struct);
-                //#######################################################################################
+                // #######################################################################################
                 dw_normalize_and_write_back_result_tile(dw_result_tile, result,
                                                         dw_normalization_buffer, d, h_offset_in_result,
                                                         ifms_width - PW_BUFFER_WIDTH, dw_layer_specs_struct,
@@ -1328,17 +1352,17 @@ void pipelined_engines::pw_dw_conv(
                 {
                     pw_write_back_result_tile(dw_channels_tile, result,
                                               tmp_channels, d, prev_prev_w, model_configs_list_limit_o, pw_layer_specs_struct);
-                    //###############################
+                    // ###############################
                     pw_only_normalize_engine_result(pw_engine_result_tile_copy,
                                                     dw_channels_tile_copy,
                                                     tmp_channels, pw_normalization_buffer, d,
                                                     starting_h, prev_w,
                                                     model_configs_list_limit_o,
                                                     pw_layer_specs_struct, dw_layer_specs_struct);
-                    //###############################
+                    // ###############################
                     pw_conv_engine(weights_tile, pw_engine_input_buffer,
                                    pw_engine_result_tile, d, pw_layer_specs_struct, model_configs_list);
-                    //###############################
+                    // ###############################
                     copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels, pw_engine_input_buffer_copy,
                                                                h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output, next_w,
@@ -1350,18 +1374,18 @@ void pipelined_engines::pw_dw_conv(
                     pw_write_back_result_tile(dw_channels_tile_copy, result,
                                               tmp_channels, d, prev_prev_w,
                                               model_configs_list_limit_o, pw_layer_specs_struct);
-                    //###############################
+                    // ###############################
                     pw_only_normalize_engine_result(pw_engine_result_tile,
                                                     dw_channels_tile,
                                                     tmp_channels, pw_normalization_buffer, d,
                                                     starting_h, prev_w,
                                                     model_configs_list_limit_o,
                                                     pw_layer_specs_struct, dw_layer_specs_struct);
-                    //###############################
+                    // ###############################
                     pw_conv_engine(weights_tile, pw_engine_input_buffer_copy,
                                    pw_engine_result_tile_copy, d,
                                    pw_layer_specs_struct, model_configs_list);
-                    //###############################
+                    // ###############################
                     copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels, pw_engine_input_buffer,
                                                                h_offset_in_pre_first_channels,
                                                                h_offset_in_pre_first_pipeline_layers_output,
@@ -1375,7 +1399,7 @@ void pipelined_engines::pw_dw_conv(
                 pw_write_back_result_tile(dw_channels_tile, result,
                                           tmp_channels, d, ifms_width - 2 * PW_BUFFER_WIDTH,
                                           model_configs_list_limit_o, pw_layer_specs_struct);
-                //###############################
+                // ###############################
                 pw_only_normalize_engine_result(pw_engine_result_tile_copy,
                                                 dw_channels_tile_copy,
                                                 tmp_channels, pw_normalization_buffer, d, starting_h,
@@ -1391,7 +1415,7 @@ void pipelined_engines::pw_dw_conv(
                 pw_write_back_result_tile(dw_channels_tile_copy, result,
                                           tmp_channels, d, ifms_width - 2 * PW_BUFFER_WIDTH,
                                           model_configs_list_limit_o, pw_layer_specs_struct);
-                //###############################
+                // ###############################
                 pw_only_normalize_engine_result(pw_engine_result_tile,
                                                 dw_channels_tile,
                                                 tmp_channels, pw_normalization_buffer, d, starting_h,
