@@ -29,8 +29,10 @@ if cgc.DW_WEIGHTS_OFF_CHIP:
 else:
     seml_dw_weights_declaration_string = 'const static dw_weights_dt seml_dw_weights_3x3[][9] = {\n'
 dw_layers_weights_offsets_declaration_string = 'const static int dw_layers_weights_offsets[] ={'
+dw_layers_weights_offsets_declaration_string_pipe = 'const static int pipe_dw_layers_weights_offsets[] ={'
 model_dag = utils.read_model_dag()
 dw_layers_weights_offsets = [0] * (len(model_dag) + 1)
+dw_layers_weights_offsets_pipe = [0] * (len(model_dag) + 1)
 
 pipe_dw_weights_v2 = None
 
@@ -58,7 +60,7 @@ with open(dw_weights_h_file, 'w') as f:
         current_index += 1
         layer_type = ''
 
-        dw_layers_weights_offsets[ii + 1] = dw_layers_weights_offsets[ii]
+        dw_layers_weights_offsets_pipe[ii + 1] = dw_layers_weights_offsets_pipe[ii]
         if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
             num_of_layers_generated_for += 1
 
@@ -93,7 +95,7 @@ with open(dw_weights_h_file, 'w') as f:
                     f.write('},\n')
                 f.write('};\n')
         elif cgc.FIRST_PART_IMPLEMENTATION == cgc.PIPELINED_ENGINES_MODE :
-            dw_layers_weights_offsets[ii + 1] += num_of_filters * filter_height * filter_width
+            dw_layers_weights_offsets_pipe[ii + 1] += num_of_filters
             current_weights = np.loadtxt(weights_file).astype(np.int8)
             filter_dim = layer_weights_shape[-1]
             current_weights = np.reshape(current_weights, (int(
@@ -167,6 +169,9 @@ with open(dw_weights_h_file, 'w') as f:
         else:
             f.write(seml_dw_weights_declaration_string.format(max_dw_num_filters))
 
+        if cgc.FIRST_PART_IMPLEMENTATION == cgc.PIPELINED_ENGINES_MODE:
+            f.write(dw_layers_weights_offsets_declaration_string_pipe +
+                str(dw_layers_weights_offsets_pipe).replace('[', '').replace(']', '') + '};\n')
         f.write(dw_layers_weights_offsets_declaration_string +
                 str(dw_layers_weights_offsets).replace('[', '').replace(']', '') + '};\n')
     f.write('#endif\n')

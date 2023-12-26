@@ -851,21 +851,57 @@ void pipelined_engines::dw_normalize_and_write_back_result_tile(
                 for (int w = 0; w < PW_BUFFER_WIDTH; w++)
                 {
 #pragma HLS UNROLL
-                    fms_dt scaled_val = dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scales, relu_6_fused_scale
-                                                     , layer_relu);
+                    fms_dt scaled_val = dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scales, relu_6_fused_scale, layer_relu);
                     if (h_offset_in_result)
                     {
                         if (h + h_offset_in_result < PW_BUFFER_HEIGHT && h < (PW_BUFFER_HEIGHT >> (strides - 1)) && w < (PW_BUFFER_WIDTH >> (strides - 1)))
                         {
                             result[starting_d + d][h + OFFSET_H_IN_PIPELINE_RESULTS][offset_w + w] = scaled_val;
                         }
+                        if (layer_specs_struct.layer_index == 6 && starting_d + d == 0 && offset_w + w == 0 && h == 0)
+                        {
+                            dw_pss_dt pss = result_tile[d][h][w];
+                            pss += fused_zero_point;
+                            printf("%d >> ", pss);
+                            pss_f_dt scaled_pss = pss * fused_scales;
+                            printf("%f >> ", fused_scales);
+                            printf("%f >> ", scaled_pss);
+                            if (scaled_pss > relu_6_fused_scale)
+                            {
+                                scaled_pss = relu_6_fused_scale;
+                            }
+
+                            scaled_pss += ofm_zero_point;
+                            printf("%f >> ", scaled_pss);
+                            scaled_pss += quant_half - (scaled_pss < 0);
+                            printf("%f >> ", scaled_pss);
+                            printf("%d \n", clamp(scaled_pss));
+                            printf("\n**********\n");
+                        }
                     }
                     else
                     {
                         result[starting_d + d][h][offset_w + w] = scaled_val;
-                        // if(layer_specs_struct.layer_index == 6 && starting_d == 0 && d == 0 && offset_w == 0){
-                        //     printf("%d\n", scaled_val);
-                        // }
+                        if (layer_specs_struct.layer_index == 6 && starting_d + d == 0 && offset_w + w == 0 && h == 0)
+                        {
+                            dw_pss_dt pss = result_tile[d][h][w];
+                            pss += fused_zero_point;
+                            printf("%d >> ", pss);
+                            pss_f_dt scaled_pss = pss * fused_scales;
+                            printf("%f >> ", fused_scales);
+                            printf("%f >> ", scaled_pss);
+                            if (scaled_pss > relu_6_fused_scale)
+                            {
+                                scaled_pss = relu_6_fused_scale;
+                            }
+
+                            scaled_pss += ofm_zero_point;
+                            printf("%f >> ", scaled_pss);
+                            scaled_pss += quant_half - (scaled_pss < 0);
+                            printf("%f >> ", scaled_pss);
+                            printf("%d \n", clamp(scaled_pss));
+                            printf("\n**********\n");
+                        }
                     }
                 }
             }
@@ -1042,7 +1078,7 @@ void copy_from_pre_first_pipeline_layers_output(fms_dt pre_first_pipeline_layers
 
 void pipelined_engines::pw_dw_conv(
     weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-    const dw_weights_dt weights[][3 * 3],
+    const dw_weights_dt dw_weights[][3 * 3],
     fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                            [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
                                            [PRE_FIRST_PIPELINE_OUTPUT_WIDTH],
@@ -1153,8 +1189,8 @@ void pipelined_engines::pw_dw_conv(
                                              pipe_layers_fused_parameters_offsets[dw_layer],
                                              DW_TILE_DEPTH, dw_layer_specs_struct);
 
-            pipelined_engines::fill_dw_weights_tile(weights, dw_weights_tile, d,
-                                                    dw_layers_weights_offsets[dw_layer]);
+            pipelined_engines::fill_dw_weights_tile(dw_weights, dw_weights_tile, d,
+                                                    pipe_dw_layers_weights_offsets[dw_layer]);
 
             copy_from_pre_first_pipeline_layers_output(pre_first_pipeline_layers_output, channels, pw_engine_input_buffer, h_offset_in_pre_first_channels,
                                                        h_offset_in_pre_first_pipeline_layers_output, 0, first_layer_in_the_pipeline,
@@ -1178,15 +1214,29 @@ void pipelined_engines::pw_dw_conv(
                 next_w = w + PW_BUFFER_WIDTH;
                 prev_w = w - PW_BUFFER_WIDTH;
                 prev_prev_w = prev_w - PW_BUFFER_WIDTH;
+                prev_prev_prev_w = prev_prev_w - PW_BUFFER_WIDTH;
                 if ((w / PW_BUFFER_WIDTH) % 2 == 0)
                 {
-                    dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
-                                                            result, dw_normalization_buffer, d,
-                                                            h_offset_in_result, prev_prev_prev_w,
-                                                            dw_layer_specs_struct, model_configs_list_limit_o);
+                    // dw_normalize_and_write_back_result_tile(dw_result_tile_copy,
+                    //                                         result, dw_normalization_buffer, d,
+                    //                                         h_offset_in_result, prev_prev_prev_w,
+                    //                                         dw_layer_specs_struct, model_configs_list_limit_o);
                     // ###############################
                     dw_conv_engine(dw_weights_tile, dw_channels_tile,
                                    dw_result_tile, d, model_configs_list_limit_o, dw_layer_specs_struct);
+                    if (prev_prev_w == 0 && dw_layer_specs_struct.layer_index == 6 && d == 0)
+                    {
+                        for (int hh = 0; hh < 3; hh++)
+                        {
+                            for (int ww = 0; ww < 3; ww++)
+                            {
+                                printf("%d * %d + ", (int)dw_channels_tile[0][hh][ww],
+                                       dw_weights_tile[0][hh * 3 + ww]);
+                            }
+                            printf("\n");
+                        }
+                        printf("%d\n", (int)dw_result_tile[0][0][0]);
+                    }
                     // ###############################
                     pw_normalize_engine_result(pw_engine_result_tile_copy,
                                                dw_channels_tile_copy, dw_vertical_overlap_buffer,
@@ -1213,6 +1263,10 @@ void pipelined_engines::pw_dw_conv(
                 }
                 else
                 {
+                    // if (prev_prev_prev_w == 0 && dw_layer_specs_struct.layer_index == 6 && d == 0)
+                    // {
+                    // printf("*%d\n", (int)dw_result_tile[0][0][0]);
+                    // }
                     dw_normalize_and_write_back_result_tile(dw_result_tile,
                                                             result, dw_normalization_buffer, d,
                                                             h_offset_in_result, prev_prev_prev_w,

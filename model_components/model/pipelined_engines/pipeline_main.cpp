@@ -258,14 +258,14 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                    true,
                    model_configs_list);
 
-        for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
-        {
-            for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
-            {
-                printf("%d ", result_buffer[0][h][w]);
-            }
-            printf("\n*************\n");
-        }
+        // for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        // {
+        //     for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+        //     {
+        //         printf("%d ", result_buffer[0][h][w]);
+        //     }
+        //     printf("\n*************\n");
+        // }
 
         pw_dw_conv(on_chip_weights,
                    pipe_dw_weights_3x3,
@@ -512,23 +512,39 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
                            dw_6_odd_even,
                            false,
                            model_configs_list);
-                           if(h==0) { for (int h = 0; h < PW_BUFFER_HEIGHT; h++) {
-           for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
-            {
-                printf("%d ", result_buffer[0][h][w]);
-            }
-            printf("\nR*************\n");
-        }
-                           for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
-        {
-            for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
-            {
-                printf("%d ", channels_buffer[0][h][w]);
-            }
-            printf("\nC*************\n");
-        }}
+        //                    if(h==0) { for (int h = 0; h < PW_BUFFER_HEIGHT; h++) {
+        //    for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+        //     {
+        //         printf("%d ", result_buffer[0][h][w]);
+        //     }
+        //     printf("\nR*************\n");
+        // }
+        //                    for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        // {
+        //     for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+        //     {
+        //         printf("%d ", channels_buffer[0][h][w]);
+        //     }
+        //     printf("\nC*************\n");
+        // }}
                 dw_6_odd_even = 1 - dw_6_odd_even;
             }
+
+        //              if(h>=0) { for (int h = 0; h < PW_BUFFER_HEIGHT; h++) {
+        //    for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+        //     {
+        //         printf("%d ", result_buffer[0][h][w]);
+        //     }
+        //     printf("\nR*************\n");
+        // }
+        //                    for (int h = 0; h < PW_BUFFER_HEIGHT; h++)
+        // {
+        //     for (int w = 0; w < MAX_PW_BUFFER_WIDTH; w++)
+        //     {
+        //         printf("%d ", channels_buffer[0][h][w]);
+        //     }
+        //     printf("\nC*************\n");
+        // }}
 
             pw_dw_conv(on_chip_weights,
                        pipe_dw_weights_3x3,
