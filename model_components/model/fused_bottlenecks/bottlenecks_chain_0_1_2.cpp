@@ -370,8 +370,8 @@ void bottleneck_0_pipeline_filling_stage(
                 bottleneck_0_projection_kernel_output_prev,
                 layer_3_pw_fused_scales,
                 layer_3_pw_fused_scales_log_2_shifts,
-                layer_3_pw_relu_6_fused_scales,
-                layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation);
+                layer_3_pw_relu_6_fused_scales[0],
+                layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation,layer_3_pw_specs);
         }
         // perform last update for the dw inter step buffer
         for (int d = 0; d < bottleneck_0_expanded_ifms_depth; d++)
@@ -444,8 +444,8 @@ void bottleneck_0_within_pipeline_stage(
                 bottleneck_0_projection_kernel_output_prev,
                 layer_3_pw_fused_scales,
                 layer_3_pw_fused_scales_log_2_shifts,
-                layer_3_pw_relu_6_fused_scales,
-                layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation);
+                layer_3_pw_relu_6_fused_scales[0],
+                layer_3_pw_fused_zero_points, d, layer_3_pw_specs.layer_activation, layer_3_pw_specs);
         }
         // perform last update for the dw inter step buffer
         for (int d = 0; d < bottleneck_0_expanded_ifms_depth; d++)
@@ -540,9 +540,9 @@ void bottleneck_1_within_pipeline_stage(
                 bottleneck_1_projection_kernel_output_prev,
                 layer_7_pw_fused_scales,
                 layer_7_pw_fused_scales_log_2_shifts,
-                layer_7_pw_relu_6_fused_scales,
+                layer_7_pw_relu_6_fused_scales[0],
                 layer_7_pw_fused_zero_points, d, layer_7_pw_specs.layer_activation,
-                bottleneck_1_projection_layer_index);
+                layer_7_pw_specs);
     }
 }
 
@@ -605,8 +605,8 @@ void bottleneck_2_within_pipeline_stage(
                 bottleneck_2_projection_kernel_output_prev,
                 layer_10_pw_fused_scales,
                 layer_10_pw_fused_scales_log_2_shifts,
-                layer_10_pw_fused_zero_points, d, layer_10_pw_specs.activation,
-                bottleneck_2_projection_layer_index);
+                layer_10_pw_fused_zero_points, d, layer_10_pw_specs.layer_activation,
+                layer_10_pw_specs);
     }
 }
 

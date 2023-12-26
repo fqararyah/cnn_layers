@@ -99,7 +99,6 @@ void mob_v2_bottleneck_1(fms_dt bottleneck_input[],
 	const fms_dt dw_layer_ofms_zero_point = layer_6_dw_specs.layer_ofms_zero_point;
 	const rec_scales_dt dw_layer_ofms_scale = layer_6_dw_specs.layer_ofms_scale;
 	const fms_dt current_dw_ifms_zero_point = layer_6_dw_specs.layer_ifms_zero_point;
-	;
 
 	fms_quantization_scheme expansion_layer_normalization;
 	expansion_layer_normalization.ofm_zero_point = expansion_layer_ofms_zero_point;

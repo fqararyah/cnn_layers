@@ -140,32 +140,20 @@ void mob_v2_bottleneck_2(fms_dt bottleneck_input[bottleneck_2_input_buffer_size]
 {
 #pragma HLS INLINE off
 
-	const fms_dt expansion_layer_ofms_zero_point =
-		conv_fms_zero_points[bottleneck_2_expansion_layer_index + 1];
-	const rec_scales_dt expansion_layer_ofms_scale_rec =
-		conv_fms_scales_rec[bottleneck_2_expansion_layer_index + 1];
-	const rec_scales_dt expansion_layer_ofms_scale =
-		conv_fms_scales[bottleneck_2_expansion_layer_index + 1];
+	const fms_dt expansion_layer_ofms_zero_point = layer_8_pw_specs.layer_ofms_zero_point;
+	const rec_scales_dt expansion_layer_ofms_scale = layer_8_pw_specs.layer_ofms_scale;
 
-	const fms_dt dw_layer_ofms_zero_point =
-		conv_fms_zero_points[bottleneck_2_dw_layer_index + 1];
-	const rec_scales_dt dw_layer_ofms_scale_rec =
-		conv_fms_scales_rec[bottleneck_2_dw_layer_index + 1];
-	const rec_scales_dt dw_layer_ofms_scale =
-		conv_fms_scales[bottleneck_2_dw_layer_index + 1];
-	const fms_dt current_dw_ifms_zero_point =
-		conv_fms_zero_points[bottleneck_2_dw_layer_index];
+	const fms_dt dw_layer_ofms_zero_point = layer_9_dw_specs.layer_ofms_zero_point;
+	const rec_scales_dt dw_layer_ofms_scale = layer_9_dw_specs.layer_ofms_scale;
+	const fms_dt current_dw_ifms_zero_point = layer_9_dw_specs.layer_ifms_zero_point;
 
 	fms_quantization_scheme expansion_layer_normalization;
 	expansion_layer_normalization.ofm_zero_point =
 		expansion_layer_ofms_zero_point;
-	expansion_layer_normalization.ofm_scale_rec =
-		expansion_layer_ofms_scale_rec;
 	expansion_layer_normalization.ofm_scale = expansion_layer_ofms_scale;
 
 	fms_quantization_scheme dw_layer_normalization;
 	dw_layer_normalization.ofm_zero_point = dw_layer_ofms_zero_point;
-	dw_layer_normalization.ofm_scale_rec = dw_layer_ofms_scale_rec;
 	dw_layer_normalization.ofm_scale = dw_layer_ofms_scale;
 
 	const int dw_kernel_starting_w = expansion_kernel_starting_w - (bottleneck_2_dw_filter_dim - bottleneck_2_dw_padding_left) + 1;
@@ -197,7 +185,7 @@ mob_v2_bottleneck_2:
 		{
 			// in first step, do only one and write it to the second col
 			pss_dt expansion_pss = expansion_kernel(bottleneck_input,
-													pw_weights_6[d_in_out], bottleneck_2_ifms_depth,
+													pw_weights_8[d_in_out], bottleneck_2_ifms_depth,
 													d_in_out, 0, 0,
 													bottleneck_2_expansion_parallelism_w);
 			expansion_result = pw_relu_norm_6(
@@ -213,15 +201,15 @@ mob_v2_bottleneck_2:
 								   dw_input_buffer, expansion_result, dw_kernel_starting_w,
 								   starting_h);
 
-		dw_layer_normalization.fused_scales = layer_7_dw_fused_scales[d_in_out];
+		dw_layer_normalization.fused_scales = layer_9_dw_fused_scales[d_in_out];
 		dw_layer_normalization.fused_scales_log_2_shift =
-			layer_7_dw_fused_scales_log_2_shifts[d_in_out];
+			layer_9_dw_fused_scales_log_2_shifts[d_in_out];
 		dw_layer_normalization.relu_6_fused_scale =
-			layer_7_dw_relu_6_fused_scales[d_in_out];
+			layer_9_dw_relu_6_fused_scales[d_in_out];
 		dw_layer_normalization.fused_zero_point =
-			layer_7_dw_fused_zero_points[d_in_out];
+			layer_9_dw_fused_zero_points[d_in_out];
 
-		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_7[d_in_out],
+		dw_pss_dt dw_pss = dw_kernel(dw_input_buffer, dw_weights_9[d_in_out],
 									 bottleneck_2_dw_filter_dim);
 		fms_dt dw_result = dw_relu_norm(dw_pss, dw_layer_normalization,
 										bottleneck_2_dw_layer_relu);
@@ -231,7 +219,7 @@ mob_v2_bottleneck_2:
 			bottleneck_2_update_previous_pass_buffer(previous_pass_dw_input_r[d_in_out - 1],
 													 dw_lower_buffer[d_in_out - 1], dw_kernel_starting_w, starting_h);
 		}
-		bottleneck_2_fill_projection_kernel_weights(pw_weights_8,
+		bottleneck_2_fill_projection_kernel_weights(pw_weights_10,
 													projection_kernel_weights, d_in_out);
 		projection_kernel(dw_result, bottleneck_2_ofms_depth,
 						  projection_kernel_weights, projection_kernel_output_buffer,
@@ -244,8 +232,8 @@ mob_v2_bottleneck_2:
 				projection_kernel_output_buffer_prev,
 				layer_10_pw_fused_scales,
 				layer_10_pw_fused_scales_log_2_shifts,
-				layer_10_pw_fused_zero_points, d_in_out, layer_3_pw_specs.layer_activation,
-				bottleneck_2_projection_layer_index);
+				layer_10_pw_fused_zero_points, d_in_out, layer_10_pw_specs.layer_activation,
+				layer_10_pw_specs);
 			chain_seml_communication_buffer[d_in_out][prev_projection_kernel_starting_w] = tm;
 			tm=0;
 		}
