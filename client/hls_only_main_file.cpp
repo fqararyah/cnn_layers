@@ -108,8 +108,8 @@ void top_func(
 #endif
 
 #endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
-	seml(off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints, channels, result, tmp_channels, fc_input, model_configs_list);
 #endif // ONLY_SEML == 0
+	seml(off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints, channels, result, tmp_channels, fc_input, model_configs_list);
 
 #endif
 }
