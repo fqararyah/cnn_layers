@@ -31,12 +31,11 @@ const int max_fms_size = switch_point_fms_width * switch_point_fms_height * swit
 const int max_tmp_fms_size = 56 * 56 * 24;
 
 #if MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
-
 #if PIPELINE_LENGTH == 6
 const int MAX_FMS_BUFFER_DEPTH = 144 * 49;//
 #elif PIPELINE_LENGTH == 9 || PIPELINE_LENGTH == 11
 const int MAX_FMS_BUFFER_DEPTH = 192 * 16;//
-#elif ONLY_SEML
+#elif ONLY_SEML || PIPELINE_LENGTH == 0
 const int MAX_FMS_BUFFER_DEPTH = 96 * 196; // 192 * (28/7) * (28/7)
 #endif
 
@@ -109,13 +108,30 @@ const int median_depth = 96;
 const int median_width = 14;
 
 // weights
-const int all_pw_s_weights = 2120320 / weights_group_items;
+const int all_pw_s_weights_0 = 2125536 / weights_group_items;
+const int all_on_chip_pw_s_weights_0 = 864;
+const int all_dw_off_chip_weights_pipe_0 = 64224;
+const int all_off_chip_fused_scales_zps_pipe_0 = 17024;
+
+const int all_pw_s_weights_6 = 2120320 / weights_group_items;
+const int all_on_chip_pw_s_weights_6 = 12128;
 const int all_dw_off_chip_weights_pipe_6 = 63072;
+const int all_off_chip_fused_scales_zps_pipe_6 = 16760;
+
+#if PIPELINE_LENGTH == 0
+const int all_pw_s_weights = all_pw_s_weights_0;
+const int all_on_chip_pw_s_weights = all_on_chip_pw_s_weights_0;
+const int all_dw_off_chip_weights = all_dw_off_chip_weights_pipe_0;
+const int all_off_chip_fused_scales_zps = all_off_chip_fused_scales_zps_pipe_0;
+#elif PIPELINE_LENGTH == 6
+const int all_pw_s_weights = all_pw_s_weights_6;
+const int all_on_chip_pw_s_weights = all_on_chip_pw_s_weights_6;
 const int all_dw_off_chip_weights = all_dw_off_chip_weights_pipe_6;
-const int all_off_chip_fused_scales_zps = 16760;
-const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
-const int all_on_chip_pw_s_weights = 12128;
+const int all_off_chip_fused_scales_zps = all_off_chip_fused_scales_zps_pipe_6;
+#endif
+
 const int all_on_chip_pw_s_weights_groups = (all_on_chip_pw_s_weights + weights_group_items - 1) / weights_group_items;
+const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
 // input specs
 const int input_image_height = 224;
 const int input_image_width = 224;

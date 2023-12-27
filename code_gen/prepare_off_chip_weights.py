@@ -105,10 +105,7 @@ np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME, pipeline_len),
             np.array(layers_weights_offsets), fmt='%i')
 
 
-if cgc.PIPELINE == True:
-    num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
-else:
-    num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME)
+num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME, pipeline_len)
 
 with open(num_of_pw_weights_file, 'w') as f:
     f.write(str(weights_combined_so_far))
@@ -116,8 +113,8 @@ with open(num_of_pw_weights_file, 'w') as f:
 replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
-        if 'const int all_pw_s_weights =' in line:
-            replacement_string += 'const int all_pw_s_weights = {} / weights_group_items;\n'.format(
+        if 'const int all_pw_s_weights_{} ='.format(pipeline_len) in line:
+            replacement_string += 'const int all_pw_s_weights_{} = {} / weights_group_items;\n'.format( pipeline_len,
                 all_pw_s_weights)
         else:
             replacement_string += line

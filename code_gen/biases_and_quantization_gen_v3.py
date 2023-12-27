@@ -353,8 +353,9 @@ with open(dw_off_chip_fused_zps_file, 'w') as f:
 replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
-        if 'const int all_off_chip_fused_scales_zps =' in line:
-            replacement_string += 'const int all_off_chip_fused_scales_zps = {};\n'.format(len(seml_fused_scales))
+        if 'const int all_off_chip_fused_scales_zps_pipe_{} ='.format(pipeline_len) in line:
+            replacement_string += 'const int all_off_chip_fused_scales_zps_pipe_{} = {};\n'.format(
+                pipeline_len,len(seml_fused_scales))
         elif 'const int first_quantization_arrays_num_elements' in line:
             replacement_string += 'const int first_quantization_arrays_num_elements = ' + \
                 str(first_quantization_arrays_num_of_elements) + ';\n'

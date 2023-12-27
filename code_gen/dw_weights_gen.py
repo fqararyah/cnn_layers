@@ -211,13 +211,9 @@ replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
         if 'const int all_dw_off_chip_weights_pipe_{} ='.format(last_pipeline_layer) in line:
-            continue
-        if 'const int all_dw_off_chip_weights =' in line:
             replacement_string += 'const int all_dw_off_chip_weights_pipe_{} = {};\n'.format(last_pipeline_layer,
                                                                                      dw_off_chip_weights_sizes_given_pipeline)        
-            replacement_string += 'const int all_dw_off_chip_weights = {};\n'.format(
-                'all_dw_off_chip_weights_pipe_{}'.format(last_pipeline_layer)
-            )
+
 
         elif 'const int MAX_DW_LAYER_D' in line:
             replacement_string += 'const int MAX_DW_LAYER_D = ' + str(max_dw_num_filters) + ';\n'

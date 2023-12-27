@@ -93,6 +93,7 @@ cumulative_dw_weights = 0
 dw_ifms_cumulative_width_offset = 0
 num_conv_layers_so_far = 0
 first_conv_layer = True
+first_conv_layer_index = 0
 with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#if PIPELINE_LENGTH == ' + str(pipeline_len) + '\n')
@@ -125,6 +126,7 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
             num_of_filters = layer_num_fils
             if first_conv_layer:
                 replacement_list.append('first_conv_layer_specs')
+                first_conv_layer_index = layer_index
             else:
                 replacement_list.append(
                     'layer_' + str(layer_index) + '_' + layer_type + '_specs')
@@ -317,6 +319,7 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
             replacement_list.append('}')
             f.write(quantize_specs_struct.format(*replacement_list))
 
+    f.write('const layer_specs layer_' + str(first_conv_layer_index) + '_s_specs = first_conv_layer_specs;\n')
     f.write('#endif\n')
     f.write('#endif\n')
 

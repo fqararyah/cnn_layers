@@ -28,7 +28,7 @@ debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 layer_0_s_block = 'layer_0_s_3x3(weights_1, input_image, result);\n'
 
 s_pw_block = 'pw_and_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_s_specs,\n\
-    fused_scales, relu_6_fused_scales, fused_zero_points);\n'
+    seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer, model_configs_list);\n'
 
 fill_scales_block = 'seml_engines::fill_fused_scales(off_chip_fused_scales,\n\
                                      seml_fused_scales_buffer,\n\

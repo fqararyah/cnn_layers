@@ -7,9 +7,13 @@ import code_generation_constants as cgc
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 on_chip_conv_and_layers = cgc.PIPELINE_LEN if cgc.PIPELINE else 1
+pipeline_len = 0
+if cgc.PIPELINE:
+    pipeline_len = cgc.PIPELINE_LEN
+
 weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(cgc.MODEL_NAME)
 weights_file_format = 'weights_{}.txt'
-conv_pw_weights_h_file = '../model_components/model/headers/{}_on_chip_weights.h'.format(cgc.MODEL_NAME) #'./out/dw_weights.h'
+conv_pw_weights_h_file = '../model_components/model/headers/{}_on_chip_weights_pipe_{}.h'.format(cgc.MODEL_NAME, pipeline_len)
 
 weights_declaration_string = {'s':'const static weights_dt weights_*i*[layer_*i*_s_num_fils][layer_*i*_s_depth]'+\
     '[layer_*i*_s_filter_dim][layer_*i*_s_filter_dim]' \
@@ -25,7 +29,7 @@ with open(conv_pw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#include "{}_layers_specs.h"\n'.format(cgc.MODEL_NAME))
     f.write("#if FIRST_PART_IMPLEMENTATION == " + cgc.BOTTLENECK_CHAIN_MODE + \
-             " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
+             " && MODEL_ID == " + cgc.MODEL_NAME.upper() + " && PIPELINE_LENGTH == " + str(pipeline_len) + "\n")
     f.write("#ifndef CONV_PW_WEIGHTS\n")
     f.write("#define CONV_PW_WEIGHTS\n")
 

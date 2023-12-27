@@ -7,16 +7,17 @@ import code_generation_constants as cgc
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 on_chip_conv_and_layers = cgc.PIPELINE_LEN if cgc.PIPELINE else 1
+pipeline_len = 0
+if cgc.PIPELINE:
+    pipeline_len = cgc.PIPELINE_LEN
+
 weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
     cgc.MODEL_NAME)
 weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2.h'.format(cgc.MODEL_NAME)
+on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2_pipe_{}.h'.format(cgc.MODEL_NAME, pipeline_len)
 
-if cgc.PIPELINE == True:
-    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipe_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
-else:
-    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipe.txt'.format(cgc.MODEL_NAME, 0)
+on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipe_{}.txt'.format(cgc.MODEL_NAME, pipeline_len)
 
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
@@ -28,7 +29,7 @@ model_dag = utils.read_model_dag()
 with open(on_chip_weights_header_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write('#include "' + cgc.MODEL_NAME + '_layers_specs.h"\n')
-    f.write("#if FIRST_PART_IMPLEMENTATION ==" + cgc.PIPELINED_ENGINES_MODE + "\n")
+    f.write("#if FIRST_PART_IMPLEMENTATION ==" + cgc.PIPELINED_ENGINES_MODE + " && PIPELINE_LENGTH == " + str(pipeline_len) + "\n")
     f.write("#ifndef ON_CHIP_WEIGHTS\n")
     f.write("#define ON_CHIP_WEIGHTS\n")
 
@@ -62,10 +63,6 @@ def write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_head
         assert(all_on_chip_pw_s_weights % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
         f.write('#endif\n')
         f.write('#endif\n')
-
-
-if cgc.PIPELINE == False:
-    exit(0)
 
 first_layer = True
 num_of_generated_layers = 0
@@ -119,13 +116,17 @@ for ii in range(len(model_dag)):
     combined_weights = combined_weights.reshape(combined_weights.size) 
     formated_weights_all_layers.append(combined_weights)
 
-np.savetxt(on_chip_weights_file, np.concatenate(formated_weights_all_layers, 0), fmt='%i')    
+if pipeline_len > 0:
+    np.savetxt(on_chip_weights_file, np.concatenate(formated_weights_all_layers, 0), fmt='%i')
+else:
+    with open(on_chip_weights_file, 'w') as f:
+        f.write('0') 
 
 replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
-        if 'const int all_on_chip_pw_s_weights =' in line:
-            replacement_string += 'const int all_on_chip_pw_s_weights = ' + str(all_on_chip_pw_s_weights) + ';\n'
+        if 'const int all_on_chip_pw_s_weights_{} ='.format(pipeline_len) in line:
+            replacement_string += 'const int all_on_chip_pw_s_weights_{} = '.format(pipeline_len) + str(all_on_chip_pw_s_weights) + ';\n'
         else:
             replacement_string += line
 
