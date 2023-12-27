@@ -1,8 +1,14 @@
 #include "../../basic_defs/basic_defs_glue.h"
+#if PIPELINE_LENGTH == 6
 #ifndef LAYERS_SPECS
 #define LAYERS_SPECS
+const Quantization_layer_specs quantize_layer_specs = {
+                1.0,//const pooling_fused_scales_dt fused_scale; 
+                127,//const biases_dt ifms_zero_point;
+                -1//const biases_dt ofms_zero_point;
+                };
 //****************************
- const int first_conv_layer_num_fils = 24;
+ const int first_conv_layer_num_fils = 32;
 const int first_conv_layer_depth = 3;
 const int first_conv_layer_filter_dim = 3;
  const int first_conv_layer_strides = 2;
@@ -13,7 +19,7 @@ const int first_conv_layer_filter_dim = 3;
 const layer_specs first_conv_layer_specs = {
                 1,//layer_index;
                 S_CONV,//conv_layer_type;; 
-                24,//layer_num_fils 
+                32,//layer_num_fils 
                 2,//strides;
                 3,//filter_size;
                 0,//padding_left;
@@ -25,21 +31,21 @@ const layer_specs first_conv_layer_specs = {
                 224,//layer_ifm_width;
                 112,//layer_ofm_height;
                 112,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (3 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (24 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (224 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (224 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                3 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                (3 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
                 0,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                -13,//fms_dt layer_ifms_zero_point;
+                -1,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -48,34 +54,34 @@ const layer_specs first_conv_layer_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_2_dw_num_fils = 24;
-const int layer_2_dw_depth = 24;
+ const int layer_2_dw_num_fils = 32;
+const int layer_2_dw_depth = 32;
 const int layer_2_dw_filter_dim = 3;
  const int layer_2_dw_ifm_width = 112;
  //****************************
 const layer_specs layer_2_dw_specs = {
                 2,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                24,//layer_num_fils 
+                32,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                24,//layer_depth;
+                32,//layer_depth;
                 112,//layer_ifm_height;
                 112,//layer_ifm_width;
                 112,//layer_ofm_height;
                 112,//layer_ofm_width;
-                RELU,//layer_activation;
-                (24 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (24 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                (32 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
                 0,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
@@ -92,7 +98,7 @@ const layer_specs layer_2_dw_specs = {
                 };
 //****************************
  const int layer_3_pw_num_fils = 16;
-const int layer_3_pw_depth = 24;
+const int layer_3_pw_depth = 32;
 const int layer_3_pw_filter_dim = 1;
  const int layer_3_pw_ifm_width = 112;
  //****************************
@@ -106,19 +112,19 @@ const layer_specs layer_3_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                24,//layer_depth;
+                32,//layer_depth;
                 112,//layer_ifm_height;
                 112,//layer_ifm_width;
                 112,//layer_ofm_height;
                 112,//layer_ofm_width;
                 0,//layer_activation;
-                (24 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (16 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                (32 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
                 0 / weights_group_items,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
@@ -126,15 +132,15 @@ const layer_specs layer_3_pw_specs = {
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.5149273872375488,//,fms_dt layer_ofms_scale;
-                -3,//fms_dt layer_ofms_zero_point;
+                0.3764464855194092,//,fms_dt layer_ofms_scale;
+                4,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
                 1,//scales_dt skip_connection_other_layer_scale;
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_4_pw_num_fils = 88;
+ const int layer_4_pw_num_fils = 96;
 const int layer_4_pw_depth = 16;
 const int layer_4_pw_filter_dim = 1;
  const int layer_4_pw_ifm_width = 112;
@@ -142,7 +148,7 @@ const int layer_4_pw_filter_dim = 1;
 const layer_specs layer_4_pw_specs = {
                 4,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                88,//layer_num_fils 
+                96,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -154,21 +160,21 @@ const layer_specs layer_4_pw_specs = {
                 112,//layer_ifm_width;
                 112,//layer_ofm_height;
                 112,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (16 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (88 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (96 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                16 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                (16 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
                 0 / weights_group_items,//layer_weights_offset;
-                384,//layer_weights_offset_on_chip;
+                512,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                -3,//fms_dt layer_ifms_zero_point;
+                4,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -177,37 +183,37 @@ const layer_specs layer_4_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_6_dw_num_fils = 88;
-const int layer_6_dw_depth = 88;
+ const int layer_6_dw_num_fils = 96;
+const int layer_6_dw_depth = 96;
 const int layer_6_dw_filter_dim = 3;
  const int layer_6_dw_ifm_width = 112;
  //****************************
 const layer_specs layer_6_dw_specs = {
                 6,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                88,//layer_num_fils 
+                96,//layer_num_fils 
                 2,//strides;
                 3,//filter_size;
                 0,//padding_left;
                 1,//padding_right;
                 0,//padding_top;
                 1,//padding_bottom;
-                88,//layer_depth;
+                96,//layer_depth;
                 112,//layer_ifm_height;
                 112,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
-                RELU,//layer_activation;
-                (88 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (88 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (96 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (112 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (112 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                88 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                24,//layer_weights_offset;
+                (96 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                32,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                5376,//dw_ifms_cumulative_width_offset;
+                7168,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -221,7 +227,7 @@ const layer_specs layer_6_dw_specs = {
                 };
 //****************************
  const int layer_7_pw_num_fils = 24;
-const int layer_7_pw_depth = 88;
+const int layer_7_pw_depth = 96;
 const int layer_7_pw_filter_dim = 1;
  const int layer_7_pw_ifm_width = 56;
  //****************************
@@ -235,35 +241,35 @@ const layer_specs layer_7_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                88,//layer_depth;
+                96,//layer_depth;
                 56,//layer_ifm_height;
                 56,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
                 0,//layer_activation;
-                (88 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (96 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (24 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                88 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                (96 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
                 0 / weights_group_items,//layer_weights_offset;
-                1792,//layer_weights_offset_on_chip;
+                2048,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.32904961705207825,//,fms_dt layer_ofms_scale;
-                -6,//fms_dt layer_ofms_zero_point;
+                0.30003005266189575,//,fms_dt layer_ofms_scale;
+                -11,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
                 1,//scales_dt skip_connection_other_layer_scale;
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_8_pw_num_fils = 112;
+ const int layer_8_pw_num_fils = 144;
 const int layer_8_pw_depth = 24;
 const int layer_8_pw_filter_dim = 1;
  const int layer_8_pw_ifm_width = 56;
@@ -271,7 +277,7 @@ const int layer_8_pw_filter_dim = 1;
 const layer_specs layer_8_pw_specs = {
                 8,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                112,//layer_num_fils 
+                144,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -283,21 +289,21 @@ const layer_specs layer_8_pw_specs = {
                 56,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (24 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (112 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (144 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                (24 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
                 0 / weights_group_items,//layer_weights_offset;
-                3904,//layer_weights_offset_on_chip;
+                4352,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                -6,//fms_dt layer_ifms_zero_point;
+                -11,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -306,37 +312,37 @@ const layer_specs layer_8_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_9_dw_num_fils = 112;
-const int layer_9_dw_depth = 112;
+ const int layer_9_dw_num_fils = 144;
+const int layer_9_dw_depth = 144;
 const int layer_9_dw_filter_dim = 3;
  const int layer_9_dw_ifm_width = 56;
  //****************************
 const layer_specs layer_9_dw_specs = {
                 9,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                112,//layer_num_fils 
+                144,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                112,//layer_depth;
+                144,//layer_depth;
                 56,//layer_ifm_height;
                 56,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
-                RELU,//layer_activation;
-                (112 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (112 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (144 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                112 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                112,//layer_weights_offset;
+                (144 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                128,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                15232,//dw_ifms_cumulative_width_offset;
+                17920,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -350,7 +356,7 @@ const layer_specs layer_9_dw_specs = {
                 };
 //****************************
  const int layer_10_pw_num_fils = 24;
-const int layer_10_pw_depth = 112;
+const int layer_10_pw_depth = 144;
 const int layer_10_pw_filter_dim = 1;
  const int layer_10_pw_ifm_width = 56;
  //****************************
@@ -364,35 +370,35 @@ const layer_specs layer_10_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                112,//layer_depth;
+                144,//layer_depth;
                 56,//layer_ifm_height;
                 56,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
                 0,//layer_activation;
-                (112 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (24 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                112 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                0 / weights_group_items,//layer_weights_offset;
-                6592,//layer_weights_offset_on_chip;
+                (144 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                3456 / weights_group_items,//layer_weights_offset;
+                7808,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.3863007724285126,//,fms_dt layer_ofms_scale;
-                2,//fms_dt layer_ofms_zero_point;
-                2.2148829983349976,//rec_scales_dt add_layer_scale_reciprocal;
-                3,//biases_dt add_layer_zero_point;
-                0.32904961705207825,//scales_dt skip_connection_other_layer_scale;
-                -6//biases_dt skip_connection_other_layer_zero_point;
+                0.41785937547683716,//,fms_dt layer_ofms_scale;
+                6,//fms_dt layer_ofms_zero_point;
+                2.04375319960446,//rec_scales_dt add_layer_scale_reciprocal;
+                -3,//biases_dt add_layer_zero_point;
+                0.30003005266189575,//scales_dt skip_connection_other_layer_scale;
+                -11//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_12_pw_num_fils = 128;
+ const int layer_12_pw_num_fils = 144;
 const int layer_12_pw_depth = 24;
 const int layer_12_pw_filter_dim = 1;
  const int layer_12_pw_ifm_width = 56;
@@ -400,7 +406,7 @@ const int layer_12_pw_filter_dim = 1;
 const layer_specs layer_12_pw_specs = {
                 12,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                128,//layer_num_fils 
+                144,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -412,21 +418,21 @@ const layer_specs layer_12_pw_specs = {
                 56,//layer_ifm_width;
                 56,//layer_ofm_height;
                 56,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (24 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (144 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                0 / weights_group_items,//layer_weights_offset;
-                9280,//layer_weights_offset_on_chip;
+                (24 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                6912 / weights_group_items,//layer_weights_offset;
+                11264,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                3,//fms_dt layer_ifms_zero_point;
+                -3,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -435,37 +441,37 @@ const layer_specs layer_12_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_14_dw_num_fils = 128;
-const int layer_14_dw_depth = 128;
+ const int layer_14_dw_num_fils = 144;
+const int layer_14_dw_depth = 144;
 const int layer_14_dw_filter_dim = 3;
  const int layer_14_dw_ifm_width = 56;
  //****************************
 const layer_specs layer_14_dw_specs = {
                 14,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                128,//layer_num_fils 
+                144,//layer_num_fils 
                 2,//strides;
                 3,//filter_size;
                 0,//padding_left;
                 1,//padding_right;
                 0,//padding_top;
                 1,//padding_bottom;
-                128,//layer_depth;
+                144,//layer_depth;
                 56,//layer_ifm_height;
                 56,//layer_ifm_width;
                 28,//layer_ofm_height;
                 28,//layer_ofm_width;
-                RELU,//layer_activation;
-                (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (128 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (144 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (56 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (56 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                128 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                224,//layer_weights_offset;
+                (144 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                272,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                27776,//dw_ifms_cumulative_width_offset;
+                34048,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -479,7 +485,7 @@ const layer_specs layer_14_dw_specs = {
                 };
 //****************************
  const int layer_15_pw_num_fils = 32;
-const int layer_15_pw_depth = 128;
+const int layer_15_pw_depth = 144;
 const int layer_15_pw_filter_dim = 1;
  const int layer_15_pw_ifm_width = 28;
  //****************************
@@ -493,414 +499,27 @@ const layer_specs layer_15_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                128,//layer_depth;
+                144,//layer_depth;
                 28,//layer_ifm_height;
                 28,//layer_ifm_width;
                 28,//layer_ofm_height;
                 28,//layer_ofm_width;
                 0,//layer_activation;
-                (128 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (144 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                128 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                0 / weights_group_items,//layer_weights_offset;
-                12352,//layer_weights_offset_on_chip;
+                (144 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                10368 / weights_group_items,//layer_weights_offset;
+                14720,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.2818763852119446,//,fms_dt layer_ofms_scale;
-                8,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_16_pw_num_fils = 64;
-const int layer_16_pw_depth = 32;
-const int layer_16_pw_filter_dim = 1;
- const int layer_16_pw_ifm_width = 28;
- //****************************
-const layer_specs layer_16_pw_specs = {
-                16,//layer_index;
-                PW_CONV,//conv_layer_type;; 
-                64,//layer_num_fils 
-                1,//strides;
-                1,//filter_size;
-                0,//padding_left;
-                0,//padding_right;
-                0,//padding_top;
-                0,//padding_bottom;
-                32,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                RELU,//layer_activation;
-                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                4096 / weights_group_items,//layer_weights_offset;
-                16448,//layer_weights_offset_on_chip;
-                0,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                8,//fms_dt layer_ifms_zero_point;
-                0.0235294122248888,//,fms_dt layer_ofms_scale;
-                -128,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_17_dw_num_fils = 64;
-const int layer_17_dw_depth = 64;
-const int layer_17_dw_filter_dim = 3;
- const int layer_17_dw_ifm_width = 28;
- //****************************
-const layer_specs layer_17_dw_specs = {
-                17,//layer_index;
-                DW_CONV,//conv_layer_type;; 
-                64,//layer_num_fils 
-                1,//strides;
-                3,//filter_size;
-                1,//padding_left;
-                1,//padding_right;
-                1,//padding_top;
-                1,//padding_bottom;
-                64,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                RELU,//layer_activation;
-                (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                352,//layer_weights_offset;
-                0,//layer_weights_offset_on_chip;
-                34944,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                -128,//fms_dt layer_ifms_zero_point;
-                0.0235294122248888,//,fms_dt layer_ofms_scale;
-                -128,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_18_pw_num_fils = 32;
-const int layer_18_pw_depth = 64;
-const int layer_18_pw_filter_dim = 1;
- const int layer_18_pw_ifm_width = 28;
- //****************************
-const layer_specs layer_18_pw_specs = {
-                18,//layer_index;
-                PW_CONV,//conv_layer_type;; 
-                32,//layer_num_fils 
-                1,//strides;
-                1,//filter_size;
-                0,//padding_left;
-                0,//padding_right;
-                0,//padding_top;
-                0,//padding_bottom;
-                64,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                0,//layer_activation;
-                (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                6144 / weights_group_items,//layer_weights_offset;
-                18496,//layer_weights_offset_on_chip;
-                0,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                1,//bool write_to_tmp;
-                1,//bool fused_with_add;
-                -128,//fms_dt layer_ifms_zero_point;
-                0.2098107784986496,//,fms_dt layer_ofms_scale;
-                8,//fms_dt layer_ofms_zero_point;
-                3.418314898604065,//rec_scales_dt add_layer_scale_reciprocal;
-                4,//biases_dt add_layer_zero_point;
-                0.2818763852119446,//scales_dt skip_connection_other_layer_scale;
-                8//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_20_pw_num_fils = 48;
-const int layer_20_pw_depth = 32;
-const int layer_20_pw_filter_dim = 1;
- const int layer_20_pw_ifm_width = 28;
- //****************************
-const layer_specs layer_20_pw_specs = {
-                20,//layer_index;
-                PW_CONV,//conv_layer_type;; 
-                48,//layer_num_fils 
-                1,//strides;
-                1,//filter_size;
-                0,//padding_left;
-                0,//padding_right;
-                0,//padding_top;
-                0,//padding_bottom;
-                32,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                RELU,//layer_activation;
-                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (48 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                8192 / weights_group_items,//layer_weights_offset;
-                20544,//layer_weights_offset_on_chip;
-                0,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                4,//fms_dt layer_ifms_zero_point;
-                0.0235294122248888,//,fms_dt layer_ofms_scale;
-                -128,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_21_dw_num_fils = 48;
-const int layer_21_dw_depth = 48;
-const int layer_21_dw_filter_dim = 3;
- const int layer_21_dw_ifm_width = 28;
- //****************************
-const layer_specs layer_21_dw_specs = {
-                21,//layer_index;
-                DW_CONV,//conv_layer_type;; 
-                48,//layer_num_fils 
-                1,//strides;
-                3,//filter_size;
-                1,//padding_left;
-                1,//padding_right;
-                1,//padding_top;
-                1,//padding_bottom;
-                48,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                RELU,//layer_activation;
-                (48 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (48 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                48 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                416,//layer_weights_offset;
-                0,//layer_weights_offset_on_chip;
-                38528,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                -128,//fms_dt layer_ifms_zero_point;
-                0.0235294122248888,//,fms_dt layer_ofms_scale;
-                -128,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_22_pw_num_fils = 32;
-const int layer_22_pw_depth = 48;
-const int layer_22_pw_filter_dim = 1;
- const int layer_22_pw_ifm_width = 28;
- //****************************
-const layer_specs layer_22_pw_specs = {
-                22,//layer_index;
-                PW_CONV,//conv_layer_type;; 
-                32,//layer_num_fils 
-                1,//strides;
-                1,//filter_size;
-                0,//padding_left;
-                0,//padding_right;
-                0,//padding_top;
-                0,//padding_bottom;
-                48,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                0,//layer_activation;
-                (48 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                48 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                9728 / weights_group_items,//layer_weights_offset;
-                22080,//layer_weights_offset_on_chip;
-                0,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                1,//bool fused_with_add;
-                -128,//fms_dt layer_ifms_zero_point;
-                0.2059318721294403,//,fms_dt layer_ofms_scale;
-                1,//fms_dt layer_ofms_zero_point;
-                2.985998185678392,//rec_scales_dt add_layer_scale_reciprocal;
-                -5,//biases_dt add_layer_zero_point;
-                0.2925418019294739,//scales_dt skip_connection_other_layer_scale;
-                4//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_24_pw_num_fils = 184;
-const int layer_24_pw_depth = 32;
-const int layer_24_pw_filter_dim = 1;
- const int layer_24_pw_ifm_width = 28;
- //****************************
-const layer_specs layer_24_pw_specs = {
-                24,//layer_index;
-                PW_CONV,//conv_layer_type;; 
-                184,//layer_num_fils 
-                1,//strides;
-                1,//filter_size;
-                0,//padding_left;
-                0,//padding_right;
-                0,//padding_top;
-                0,//padding_bottom;
-                32,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                28,//layer_ofm_height;
-                28,//layer_ofm_width;
-                RELU,//layer_activation;
-                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (184 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                32 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                11264 / weights_group_items,//layer_weights_offset;
-                23616,//layer_weights_offset_on_chip;
-                0,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                -5,//fms_dt layer_ifms_zero_point;
-                0.0235294122248888,//,fms_dt layer_ofms_scale;
-                -128,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_26_dw_num_fils = 184;
-const int layer_26_dw_depth = 184;
-const int layer_26_dw_filter_dim = 3;
- const int layer_26_dw_ifm_width = 28;
- //****************************
-const layer_specs layer_26_dw_specs = {
-                26,//layer_index;
-                DW_CONV,//conv_layer_type;; 
-                184,//layer_num_fils 
-                2,//strides;
-                3,//filter_size;
-                0,//padding_left;
-                1,//padding_right;
-                0,//padding_top;
-                1,//padding_bottom;
-                184,//layer_depth;
-                28,//layer_ifm_height;
-                28,//layer_ifm_width;
-                14,//layer_ofm_height;
-                14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (184 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (184 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                184 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                464,//layer_weights_offset;
-                0,//layer_weights_offset_on_chip;
-                41216,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                0,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                -128,//fms_dt layer_ifms_zero_point;
-                0.0235294122248888,//,fms_dt layer_ofms_scale;
-                -128,//fms_dt layer_ofms_zero_point;
-                1,//rec_scales_dt add_layer_scale_reciprocal;
-                0,//biases_dt add_layer_zero_point;
-                1,//scales_dt skip_connection_other_layer_scale;
-                0//biases_dt skip_connection_other_layer_zero_point;
-                };
-//****************************
- const int layer_27_pw_num_fils = 64;
-const int layer_27_pw_depth = 184;
-const int layer_27_pw_filter_dim = 1;
- const int layer_27_pw_ifm_width = 14;
- //****************************
-const layer_specs layer_27_pw_specs = {
-                27,//layer_index;
-                PW_CONV,//conv_layer_type;; 
-                64,//layer_num_fils 
-                1,//strides;
-                1,//filter_size;
-                0,//padding_left;
-                0,//padding_right;
-                0,//padding_top;
-                0,//padding_bottom;
-                184,//layer_depth;
-                14,//layer_ifm_height;
-                14,//layer_ifm_width;
-                14,//layer_ofm_height;
-                14,//layer_ofm_width;
-                0,//layer_activation;
-                (184 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                184 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                17152 / weights_group_items,//layer_weights_offset;
-                29504,//layer_weights_offset_on_chip;
-                0,//dw_ifms_cumulative_width_offset;
-                1,//bool write_to_result_or_channels;
-                1,//bool write_to_tmp;
-                0,//bool fused_with_add;
-                -128,//fms_dt layer_ifms_zero_point;
-                0.21619953215122223,//,fms_dt layer_ofms_scale;
+                0.21887806057929993,//,fms_dt layer_ofms_scale;
                 -6,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
@@ -908,36 +527,36 @@ const layer_specs layer_27_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_28_pw_num_fils = 64;
-const int layer_28_pw_depth = 64;
-const int layer_28_pw_filter_dim = 1;
- const int layer_28_pw_ifm_width = 14;
+ const int layer_16_pw_num_fils = 192;
+const int layer_16_pw_depth = 32;
+const int layer_16_pw_filter_dim = 1;
+ const int layer_16_pw_ifm_width = 28;
  //****************************
-const layer_specs layer_28_pw_specs = {
-                28,//layer_index;
+const layer_specs layer_16_pw_specs = {
+                16,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                64,//layer_num_fils 
+                192,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                64,//layer_depth;
-                14,//layer_ifm_height;
-                14,//layer_ifm_width;
-                14,//layer_ofm_height;
-                14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
-                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
-                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
-                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
-                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                28928 / weights_group_items,//layer_weights_offset;
-                41280,//layer_weights_offset_on_chip;
+                32,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (32 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                14976 / weights_group_items,//layer_weights_offset;
+                19328,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
@@ -951,37 +570,424 @@ const layer_specs layer_28_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_29_dw_num_fils = 64;
-const int layer_29_dw_depth = 64;
-const int layer_29_dw_filter_dim = 3;
- const int layer_29_dw_ifm_width = 14;
+ const int layer_17_dw_num_fils = 192;
+const int layer_17_dw_depth = 192;
+const int layer_17_dw_filter_dim = 3;
+ const int layer_17_dw_ifm_width = 28;
  //****************************
-const layer_specs layer_29_dw_specs = {
-                29,//layer_index;
+const layer_specs layer_17_dw_specs = {
+                17,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                64,//layer_num_fils 
+                192,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                64,//layer_depth;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (192 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                416,//layer_weights_offset;
+                0,//layer_weights_offset_on_chip;
+                42112,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                -128,//fms_dt layer_ifms_zero_point;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
+                -128,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_18_pw_num_fils = 32;
+const int layer_18_pw_depth = 192;
+const int layer_18_pw_filter_dim = 1;
+ const int layer_18_pw_ifm_width = 28;
+ //****************************
+const layer_specs layer_18_pw_specs = {
+                18,//layer_index;
+                PW_CONV,//conv_layer_type;; 
+                32,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                0,//layer_activation;
+                (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (192 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                21120 / weights_group_items,//layer_weights_offset;
+                25472,//layer_weights_offset_on_chip;
+                0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                1,//bool write_to_tmp;
+                1,//bool fused_with_add;
+                -128,//fms_dt layer_ifms_zero_point;
+                0.22161531448364258,//,fms_dt layer_ofms_scale;
+                -8,//fms_dt layer_ofms_zero_point;
+                3.7931430840069655,//rec_scales_dt add_layer_scale_reciprocal;
+                7,//biases_dt add_layer_zero_point;
+                0.21887806057929993,//scales_dt skip_connection_other_layer_scale;
+                -6//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_20_pw_num_fils = 192;
+const int layer_20_pw_depth = 32;
+const int layer_20_pw_filter_dim = 1;
+ const int layer_20_pw_ifm_width = 28;
+ //****************************
+const layer_specs layer_20_pw_specs = {
+                20,//layer_index;
+                PW_CONV,//conv_layer_type;; 
+                192,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                32,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (32 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                27264 / weights_group_items,//layer_weights_offset;
+                31616,//layer_weights_offset_on_chip;
+                0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                7,//fms_dt layer_ifms_zero_point;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
+                -128,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_21_dw_num_fils = 192;
+const int layer_21_dw_depth = 192;
+const int layer_21_dw_filter_dim = 3;
+ const int layer_21_dw_ifm_width = 28;
+ //****************************
+const layer_specs layer_21_dw_specs = {
+                21,//layer_index;
+                DW_CONV,//conv_layer_type;; 
+                192,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (192 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                608,//layer_weights_offset;
+                0,//layer_weights_offset_on_chip;
+                52864,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                -128,//fms_dt layer_ifms_zero_point;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
+                -128,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_22_pw_num_fils = 32;
+const int layer_22_pw_depth = 192;
+const int layer_22_pw_filter_dim = 1;
+ const int layer_22_pw_ifm_width = 28;
+ //****************************
+const layer_specs layer_22_pw_specs = {
+                22,//layer_index;
+                PW_CONV,//conv_layer_type;; 
+                32,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                0,//layer_activation;
+                (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (32 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (192 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                33408 / weights_group_items,//layer_weights_offset;
+                37760,//layer_weights_offset_on_chip;
+                0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                1,//bool fused_with_add;
+                -128,//fms_dt layer_ifms_zero_point;
+                0.2900388240814209,//,fms_dt layer_ofms_scale;
+                -4,//fms_dt layer_ofms_zero_point;
+                2.6695711158574493,//rec_scales_dt add_layer_scale_reciprocal;
+                -17,//biases_dt add_layer_zero_point;
+                0.2636336088180542,//scales_dt skip_connection_other_layer_scale;
+                7//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_24_pw_num_fils = 192;
+const int layer_24_pw_depth = 32;
+const int layer_24_pw_filter_dim = 1;
+ const int layer_24_pw_ifm_width = 28;
+ //****************************
+const layer_specs layer_24_pw_specs = {
+                24,//layer_index;
+                PW_CONV,//conv_layer_type;; 
+                192,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                32,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                28,//layer_ofm_height;
+                28,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (32 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (32 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                39552 / weights_group_items,//layer_weights_offset;
+                43904,//layer_weights_offset_on_chip;
+                0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                -17,//fms_dt layer_ifms_zero_point;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
+                -128,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_26_dw_num_fils = 192;
+const int layer_26_dw_depth = 192;
+const int layer_26_dw_filter_dim = 3;
+ const int layer_26_dw_ifm_width = 28;
+ //****************************
+const layer_specs layer_26_dw_specs = {
+                26,//layer_index;
+                DW_CONV,//conv_layer_type;; 
+                192,//layer_num_fils 
+                2,//strides;
+                3,//filter_size;
+                0,//padding_left;
+                1,//padding_right;
+                0,//padding_top;
+                1,//padding_bottom;
+                192,//layer_depth;
+                28,//layer_ifm_height;
+                28,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (192 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (28 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (28 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (192 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                800,//layer_weights_offset;
+                0,//layer_weights_offset_on_chip;
+                63616,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                -128,//fms_dt layer_ifms_zero_point;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
+                -128,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_27_pw_num_fils = 64;
+const int layer_27_pw_depth = 192;
+const int layer_27_pw_filter_dim = 1;
+ const int layer_27_pw_ifm_width = 14;
+ //****************************
+const layer_specs layer_27_pw_specs = {
+                27,//layer_index;
+                PW_CONV,//conv_layer_type;; 
+                64,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                192,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                0,//layer_activation;
+                (192 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                648,//layer_weights_offset;
+                (192 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                45696 / weights_group_items,//layer_weights_offset;
+                50048,//layer_weights_offset_on_chip;
+                0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                1,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                -128,//fms_dt layer_ifms_zero_point;
+                0.20964163541793823,//,fms_dt layer_ofms_scale;
+                -6,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_28_pw_num_fils = 384;
+const int layer_28_pw_depth = 64;
+const int layer_28_pw_filter_dim = 1;
+ const int layer_28_pw_ifm_width = 14;
+ //****************************
+const layer_specs layer_28_pw_specs = {
+                28,//layer_index;
+                PW_CONV,//conv_layer_type;; 
+                384,//layer_num_fils 
+                1,//strides;
+                1,//filter_size;
+                0,//padding_left;
+                0,//padding_right;
+                0,//padding_top;
+                0,//padding_bottom;
+                64,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (64 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                57984 / weights_group_items,//layer_weights_offset;
+                62336,//layer_weights_offset_on_chip;
+                0,//dw_ifms_cumulative_width_offset;
+                1,//bool write_to_result_or_channels;
+                0,//bool write_to_tmp;
+                0,//bool fused_with_add;
+                -6,//fms_dt layer_ifms_zero_point;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
+                -128,//fms_dt layer_ofms_zero_point;
+                1,//rec_scales_dt add_layer_scale_reciprocal;
+                0,//biases_dt add_layer_zero_point;
+                1,//scales_dt skip_connection_other_layer_scale;
+                0//biases_dt skip_connection_other_layer_zero_point;
+                };
+//****************************
+ const int layer_29_dw_num_fils = 384;
+const int layer_29_dw_depth = 384;
+const int layer_29_dw_filter_dim = 3;
+ const int layer_29_dw_ifm_width = 14;
+ //****************************
+const layer_specs layer_29_dw_specs = {
+                29,//layer_index;
+                DW_CONV,//conv_layer_type;; 
+                384,//layer_num_fils 
+                1,//strides;
+                3,//filter_size;
+                1,//padding_left;
+                1,//padding_right;
+                1,//padding_top;
+                1,//padding_bottom;
+                384,//layer_depth;
+                14,//layer_ifm_height;
+                14,//layer_ifm_width;
+                14,//layer_ofm_height;
+                14,//layer_ofm_width;
+                RELU6,//layer_activation;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
+                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
+                (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
+                (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                992,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                46368,//dw_ifms_cumulative_width_offset;
+                68992,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -995,7 +1001,7 @@ const layer_specs layer_29_dw_specs = {
                 };
 //****************************
  const int layer_30_pw_num_fils = 64;
-const int layer_30_pw_depth = 64;
+const int layer_30_pw_depth = 384;
 const int layer_30_pw_filter_dim = 1;
  const int layer_30_pw_ifm_width = 14;
  //****************************
@@ -1009,35 +1015,35 @@ const layer_specs layer_30_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                64,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 0,//layer_activation;
-                (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                33024 / weights_group_items,//layer_weights_offset;
-                45376,//layer_weights_offset_on_chip;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                82560 / weights_group_items,//layer_weights_offset;
+                86912,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.16776806116104126,//,fms_dt layer_ofms_scale;
-                4,//fms_dt layer_ofms_zero_point;
-                4.680889809598044,//rec_scales_dt add_layer_scale_reciprocal;
+                0.1939420849084854,//,fms_dt layer_ofms_scale;
+                -15,//fms_dt layer_ofms_zero_point;
+                4.909893694722064,//rec_scales_dt add_layer_scale_reciprocal;
                 -8,//biases_dt add_layer_zero_point;
-                0.21619953215122223,//scales_dt skip_connection_other_layer_scale;
+                0.20964163541793823,//scales_dt skip_connection_other_layer_scale;
                 -6//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_32_pw_num_fils = 48;
+ const int layer_32_pw_num_fils = 384;
 const int layer_32_pw_depth = 64;
 const int layer_32_pw_filter_dim = 1;
  const int layer_32_pw_ifm_width = 14;
@@ -1045,7 +1051,7 @@ const int layer_32_pw_filter_dim = 1;
 const layer_specs layer_32_pw_specs = {
                 32,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                48,//layer_num_fils 
+                384,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1057,16 +1063,16 @@ const layer_specs layer_32_pw_specs = {
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (48 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                37120 / weights_group_items,//layer_weights_offset;
-                49472,//layer_weights_offset_on_chip;
+                (64 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                107136 / weights_group_items,//layer_weights_offset;
+                111488,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
@@ -1080,37 +1086,37 @@ const layer_specs layer_32_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_33_dw_num_fils = 48;
-const int layer_33_dw_depth = 48;
+ const int layer_33_dw_num_fils = 384;
+const int layer_33_dw_depth = 384;
 const int layer_33_dw_filter_dim = 3;
  const int layer_33_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_33_dw_specs = {
                 33,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                48,//layer_num_fils 
+                384,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                48,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (48 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (48 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                48 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                712,//layer_weights_offset;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1376,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                48160,//dw_ifms_cumulative_width_offset;
+                79744,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1124,7 +1130,7 @@ const layer_specs layer_33_dw_specs = {
                 };
 //****************************
  const int layer_34_pw_num_fils = 64;
-const int layer_34_pw_depth = 48;
+const int layer_34_pw_depth = 384;
 const int layer_34_pw_filter_dim = 1;
  const int layer_34_pw_ifm_width = 14;
  //****************************
@@ -1138,35 +1144,35 @@ const layer_specs layer_34_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                48,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 0,//layer_activation;
-                (48 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                48 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                40192 / weights_group_items,//layer_weights_offset;
-                52544,//layer_weights_offset_on_chip;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                131712 / weights_group_items,//layer_weights_offset;
+                136064,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.15476195514202118,//,fms_dt layer_ofms_scale;
-                37,//fms_dt layer_ofms_zero_point;
-                3.896838809478462,//rec_scales_dt add_layer_scale_reciprocal;
-                14,//biases_dt add_layer_zero_point;
-                0.21363459527492523,//scales_dt skip_connection_other_layer_scale;
+                0.15376076102256775,//,fms_dt layer_ofms_scale;
+                -16,//fms_dt layer_ofms_zero_point;
+                4.591107699591028,//rec_scales_dt add_layer_scale_reciprocal;
+                -14,//biases_dt add_layer_zero_point;
+                0.20367039740085602,//scales_dt skip_connection_other_layer_scale;
                 -8//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_36_pw_num_fils = 24;
+ const int layer_36_pw_num_fils = 384;
 const int layer_36_pw_depth = 64;
 const int layer_36_pw_filter_dim = 1;
  const int layer_36_pw_ifm_width = 14;
@@ -1174,7 +1180,7 @@ const int layer_36_pw_filter_dim = 1;
 const layer_specs layer_36_pw_specs = {
                 36,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                24,//layer_num_fils 
+                384,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1186,21 +1192,21 @@ const layer_specs layer_36_pw_specs = {
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (24 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                43264 / weights_group_items,//layer_weights_offset;
-                55616,//layer_weights_offset_on_chip;
+                (64 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                156288 / weights_group_items,//layer_weights_offset;
+                160640,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                14,//fms_dt layer_ifms_zero_point;
+                -14,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1209,37 +1215,37 @@ const layer_specs layer_36_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_37_dw_num_fils = 24;
-const int layer_37_dw_depth = 24;
+ const int layer_37_dw_num_fils = 384;
+const int layer_37_dw_depth = 384;
 const int layer_37_dw_filter_dim = 3;
  const int layer_37_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_37_dw_specs = {
                 37,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                24,//layer_num_fils 
+                384,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                24,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (24 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (24 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                760,//layer_weights_offset;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1760,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                49504,//dw_ifms_cumulative_width_offset;
+                90496,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1253,7 +1259,7 @@ const layer_specs layer_37_dw_specs = {
                 };
 //****************************
  const int layer_38_pw_num_fils = 64;
-const int layer_38_pw_depth = 24;
+const int layer_38_pw_depth = 384;
 const int layer_38_pw_filter_dim = 1;
  const int layer_38_pw_ifm_width = 14;
  //****************************
@@ -1267,35 +1273,35 @@ const layer_specs layer_38_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                24,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 0,//layer_activation;
-                (24 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (64 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                24 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                44800 / weights_group_items,//layer_weights_offset;
-                57152,//layer_weights_offset_on_chip;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                180864 / weights_group_items,//layer_weights_offset;
+                185216,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.11894886195659637,//,fms_dt layer_ofms_scale;
-                17,//fms_dt layer_ofms_zero_point;
-                3.620043393786366,//rec_scales_dt add_layer_scale_reciprocal;
-                16,//biases_dt add_layer_zero_point;
-                0.2566182613372803,//scales_dt skip_connection_other_layer_scale;
-                14//biases_dt skip_connection_other_layer_zero_point;
+                0.17933277785778046,//,fms_dt layer_ofms_scale;
+                -14,//fms_dt layer_ofms_zero_point;
+                4.23036255280951,//rec_scales_dt add_layer_scale_reciprocal;
+                -7,//biases_dt add_layer_zero_point;
+                0.21781235933303833,//scales_dt skip_connection_other_layer_scale;
+                -14//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_40_pw_num_fils = 368;
+ const int layer_40_pw_num_fils = 384;
 const int layer_40_pw_depth = 64;
 const int layer_40_pw_filter_dim = 1;
  const int layer_40_pw_ifm_width = 14;
@@ -1303,7 +1309,7 @@ const int layer_40_pw_filter_dim = 1;
 const layer_specs layer_40_pw_specs = {
                 40,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                368,//layer_num_fils 
+                384,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1315,21 +1321,21 @@ const layer_specs layer_40_pw_specs = {
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (64 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (368 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                64 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                46336 / weights_group_items,//layer_weights_offset;
-                58688,//layer_weights_offset_on_chip;
+                (64 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                205440 / weights_group_items,//layer_weights_offset;
+                209792,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                16,//fms_dt layer_ifms_zero_point;
+                -7,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1338,37 +1344,37 @@ const layer_specs layer_40_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_41_dw_num_fils = 368;
-const int layer_41_dw_depth = 368;
+ const int layer_41_dw_num_fils = 384;
+const int layer_41_dw_depth = 384;
 const int layer_41_dw_filter_dim = 3;
  const int layer_41_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_41_dw_specs = {
                 41,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                368,//layer_num_fils 
+                384,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                368,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (368 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (368 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                368 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                784,//layer_weights_offset;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                2144,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                50176,//dw_ifms_cumulative_width_offset;
+                101248,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1382,7 +1388,7 @@ const layer_specs layer_41_dw_specs = {
                 };
 //****************************
  const int layer_42_pw_num_fils = 96;
-const int layer_42_pw_depth = 368;
+const int layer_42_pw_depth = 384;
 const int layer_42_pw_filter_dim = 1;
  const int layer_42_pw_ifm_width = 14;
  //****************************
@@ -1396,35 +1402,35 @@ const layer_specs layer_42_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                368,//layer_depth;
+                384,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 0,//layer_activation;
-                (368 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (384 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (96 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                368 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                69888 / weights_group_items,//layer_weights_offset;
-                82240,//layer_weights_offset_on_chip;
+                (384 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                230016 / weights_group_items,//layer_weights_offset;
+                234368,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.14258623123168945,//,fms_dt layer_ofms_scale;
-                16,//fms_dt layer_ofms_zero_point;
+                0.1666376143693924,//,fms_dt layer_ofms_scale;
+                13,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
                 1,//scales_dt skip_connection_other_layer_scale;
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_43_pw_num_fils = 336;
+ const int layer_43_pw_num_fils = 576;
 const int layer_43_pw_depth = 96;
 const int layer_43_pw_filter_dim = 1;
  const int layer_43_pw_ifm_width = 14;
@@ -1432,7 +1438,7 @@ const int layer_43_pw_filter_dim = 1;
 const layer_specs layer_43_pw_specs = {
                 43,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                336,//layer_num_fils 
+                576,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1444,21 +1450,21 @@ const layer_specs layer_43_pw_specs = {
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (96 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (336 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (576 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                105216 / weights_group_items,//layer_weights_offset;
-                117568,//layer_weights_offset_on_chip;
+                (96 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                266880 / weights_group_items,//layer_weights_offset;
+                271232,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                16,//fms_dt layer_ifms_zero_point;
+                13,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1467,37 +1473,37 @@ const layer_specs layer_43_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_44_dw_num_fils = 336;
-const int layer_44_dw_depth = 336;
+ const int layer_44_dw_num_fils = 576;
+const int layer_44_dw_depth = 576;
 const int layer_44_dw_filter_dim = 3;
  const int layer_44_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_44_dw_specs = {
                 44,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                336,//layer_num_fils 
+                576,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                336,//layer_depth;
+                576,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (336 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (336 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                336 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1152,//layer_weights_offset;
+                (576 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                2528,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                60480,//dw_ifms_cumulative_width_offset;
+                112000,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1511,7 +1517,7 @@ const layer_specs layer_44_dw_specs = {
                 };
 //****************************
  const int layer_45_pw_num_fils = 96;
-const int layer_45_pw_depth = 336;
+const int layer_45_pw_depth = 576;
 const int layer_45_pw_filter_dim = 1;
  const int layer_45_pw_ifm_width = 14;
  //****************************
@@ -1525,35 +1531,35 @@ const layer_specs layer_45_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                336,//layer_depth;
+                576,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 0,//layer_activation;
-                (336 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (96 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                336 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                137472 / weights_group_items,//layer_weights_offset;
-                149824,//layer_weights_offset_on_chip;
+                (576 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                322176 / weights_group_items,//layer_weights_offset;
+                326528,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.09547445923089981,//,fms_dt layer_ofms_scale;
-                -15,//fms_dt layer_ofms_zero_point;
-                6.305897688061477,//rec_scales_dt add_layer_scale_reciprocal;
-                12,//biases_dt add_layer_zero_point;
-                0.14258623123168945,//scales_dt skip_connection_other_layer_scale;
-                16//biases_dt skip_connection_other_layer_zero_point;
+                0.142830491065979,//,fms_dt layer_ofms_scale;
+                -11,//fms_dt layer_ofms_zero_point;
+                5.718978723607331,//rec_scales_dt add_layer_scale_reciprocal;
+                5,//biases_dt add_layer_zero_point;
+                0.1666376143693924,//scales_dt skip_connection_other_layer_scale;
+                13//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_47_pw_num_fils = 328;
+ const int layer_47_pw_num_fils = 576;
 const int layer_47_pw_depth = 96;
 const int layer_47_pw_filter_dim = 1;
  const int layer_47_pw_ifm_width = 14;
@@ -1561,7 +1567,7 @@ const int layer_47_pw_filter_dim = 1;
 const layer_specs layer_47_pw_specs = {
                 47,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                328,//layer_num_fils 
+                576,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1573,21 +1579,21 @@ const layer_specs layer_47_pw_specs = {
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (96 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (328 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (576 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                169728 / weights_group_items,//layer_weights_offset;
-                182080,//layer_weights_offset_on_chip;
+                (96 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                377472 / weights_group_items,//layer_weights_offset;
+                381824,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                12,//fms_dt layer_ifms_zero_point;
+                5,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1596,37 +1602,37 @@ const layer_specs layer_47_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_48_dw_num_fils = 328;
-const int layer_48_dw_depth = 328;
+ const int layer_48_dw_num_fils = 576;
+const int layer_48_dw_depth = 576;
 const int layer_48_dw_filter_dim = 3;
  const int layer_48_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_48_dw_specs = {
                 48,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                328,//layer_num_fils 
+                576,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                328,//layer_depth;
+                576,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
-                (328 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (328 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                328 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1488,//layer_weights_offset;
+                (576 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                3104,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                69888,//dw_ifms_cumulative_width_offset;
+                128128,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1640,7 +1646,7 @@ const layer_specs layer_48_dw_specs = {
                 };
 //****************************
  const int layer_49_pw_num_fils = 96;
-const int layer_49_pw_depth = 328;
+const int layer_49_pw_depth = 576;
 const int layer_49_pw_filter_dim = 1;
  const int layer_49_pw_ifm_width = 14;
  //****************************
@@ -1654,35 +1660,35 @@ const layer_specs layer_49_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                328,//layer_depth;
+                576,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
                 0,//layer_activation;
-                (328 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (96 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                328 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                201216 / weights_group_items,//layer_weights_offset;
-                213568,//layer_weights_offset_on_chip;
+                (576 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                432768 / weights_group_items,//layer_weights_offset;
+                437120,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.12509964406490326,//,fms_dt layer_ofms_scale;
-                10,//fms_dt layer_ofms_zero_point;
-                5.7827373879301,//rec_scales_dt add_layer_scale_reciprocal;
-                4,//biases_dt add_layer_zero_point;
-                0.1585817039012909,//scales_dt skip_connection_other_layer_scale;
-                12//biases_dt skip_connection_other_layer_zero_point;
+                0.18632979691028595,//,fms_dt layer_ofms_scale;
+                8,//fms_dt layer_ofms_zero_point;
+                3.619118024720866,//rec_scales_dt add_layer_scale_reciprocal;
+                -2,//biases_dt add_layer_zero_point;
+                0.17485639452934265,//scales_dt skip_connection_other_layer_scale;
+                5//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_51_pw_num_fils = 568;
+ const int layer_51_pw_num_fils = 576;
 const int layer_51_pw_depth = 96;
 const int layer_51_pw_filter_dim = 1;
  const int layer_51_pw_ifm_width = 14;
@@ -1690,7 +1696,7 @@ const int layer_51_pw_filter_dim = 1;
 const layer_specs layer_51_pw_specs = {
                 51,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                568,//layer_num_fils 
+                576,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1702,21 +1708,21 @@ const layer_specs layer_51_pw_specs = {
                 14,//layer_ifm_width;
                 14,//layer_ofm_height;
                 14,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (96 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (568 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (576 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                96 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                232704 / weights_group_items,//layer_weights_offset;
-                245056,//layer_weights_offset_on_chip;
+                (96 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                488064 / weights_group_items,//layer_weights_offset;
+                492416,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                4,//fms_dt layer_ifms_zero_point;
+                -2,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1725,37 +1731,37 @@ const layer_specs layer_51_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_53_dw_num_fils = 568;
-const int layer_53_dw_depth = 568;
+ const int layer_53_dw_num_fils = 576;
+const int layer_53_dw_depth = 576;
 const int layer_53_dw_filter_dim = 3;
  const int layer_53_dw_ifm_width = 14;
  //****************************
 const layer_specs layer_53_dw_specs = {
                 53,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                568,//layer_num_fils 
+                576,//layer_num_fils 
                 2,//strides;
                 3,//filter_size;
                 0,//padding_left;
                 1,//padding_right;
                 0,//padding_top;
                 1,//padding_bottom;
-                568,//layer_depth;
+                576,//layer_depth;
                 14,//layer_ifm_height;
                 14,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
-                (568 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (568 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (14 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (14 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                568 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1816,//layer_weights_offset;
+                (576 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                3680,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                79072,//dw_ifms_cumulative_width_offset;
+                144256,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1769,7 +1775,7 @@ const layer_specs layer_53_dw_specs = {
                 };
 //****************************
  const int layer_54_pw_num_fils = 160;
-const int layer_54_pw_depth = 568;
+const int layer_54_pw_depth = 576;
 const int layer_54_pw_filter_dim = 1;
  const int layer_54_pw_ifm_width = 7;
  //****************************
@@ -1783,28 +1789,28 @@ const layer_specs layer_54_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                568,//layer_depth;
+                576,//layer_depth;
                 7,//layer_ifm_height;
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
                 0,//layer_activation;
-                (568 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (576 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (160 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                568 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                287232 / weights_group_items,//layer_weights_offset;
-                299584,//layer_weights_offset_on_chip;
+                (576 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                543360 / weights_group_items,//layer_weights_offset;
+                547712,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.11771583557128906,//,fms_dt layer_ofms_scale;
-                13,//fms_dt layer_ofms_zero_point;
+                0.13677388429641724,//,fms_dt layer_ofms_scale;
+                11,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
                 1,//scales_dt skip_connection_other_layer_scale;
@@ -1831,21 +1837,21 @@ const layer_specs layer_55_pw_specs = {
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (160 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (960 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                160 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                378112 / weights_group_items,//layer_weights_offset;
-                390464,//layer_weights_offset_on_chip;
+                (160 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                635520 / weights_group_items,//layer_weights_offset;
+                639872,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                13,//fms_dt layer_ifms_zero_point;
+                11,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1874,17 +1880,17 @@ const layer_specs layer_56_dw_specs = {
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (960 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (960 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                2384,//layer_weights_offset;
+                (960 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                4256,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                87024,//dw_ifms_cumulative_width_offset;
+                152320,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -1924,23 +1930,23 @@ const layer_specs layer_57_pw_specs = {
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                531712 / weights_group_items,//layer_weights_offset;
-                544064,//layer_weights_offset_on_chip;
+                (960 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                789120 / weights_group_items,//layer_weights_offset;
+                793472,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 1,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.09775901585817337,//,fms_dt layer_ofms_scale;
+                0.10249070078134537,//,fms_dt layer_ofms_scale;
                 3,//fms_dt layer_ofms_zero_point;
-                7.370089296990743,//rec_scales_dt add_layer_scale_reciprocal;
-                1,//biases_dt add_layer_zero_point;
-                0.11771583557128906,//scales_dt skip_connection_other_layer_scale;
-                13//biases_dt skip_connection_other_layer_zero_point;
+                5.994435647514072,//rec_scales_dt add_layer_scale_reciprocal;
+                -5,//biases_dt add_layer_zero_point;
+                0.13677388429641724,//scales_dt skip_connection_other_layer_scale;
+                11//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_59_pw_num_fils = 944;
+ const int layer_59_pw_num_fils = 960;
 const int layer_59_pw_depth = 160;
 const int layer_59_pw_filter_dim = 1;
  const int layer_59_pw_ifm_width = 7;
@@ -1948,7 +1954,7 @@ const int layer_59_pw_filter_dim = 1;
 const layer_specs layer_59_pw_specs = {
                 59,//layer_index;
                 PW_CONV,//conv_layer_type;; 
-                944,//layer_num_fils 
+                960,//layer_num_fils 
                 1,//strides;
                 1,//filter_size;
                 0,//padding_left;
@@ -1960,21 +1966,21 @@ const layer_specs layer_59_pw_specs = {
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (160 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (944 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                (960 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                160 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                685312 / weights_group_items,//layer_weights_offset;
-                697664,//layer_weights_offset_on_chip;
+                (160 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                942720 / weights_group_items,//layer_weights_offset;
+                947072,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                1,//fms_dt layer_ifms_zero_point;
+                -5,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -1983,42 +1989,42 @@ const layer_specs layer_59_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
- const int layer_60_dw_num_fils = 944;
-const int layer_60_dw_depth = 944;
+ const int layer_60_dw_num_fils = 960;
+const int layer_60_dw_depth = 960;
 const int layer_60_dw_filter_dim = 3;
  const int layer_60_dw_ifm_width = 7;
  //****************************
 const layer_specs layer_60_dw_specs = {
                 60,//layer_index;
                 DW_CONV,//conv_layer_type;; 
-                944,//layer_num_fils 
+                960,//layer_num_fils 
                 1,//strides;
                 3,//filter_size;
                 1,//padding_left;
                 1,//padding_right;
                 1,//padding_top;
                 1,//padding_bottom;
-                944,//layer_depth;
+                960,//layer_depth;
                 7,//layer_ifm_height;
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
-                (944 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
-                (944 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
+                RELU6,//layer_activation;
+                (960 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                944 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                3344,//layer_weights_offset;
+                (960 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                5216,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                100464,//dw_ifms_cumulative_width_offset;
+                165760,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.021300900727510452,//,fms_dt layer_ofms_scale;
+                0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
@@ -2027,7 +2033,7 @@ const layer_specs layer_60_dw_specs = {
                 };
 //****************************
  const int layer_61_pw_num_fils = 160;
-const int layer_61_pw_depth = 944;
+const int layer_61_pw_depth = 960;
 const int layer_61_pw_filter_dim = 1;
  const int layer_61_pw_ifm_width = 7;
  //****************************
@@ -2041,32 +2047,32 @@ const layer_specs layer_61_pw_specs = {
                 0,//padding_right;
                 0,//padding_top;
                 0,//padding_bottom;
-                944,//layer_depth;
+                960,//layer_depth;
                 7,//layer_ifm_height;
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
                 0,//layer_activation;
-                (944 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
+                (960 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (160 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                944 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                836352 / weights_group_items,//layer_weights_offset;
-                848704,//layer_weights_offset_on_chip;
+                (960 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1096320 / weights_group_items,//layer_weights_offset;
+                1100672,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 1,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.11476074904203415,//,fms_dt layer_ofms_scale;
-                17,//fms_dt layer_ofms_zero_point;
-                6.80408949835745,//rec_scales_dt add_layer_scale_reciprocal;
-                5,//biases_dt add_layer_zero_point;
-                0.1356835663318634,//scales_dt skip_connection_other_layer_scale;
-                1//biases_dt skip_connection_other_layer_zero_point;
+                0.22082959115505219,//,fms_dt layer_ofms_scale;
+                0,//fms_dt layer_ofms_zero_point;
+                3.3522585543733454,//rec_scales_dt add_layer_scale_reciprocal;
+                4,//biases_dt add_layer_zero_point;
+                0.16682137548923492,//scales_dt skip_connection_other_layer_scale;
+                -5//biases_dt skip_connection_other_layer_zero_point;
                 };
 //****************************
  const int layer_63_pw_num_fils = 960;
@@ -2089,21 +2095,21 @@ const layer_specs layer_63_pw_specs = {
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (160 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (960 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                160 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                987392 / weights_group_items,//layer_weights_offset;
-                999744,//layer_weights_offset_on_chip;
+                (160 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1249920 / weights_group_items,//layer_weights_offset;
+                1254272,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                5,//fms_dt layer_ifms_zero_point;
+                4,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -2132,17 +2138,17 @@ const layer_specs layer_64_dw_specs = {
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (960 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (960 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                4288,//layer_weights_offset;
+                (960 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                6176,//layer_weights_offset;
                 0,//layer_weights_offset_on_chip;
-                113680,//dw_ifms_cumulative_width_offset;
+                179200,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
@@ -2182,16 +2188,16 @@ const layer_specs layer_65_pw_specs = {
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                960 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1140992 / weights_group_items,//layer_weights_offset;
-                1153344,//layer_weights_offset_on_chip;
+                (960 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1403520 / weights_group_items,//layer_weights_offset;
+                1407872,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
                 -128,//fms_dt layer_ifms_zero_point;
-                0.10943020135164261,//,fms_dt layer_ofms_scale;
-                10,//fms_dt layer_ofms_zero_point;
+                0.14633579552173615,//,fms_dt layer_ofms_scale;
+                40,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
                 0,//biases_dt add_layer_zero_point;
                 1,//scales_dt skip_connection_other_layer_scale;
@@ -2218,21 +2224,21 @@ const layer_specs layer_66_pw_specs = {
                 7,//layer_ifm_width;
                 7,//layer_ofm_height;
                 7,//layer_ofm_width;
-                RELU,//layer_activation;
+                RELU6,//layer_activation;
                 (320 + pw_tile_d - 1) / pw_tile_d,//layer_num_of_tiles_in_d;
                 (1280 + pw_conv_parallelism_out - 1) / pw_conv_parallelism_out,//layer_num_of_tiles_out_d;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ifm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ifm_tiles_w;
                 (7 + pw_tile_h - 1) / pw_tile_h,//layer_num_of_ofm_tiles_h;
                 (7 + pw_tile_w - 1) / pw_tile_w,//layer_num_of_ofm_tiles_w;
-                320 * pw_conv_parallelism_out / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
-                1448192 / weights_group_items,//layer_weights_offset;
-                1460544,//layer_weights_offset_on_chip;
+                (320 * pw_conv_parallelism_out ) / weights_group_items,//layer_num_of_weight_groups_for_one_pass;
+                1710720 / weights_group_items,//layer_weights_offset;
+                1715072,//layer_weights_offset_on_chip;
                 0,//dw_ifms_cumulative_width_offset;
                 1,//bool write_to_result_or_channels;
                 0,//bool write_to_tmp;
                 0,//bool fused_with_add;
-                10,//fms_dt layer_ifms_zero_point;
+                40,//fms_dt layer_ifms_zero_point;
                 0.0235294122248888,//,fms_dt layer_ofms_scale;
                 -128,//fms_dt layer_ofms_zero_point;
                 1,//rec_scales_dt add_layer_scale_reciprocal;
@@ -2241,11 +2247,12 @@ const layer_specs layer_66_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 const pooling_layer_specs layer_67_avgpool_specs = {
-                1.0,//const pooling_fused_scales_dt fused_scale; 
+                1.0620487151969,//const pooling_fused_scales_dt fused_scale; 
                 -128,//const biases_dt ifms_zero_point;
                 -128,//const biases_dt ofms_zero_point;
                 };
 const fc_layer_specs layer_68_fc_specs = {
                 -128,//const fms_dt ifm_zero_point
                 };
+#endif
 #endif

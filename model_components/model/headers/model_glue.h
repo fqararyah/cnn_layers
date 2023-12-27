@@ -12,9 +12,9 @@
 #endif
 #if MODEL_ID == MOB_V2
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
-#include "mob_v2_dw_weights_BOTTLENECK_CHAIN_MODE.h"
+#include "mob_v2_dw_weights.h"
 #include "../../model/headers/mob_v2_on_chip_weights.h"
-#include "../../model/headers/mob_v2_quantization_and_biases_BOTTLENECK_CHAIN_MODE.h"
+#include "../../model/headers/mob_v2_quantization_and_biases.h"
 #else
 #include "../../model/headers/mob_v2_on_chip_weights.h"
 #include "../../model/headers/mob_v2_quantization_and_biases_PIPELINED_ENGINES_MODE.h"

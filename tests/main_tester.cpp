@@ -31,18 +31,18 @@ int main(int argc, char **argv)
 
 	string dw_weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
-		"_off_chip_dw_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
+		"_off_chip_dw_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 	string fused_scales_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
-		"_fused_scales_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
+		"_fused_scales_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 	string fused_zps_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
-		"_fused_zps_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";	
+		"_fused_zps_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";	
 #if HW == CPU
 	string weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 	string on_chip_weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipeline_" + to_string(PIPELINE_LENGTH) + ".txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #elif HW == _FPGA
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga.txt";

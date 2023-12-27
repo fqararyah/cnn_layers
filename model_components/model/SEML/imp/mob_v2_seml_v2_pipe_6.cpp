@@ -6,7 +6,7 @@
 
 using namespace seml_engines;
 
-#if FIBHA_VERSION == 2 && MODEL_ID == MOB_V2
+#if FIBHA_VERSION == 2 && MODEL_ID == MOB_V2 && PIPELINE_LENGTH == 6
 
 void seml(weights_grp_dt off_chip_weights[all_pw_s_weights],
           weights_dt off_chip_dw_weights[all_dw_off_chip_weights],

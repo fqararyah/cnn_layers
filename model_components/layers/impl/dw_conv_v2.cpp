@@ -56,10 +56,10 @@ dw_conv_engine:
                 {
                     break;
                 }
-                for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
+                for (int h = 0; h < DW_PARALLELISM_H; h++)
                 {
 #pragma HLS UNROLL
-                    for (int w = 0; w < CHANNELS_TILE_WIDTH; w++)
+                    for (int w = 0; w < DW_PARALLELISM_W; w++)
                     {
 #pragma HLS UNROLL
                         // if(layer_specs_struct.layer_index == 14 && h == 0 && w == 0 && starting_d + d_in_pipeline == 0 && tile_in_h == 0 && tile_in_w == 2){

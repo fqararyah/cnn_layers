@@ -12,7 +12,11 @@ weights_file_format = weights_files_location + 'weights_{}.txt'
 parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
-off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights_fpga.txt'
+pipeline_len = 0
+if cgc.PIPELINE == True:
+    pipeline_len = cgc.PIPELINE_LEN
+
+off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights_fpga_pipe_{}.txt'
 
 model_dag = utils.read_model_dag()
 
@@ -69,4 +73,5 @@ for i in range(first_off_chip_layer, last_off_chip_layer):
     combined_weights = combined_weights.reshape(combined_weights.size) 
     formated_weights_all_layers.append(combined_weights)
 
-np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(formated_weights_all_layers, 0), fmt='%i')
+np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME, pipeline_len),
+            np.concatenate(formated_weights_all_layers, 0), fmt='%i')

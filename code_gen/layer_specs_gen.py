@@ -5,7 +5,11 @@ import code_generation_constants as cgc
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 # './out/layers_specs.h'
-out_file = '../model_components/model/headers/{}_layers_specs.h'
+out_file = '../model_components/model/headers/{}_layers_specs_pipe_{}.h'
+
+pipeline_len = 0
+if cgc.PIPELINE:
+    pipeline_len = cgc.PIPELINE_LEN
 
 model_config_file = '../model_config/{}.txt'.format(cgc.MODEL_NAME)
 
@@ -89,8 +93,9 @@ cumulative_dw_weights = 0
 dw_ifms_cumulative_width_offset = 0
 num_conv_layers_so_far = 0
 first_conv_layer = True
-with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
+with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
+    f.write('#if PIPELINE_LENGTH == ' + str(pipeline_len) + '\n')
     f.write("#ifndef LAYERS_SPECS\n")
     f.write("#define LAYERS_SPECS\n")
 
@@ -312,6 +317,7 @@ with open(out_file.format(cgc.MODEL_NAME), 'w') as f:
             replacement_list.append('}')
             f.write(quantize_specs_struct.format(*replacement_list))
 
+    f.write('#endif\n')
     f.write('#endif\n')
 
 with open(model_config_file, 'w') as f:

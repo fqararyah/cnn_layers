@@ -249,10 +249,10 @@ pw_conv_eng_loops:
 	for (int f_d = 0; f_d < pw_conv_parallelism_out; f_d++)
 	{
 #pragma HLS UNROLL
-		for (int t_h = 0; t_h < pw_tile_h; t_h++)
+		for (int t_h = 0; t_h < PW_PARALLELISM_H; t_h++)
 		{
 #pragma HLS UNROLL
-			for (int t_w = 0; t_w < pw_tile_w; t_w++)
+			for (int t_w = 0; t_w < PW_PARALLELISM_W; t_w++)
 			{
 #pragma HLS UNROLL
 				if (t_h >= pw_tile_h / strides || t_w >= pw_tile_w / strides)

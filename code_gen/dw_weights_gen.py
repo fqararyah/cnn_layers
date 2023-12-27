@@ -7,18 +7,24 @@ utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
 bit_width = 8
 from_files = True
+model_dag = utils.read_model_dag()
+
+pipeline_len_str = 'pipe_' + str(cgc.PIPELINE_LEN)
+pipeline_len = cgc.PIPELINE_LEN
+if not cgc.PIPELINE:
+    pipeline_len_str = 'pipe_0'
+    pipeline_len = 0
+
 weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
     cgc.MODEL_NAME)
 reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
-dw_weights_h_file = '../model_components/model/headers/{}_dw_weights_{}.h'.format(
-    cgc.MODEL_NAME, cgc.FIRST_PART_IMPLEMENTATION)
+dw_weights_h_file = '../model_components/model/headers/{}_dw_weights_{}_{}.h'.format(
+    cgc.MODEL_NAME, cgc.FIRST_PART_IMPLEMENTATION, pipeline_len_str)
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
-if cgc.PIPELINE:
-    dw_off_chip_weights_file = '../off_chip_weights/{}_off_chip_dw_weights_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
-else:
-    dw_off_chip_weights_file = '../off_chip_weights/{}_off_chip_dw_weights.txt'.format(cgc.MODEL_NAME)
+dw_off_chip_weights_file = '../off_chip_weights/{}_off_chip_dw_weights_{}.txt'.format(cgc.MODEL_NAME, pipeline_len_str)
+
 
 dw_off_chip_weights = []
 
@@ -30,7 +36,7 @@ else:
     seml_dw_weights_declaration_string = 'const static dw_weights_dt seml_dw_weights_3x3[][9] = {\n'
 dw_layers_weights_offsets_declaration_string = 'const static int dw_layers_weights_offsets[] ={'
 dw_layers_weights_offsets_declaration_string_pipe = 'const static int pipe_dw_layers_weights_offsets[] ={'
-model_dag = utils.read_model_dag()
+
 dw_layers_weights_offsets = [0] * (len(model_dag) + 1)
 dw_layers_weights_offsets_pipe = [0] * (len(model_dag) + 1)
 
@@ -44,14 +50,12 @@ first_layer = cgc.FIRST_LAYER_TO_GENERATE
 last_pipeline_layer = cgc.PIPELINE_LEN if cgc.PIPELINE == True else 0
 first_pipeline_layer = 0
 
-
-
 current_index = 0
 num_of_layers_generated_for = 0
 with open(dw_weights_h_file, 'w') as f:
     f.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     f.write("#if FIRST_PART_IMPLEMENTATION == " + str(cgc.FIRST_PART_IMPLEMENTATION) + \
-            " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
+            " && MODEL_ID == " + cgc.MODEL_NAME.upper() + " && PIPELINE_LENGTH == " + str(pipeline_len) + "\n")
     f.write("#ifndef DW_WEIGHTS\n")
     f.write("#define DW_WEIGHTS\n")
 
@@ -181,12 +185,40 @@ with open(dw_off_chip_weights_file, 'w') as f:
     for i in range(len(dw_off_chip_weights)):
         f.write(dw_off_chip_weights[i] + '\n')
 
+#*****************************************************
+all_dw_weights = 0
+for i in range(len(model_dag)):
+    layer_specs = model_dag[i]
+    if 'type' in layer_specs and layer_specs['type'] == 'dw':
+        weights_shape = layer_specs['weights_shape']
+        all_dw_weights += (weights_shape[0] * weights_shape[1] * weights_shape[2])
+
+dw_off_chip_weights_sizes_given_pipeline = all_dw_weights
+conv_layers_so_far = 0
+i=0
+print(last_pipeline_layer)
+while conv_layers_so_far < last_pipeline_layer:
+    layer_specs = model_dag[i]
+    i += 1
+    if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
+        conv_layers_so_far += 1
+        if layer_specs['type'] == 'dw':
+            weights_shape = layer_specs['weights_shape']
+            dw_off_chip_weights_sizes_given_pipeline -= (weights_shape[0] * weights_shape[1] * weights_shape[2])
+#**********************************************************
 
 replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
+        if 'const int all_dw_off_chip_weights_pipe_{} ='.format(last_pipeline_layer) in line:
+            continue
         if 'const int all_dw_off_chip_weights =' in line:
-            replacement_string += 'const int all_dw_off_chip_weights = {};\n'.format(len(dw_off_chip_weights))
+            replacement_string += 'const int all_dw_off_chip_weights_pipe_{} = {};\n'.format(last_pipeline_layer,
+                                                                                     dw_off_chip_weights_sizes_given_pipeline)        
+            replacement_string += 'const int all_dw_off_chip_weights = {};\n'.format(
+                'all_dw_off_chip_weights_pipe_{}'.format(last_pipeline_layer)
+            )
+
         elif 'const int MAX_DW_LAYER_D' in line:
             replacement_string += 'const int MAX_DW_LAYER_D = ' + str(max_dw_num_filters) + ';\n'
         else:

@@ -1,13 +1,5 @@
 zbc: ./model_components/utils/utils.cpp \
-	./model_components/model/SEML/imp/mob_v2_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_5_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_5_seml_v2.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_75_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_75_seml_v2.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_25_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_25_seml_v2.cpp \
-	./model_components/model/SEML/imp/resnet50_seml_v2.cpp \
+	./model_components/model/SEML/imp/*.cpp \
 	./model_components/layers/impl/pw_conv_v1_2.cpp \
 	./model_components/layers/impl/pw_conv_v2.cpp \
 	./model_components/layers/impl/pw_and_conv.cpp \
@@ -33,15 +25,7 @@ zbc: ./model_components/utils/utils.cpp \
 	./tests/main_tester.cpp
 	g++ -o main_tester \
 	./model_components/utils/utils.cpp \
-	./model_components/model/SEML/imp/mob_v2_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_seml_v2.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_5_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_5_seml_v2.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_75_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_75_seml_v2.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_25_seml.cpp \
-	./model_components/model/SEML/imp/mob_v2_0_25_seml_v2.cpp \
-	./model_components/model/SEML/imp/resnet50_seml_v2.cpp \
+	./model_components/model/SEML/imp/*.cpp \
 	./model_components/layers/impl/pw_conv_v1_2.cpp \
 	./model_components/layers/impl/pw_conv_v2.cpp \
 	./model_components/layers/impl/pw_and_conv.cpp \

@@ -4,12 +4,16 @@ import utils
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format(cgc.MODEL_NAME,
-                                                                        cgc.FIBHA_VERSION_POSTFIX)
+pipeline_len_str = 'pipe_' + str(cgc.PIPELINE_LEN)
+if not cgc.PIPELINE:
+    pipeline_len_str = 'pipe_0'
+
+in_out_file = '../model_components/model/SEML/imp/{}_seml{}_{}.cpp'.format(cgc.MODEL_NAME,
+                                                                        cgc.FIBHA_VERSION_POSTFIX, pipeline_len_str)
 
 if 'uniform' in cgc.MODEL_NAME:
-    in_out_file = '../model_components/model/SEML/imp/{}_seml{}.cpp'.format('mob_v2',
-                                                                            cgc.FIBHA_VERSION_POSTFIX)
+    in_out_file = '../model_components/model/SEML/imp/{}_seml{}_{}.cpp'.format('mob_v2',
+                                                                            cgc.FIBHA_VERSION_POSTFIX, pipeline_len_str)
 
 constants_header_file = '../model_components/basic_defs/simulation_constants.h'
 in_out_header_file = '../model_components/model/SEML/headers/seml.h'
@@ -178,8 +182,11 @@ file_replacement = ''
 with open(constants_header_file, 'r') as f:
     for line in f:
         if '#define PIPELINE_LENGTH' in line:
-            file_replacement += '#define PIPELINE_LENGTH ' + \
-                str(cgc.PIPELINE_LEN) + '\n'
+            if cgc.PIPELINE:
+                file_replacement += '#define PIPELINE_LENGTH ' + \
+                    str(cgc.PIPELINE_LEN) + '\n'
+            else:
+               file_replacement += '#define PIPELINE_LENGTH 0\n' 
         else:
             file_replacement += line
 

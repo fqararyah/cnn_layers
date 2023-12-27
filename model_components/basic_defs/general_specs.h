@@ -110,7 +110,8 @@ const int median_width = 14;
 
 // weights
 const int all_pw_s_weights = 2120320 / weights_group_items;
-const int all_dw_off_chip_weights = 63072;
+const int all_dw_off_chip_weights_pipe_6 = 63072;
+const int all_dw_off_chip_weights = all_dw_off_chip_weights_pipe_6;
 const int all_off_chip_fused_scales_zps = 16760;
 const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
 const int all_on_chip_pw_s_weights = 12128;

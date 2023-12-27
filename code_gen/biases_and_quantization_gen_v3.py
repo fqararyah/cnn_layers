@@ -22,11 +22,15 @@ fms_scales_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/' 
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 if cgc.PIPELINE:
-    off_chip_fused_scales_file = '../off_chip_weights/{}_fused_scales_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
-    dw_off_chip_fused_zps_file = '../off_chip_weights/{}_fused_zps_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+    pipeline_len = cgc.PIPELINE_LEN
 else:
-    off_chip_fused_scales_file = '../off_chip_weights/{}_fused_scales.txt'.format(cgc.MODEL_NAME)
-    dw_off_chip_fused_zps_file = '../off_chip_weights/{}_fused_zps.txt'.format(cgc.MODEL_NAME)
+    pipeline_len = 0
+
+off_chip_fused_scales_file = '../off_chip_weights/{}_fused_scales_pipe_{}.txt'.format(cgc.MODEL_NAME,
+                                                                                           pipeline_len)
+dw_off_chip_fused_zps_file = '../off_chip_weights/{}_fused_zps_pipe_{}.txt'.format(cgc.MODEL_NAME, 
+                                                                                       pipeline_len)
+
 
 #########################################################################
 
@@ -73,8 +77,9 @@ biases_file_format = biases_files_location + 'biases_{}.txt'
 max_layer_d = 0
 
 # './out/dw_weights.h'
-h_file = '../model_components/model/headers/{}_quantization_and_biases_{}.h'.format(cgc.MODEL_NAME,
-                                                                                   cgc.FIRST_PART_IMPLEMENTATION)
+h_file = '../model_components/model/headers/{}_quantization_and_biases_{}_pipe_{}.h'.format(cgc.MODEL_NAME,
+                                                                                   cgc.FIRST_PART_IMPLEMENTATION,
+                                                                                   pipeline_len)
 
 layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
 pipe_layers_fused_parameters_offsets = [0] * (len(model_dag) + 1)
@@ -86,7 +91,7 @@ last_secondary_type_after_a_conv = {}
 with open(h_file, 'w') as wf:
     wf.write('#include "../../basic_defs/basic_defs_glue.h"\n')
     wf.write('#if FIRST_PART_IMPLEMENTATION ==' + str(cgc.FIRST_PART_IMPLEMENTATION) +
-             " && MODEL_ID == " + cgc.MODEL_NAME.upper() + "\n")
+             " && MODEL_ID == " + cgc.MODEL_NAME.upper()  + " && PIPELINE_LENGTH == " + str(pipeline_len) + "\n")
     wf.write("#ifndef BIAS_QUANT\n")
     wf.write("#define BIAS_QUANT\n")
 

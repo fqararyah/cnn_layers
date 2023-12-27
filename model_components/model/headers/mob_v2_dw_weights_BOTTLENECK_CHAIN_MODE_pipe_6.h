@@ -1,5 +1,5 @@
 #include "../../basic_defs/basic_defs_glue.h"
-#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && MODEL_ID == MOB_V2
+#if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE && MODEL_ID == MOB_V2 && PIPELINE_LENGTH == 6
 #ifndef DW_WEIGHTS
 #define DW_WEIGHTS
 const static dw_weights_dt dw_weights_2[layer_2_dw_depth][layer_2_dw_filter_dim * layer_2_dw_filter_dim]= {

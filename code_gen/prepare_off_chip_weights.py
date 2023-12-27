@@ -25,14 +25,13 @@ off_chip_fc_weights_file = '../off_chip_weights/{}_fc_weights.txt'
 off_chip_fc_weight_sums_file = '../off_chip_weights/{}_fc_weight_sums.txt'
 off_chip_fc_biases_file = '../off_chip_weights/{}_fc_biases.txt'
 
+pipeline_len = 0
 if cgc.PIPELINE == True:
-    off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights_pipeline_{}.txt'
-    off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets_pipeline_{}.txt'
-    num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights_pipeline_{}.txt'
-else:
-    off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights.txt'
-    off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets.txt'
-    num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights.txt'
+    pipeline_len = cgc.PIPELINE_LEN
+
+off_chip_weights_file = '../off_chip_weights/{}_off_chip_weights_pipe_{}.txt'
+off_chip_weights_offsets_file = '../off_chip_weights/{}_off_chip_weights_offsets_pipe_{}.txt'
+num_of_pw_weights_file = '../off_chip_weights/{}_num_of_pw_weights_pipe_{}.txt'
 
 model_dag = utils.read_model_dag()
 
@@ -100,12 +99,11 @@ for layer_index in layers_indices:
     layers_weights_offsets[layer_index] = weights_combined_so_far
     weights_combined_so_far += layers_weights[layer_index].size
 
-if cgc.PIPELINE == True:
-    np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN), np.concatenate(combined_weights, 0), fmt='%i')
-    np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN), np.array(layers_weights_offsets), fmt='%i')
-else:
-    np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME), np.concatenate(combined_weights, 0), fmt='%i')
-    np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME), np.array(layers_weights_offsets), fmt='%i')
+np.savetxt(off_chip_weights_file.format(cgc.MODEL_NAME, pipeline_len), 
+           np.concatenate(combined_weights, 0), fmt='%i')
+np.savetxt(off_chip_weights_offsets_file.format(cgc.MODEL_NAME, pipeline_len),
+            np.array(layers_weights_offsets), fmt='%i')
+
 
 if cgc.PIPELINE == True:
     num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
@@ -119,7 +117,8 @@ replacement_string = ''
 with open(general_specs_file, 'r') as f:
     for line in f:
         if 'const int all_pw_s_weights =' in line:
-            replacement_string += 'const int all_pw_s_weights = {} / weights_group_items;\n'.format(all_pw_s_weights)
+            replacement_string += 'const int all_pw_s_weights = {} / weights_group_items;\n'.format(
+                all_pw_s_weights)
         else:
             replacement_string += line
 

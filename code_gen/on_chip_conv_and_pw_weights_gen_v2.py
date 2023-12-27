@@ -14,9 +14,9 @@ weights_file_format = 'weights_{}.txt'
 on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2.h'.format(cgc.MODEL_NAME)
 
 if cgc.PIPELINE == True:
-    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipeline_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
+    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipe_{}.txt'.format(cgc.MODEL_NAME, cgc.PIPELINE_LEN)
 else:
-    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights.txt'.format(cgc.MODEL_NAME)
+    on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipe.txt'.format(cgc.MODEL_NAME, 0)
 
 general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
