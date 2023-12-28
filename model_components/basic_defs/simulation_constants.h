@@ -23,7 +23,7 @@
 #define ONLY_SEML 0
 #endif
 #define USE_FIRB 1
-#define DEBUGGING 1
+#define DEBUGGING 0
 #define TESTING 1
 #define FIBHA_VERSION 2
 #define BOTTLENECK_CHAIN_MODE 1

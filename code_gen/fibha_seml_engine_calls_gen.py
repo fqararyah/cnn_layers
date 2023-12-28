@@ -113,7 +113,7 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     target_block = ''
     if layer_type == 's' and first_conv_layer:
         first_conv_layer = False
-        target_block = first_conv_block
+        continue
     elif layer_type == 'dw':
         if cgc.DW_WEIGHTS_OFF_CHIP:
             target_block = fill_dw_weights_block.format(layer_index, layer_index)
