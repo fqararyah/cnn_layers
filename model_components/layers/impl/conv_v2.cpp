@@ -95,13 +95,13 @@ void layer_0_s_conv_engine(
 	const biases_dt current_layer_zero_point = first_conv_layer_specs.layer_ifms_zero_point;
 	for (int f = 0; f < first_conv_layer_num_fils; f++)
 	{
-		fms_quantization_scheme normalization = {0, 0, 0, 0};
-		normalization.ofm_zero_point = first_conv_layer_specs.layer_ofms_zero_point;
-		normalization.ofm_scale = first_conv_layer_specs.layer_ofms_scale;
-		normalization.fused_zero_point = fused_zero_points[f];
-		normalization.fused_scales = fused_scales[f];
-		normalization.fused_scales_log_2_shift = fused_scales_log_2_shifts[f];
-		normalization.layer_0_relu_6_fused_scale = relu_6_fused_scales[f];
+
+		fms_dt ofm_zero_point = first_conv_layer_specs.layer_ofms_zero_point;
+		scales_dt ofm_scale = first_conv_layer_specs.layer_ofms_scale;
+		biases_dt fused_zero_point = fused_zero_points[f];
+		fused_scales_dt fused_scale = fused_scales[f];
+		relu_6_fused_scales_dt relu_6_fused_scale = relu_6_fused_scales[0];
+		int layer_relu = first_conv_layer_specs.layer_activation;
 		for (int w = 0; w < first_conv_layer_specs.layer_ofm_width; w++)
 		{
 #pragma HLS PIPELINE
@@ -115,34 +115,61 @@ void layer_0_s_conv_engine(
 					for (int c_w = 0; c_w < first_conv_layer_filter_dim; c_w++)
 					{
 #pragma HLS UNROLL
+						// tmp += weights_1[f][d][c_h][c_w] * channels_tile[d][c_h][w * first_conv_layer_specs.strides + c_w];
 						if (w * first_conv_layer_specs.strides + c_w < first_conv_layer_ifm_width)
 						{
 							tmp += weights_1[f][d][c_h][c_w] * channels_tile[d][c_h][w * first_conv_layer_specs.strides + c_w];
-							if (starting_h == 0 && w == 0 && d == 0 && f == 0)
-							{
-								printf("%d * %d \n", (int)weights_1[f][d][c_h][c_w],
-									   (int)channels_tile[d][c_h][w * first_conv_layer_specs.strides + c_w]);
-							}
 						}
 						else
 						{
 							tmp += weights_1[f][d][c_h][c_w] * current_layer_zero_point;
 						}
+						// if ((starting_h == 9 || starting_h == 8) && w == 0 && d == 0 && f == 0)
+						// {
+						// 	printf("%d * %d \n", (int)weights_1[f][d][c_h][c_w],
+						// 		   (int)channels_tile[d][c_h][w * first_conv_layer_specs.strides + c_w]);
+						// }
 					}
 				}
+				// if ((starting_h == 9 || starting_h == 8) && w == 0 && d == 0 && f == 0)
+				// {
+				// 	printf("\n*************\n");
+				// }
 			}
 			const int tile_in_d = f / pw_tile_d;
 			const int tile_in_h = starting_h / pw_tile_h;
 			const int tile_in_w = w / pw_tile_w;
-			const int tile_index = tile_in_d * (first_conv_layer_specs.layer_num_fils * first_conv_layer_specs.layer_num_of_ofm_tiles_w) + tile_in_h * first_conv_layer_specs.layer_num_of_ofm_tiles_w + tile_in_w;
+			const int tile_index = tile_in_d *
+									   (first_conv_layer_specs.layer_num_of_ofm_tiles_h * first_conv_layer_specs.layer_num_of_ofm_tiles_w) +
+								   tile_in_h * first_conv_layer_specs.layer_num_of_ofm_tiles_w + tile_in_w;
 
 			// const int in_tile_d = f % pw_tile_d;
 			const int in_tile_h = starting_h % pw_tile_h;
 			const int in_tile_w = w % pw_tile_w;
 			// const int in_tile_index = in_tile_d * pw_tile_hw + in_tile_h * pw_tile_w + in_tile_w;
 
-			result[tile_index][in_tile_h][in_tile_w] = conv_relu_norm(
-				tmp, normalization, 6);
+			result[tile_index][in_tile_h][in_tile_w] = result[tile_index][in_tile_h][in_tile_w] = // conv_relu_norm(
+																								  // tmp, normalization, first_conv_layer_specs.layer_activation);
+				conv_relu_norm_v2(tmp, fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
+			// if (tile_index == 0)
+			// {
+			// 	pss_dt pss = tmp;
+			// 	pss += fused_zero_point;
+			// 	printf("%d >> ", (int)pss);
+
+			// 	pss_f_dt scaled_pss = pss * fused_scale;
+			// 	printf("%f >> ", (float)scaled_pss);
+			// 	printf("%f >> ", (float)fused_scale);
+			// 	if (layer_relu == 6 && scaled_pss > relu_6_fused_scale)
+			// 	{
+			// 		scaled_pss = relu_6_fused_scale;
+			// 	}
+
+			// 	scaled_pss += ofm_zero_point;
+			// 	printf("%f >> ", (float)scaled_pss);
+			// 	scaled_pss += quant_half - (scaled_pss < 0);
+			// 	printf("%f \n ", (float)scaled_pss);
+			// }
 		}
 	}
 }
@@ -176,7 +203,7 @@ void layer_0_s_3x3(
 #endif
 	for (int h = 0; h < first_conv_layer_specs.layer_ofm_height; h++)
 	{
-		const int start_reading_h = h * first_conv_layer_strides + rows_filled_first_time;
+		const int start_reading_h = (h + 1) * first_conv_layer_strides + rows_filled_first_time;
 		layer_0_s_conv_engine(first_layer_weights, channels_tile, result, h,
 							  first_conv_layer_fused_scales, first_conv_layer_relu_6_fused_scales,
 							  first_conv_layer_fused_zero_points);

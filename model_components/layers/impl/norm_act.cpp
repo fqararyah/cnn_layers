@@ -278,7 +278,7 @@ fms_dt conv_relu_norm(first_conv_pss_dt pss,
 	return clamp((fms_dt)(normalization.ofm_zero_point + normalization.layer_0_relu_6_fused_scale));
 }
 
-fms_dt conv_relu_norm_v2(pss_dt pss,
+fms_dt conv_relu_norm_v2(first_conv_pss_dt pss,
 						 const biases_dt fused_zero_point,
 						 const fms_dt ofm_zero_point,
 						 const scales_dt fused_scales,
@@ -289,13 +289,13 @@ fms_dt conv_relu_norm_v2(pss_dt pss,
 
 	pss += fused_zero_point;
 
-	if (pss <= 0)
+	if (layer_relu == 6 && pss <= 0)
 	{
 		return ofm_zero_point;
 	}
 
 	pss_f_dt scaled_pss = pss * fused_scales;
-	if (scaled_pss > relu_6_fused_scale)
+	if (layer_relu == 6 && scaled_pss > relu_6_fused_scale)
 	{
 		scaled_pss = relu_6_fused_scale;
 	}
