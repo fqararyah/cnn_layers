@@ -70,11 +70,16 @@ using namespace std::chrono;
 
 int main(int argc, char* argv[]) {
 
+	int images_to_test = 1000;
+
 	//TARGET_DEVICE macro needs to be passed from gcc command line
 	if (argc < 2) {
 		std::cout << "Usage: " << argv[0]
 				<< " <xclbin> number_of_images_to_test" << std::endl;
 		return EXIT_FAILURE;
+	}
+	if (argc >= 3) {
+		images_to_test = atoi(argv[2]);
 	}
 
 	//*********************************************************************************************************************
@@ -85,8 +90,8 @@ int main(int argc, char* argv[]) {
 			+ get_model_prefix() + "_off_chip_dw_weights_pipeline_"
 			+ to_string(PIPELINE_LENGTH) + ".txt";
 
-	string on_chip_weights_file =
-			"/media/sd-mmcblk0p2/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
+	string on_chip_weights_file = "/media/sd-mmcblk0p2/on_chip_weights/"
+			+ get_model_prefix() + "_on_chip_weights.txt";
 
 	string fused_scales_file = "/media/sd-mmcblk0p2/off_chip_weights/"
 			+ get_model_prefix() + "_fused_scales_pipeline_"
@@ -106,7 +111,7 @@ int main(int argc, char* argv[]) {
 	string output_folder = "/media/sd-mmcblk0p2/fpga_out/";
 
 	string predictions_file =
-			"/media/sd-mmcblk0p2/fpga_out/predictions_fpga.json";
+			"/media/sd-mmcblk0p2/fpga_out/predictions_fpga_" + to_string(images_to_test) + ".json";
 
 	//weights_grp_dt glued_weights[all_pw_weights];
 	//fms_dt fc_input[fc_layer_input_size];
@@ -234,7 +239,7 @@ int main(int argc, char* argv[]) {
 	int *ptr_first_lunch;
 
 	OCL_CHECK(err,
-				ptr_input_image = (fms_grp_dt*)q.enqueueMapBuffer (buffer_input_image , CL_TRUE , CL_MAP_WRITE , 0, input_image_depth * input_image_num_fms_groups_in_a_channel*sizeof(fms_grp_dt), NULL, NULL, &err));
+			ptr_input_image = (fms_grp_dt*)q.enqueueMapBuffer (buffer_input_image , CL_TRUE , CL_MAP_WRITE , 0, input_image_depth * input_image_num_fms_groups_in_a_channel*sizeof(fms_grp_dt), NULL, NULL, &err));
 	OCL_CHECK(err,
 			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_pw_s_weights * sizeof(weights_grp_dt), NULL, NULL, &err));
 	OCL_CHECK(err,
@@ -255,10 +260,7 @@ int main(int argc, char* argv[]) {
 
 	DIR *dir;
 	int img_count = 0;
-	int images_to_test = 1000;
-	if (argc >= 3) {
-		images_to_test = atoi(argv[2]);
-	}
+
 	if (argc >= 4) {
 		//read_model_configs(argv[3], ptr_model_config_list);
 		cout << "model_configs_list is filled *************\n";
@@ -318,7 +320,8 @@ int main(int argc, char* argv[]) {
 			string formatted_file_name = ((string) ent->d_name).substr(0,
 					((string) ent->d_name).find(".", 0) + 1) + "JPEG";
 			cout << file_name << "\n";
-			glue_and_quantize_input_image(file_name, ptr_input_image, quantize_layer_specs);
+			glue_and_quantize_input_image(file_name, ptr_input_image,
+					quantize_layer_specs);
 
 //			verify_glued_image(file_name, ptr_input_image);
 //			std::cout<<(fms_dt)ptr_weights[0](fms_dt_offset,0)<<" "
@@ -337,7 +340,7 @@ int main(int argc, char* argv[]) {
 #if PROFILING
 			auto stop = high_resolution_clock::now();
 			auto duration = duration_cast<microseconds>(stop - start);
-			cout << duration.count() << endl;
+			cout << "fibha duration" << duration.count() << endl;
 #endif
 			// The result of the previous kernel execution will need to be retrieved in
 			// order to view the results. This call will transfer the data from FPGA to
@@ -363,7 +366,6 @@ int main(int argc, char* argv[]) {
 //					<< ptr_result[502] << " " << ptr_result[503] << " ";
 #if PROFILING
 			start = high_resolution_clock::now();
-			cout << duration.count() << endl;
 #endif
 			fc_layer(ptr_result, fc_weights, weight_sums, top5, biases,
 					layer_68_fc_specs);
@@ -393,6 +395,11 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
+	cout << "\n" << img_count <<"\n";
+	predictions_file_content = predictions_file_content.substr(0,
+			predictions_file_content.length() - 1) + ']';
+	save_predictions(predictions_file, predictions_file_content);
+
 	OCL_CHECK(err, err = q.enqueueUnmapMemObject(buffer_weights, ptr_weights));
 	OCL_CHECK(err,
 			err = q.enqueueUnmapMemObject(buffer_dw_weights, ptr_dw_weights));
@@ -416,11 +423,6 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err, err = q.finish());
 
 	//std::cout << "TEST " << (match ? "FAILED" : "PASSED") << std::endl;
-
-	cout << img_count;
-	predictions_file_content = predictions_file_content.substr(0,
-			predictions_file_content.length() - 1) + ']';
-	save_predictions(predictions_file, predictions_file_content);
 
 	return (EXIT_SUCCESS);
 

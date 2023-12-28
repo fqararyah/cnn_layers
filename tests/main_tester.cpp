@@ -37,17 +37,15 @@ int main(int argc, char **argv)
 		"_fused_scales_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 	string fused_zps_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
-		"_fused_zps_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";	
+		"_fused_zps_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string on_chip_weights_file =
+		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
-	string on_chip_weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #elif HW == _FPGA
 	string weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga.txt";
-	string on_chip_weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #endif
 	string input_images_folder =
 		"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000/";
@@ -129,10 +127,10 @@ int main(int argc, char **argv)
 			}
 			string formatted_file_name = ((string)ent->d_name).substr(0, ((string)ent->d_name).find(".", 0) + 1) + "JPEG";
 			cout << file_name << "\n";
-// glue_input_image(file_name, input_image);
+			// glue_input_image(file_name, input_image);
 			auto start = chrono::steady_clock::now();
 #if HW == _FPGA
-			glue_input_image(file_name, input_image);
+			glue_and_quantize_input_image(file_name, input_image, quantize_layer_specs);
 #elif HW == CPU
 			// load_image(file_name, input_image);
 
@@ -140,17 +138,17 @@ int main(int argc, char **argv)
 #endif
 			auto end = chrono::steady_clock::now();
 
-						cout << "Elapsed time in milliseconds reading: "
-							 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
-							 << " ms" << endl;
+			cout << "Elapsed time in milliseconds reading: "
+				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
+				 << " ms" << endl;
 			// verify_glued_image(file_name, input_image);
 			// validate_weights(weights_file, glued_weights);
 			int ready_to_receive_new_input = 0;
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 #if HW == _FPGA
 			krnl_fibha_v2(input_image, weights, dw_weights, off_chip_fused_scales,
-					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-					 model_configs_list, &img_count);
+						  off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
+						  model_configs_list, &img_count);
 #elif HW == CPU
 			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
 					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,

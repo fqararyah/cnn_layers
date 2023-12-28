@@ -4,8 +4,9 @@
 #include <dirent.h>
 #include <chrono>
 #include <cassert>
-
-
+#if TESTING == 0
+#include <arm_neon.h>
+#endif
 #include "../../../fiba_v2_kernels/src/model_components/basic_defs/basic_defs_glue.h"
 #if MODEL_ID == MOB_V2
 #include "../../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_layers_specs.h"

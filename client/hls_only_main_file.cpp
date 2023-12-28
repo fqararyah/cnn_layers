@@ -110,8 +110,8 @@ void top_func(
 #endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
 #else
 layer_0_s_3x3(input_image, channels);
-dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_1.txt",
- channels, layer_1_s_specs);
+// dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_1.txt",
+//  channels, layer_1_s_specs);
 #endif // ONLY_SEML == 0
 	seml(off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints, channels, result, tmp_channels, fc_input, model_configs_list);
 

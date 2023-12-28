@@ -77,7 +77,7 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[],
 	top5[2] = -1;
 	top5[3] = -1;
 	top5[4] = -1;
-#if HW == _FPGA
+#if HW == _FPGA && !TESTING
 	int8_t in_vector_int8[fc_layer_input_size];
 	for (int i = 0; i < fc_layer_input_size; i++) {
 		in_vector_int8[i] = in_vector[i];
