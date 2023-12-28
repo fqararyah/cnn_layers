@@ -4,6 +4,97 @@
 
 #if FIBHA_VERSION == 2
 
+void conv_v2_fill_input_image_groups_buffer(
+	fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
+	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_filter_dim],
+	const int starting_h,
+	const int elements_to_fill_from_an_ifm)
+{ // chain_0_1_layer_0_s_in_rows_at_once * input_image_num_fms_groups_in_width
+#pragma HLS INLINE off
+
+	const int start_filling_offset = starting_h * input_image_num_fms_groups_in_width;
+	int elements_avaiable_in_input_image;
+
+	elements_avaiable_in_input_image = (input_image_height - starting_h) * input_image_num_fms_groups_in_width;
+
+	for (int d = 0; d < input_image_depth; d++)
+	{
+#pragma HLS PIPELINE off
+		const int d_offst = start_filling_offset + d * input_image_num_fms_groups_in_a_channel;
+		for (int i = 0; i < elements_to_fill_from_an_ifm; i++)
+		{
+#pragma HLS PIPELINE off
+			if (i < elements_avaiable_in_input_image)
+			{
+				fms_groups_buffer[d][i] = channels[d_offst + i];
+			}
+		}
+	}
+}
+
+void conv_v2_input_image_fill_row_from_groups_buffer(
+	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_strides],
+	fms_dt channels_buffer_0[input_image_depth][first_conv_layer_filter_dim][input_image_width],
+	int row, const int channels_buffer_start_filling_h)
+{
+#pragma HLS INLINE off
+
+	const int start_filling_offset = row * input_image_num_fms_groups_in_width;
+	for (int o_w = 0; o_w < input_image_num_fms_groups_in_width; o_w++)
+	{
+		const int o_w_offset = o_w * input_image_group_items;
+		for (int d = 0; d < input_image_depth; d++)
+		{
+			fms_grp_dt chunck = fms_groups_buffer[d][start_filling_offset + o_w];
+			for (int w = 0; w < input_image_group_items; w++)
+			{
+#pragma HLS PIPELINE
+				if (o_w_offset + w < input_image_width)
+				{
+#if HW == _FPGA
+					if (channels_buffer_start_filling_h + row < first_conv_layer_filter_dim)
+					{
+						channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
+							w * fms_dt_width + fms_dt_offset,
+							w * fms_dt_width);
+					}
+					else
+					{
+						channels_buffer_0[d][channels_buffer_start_filling_h + row -
+											 first_conv_layer_filter_dim][o_w_offset + w] =
+							(fms_dt)chunck(w * fms_dt_width + fms_dt_offset,
+										   w * fms_dt_width);
+					}
+#endif
+				}
+			}
+		}
+	}
+}
+
+void conv_v2_input_image_fill_channels_buffer_from_groups_buffer(
+	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_strides],
+	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width],
+	const int starting_h, const int channels_buffer_start_filling_h,
+	const fms_dt zero_point)
+{
+#pragma HLS INLINE off
+
+	const int rows_to_shift = first_conv_layer_filter_dim - (first_conv_layer_filter_dim - first_conv_layer_strides);
+	if (starting_h >= first_conv_layer_filter_dim - first_conv_layer_specs.padding_top)
+	{
+		shift_hannels_buffer_rows(channels_tile, rows_to_shift);
+	}
+	for (int h = 0; h < INPUT_IMAGE_ROWS_FILLED_EACH_TIME; h++)
+	{
+		if (starting_h + h < input_image_height)
+		{
+			conv_v2_input_image_fill_row_from_groups_buffer(fms_groups_buffer,
+															channels_tile, h, channels_buffer_start_filling_h);
+		}
+	}
+}
+
 void shift_hannels_buffer_rows(
 	fms_dt channels_tile[input_image_depth][first_conv_layer_filter_dim][input_image_width],
 	const int rows_to_shift)
@@ -186,20 +277,20 @@ void layer_0_s_3x3(
 	fill_channels_buffer_cpu(input_image, channels_tile, 0);
 	fill_channels_buffer_cpu(input_image, channels_tile, rows_filled_first_time);
 #elif HW == _FPGA
-	fill_input_image_groups_buffer(input_image, fms_groups_buffer, 0,
-								   input_image_num_fms_groups_in_width); // to do
-	input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-														channels_tile, 0, 0,
-														first_conv_layer_specs.layer_ifms_zero_point);
+	conv_v2_fill_input_image_groups_buffer(input_image, fms_groups_buffer, 0,
+										   input_image_num_fms_groups_in_width); // to do
+	conv_v2_input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+																channels_tile, 0, 0,
+																first_conv_layer_specs.layer_ifms_zero_point);
 
-	fill_input_image_groups_buffer(input_image, fms_groups_buffer,
-								   rows_filled_first_time,
-								   num_of_ifm_groups_read_each_time); // to do
-	input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-														channels_tile,
-														rows_filled_first_time,
-														rows_filled_first_time,
-														first_conv_layer_specs.layer_ifms_zero_point);
+	conv_v2_fill_input_image_groups_buffer(input_image, fms_groups_buffer,
+										   rows_filled_first_time,
+										   num_of_ifm_groups_read_each_time); // to do
+	conv_v2_input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+																channels_tile,
+																rows_filled_first_time,
+																rows_filled_first_time,
+																first_conv_layer_specs.layer_ifms_zero_point);
 #endif
 	for (int h = 0; h < first_conv_layer_specs.layer_ofm_height; h++)
 	{
@@ -210,12 +301,12 @@ void layer_0_s_3x3(
 #if HW == CPU
 		fill_channels_buffer_cpu(input_image, channels_tile, start_reading_h);
 #elif HW == _FPGA
-		fill_input_image_groups_buffer(input_image, fms_groups_buffer,
-									   start_reading_h, num_of_ifm_groups_read_each_time); // to do
-		input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
-															channels_tile, start_reading_h,
-															start_reading_h % first_conv_layer_filter_dim,
-															first_conv_layer_specs.layer_ifms_zero_point);
+		conv_v2_fill_input_image_groups_buffer(input_image, fms_groups_buffer,
+											   start_reading_h, num_of_ifm_groups_read_each_time); // to do
+		conv_v2_input_image_fill_channels_buffer_from_groups_buffer(fms_groups_buffer,
+																	channels_tile, start_reading_h,
+																	rows_filled_first_time,
+																	first_conv_layer_specs.layer_ifms_zero_point);
 #endif
 	}
 }
