@@ -2,6 +2,8 @@
 #include "../headers/dw_conv.h"
 #include "../headers/pw_conv.h"
 
+#if FIBHA_VERSION == 1
+
 void fill_ifms_cols(fms_dt channels[max_fms_size],
 		fms_dt ifms_buffer[dw_pipeline_depth][dw_max_v2_buffer_height][dw_max_v2_buffer_width],
 		const int offset_in_ifms_buffer_h, const int offset_in_ifms_buffer_w,
@@ -554,3 +556,5 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
 		}
 	}
 }
+
+#endif

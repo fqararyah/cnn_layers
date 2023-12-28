@@ -5,6 +5,7 @@
 #define MAIN_FILE
 
 #include "../model_components/model/headers/model_glue.h"
+#include "../model_components/layers/headers/conv.h"
 #if !ONLY_SEML
 #include "../model_components/model/fused_bottlenecks/bottlenecks_glue.h"
 #endif

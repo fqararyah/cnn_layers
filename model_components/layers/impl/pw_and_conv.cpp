@@ -39,6 +39,13 @@ pw_conv_eng_loops:
                             {
                                 break;
                             }
+                            // if (starting_filter == 0 && d == 0 && f_d == 0 && t_h == 0 && t_w == 0)
+                            // {
+                            //     printf("%d * %d \n", (int)channels_tile[d][t_h * strides + c_h][t_w * strides + c_w],
+                            //            (int)weights_tile[f_d][starting_conv_d + d]
+                            //                        [c_h * max_conv_filter_hw_dim + c_w]);
+                            // }
+
                             results_tile[f_d][t_h][t_w] += channels_tile[d][t_h * strides + c_h][t_w * strides + c_w] *
                                                            weights_tile[f_d][starting_conv_d + d]
                                                                        [c_h * max_conv_filter_hw_dim + c_w];
@@ -126,7 +133,6 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_fi
              fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              const int layer, const layer_specs layer_specs_struct,
              const fused_scales_dt fused_scales_buffer[],
-             const fused_scales_log_2_shifts_dt fused_scales_log_2_shifts_buffer[],
              const relu_6_fused_scales_dt relu_6_fused_scales_buffer[],
              const biases_dt fused_zero_points_buffer[], int td_o,
              const int model_configs_list[2 * max_conv_layers])
@@ -207,6 +213,49 @@ conv2_ith_loop:
                           layer_specs_struct);
 }
 
+void fill_from_first_layer_weights(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
+                                   const int starting_filter)
+{
+#pragma HLS INLINE off
+
+    const int filter_dim = first_conv_layer_filter_dim;
+    const int layer_depth = first_conv_layer_depth;
+    for (int f = 0; f < pw_conv_parallelism_out; f++)
+    {
+        for (int d = 0; d < layer_depth; d++)
+        {
+            for (int c_h = 0; c_h < first_conv_layer_filter_dim; c_h++)
+            {
+                for (int c_w = 0; c_w < first_conv_layer_filter_dim; c_w++)
+                {
+                    weights_tile[f][d][c_h * filter_dim + c_w] = first_layer_weights[starting_filter + f][d][c_h][c_w];
+                    // if (starting_filter == 0)
+                    // {
+                    //     printf("%d, %d, %d, %d: %d >>> %d \n", f, d, c_h, c_w, (int)weights_tile[0][0][0],
+                    //            (int)first_layer_weights[starting_filter + f][d][c_h][c_w]);
+                    // }
+                }
+            }
+        }
+    }
+    if (starting_filter == 0)
+        {
+        //     for (int f = 0; f < pw_conv_parallelism_out; f++)
+        //     {
+        //         for (int d = 0; d < 3; d++)
+        //         {
+        //             for (int c_h = 0; c_h < first_conv_layer_filter_dim; c_h++)
+        //             {
+        //                 for (int c_w = 0; c_w < first_conv_layer_filter_dim; c_w++)
+        //                 {
+        //                     printf("%d\n", (int)weights_tile[f][d][c_h * filter_dim * c_w]);
+        //                 }
+        //             }
+        //         }
+        //     }
+         }
+}
+
 void pw_and_conv(weights_grp_dt *weights,
                  fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                  fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
@@ -223,48 +272,68 @@ void pw_and_conv(weights_grp_dt *weights,
 #pragma HLS ARRAY_PARTITION variable = weights_tile complete dim = 1
 #pragma HLS ARRAY_PARTITION variable = weights_tile cyclic dim = 2 factor = num_of_weights_in_the_same_filter_and_group
 
-#if HW == _FPGA
-    weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
-    fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
-                                           layer_specs_struct.layer_depth, layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
-                                           layer_specs_struct.layer_weights_offset,
-                                           layer_specs_struct.layer_num_fils);
-#elif HW == CPU
-    fill_layers_weights_cpu_pw_conv(weights,
-                                    weights_tile,
-                                    0 * pw_conv_parallelism_out, layer_specs_struct.layer_depth,
-                                    layer_specs_struct.layer_weights_offset, layer_specs_struct.layer_num_fils);
-#endif
-
-    const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
-
-conv2_ots_loop:
-    for (int td_o = 0; td_o < layer_specs_struct.layer_num_of_tiles_out_d; td_o++)
+    if (layer_specs_struct.layer_index == first_conv_layer_specs.layer_index)
+    {
+        fill_from_first_layer_weights(weights_tile, 0);
+    }
+    else
     {
 #if HW == _FPGA
-        fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
-                                                  weights_tile, td_o * pw_conv_parallelism_out,
-                                                  layer_specs_struct.layer_depth,
-                                                  layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
-                                                  layer_specs_struct.layer_weights_offset);
-#endif
-        do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
-                fused_scales_log_2_shifts, relu_6_fused_scales,
-                fused_zero_points, td_o, model_configs_list);
-#if HW == _FPGA
-        fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
-                                               (td_o + 1) * pw_conv_parallelism_out,
-                                               layer_specs_struct.layer_depth,
-                                               layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+        weights_grp_dt weight_groups_buffer[num_of_weight_groups_in_the_largest_weight_tile];
+        fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer, 0,
+                                               layer_specs_struct.layer_depth, layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
                                                layer_specs_struct.layer_weights_offset,
                                                layer_specs_struct.layer_num_fils);
 #elif HW == CPU
         fill_layers_weights_cpu_pw_conv(weights,
                                         weights_tile,
-                                        (td_o + 1) * pw_conv_parallelism_out, layer_specs_struct.layer_depth,
+                                        0 * pw_conv_parallelism_out, layer_specs_struct.layer_depth,
                                         layer_specs_struct.layer_weights_offset, layer_specs_struct.layer_num_fils);
 #endif
     }
-}
+    const int current_layer_fused_parameters_offset = layers_fused_parameters_offsets[layer];
 
+    if (layer_specs_struct.layer_index == first_conv_layer_specs.layer_index)
+    {
+    conv2_ots_loop:
+        for (int td_o = 0; td_o < layer_specs_struct.layer_num_of_tiles_out_d; td_o++)
+        {
+            do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
+                    relu_6_fused_scales,
+                    fused_zero_points, td_o, model_configs_list);
+
+            fill_from_first_layer_weights(weights_tile, (td_o + 1) * pw_conv_parallelism_out);
+        }
+    }
+    else
+    {
+    conv2_ots_loop_fl:
+        for (int td_o = 0; td_o < layer_specs_struct.layer_num_of_tiles_out_d; td_o++)
+        {
+#if HW == _FPGA
+            fill_weights_tile_from_weight_groups_tile(weight_groups_buffer,
+                                                      weights_tile, td_o * pw_conv_parallelism_out,
+                                                      layer_specs_struct.layer_depth,
+                                                      layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+                                                      layer_specs_struct.layer_weights_offset);
+#endif
+            do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
+                    relu_6_fused_scales,
+                    fused_zero_points, td_o, model_configs_list);
+#if HW == _FPGA
+            fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
+                                                   (td_o + 1) * pw_conv_parallelism_out,
+                                                   layer_specs_struct.layer_depth,
+                                                   layer_specs_struct.layer_num_of_weight_groups_for_one_pass,
+                                                   layer_specs_struct.layer_weights_offset,
+                                                   layer_specs_struct.layer_num_fils);
+#elif HW == CPU
+            fill_layers_weights_cpu_pw_conv(weights,
+                                            weights_tile,
+                                            (td_o + 1) * pw_conv_parallelism_out, layer_specs_struct.layer_depth,
+                                            layer_specs_struct.layer_weights_offset, layer_specs_struct.layer_num_fils);
+#endif
+        }
+    }
+}
 #endif

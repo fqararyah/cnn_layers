@@ -12,6 +12,7 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/layers/impl/dw_conv_v1_6.cpp \
 	./model_components/layers/impl/dw_conv_v2.cpp \
 	./model_components/layers/impl/conv.cpp \
+	./model_components/layers/impl/conv_v2.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_kernels.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_0.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_1.cpp \
@@ -38,6 +39,7 @@ zbc: ./model_components/utils/utils.cpp \
 	./model_components/layers/impl/dw_conv_v1_6.cpp \
 	./model_components/layers/impl/dw_conv_v2.cpp \
 	./model_components/layers/impl/conv.cpp \
+	./model_components/layers/impl/conv_v2.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_kernels.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_0.cpp \
 	./model_components/model/fused_bottlenecks/bottleneck_1.cpp \

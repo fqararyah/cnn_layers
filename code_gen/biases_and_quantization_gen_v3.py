@@ -188,12 +188,13 @@ with open(h_file, 'w') as wf:
                    1 and fused_zero_point > - 2**31)
             fused_zero_points.append(fused_zero_point)
 
-        if (cgc.PIPELINE == False or num_of_generated_for_layers >= cgc.PIPELINE_LEN):
-            layers_fused_parameters_offsets[layer_index +
-                                            1] += layer_weight_shape[0]
-        elif not first_conv_layer:
-            pipe_layers_fused_parameters_offsets[layer_index +
-                                                 1] += layer_weight_shape[0]
+        if not first_conv_layer:
+            if (cgc.PIPELINE == False or num_of_generated_for_layers >= cgc.PIPELINE_LEN):
+                layers_fused_parameters_offsets[layer_index +
+                                                1] += layer_weight_shape[0]
+            else:
+                pipe_layers_fused_parameters_offsets[layer_index +
+                                                    1] += layer_weight_shape[0]
 
         with open(weights_scales_file_format.format(layer_index), 'r') as f:
             ifms_scale = layer_specs['ifms_scales']

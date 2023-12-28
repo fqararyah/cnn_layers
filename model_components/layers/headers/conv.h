@@ -14,6 +14,10 @@ void layer_0_s_using_pw(
 
 void layer_0_s_3x3(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
+
+void layer_0_s_3x3(
+	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 	fms_dt result[max_fms_size]);
 

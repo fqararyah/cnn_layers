@@ -63,6 +63,8 @@ for layer_index in range(len(model_dag)):
 
     if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES:
         num_conv_layers_so_far += 1
+    else:
+        continue
 
     if (num_conv_layers_so_far <= cgc.PIPELINE_LEN and cgc.PIPELINE == True) or first_layer:
         first_layer = False

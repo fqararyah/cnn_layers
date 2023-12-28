@@ -150,7 +150,7 @@ void scale_pss_tile(fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MI
 								pw_relu_norm_6_v2(pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w], fused_zero_point,
 												  ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
 
-							// if(layer_specs_struct.layer_index == 15 && tile_index == 0) {
+							// if(layer_specs_struct.layer_index == 1 && tile_index == 0) {
 							// 	pss_dt pss = pss_tile[tile_offset * pw_tile_d
 							// 			+ t_d][t_h][t_w];
 							// 	pss += fused_zero_point;

@@ -4,8 +4,9 @@
 
 #include "../tests/test_utils.h"
 
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 static 	weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
-
+#endif
 void top_func(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	weights_grp_dt off_chip_weights[all_pw_s_weights],

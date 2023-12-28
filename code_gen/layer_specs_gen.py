@@ -208,7 +208,7 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
                     str(cumulative_s_pw_weights) + ' / weights_group_items')
                 replacement_list.append(cumulative_s_pw_weights_on_chip)
                 replacement_list.append(0)
-                if num_conv_layers_so_far > cgc.PIPELINE_LEN and cgc.PIPELINE == True:
+                if num_conv_layers_so_far > cgc.PIPELINE_LEN or cgc.PIPELINE == False:
                     cumulative_s_pw_weights += layer_weights_size
                 cumulative_s_pw_weights_on_chip += int(layer_weights_size)
             elif layer_type == 'dw':

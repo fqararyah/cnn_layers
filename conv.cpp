@@ -136,16 +136,16 @@ void layer_0_s_conv_engine(
 	}
 }
 
-void layer_0_s_3x3(
-	const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
-	fms_grp_dt channels[input_image_depth * input_image_height * input_image_width / input_image_group_items],
-	fms_dt result[max_fms_size], fused_scales_dt fused_scales[],
-	fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[])
-{
-	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width];
-	for (int h = 0; h < first_conv_layer_specs.layer_ofm_height h++)
-	{
-		fill_channels_buffer_cpu(channels, channels_tile, h);
-		layer_0_s_conv_engine(weights_1, channels_tile, result, h, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);
-	}
-}
+// void layer_0_s_3x3(
+// 	const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
+// 	fms_grp_dt channels[input_image_depth * input_image_height * input_image_width / input_image_group_items],
+// 	fms_dt result[max_fms_size], fused_scales_dt fused_scales[],
+// 	fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[], relu_6_fused_scales_dt relu_6_fused_scales[], biases_dt fused_zero_points[])
+// {
+// 	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width];
+// 	for (int h = 0; h < first_conv_layer_specs.layer_ofm_height h++)
+// 	{
+// 		fill_channels_buffer_cpu(channels, channels_tile, h);
+// 		layer_0_s_conv_engine(weights_1, channels_tile, result, h, fused_scales, fused_scales_log_2_shifts, relu_6_fused_scales, fused_zero_points);
+// 	}
+// }

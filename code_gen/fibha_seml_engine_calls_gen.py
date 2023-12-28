@@ -25,7 +25,10 @@ ifms_file_format = 'ifms_{}.txt'
 
 debugging_includes_block = '#include "../../../../tests/test_utils.h"\n'
 
-layer_0_s_block = 'layer_0_s_3x3(weights_1, input_image, result);\n'
+first_conv_block = '//layer_0_s_3x3(weights_1, input_image, result);\n'
+
+# first_conv_block = 'pw_and_conv(off_chip_weights, channels , result, tmp_channels, *i*, layer_*i*_s_specs,\n\
+#     first_conv_layer_fused_scales, first_conv_layer_relu_6_fused_scales, first_conv_layer_fused_zero_points, model_configs_list);\n'
 
 s_pw_block = 'pw_and_conv(off_chip_weights, {} , {}, tmp_channels, *i*, layer_*i*_s_specs,\n\
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer, model_configs_list);\n'
@@ -98,7 +101,7 @@ with open(in_out_file, 'r') as f:
 
 direction = 0  # assumes a topological ordering
 code_to_insert = ''
-
+first_conv_layer = (not cgc.PIPELINE) or (not cgc.PIPELINE_LEN == 0)
 for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
     layer_specs = model_dag[layer_index]
     layer_type = ''
@@ -108,9 +111,10 @@ for layer_index in range(layers_to_generate[0], layers_to_generate[1]):
         continue
 
     target_block = ''
-    if layer_index == 0:
-        target_block = layer_0_s_block
-    if layer_type == 'dw':
+    if layer_type == 's' and first_conv_layer:
+        first_conv_layer = False
+        target_block = first_conv_block
+    elif layer_type == 'dw':
         if cgc.DW_WEIGHTS_OFF_CHIP:
             target_block = fill_dw_weights_block.format(layer_index, layer_index)
         

@@ -108,7 +108,7 @@ const int median_depth = 96;
 const int median_width = 14;
 
 // weights
-const int all_pw_s_weights_0 = 2125536 / weights_group_items;
+const int all_pw_s_weights_0 = 2124672 / weights_group_items;
 const int all_on_chip_pw_s_weights_0 = 864;
 const int all_dw_off_chip_weights_pipe_0 = 64224;
 const int all_off_chip_fused_scales_zps_pipe_0 = 17024;

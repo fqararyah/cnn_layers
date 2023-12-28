@@ -209,7 +209,7 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[MAX_FMS_BUFFER_DEPTH]
 #pragma HLS UNROLL
                     result[main_tile_index][h][w] =
                         dw_relu_norm_v2(result_tile[d][h][w], fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
-                    // if(layer_specs_struct.layer_index == 17 && starting_d + d == 0 && tile_in_h == 0 && tile_in_w == 0){
+                    // if(layer_specs_struct.layer_index == 2 && starting_d + d == 0 && tile_in_h == 0 && tile_in_w == 0){
                     //     dw_pss_dt pss = result_tile[d][h][w];
                     //     pss += fused_zero_point;
                     //     printf("%d >> ", pss);
