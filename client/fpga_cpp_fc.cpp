@@ -77,7 +77,26 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[],
 	top5[2] = -1;
 	top5[3] = -1;
 	top5[4] = -1;
-#if HW == _FPGA && !TESTING
+#if HW == _FPGA
+
+#if TESTING
+	int8_t in_vector_int8[fc_layer_input_size];
+    for (int i = 0; i < fc_layer_input_size; i++)
+    {
+        in_vector_int8[i] = in_vector[i];
+    }
+    for (int i = 0; i < num_classes; i++)
+    {
+        int64_t pss = 0;
+        const int row_start_index = i * fc_layer_input_size;
+        for (int j = 0; j < fc_layer_input_size; j++)
+        {
+            pss += (int64_t)weights[row_start_index + j] * in_vector_int8[j];
+        }
+        // if(i==999)cout << pss <<" "<<weight_sums[i]<<" "<<biases[i]<<"\n";
+        pss_vector[i] = pss + (-weight_sums[i] * layer_specs_struct.ifm_zero_point) + biases[i];
+    }
+#else
 	int8_t in_vector_int8[fc_layer_input_size];
 	for (int i = 0; i < fc_layer_input_size; i++) {
 		in_vector_int8[i] = in_vector[i];
@@ -116,6 +135,8 @@ void fc_layer(fms_dt in_vector[], int8_t weights[], int64_t weight_sums[],
 				+ (-weight_sums[i] * layer_specs_struct.ifm_zero_point)
 				+ biases[i];
 	}
+#endif
+
 #else
 	for (int i = 0; i < num_classes; i++)
 	{

@@ -16,7 +16,7 @@
 #include <chrono>
 
 #include "../../../fiba_v2_kernels/src/model_components/layers/headers/norm_act.h"
-#include "../client/fpga_prepare_weights_and_input.h"
+#include "../client/fpga_prepare_weights_and_input.cpp"
 #include "../client/fpga_prepare_weights_and_input_v2.cpp"
 
 #include <iostream>
@@ -31,7 +31,7 @@ using namespace std;
 int main(int argc, char **argv)
 {
 
-	int images_to_test = 10;
+	int images_to_test = 1;
 
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
@@ -54,16 +54,15 @@ int main(int argc, char **argv)
 	string fused_zps_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
 		"_fused_zps_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string on_chip_weights_file =
+			"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
-	string on_chip_weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+
 #elif HW == _FPGA
 	string weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga.txt";
-	string on_chip_weights_file =
-		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights.txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #endif
 	string input_images_folder =
 		"/media/SSD2TB/shared/vedliot_evaluation/D3.3_Accuracy_Evaluation/imagenet/imagenet_val2012_resized_1000/";

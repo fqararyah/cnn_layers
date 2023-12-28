@@ -6,7 +6,7 @@
 
 void conv_v2_fill_input_image_groups_buffer(
 	fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_filter_dim],
+	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_strides],
 	const int starting_h,
 	const int elements_to_fill_from_an_ifm)
 { // chain_0_1_layer_0_s_in_rows_at_once * input_image_num_fms_groups_in_width
@@ -52,19 +52,9 @@ void conv_v2_input_image_fill_row_from_groups_buffer(
 				if (o_w_offset + w < input_image_width)
 				{
 #if HW == _FPGA
-					if (channels_buffer_start_filling_h + row < first_conv_layer_filter_dim)
-					{
-						channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
-							w * fms_dt_width + fms_dt_offset,
-							w * fms_dt_width);
-					}
-					else
-					{
-						channels_buffer_0[d][channels_buffer_start_filling_h + row -
-											 first_conv_layer_filter_dim][o_w_offset + w] =
-							(fms_dt)chunck(w * fms_dt_width + fms_dt_offset,
-										   w * fms_dt_width);
-					}
+					channels_buffer_0[d][channels_buffer_start_filling_h + row][o_w_offset + w] = (fms_dt)chunck(
+						w * fms_dt_width + fms_dt_offset,
+						w * fms_dt_width);
 #endif
 				}
 			}
@@ -72,30 +62,7 @@ void conv_v2_input_image_fill_row_from_groups_buffer(
 	}
 }
 
-void conv_v2_input_image_fill_channels_buffer_from_groups_buffer(
-	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_strides],
-	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width],
-	const int starting_h, const int channels_buffer_start_filling_h,
-	const fms_dt zero_point)
-{
-#pragma HLS INLINE off
-
-	const int rows_to_shift = first_conv_layer_filter_dim - (first_conv_layer_filter_dim - first_conv_layer_strides);
-	if (starting_h >= first_conv_layer_filter_dim - first_conv_layer_specs.padding_top)
-	{
-		shift_hannels_buffer_rows(channels_tile, rows_to_shift);
-	}
-	for (int h = 0; h < INPUT_IMAGE_ROWS_FILLED_EACH_TIME; h++)
-	{
-		if (starting_h + h < input_image_height)
-		{
-			conv_v2_input_image_fill_row_from_groups_buffer(fms_groups_buffer,
-															channels_tile, h, channels_buffer_start_filling_h);
-		}
-	}
-}
-
-void shift_hannels_buffer_rows(
+void shift_channels_buffer_rows(
 	fms_dt channels_tile[input_image_depth][first_conv_layer_filter_dim][input_image_width],
 	const int rows_to_shift)
 {
@@ -138,6 +105,33 @@ void chain_0_1_padd_bottom_channels_buffer_rows(
 	}
 }
 
+void conv_v2_input_image_fill_channels_buffer_from_groups_buffer(
+	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_strides],
+	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width],
+	const int starting_h, const int channels_buffer_start_filling_h,
+	const fms_dt zero_point)
+{
+#pragma HLS INLINE off
+
+	const int rows_to_shift = first_conv_layer_filter_dim - first_conv_layer_strides;
+	if (starting_h >= first_conv_layer_filter_dim - first_conv_layer_specs.padding_top)
+	{
+		shift_channels_buffer_rows(channels_tile, rows_to_shift);
+	}
+	for (int h = 0; h < first_conv_layer_strides; h++)
+	{
+		if (starting_h + h < input_image_height)
+		{
+			conv_v2_input_image_fill_row_from_groups_buffer(fms_groups_buffer,
+															channels_tile, h, channels_buffer_start_filling_h);
+		}
+		else
+		{
+			chain_0_1_padd_bottom_channels_buffer_rows(channels_tile, first_conv_layer_specs.layer_ifms_zero_point);
+		}
+	}
+}
+
 void fill_channels_buffer_cpu(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	fms_dt channels_tile[input_image_depth][first_conv_layer_filter_dim][input_image_width],
@@ -149,7 +143,7 @@ void fill_channels_buffer_cpu(
 
 	if (starting_h >= first_conv_layer_filter_dim - first_conv_layer_specs.padding_top)
 	{
-		shift_hannels_buffer_rows(channels_tile, rows_to_shift);
+		shift_channels_buffer_rows(channels_tile, rows_to_shift);
 	}
 	const int channels_buffer_start_filling_h =
 		starting_h == 0 ? first_conv_layer_specs.padding_top : rows_to_shift;
@@ -272,6 +266,9 @@ void layer_0_s_3x3(
 	const int rows_filled_first_time = first_conv_layer_filter_dim - first_conv_layer_strides;
 	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width];
 	fms_grp_dt fms_groups_buffer[input_image_depth][input_image_num_fms_groups_in_width * first_conv_layer_strides];
+
+	const int num_of_ifm_groups_read_each_time =
+		input_image_num_fms_groups_in_width * first_conv_layer_strides;
 
 #if HW == CPU
 	fill_channels_buffer_cpu(input_image, channels_tile, 0);
