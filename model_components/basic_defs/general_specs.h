@@ -31,6 +31,7 @@ const int max_fms_size = switch_point_fms_width * switch_point_fms_height * swit
 const int max_tmp_fms_size = 56 * 56 * 24;
 
 #if MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
+const int MAX_TMP_FMS_BUFFER_DEPTH = 24 * 49; // 192 * (28/7) * (28/7)
 #if PIPELINE_LENGTH == 6
 const int MAX_FMS_BUFFER_DEPTH = 144 * 49;//
 #elif PIPELINE_LENGTH == 9 || PIPELINE_LENGTH == 11

@@ -236,25 +236,25 @@ void layer_0_s_conv_engine(
 			result[tile_index][in_tile_h][in_tile_w] = result[tile_index][in_tile_h][in_tile_w] = // conv_relu_norm(
 																								  // tmp, normalization, first_conv_layer_specs.layer_activation);
 				conv_relu_norm_v2(tmp, fused_zero_point, ofm_zero_point, fused_scale, relu_6_fused_scale, layer_relu);
-			// if (tile_index == 0)
-			// {
-			// 	pss_dt pss = tmp;
-			// 	pss += fused_zero_point;
-			// 	printf("%d >> ", (int)pss);
+			if (tile_in_h * pw_tile_h + in_tile_h == 10 && tile_in_w * pw_tile_w + in_tile_w == 20 && tile_in_d == 1)
+			{
+				pss_dt pss = tmp;
+				pss += fused_zero_point;
+				printf("%d >> ", (int)pss);
 
-			// 	pss_f_dt scaled_pss = pss * fused_scale;
-			// 	printf("%f >> ", (float)scaled_pss);
-			// 	printf("%f >> ", (float)fused_scale);
-			// 	if (layer_relu == 6 && scaled_pss > relu_6_fused_scale)
-			// 	{
-			// 		scaled_pss = relu_6_fused_scale;
-			// 	}
+				pss_f_dt scaled_pss = pss * fused_scale;
+				printf("%f >> ", (float)scaled_pss);
+				printf("%f >> ", (float)fused_scale);
+				if (layer_relu == 6 && scaled_pss > relu_6_fused_scale)
+				{
+					scaled_pss = relu_6_fused_scale;
+				}
 
-			// 	scaled_pss += ofm_zero_point;
-			// 	printf("%f >> ", (float)scaled_pss);
-			// 	scaled_pss += quant_half - (scaled_pss < 0);
-			// 	printf("%f \n ", (float)scaled_pss);
-			// }
+				scaled_pss += ofm_zero_point;
+				printf("%f >> ", (float)scaled_pss);
+				scaled_pss += quant_half - (scaled_pss < 0);
+				printf("%f \n ", (float)scaled_pss);
+			}
 		}
 	}
 }

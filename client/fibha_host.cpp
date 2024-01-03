@@ -83,28 +83,31 @@ int main(int argc, char* argv[]) {
 	}
 
 	//*********************************************************************************************************************
-	string weights_file = "/media/sd-mmcblk0p2/off_chip_weights/"
-			+ get_model_prefix() + "_off_chip_weights_fpga.txt";
+	string off_chip_weights_dir = "/media/sd-mmcblk0p2/off_chip_weights/";
+	string on_chip_weights_dir = "/media/sd-mmcblk0p2/on_chip_weights/";
 
-	string dw_weights_file = "/media/sd-mmcblk0p2/off_chip_weights/"
-			+ get_model_prefix() + "_off_chip_dw_weights_pipeline_"
+	string weights_file = off_chip_weights_dir
+			+ get_model_prefix() + "_off_chip_weights_fpga_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+
+	string dw_weights_file = off_chip_weights_dir
+			+ get_model_prefix() + "_off_chip_dw_weights_pipe_"
 			+ to_string(PIPELINE_LENGTH) + ".txt";
 
-	string on_chip_weights_file = "/media/sd-mmcblk0p2/on_chip_weights/"
-			+ get_model_prefix() + "_on_chip_weights.txt";
+	string on_chip_weights_file = on_chip_weights_dir
+			+ get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 
-	string fused_scales_file = "/media/sd-mmcblk0p2/off_chip_weights/"
-			+ get_model_prefix() + "_fused_scales_pipeline_"
+	string fused_scales_file = off_chip_weights_dir
+			+ get_model_prefix() + "_fused_scales_pipe_"
 			+ to_string(PIPELINE_LENGTH) + ".txt";
-	string fused_zps_file = "/media/sd-mmcblk0p2/off_chip_weights/"
-			+ get_model_prefix() + "_fused_zps_pipeline_"
+	string fused_zps_file = off_chip_weights_dir
+			+ get_model_prefix() + "_fused_zps_pipe_"
 			+ to_string(PIPELINE_LENGTH) + ".txt";
 
-	string fc_weights_file = "/media/sd-mmcblk0p2/off_chip_weights/"
+	string fc_weights_file = off_chip_weights_dir
 			+ get_model_prefix() + "_fc_weights.txt";
-	string weight_sums_file = "/media/sd-mmcblk0p2/off_chip_weights/"
+	string weight_sums_file = off_chip_weights_dir
 			+ get_model_prefix() + "_fc_weight_sums.txt";
-	string biases_file = "/media/sd-mmcblk0p2/off_chip_weights/"
+	string biases_file = off_chip_weights_dir
 			+ get_model_prefix() + "_fc_biases.txt";
 
 	string input_images_folder = "/media/sd-mmcblk0p2/resized_images/";
