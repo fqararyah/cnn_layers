@@ -52,6 +52,9 @@ specs_struct = 'const layer_specs {} = {}\n\
                 {};\n'
 
 pooling_specs_struct = 'const pooling_layer_specs layer_{}_specs = {}\n\
+                {},//ifm_depth\n\
+                {},//ifm_height\n\
+                {},//ifm_width\n\
                 {},//const pooling_fused_scales_dt fused_scale; \n\
                 {},//const biases_dt ifms_zero_point;\n\
                 {},//const biases_dt ofms_zero_point;\n\
@@ -235,9 +238,8 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
             skip_connection_other_layer_zero_point = 0
 
             layer_children = layer_specs['children']
-            for i in range(len(layer_children)):
-                if layer_children[i] - i != layer_index + 1:
-                    write_to_tmp = 1
+            if len(layer_children) > 1:
+                write_to_tmp = 1
 
             if model_dag[layer_children[0]]['name'] == 'add' and model_dag[layer_children[0]]['id'] == layer_index + 1:
                 add_layer_specs = model_dag[layer_children[0]]
@@ -289,8 +291,15 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
         elif 'type' in layer_specs:
             layer_type = layer_specs['type']
             if layer_type == 'avgpool':
+                layer_ifms_shape = layer_specs['ifms_shape']
+                ifms_depth = layer_ifms_shape[-1]
+                ifms_height = layer_ifms_shape[-3]
+                ifms_width = layer_ifms_shape[-2]
                 replacement_list.append(str(layer_index) + '_' + layer_type)
                 replacement_list.append('{')
+                replacement_list.append(ifms_depth)
+                replacement_list.append(ifms_height)
+                replacement_list.append(ifms_width)
                 pooling_ifms_scale = layer_specs['ifms_scales']
                 pooling_ofms_scale = layer_specs['ofms_scales']
                 replacement_list.append(

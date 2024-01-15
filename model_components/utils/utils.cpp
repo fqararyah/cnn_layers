@@ -23,7 +23,7 @@ void fill_layer_weight_groups_tile_off_chip(weights_grp_dt *weights,
 		for (int weight_grp_index = 0;
 			 weight_grp_index < num_of_weight_groups; weight_grp_index++)
 		{
-			if (current_fill_offset + weight_grp_index < all_pw_s_weights)
+			if (current_fill_offset + weight_grp_index < all_off_chip_pw_s_weights)
 			{
 				weight_groups_buffer[weight_grp_index] = weights[current_fill_offset + weight_grp_index];
 			}
@@ -222,32 +222,32 @@ void fill_layer_0_weights(
 	}
 }
 
-void fill_dw_layer_weights(
-	const dw_weights_dt src[max_conv_d][max_conv_h * max_conv_w],
-	dw_weights_dt dst[max_conv_d][max_conv_h * max_conv_w],
-	const int conv_d, const int conv_h, const int conv_w)
-{
-#pragma HLS INLINE OFF
-	for (int d = 0; d < conv_d; d++)
-	{
-		if (d < conv_d)
-		{
-			for (int h = 0; h < conv_h; h++)
-			{
-				if (h < conv_h)
-				{
-					for (int w = 0; w < conv_w; w++)
-					{
-						if (w < conv_w)
-						{
-							dst[d][h * conv_w + w] = src[d][h * conv_w + w];
-						}
-					}
-				}
-			}
-		}
-	}
-}
+// void fill_dw_layer_weights(
+// 	const dw_weights_dt src[max_conv_d][max_conv_h * max_conv_w],
+// 	dw_weights_dt dst[max_conv_d][max_conv_h * max_conv_w],
+// 	const int conv_d, const int conv_h, const int conv_w)
+// {
+// #pragma HLS INLINE OFF
+// 	for (int d = 0; d < conv_d; d++)
+// 	{
+// 		if (d < conv_d)
+// 		{
+// 			for (int h = 0; h < conv_h; h++)
+// 			{
+// 				if (h < conv_h)
+// 				{
+// 					for (int w = 0; w < conv_w; w++)
+// 					{
+// 						if (w < conv_w)
+// 						{
+// 							dst[d][h * conv_w + w] = src[d][h * conv_w + w];
+// 						}
+// 					}
+// 				}
+// 			}
+// 		}
+// 	}
+// }
 
 void fill_fused_zero_points_buffer(const biases_dt fused_zero_points[],
 								   biases_dt fused_zero_points_buffer[], int starting_d, int layer,
@@ -303,10 +303,10 @@ void copy_channels_to_tmp_channels(fms_dt channels[max_fms_size], fms_dt tmp_cha
 	}
 }
 
-void copy_channels_to_tmp_channels(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-								   fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
+void copy_channels_to_tmp_channels(fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+								   fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
 {
-	for (int d = 0; d < MAX_FMS_BUFFER_DEPTH; d++)
+	for (int d = 0; d < MAX_TMP_FMS_BUFFER_DEPTH; d++)
 	{
 		for (int h = 0; h < MIN_FMS_HEIGHT; h++)
 		{

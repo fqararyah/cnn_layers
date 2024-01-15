@@ -21,7 +21,6 @@ reading_weights_file_format = 'weights_{}.txt'
 # './out/dw_weights.h'
 dw_weights_h_file = '../model_components/model/headers/{}_dw_weights_{}_{}.h'.format(
     cgc.MODEL_NAME, cgc.FIRST_PART_IMPLEMENTATION, pipeline_len_str)
-general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 dw_off_chip_weights_file = '../off_chip_weights/{}_off_chip_dw_weights_{}.txt'.format(cgc.MODEL_NAME, pipeline_len_str)
 
@@ -206,19 +205,3 @@ while conv_layers_so_far < last_pipeline_layer:
             weights_shape = layer_specs['weights_shape']
             dw_off_chip_weights_sizes_given_pipeline -= (weights_shape[0] * weights_shape[1] * weights_shape[2])
 #**********************************************************
-
-replacement_string = ''
-with open(general_specs_file, 'r') as f:
-    for line in f:
-        if 'const int all_dw_off_chip_weights_pipe_{} ='.format(last_pipeline_layer) in line:
-            replacement_string += 'const int all_dw_off_chip_weights_pipe_{} = {};\n'.format(last_pipeline_layer,
-                                                                                     dw_off_chip_weights_sizes_given_pipeline)        
-
-
-        elif 'const int MAX_DW_LAYER_D' in line:
-            replacement_string += 'const int MAX_DW_LAYER_D = ' + str(max_dw_num_filters) + ';\n'
-        else:
-            replacement_string += line
-
-with open(general_specs_file, 'w') as f:
-    f.write(replacement_string)

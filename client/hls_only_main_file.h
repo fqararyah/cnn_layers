@@ -13,7 +13,7 @@
 
 void top_func(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	weights_grp_dt off_chip_weights[all_pw_s_weights],
+	weights_grp_dt off_chip_weights[all_off_chip_pw_s_weights],
 	weights_dt off_chip_dw_weights[all_dw_off_chip_weights],
 	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps],
 	biases_dt off_chip_fused_zero_points[all_off_chip_fused_scales_zps],

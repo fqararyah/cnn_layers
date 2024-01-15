@@ -13,8 +13,6 @@ weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/'+ \
 biases_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/'+ \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/biases/'.format(cgc.MODEL_NAME)
 
-general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
-
 weights_file_format = weights_files_location + 'weights_{}.txt'
 fc_weights_file_format = weights_files_location + 'weights_{}.txt'
 fc_biases_file_format = biases_files_location + 'biases_{}.txt'
@@ -56,7 +54,6 @@ num_s_pw_layers_so_far = 0
 num_conv_layers_so_far = 0
 fc_layer_index = 0
 fc_weights_shape = []
-all_pw_s_weights = 0
 first_layer = True
 for layer_index in range(len(model_dag)):
     layer_specs = model_dag[layer_index]
@@ -75,7 +72,6 @@ for layer_index in range(len(model_dag)):
         weights = np.loadtxt(weights_file).astype(np.int8)
         layers_weights[layer_index] = weights
         num_s_pw_layers_so_far += 1
-        all_pw_s_weights += weights.size
     elif 'type' in layer_specs and layer_specs['type'] == 'fc':
         fc_layer_index = layer_index
         fc_weights_shape = layer_specs['weights_shape']
@@ -111,15 +107,3 @@ num_of_pw_weights_file = num_of_pw_weights_file.format(cgc.MODEL_NAME, pipeline_
 
 with open(num_of_pw_weights_file, 'w') as f:
     f.write(str(weights_combined_so_far))
-
-replacement_string = ''
-with open(general_specs_file, 'r') as f:
-    for line in f:
-        if 'const int all_pw_s_weights_{} ='.format(pipeline_len) in line:
-            replacement_string += 'const int all_pw_s_weights_{} = {} / weights_group_items;\n'.format( pipeline_len,
-                all_pw_s_weights)
-        else:
-            replacement_string += line
-
-with open(general_specs_file, 'w') as f:
-    f.write(replacement_string)

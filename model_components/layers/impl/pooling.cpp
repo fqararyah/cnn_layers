@@ -1,11 +1,14 @@
 #include "../headers/layers_imp_common_includes.h"
 #include "../headers/pooling.h"
 
-void avgpool(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void avgpool(fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 			 fms_dt result[fc_layer_input_size],
 			 const pooling_layer_specs layer_specs_struct)
 {
 
+	const int avgpool_input_depth = layer_specs_struct.ifm_depth;
+	const int avgpool_input_height = layer_specs_struct.ifm_height;
+	const int avgpool_input_width = layer_specs_struct.ifm_width;
 	const int avgpool_input_hw = avgpool_input_height * avgpool_input_width;
 	for (int d = 0; d < avgpool_input_depth; d++)
 	{
@@ -32,6 +35,10 @@ void avgpool(fms_dt channels[max_fms_size],
 			 const pooling_layer_specs layer_specs_struct)
 {
 #pragma HLS INLINE OFF
+	
+	const int avgpool_input_depth = layer_specs_struct.ifm_depth;
+	const int avgpool_input_height = layer_specs_struct.ifm_height;
+	const int avgpool_input_width = layer_specs_struct.ifm_width;
 	const int avgpool_input_hw = avgpool_input_height * avgpool_input_width;
 
 	const int num_tiles_h =

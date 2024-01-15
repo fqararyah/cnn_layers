@@ -87,14 +87,14 @@ int main(int argc, char **argv)
 #endif
 
 #if HW == _FPGA
-	static weights_grp_dt weights[all_pw_s_weights];
+	static weights_grp_dt weights[all_off_chip_pw_s_weights];
 	static weights_dt dw_weights[all_dw_off_chip_weights];
 	static weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups];
 	static fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps];
 	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps];
 #elif HW == CPU
-	weights_dt *weights = (weights_dt *)malloc(all_pw_s_weights * weights_dt_width / 8);
+	weights_dt *weights = (weights_dt *)malloc(all_off_chip_pw_s_weights * weights_dt_width / 8);
 	weights_dt *dw_weights = (weights_dt *)malloc(all_dw_off_chip_weights);
 	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
 																	 weights_group_items * weights_dt_width / 8);

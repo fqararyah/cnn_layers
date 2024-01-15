@@ -55,7 +55,7 @@
 // void krnl_fibha_v2(
 // 		fms_grp_dt input_image[input_image_depth
 // 				* input_image_num_fms_groups_in_a_channel],
-// 		weights_grp_dt off_chip_weights[all_pw_s_weights],
+// 		weights_grp_dt off_chip_weights[all_off_chip_pw_s_weights],
 // 		weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 // 		fms_dt fc_input[fc_layer_input_size],
 // 		const int model_config_list_src[2 * max_conv_layers],
@@ -98,10 +98,10 @@
 // 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 // #endif
 // #elif FIBHA_VERSION == 2
-// 	fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
-// 	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+// 	fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+// 	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
 // 	// fms_dt result2[max_fms_size];
-// 	fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+// 	fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
 
 // #pragma HLS bind_storage variable=channels type=ram_2p impl=URAM
 // #pragma HLS bind_storage variable=result type=ram_2p impl=URAM

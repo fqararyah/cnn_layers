@@ -179,7 +179,7 @@ int main(int argc, char* argv[]) {
 	// These commands will allocate memory on the Device. The cl::Buffer objects can
 	// be used to reference the memory locations on the device.
 	OCL_CHECK(err,
-			cl::Buffer buffer_weights(context, CL_MEM_READ_ONLY, all_pw_s_weights * sizeof(weights_grp_dt), NULL, &err));
+			cl::Buffer buffer_weights(context, CL_MEM_READ_ONLY, all_off_chip_pw_s_weights * sizeof(weights_grp_dt), NULL, &err));
 	OCL_CHECK(err,
 			cl::Buffer buffer_on_chip_weights(context, CL_MEM_READ_ONLY, all_on_chip_pw_s_weights_groups * sizeof(weights_grp_dt), NULL, &err));
 	OCL_CHECK(err,
@@ -209,7 +209,7 @@ int main(int argc, char* argv[]) {
 	int *ptr_first_lunch;
 
 	OCL_CHECK(err,
-			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_pw_s_weights*sizeof(weights_grp_dt), NULL, NULL, &err));
+			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_off_chip_pw_s_weights*sizeof(weights_grp_dt), NULL, NULL, &err));
 	OCL_CHECK(err,
 			ptr_glued_on_chip_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_on_chip_weights , CL_TRUE , CL_MAP_WRITE , 0, all_on_chip_pw_s_weights_groups*sizeof(weights_grp_dt), NULL, NULL, &err));
 	OCL_CHECK(err,

@@ -98,7 +98,7 @@ void padd_bottom_dw_channels_tile(fms_dt dw_channels_tile[DW_TILE_DEPTH][DW_BUFF
 
 void write_pipe_seml_communication_buffer(
     fms_dt pipe_seml_communication_buffer[MAX_PW_BUFFER_DEPTH][PW_BUFFER_HEIGHT][MAX_PW_BUFFER_WIDTH],
-    fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+    fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
     const int starting_h,
     const int offset_h_in_communication_buffer,
     const layer_specs layer_specs_struct)
@@ -199,7 +199,7 @@ void padd_top_conv_dw_communication_buffer_inter(fms_dt conv_dw_communication_bu
 }
 
 void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                                     fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                                     fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                                      fms_dt pre_first_pipeline_layers_output[PRE_FIRST_PIPELINE_OUTPUT_DEPTH]
                                                                             [PRE_FIRST_PIPELINE_OUTPUT_HEIGHT]
                                                                             [PRE_FIRST_PIPELINE_OUTPUT_WIDTH],
@@ -645,7 +645,7 @@ void main_pipeline_engine_calls_loop(weights_dt on_chip_weights[][ON_CHIP_WEIGHT
 
 void pipelined_engines_caller(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
                               weights_dt on_chip_weights[][ON_CHIP_WEIGHTS_PORTS],
-                              fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                              fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                               const int model_configs_list[])
 {
 

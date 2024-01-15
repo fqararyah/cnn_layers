@@ -9,7 +9,7 @@ weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/'+ \
 
 weights_file_format = weights_files_location + 'weights_{}.txt'
 
-parallelism_file = '../model_components/basic_defs/parallelism_and_tiling.h'
+parallelism_file = '../model_components/basic_defs/parallelism.h'
 ofms_parallelism_key = 'pw_conv_parallelism_out'
 
 pipeline_len = 0

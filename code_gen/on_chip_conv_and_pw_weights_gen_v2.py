@@ -6,10 +6,10 @@ import code_generation_constants as cgc
 
 utils.set_globals(cgc.MODEL_NAME, cgc.MODEL_NAME)
 
-on_chip_conv_and_layers = cgc.PIPELINE_LEN if cgc.PIPELINE else 1
 pipeline_len = 0
 if cgc.PIPELINE:
     pipeline_len = cgc.PIPELINE_LEN
+on_chip_conv_and_layers = pipeline_len
 
 weights_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/weights/'.format(
     cgc.MODEL_NAME)
@@ -18,8 +18,6 @@ weights_file_format = 'weights_{}.txt'
 on_chip_weights_header_file = '../model_components/model/headers/{}_on_chip_weights_v2_pipe_{}.h'.format(cgc.MODEL_NAME, pipeline_len)
 
 on_chip_weights_file = '../on_chip_weights/{}_on_chip_weights_pipe_{}.txt'.format(cgc.MODEL_NAME, pipeline_len)
-
-general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 first_layer_weights_declaration_string = 'const static layer_0_weights_dt first_layer_weights[first_conv_layer_num_fils]' + \
     '[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim]{\n'
@@ -60,13 +58,11 @@ def write_first_layer_weights(layer_weights_shape, weights, on_chip_weights_head
             f.write('},\n')
         f.write('};\n')
 
-        assert(all_on_chip_pw_s_weights % cgc.ON_CHIP_WEIGHTS_PORTS == 0)
         f.write('#endif\n')
         f.write('#endif\n')
 
 first_layer = True
 num_of_generated_layers = 0
-all_on_chip_pw_s_weights = 0
 formated_weights_all_layers = []
 
 for ii in range(len(model_dag)):
@@ -75,6 +71,7 @@ for ii in range(len(model_dag)):
     layer_specs = model_dag[ii]
     layer_type = ''
     if 'type' in layer_specs and layer_specs['type'] in cgc.CONV_LAYER_TYPES and layer_specs['type'] != 'dw':
+        num_of_generated_layers += 1
         layer_type = layer_specs['type']
     else:
         continue
@@ -87,7 +84,6 @@ for ii in range(len(model_dag)):
     
     weights = np.loadtxt(weights_file).astype(np.int8)
 
-    all_on_chip_pw_s_weights += weights.size
 
     if first_layer:
         first_layer = False
@@ -120,15 +116,4 @@ if pipeline_len > 0:
     np.savetxt(on_chip_weights_file, np.concatenate(formated_weights_all_layers, 0), fmt='%i')
 else:
     with open(on_chip_weights_file, 'w') as f:
-        f.write('0') 
-
-replacement_string = ''
-with open(general_specs_file, 'r') as f:
-    for line in f:
-        if 'const int all_on_chip_pw_s_weights_{} ='.format(pipeline_len) in line:
-            replacement_string += 'const int all_on_chip_pw_s_weights_{} = '.format(pipeline_len) + str(all_on_chip_pw_s_weights) + ';\n'
-        else:
-            replacement_string += line
-
-with open(general_specs_file, 'w') as f:
-    f.write(replacement_string)
+        f.write('0')

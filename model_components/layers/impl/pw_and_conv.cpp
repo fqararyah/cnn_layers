@@ -43,12 +43,12 @@ pw_conv_eng_loops:
                             // {
                             //     printf("%d * %d \n", (int)channels_tile[d][t_h * strides + c_h][t_w * strides + c_w],
                             //            (int)weights_tile[f_d][starting_conv_d + d]
-                            //                        [c_h * max_conv_filter_hw_dim + c_w]);
+                            //                        [c_h * max_std_conv_filter_hw_dim + c_w]);
                             // }
 
                             results_tile[f_d][t_h][t_w] += channels_tile[d][t_h * strides + c_h][t_w * strides + c_w] *
                                                            weights_tile[f_d][starting_conv_d + d]
-                                                                       [c_h * max_conv_filter_hw_dim + c_w];
+                                                                       [c_h * max_std_conv_filter_hw_dim + c_w];
                         }
                     }
                 }
@@ -57,7 +57,7 @@ pw_conv_eng_loops:
     }
 }
 
-void pw_conv_pipeline(fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void pw_conv_pipeline(fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                       weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
                       pss_dt results_tile[pw_tile_d][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                       layer_specs layer_specs_struct,
@@ -128,9 +128,9 @@ conv2_itd_loop:
 }
 
 void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
-             fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-             fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-             fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+             fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+             fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+             fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              const int layer, const layer_specs layer_specs_struct,
              const fused_scales_dt fused_scales_buffer[],
              const relu_6_fused_scales_dt relu_6_fused_scales_buffer[],
@@ -257,9 +257,9 @@ void fill_from_first_layer_weights(weights_dt weights_tile[pw_conv_parallelism_o
 }
 
 void pw_and_conv(weights_grp_dt *weights,
-                 fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                 fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                 fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                 fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                 fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                 fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
                  int layer, const layer_specs layer_specs_struct,
                  const fused_scales_dt fused_scales[],
                  const relu_6_fused_scales_dt relu_6_fused_scales[],

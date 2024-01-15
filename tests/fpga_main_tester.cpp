@@ -87,14 +87,14 @@ int main(int argc, char **argv)
 #endif
 
 #if HW == _FPGA
-	static weights_grp_dt weights[all_pw_s_weights];
+	static weights_grp_dt weights[all_off_chip_pw_s_weights];
 	static weights_dt dw_weights[all_dw_off_chip_weights];
 	static weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups];
 	static fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel];
 	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps];
 	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps];
 #elif HW == CPU
-	weights_dt *weights = (weights_dt *)malloc(all_pw_s_weights * weights_dt_width / 8);
+	weights_dt *weights = (weights_dt *)malloc(all_off_chip_pw_s_weights * weights_dt_width / 8);
 	weights_dt *dw_weights = (weights_dt *)malloc(all_dw_off_chip_weights);
 	weights_grp_dt *glued_on_chip_weights = (weights_grp_dt *)malloc(all_on_chip_pw_s_weights_groups *
 																	 weights_group_items * weights_dt_width / 8);
@@ -112,13 +112,17 @@ int main(int argc, char **argv)
 	int top5[5];
 
 #if HW == _FPGA
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	glue_on_chip_weights_fpga(on_chip_weights_file,
 							  glued_on_chip_weights);
+#endif
 	glue_weights(weights_file, weights);
 	validate_weights(weights_file, weights);
 #elif HW == CPU
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	glue_on_chip_weights_cpu(on_chip_weights_file,
 							 glued_on_chip_weights);
+#endif
 	load_weights(weights_file, weights);
 #endif
 	load_fused_scales(fused_scales_file, off_chip_fused_scales);

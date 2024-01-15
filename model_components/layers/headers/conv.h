@@ -14,7 +14,7 @@ void layer_0_s_using_pw(
 
 void layer_0_s_3x3(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
+	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
 
 void layer_0_s_3x3(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
@@ -22,9 +22,9 @@ void layer_0_s_3x3(
 	fms_dt result[max_fms_size]);
 
 void pw_and_conv(weights_grp_dt *weights,
-             fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-             fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-             fms_dt tmp_channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+             fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+             fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+             fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
              int layer, const layer_specs layer_specs_struct,
              const fused_scales_dt fused_scales[],
              const relu_6_fused_scales_dt relu_6_fused_scales[],

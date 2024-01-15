@@ -19,7 +19,6 @@ weights_scales_files_location = weights_files_location
 fms_scales_files_location = '/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/' + \
     'tflite_scripts_imgnt_accuracy_and_weight_extraction/{}/fms/'.format(
         cgc.MODEL_NAME)
-general_specs_file = '/media/SSD2TB/fareed/wd/cnn_layers/model_components/basic_defs/general_specs.h'
 
 if cgc.PIPELINE:
     pipeline_len = cgc.PIPELINE_LEN
@@ -351,23 +350,3 @@ with open(dw_off_chip_fused_zps_file, 'w') as f:
 # for i in range(len(add_layers_fms_scales_rec)):
 #     print(i, add_layers_fms_scales[i], add_layers_fms_scales_rec[i])
 
-replacement_string = ''
-with open(general_specs_file, 'r') as f:
-    for line in f:
-        if 'const int all_off_chip_fused_scales_zps_pipe_{} ='.format(pipeline_len) in line:
-            replacement_string += 'const int all_off_chip_fused_scales_zps_pipe_{} = {};\n'.format(
-                pipeline_len,len(seml_fused_scales))
-        elif 'const int first_quantization_arrays_num_elements' in line:
-            replacement_string += 'const int first_quantization_arrays_num_elements = ' + \
-                str(first_quantization_arrays_num_of_elements) + ';\n'
-        elif '#define MODEL_ACTIVATION' in line:
-            replacement_string += '#define MODEL_ACTIVATION ' + model_activation + '\n'
-        elif '#define ADD_LAYER_ACTIVATION' in line:
-            replacement_string += '#define ADD_LAYER_ACTIVATION ' + add_layers_activation + '\n'
-        elif 'const int MAX_LAYER_D' in line:
-            replacement_string += 'const int MAX_LAYER_D = ' + str(max_layer_d) + ';\n'
-        else:
-            replacement_string += line
-
-with open(general_specs_file, 'w') as f:
-    f.write(replacement_string)

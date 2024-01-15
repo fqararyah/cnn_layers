@@ -13,126 +13,17 @@
 #define ADD_LAYER_ACTIVATION 0
 typedef int conv_type;
 //
-const int first_quantization_arrays_num_elements = 0;
-
 static bool on_chip_weights_filled = false;
-// switch point
-#if ONLY_SEML
-const int switch_point_fms_width = 112;
-const int switch_point_fms_height = 112;
-const int switch_point_fms_depth = 96; // not really, but the max of ...
-#else
-const int switch_point_fms_width = 56;
-const int switch_point_fms_height = 56;
-const int switch_point_fms_depth = 144; // not really, but the max of ...
-#endif
-
-const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
-const int max_tmp_fms_size = 56 * 56 * 24;
-
-#if MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
-const int MAX_TMP_FMS_BUFFER_DEPTH = 24 * 49; // 192 * (28/7) * (28/7)
-#if PIPELINE_LENGTH == 6
-const int MAX_FMS_BUFFER_DEPTH = 144 * 49;//
-#elif PIPELINE_LENGTH == 9 || PIPELINE_LENGTH == 11
-const int MAX_FMS_BUFFER_DEPTH = 192 * 16;//
-#elif ONLY_SEML || PIPELINE_LENGTH == 0
-const int MAX_FMS_BUFFER_DEPTH = 96 * 196; // 192 * (28/7) * (28/7)
-#endif
-
-#elif MODEL_ID == RESNET50
-
-const int MAX_FMS_BUFFER_DEPTH = 512 * 16; // 192 * (28/7) * (28/7)
-
-#endif
-
-const int MIN_FMS_HEIGHT = 8;
-const int MIN_FMS_WIDTH = 8;
-const int MAX_FILTER_DIM_STRIDE_1 = 3;
-const int MAX_FILTER_DIM_STRIDE_2 = 3;
-const int MAX_DW_LAYER_D = 960;
-const int MAX_LAYER_D = 1280;
-
-const int ON_CHIP_WEIGHTS_PORTS = 8;
-
-// assumptions
-// CHANNELS_TILE_WIDTH = CHANNELS_TILE_HEIGHT
-// CHANNELS_TILE_WIDTH is even
-const int MAX_TILE_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1) / 2;
-const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
-
 // MobileNetsV1, but could be useful in future
 const int alpha = 1;
 
-// fc_layer
-#if MODEL_ID == RESNET50
-const int fc_layer_input_size = 2048;
-#elif MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
-const int fc_layer_input_size = 1280;
-#endif
-const int fc_cols = 1000;
-
-// avg_pool_layer
-const int avgpool_input_depth = 1280;
-const int avgpool_input_height = 7;
-const int avgpool_input_width = 7;
+const int ON_CHIP_WEIGHTS_PORTS = 8;
+const int fc_cols = 1000; // num classes
+const int max_conv_layers = 100;
 
 // skip connection
 const int skip_connection_depth = 3;
 
-// testing vars
-const int DF = 1;
-const int start_with_pw = 1;
-
-// maxs for buffers
-#if MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
-const int max_conv_d = 1280 / alpha; // to_automate
-#elif MODEL_ID == RESNET50
-const int max_conv_d = 2048; // to_automate
-#endif
-const int min_strides = 1;
-const int max_strides = 2;
-#if MODEL_ID == MOB_V1 || MODEL_ID == MOB_V2 || MODEL_ID == RESNET50 || MODEL_ID == MOB_V2_0_5 \
-|| MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25
-const int max_filter_hw_dim = 3;
-const int max_conv_filter_hw_dim = 3;
-const int max_padding_lr = 2;
-#elif MODEL_ID == 3 || MODEL_ID == 4
-const int max_filter_hw_dim = 5;
-#endif
-const int max_padding = 1;
-const int max_conv_h = max_conv_filter_hw_dim;
-const int max_conv_w = max_conv_filter_hw_dim;
-const int max_filter_area = max_conv_h * max_conv_w;
-
-const int median_depth = 96;
-const int median_width = 14;
-
-// weights
-const int all_pw_s_weights_0 = 2124672 / weights_group_items;
-const int all_on_chip_pw_s_weights_0 = 864;
-const int all_dw_off_chip_weights_pipe_0 = 64224;
-const int all_off_chip_fused_scales_zps_pipe_0 = 17024;
-
-const int all_pw_s_weights_6 = 2120320 / weights_group_items;
-const int all_on_chip_pw_s_weights_6 = 12128;
-const int all_dw_off_chip_weights_pipe_6 = 63072;
-const int all_off_chip_fused_scales_zps_pipe_6 = 16760;
-
-#if PIPELINE_LENGTH == 0
-const int all_pw_s_weights = all_pw_s_weights_0;
-const int all_on_chip_pw_s_weights = all_on_chip_pw_s_weights_0;
-const int all_dw_off_chip_weights = all_dw_off_chip_weights_pipe_0;
-const int all_off_chip_fused_scales_zps = all_off_chip_fused_scales_zps_pipe_0;
-#elif PIPELINE_LENGTH == 6
-const int all_pw_s_weights = all_pw_s_weights_6;
-const int all_on_chip_pw_s_weights = all_on_chip_pw_s_weights_6;
-const int all_dw_off_chip_weights = all_dw_off_chip_weights_pipe_6;
-const int all_off_chip_fused_scales_zps = all_off_chip_fused_scales_zps_pipe_6;
-#endif
-
-const int all_on_chip_pw_s_weights_groups = (all_on_chip_pw_s_weights + weights_group_items - 1) / weights_group_items;
-const int max_num_of_weight_groups_for_one_pass = max_conv_d / weights_group_items;
 // input specs
 const int input_image_height = 224;
 const int input_image_width = 224;
@@ -181,22 +72,98 @@ struct layer_specs
 	biases_dt skip_connection_other_layer_zero_point;
 };
 
-struct pooling_layer_specs{
-const pooling_fused_scales_dt fused_scale;
-const biases_dt ifms_zero_point;
-const biases_dt ofms_zero_point;
+struct pooling_layer_specs
+{
+	const int ifm_depth;
+	const int ifm_height;
+	const int ifm_width;
+	const pooling_fused_scales_dt fused_scale;
+	const biases_dt ifms_zero_point;
+	const biases_dt ofms_zero_point;
 };
 
-struct Quantization_layer_specs{
-const float fused_scale;
-const fms_dt ifms_zero_point;
-const biases_dt ofms_zero_point;
+struct Quantization_layer_specs
+{
+	const float fused_scale;
+	const fms_dt ifms_zero_point;
+	const biases_dt ofms_zero_point;
 };
 
-struct fc_layer_specs{
-const fms_dt ifm_zero_point;
+struct fc_layer_specs
+{
+	const fms_dt ifm_zero_point;
 };
 
-const int max_conv_layers = 100;
+// switch point
+#if ONLY_SEML
+const int switch_point_fms_width = 112;
+const int switch_point_fms_height = 112;
+const int switch_point_fms_depth = 96; // not really, but the max of ...
+#else
+const int switch_point_fms_width = 56;
+const int switch_point_fms_height = 56;
+const int switch_point_fms_depth = 144; // not really, but the max of ...
+#endif
+
+const int max_fms_size = switch_point_fms_width * switch_point_fms_height * switch_point_fms_depth;
+const int max_tmp_fms_size = 56 * 56 * 24;
+
+const int CHANNELS_PIPELINE_DEPTH = 32;
+const int CHANNELS_TILE_DEPTH = 1;
+const int MIN_FMS_HEIGHT = 8;
+const int MIN_FMS_WIDTH = 8;
+
+const int CHANNELS_TILE_HEIGHT = PW_PARALLELISM_H;
+const int CHANNELS_TILE_WIDTH = PW_PARALLELISM_W;
+
+#include "mob_v2_general_specs_pipe_0.h"
+#include "mob_v2_general_specs_pipe_6.h"
+
+// assumptions
+// CHANNELS_TILE_WIDTH = CHANNELS_TILE_HEIGHT
+// CHANNELS_TILE_WIDTH is even
+const int MAX_TILE_PADDING_TOP_LEFT = (MAX_FILTER_DIM_STRIDE_1 - 1) / 2;
+const int MAX_TILE_PADDING_BOTTOM_RIGHT = MAX_FILTER_DIM_STRIDE_2 - 2;
+
+const int CHANNELS_TILE_HEIGHT_PADDED = CHANNELS_TILE_HEIGHT + MAX_TILE_PADDING_TOP_LEFT + MAX_TILE_PADDING_BOTTOM_RIGHT;
+const int CHANNELS_TILE_WIDTH_PADDED = CHANNELS_TILE_WIDTH + MAX_TILE_PADDING_TOP_LEFT + MAX_TILE_PADDING_BOTTOM_RIGHT;
+const int pw_tile_d = pw_conv_parallelism_in;
+#if FIBHA_VERSION == 1
+const int pw_tile_h = 8;
+const int pw_tile_w = 8;
+#elif FIBHA_VERSION == 2
+const int pw_tile_h = PW_PARALLELISM_H;
+const int pw_tile_w = PW_PARALLELISM_W;
+#endif
+const int pw_tile_hw = pw_tile_h * pw_tile_w;
+const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;
+
+const int dw_tile_d = pw_tile_d;
+const int dw_tile_h = pw_tile_h;
+const int dw_tile_w = pw_tile_w;
+#if FIBHA_VERSION == 1
+const int dw_pipeline_depth = 24;
+#elif FIBHA_VERSION == 2
+const int dw_pipeline_depth = CHANNELS_PIPELINE_DEPTH;
+#endif
+
+const int dw_tile_hw = dw_tile_h * dw_tile_w;
+const int dw_tile_size = dw_tile_d * dw_tile_h * dw_tile_w;
+const int dw_max_v2_buffer_height = dw_tile_h + (max_filter_hw_dim - 1); // where 3 is max conv kernel dim and 1 is mi strides
+const int dw_max_v2_buffer_width = dw_max_v2_buffer_height;				 // where 3 is max conv kernel dim and 1 is mi strides
+
+const int max_dw_input_width = 112 + 1 + 1; // where 1 is max padding left and right
+const int max_tile_w = pw_tile_w;
+const int max_tile_h = pw_tile_h;
+const int max_tile_d = pw_tile_d > dw_tile_d ? pw_tile_d : dw_tile_d;
+
+const int num_of_weights_in_the_same_filter_and_group_on_chip = weights_group_items / ON_CHIP_WEIGHTS_PORTS;
+const int num_of_weights_in_the_same_filter_and_group = weights_group_items / pw_conv_parallelism_out;
+const int num_of_weight_groups_in_the_largest_weight_tile = max_conv_d * pw_conv_parallelism_out / weights_group_items;
+const int pw_weights_tile_partitioning_factor = num_of_weights_in_the_same_filter_and_group;
+
+const int max_filter_area = max_filter_hw_dim * max_filter_hw_dim;
+
+const int all_on_chip_pw_s_weights_groups = (all_on_chip_pw_s_weights + weights_group_items - 1) / weights_group_items;
 
 #endif

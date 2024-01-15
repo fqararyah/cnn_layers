@@ -85,7 +85,7 @@ void dump_layer_output(string file_name, fms_dt ofms[max_fms_size],
 	myfile.close();
 }
 
-void dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void dump_layer_output(string file_name, fms_dt ofms[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 					   const layer_specs layer_specs_struct)
 {
 

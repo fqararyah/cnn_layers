@@ -33,10 +33,10 @@ void load_and_quantize_image(string file_name,
 							 fms_dt image[], Quantization_layer_specs quantization_l_specs);
 
 void glue_weights(string file_name,
-				  weights_grp_dt glued_weights[all_pw_s_weights]);
+				  weights_grp_dt glued_weights[all_off_chip_pw_s_weights]);
 
 void validate_weights(string file_name,
-					  weights_grp_dt glued_weights[all_pw_s_weights]);
+					  weights_grp_dt glued_weights[all_off_chip_pw_s_weights]);
 
 void glue_input_image(string file_name,
 					  fms_grp_dt input_image[input_image_depth * input_image_height * input_image_width / input_image_group_items]);
@@ -57,10 +57,10 @@ void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size],
 							 const layer_specs layer_specs_struct);
 
 // V2
-void fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void fill_layer_input(string file_name, fms_dt layer_input[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 					  const layer_specs layer_specs_struct);
 
-void verify_fill_layer_input(string file_name, fms_dt layer_input[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void verify_fill_layer_input(string file_name, fms_dt layer_input[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 							 const layer_specs layer_specs_struct);
 
 #if HW == CPU

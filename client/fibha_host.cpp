@@ -199,7 +199,7 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			cl::Buffer buffer_input_image(context, CL_MEM_READ_ONLY, input_image_depth * input_image_num_fms_groups_in_a_channel*sizeof(fms_grp_dt), NULL, &err));
 	OCL_CHECK(err,
-			cl::Buffer buffer_weights(context, CL_MEM_READ_ONLY, all_pw_s_weights * sizeof(weights_grp_dt), NULL, &err));
+			cl::Buffer buffer_weights(context, CL_MEM_READ_ONLY, all_off_chip_pw_s_weights * sizeof(weights_grp_dt), NULL, &err));
 	OCL_CHECK(err,
 			cl::Buffer buffer_dw_weights(context, CL_MEM_READ_ONLY, all_dw_off_chip_weights * sizeof(weights_dt), NULL, &err));
 	OCL_CHECK(err,
@@ -244,7 +244,7 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			ptr_input_image = (fms_grp_dt*)q.enqueueMapBuffer (buffer_input_image , CL_TRUE , CL_MAP_WRITE , 0, input_image_depth * input_image_num_fms_groups_in_a_channel*sizeof(fms_grp_dt), NULL, NULL, &err));
 	OCL_CHECK(err,
-			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_pw_s_weights * sizeof(weights_grp_dt), NULL, NULL, &err));
+			ptr_weights = (weights_grp_dt*)q.enqueueMapBuffer (buffer_weights , CL_TRUE , CL_MAP_WRITE , 0, all_off_chip_pw_s_weights * sizeof(weights_grp_dt), NULL, NULL, &err));
 	OCL_CHECK(err,
 			ptr_dw_weights = (weights_dt*)q.enqueueMapBuffer (buffer_dw_weights , CL_TRUE , CL_MAP_WRITE , 0, all_dw_off_chip_weights *sizeof(weights_dt), NULL, NULL, &err));
 	OCL_CHECK(err,
@@ -282,7 +282,9 @@ int main(int argc, char* argv[]) {
 	load_fused_zps(fused_zps_file, ptr_off_chip_fused_zeropoints);
 	glue_weights(weights_file, ptr_weights);
 	validate_weights(weights_file, ptr_weights);
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	glue_on_chip_weights_fpga(on_chip_weights_file, ptr_glued_on_chip_weights);
+#endif
 	read_fc_weights(fc_weights_file, fc_weights);
 	read_weight_sums(weight_sums_file, weight_sums);
 	read_biases(biases_file, biases);

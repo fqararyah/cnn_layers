@@ -3,7 +3,7 @@
 
 #include "simulation_constants.h"
 #include "q_data_types.h"
+#include "parallelism.h"
 #include "general_specs.h"
-#include "parallelism_and_tiling.h"
 
 #endif

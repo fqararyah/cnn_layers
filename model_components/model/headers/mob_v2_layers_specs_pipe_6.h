@@ -2247,6 +2247,9 @@ const layer_specs layer_66_pw_specs = {
                 0//biases_dt skip_connection_other_layer_zero_point;
                 };
 const pooling_layer_specs layer_67_avgpool_specs = {
+                1280,//ifm_depth
+                7,//ifm_height
+                7,//ifm_width
                 1.0620487151969,//const pooling_fused_scales_dt fused_scale; 
                 -128,//const biases_dt ifms_zero_point;
                 -128,//const biases_dt ofms_zero_point;
