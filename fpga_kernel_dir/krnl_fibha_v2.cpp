@@ -40,7 +40,7 @@
 #include "model_components/model/SEML/imp/mob_v2_seml_v2_pipe_6.cpp"
 
 #if TESTING
-void krnl_local_dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void krnl_local_dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 					   const layer_specs layer_specs_struct)
 {
 
@@ -127,10 +127,10 @@ void krnl_fibha_v2(
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif
 #elif FIBHA_VERSION == 2
-	fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
-	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	fms_dt channels[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
 	// fms_dt result2[max_fms_size];
-	fms_dt tmp_channels[MAX_TMP_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	fms_dt tmp_channels[MAX_TMP_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
 	// fms_dt tmp_channels2[max_tmp_fms_size];
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 2

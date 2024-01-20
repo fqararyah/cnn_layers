@@ -103,8 +103,8 @@ void fill_fused_scales_and_zero_points(
 	biases_dt fused_zero_points[], const int layer_num_filters);
 
 void copy_channels_to_tmp_channels(fms_dt channels[max_fms_size], fms_dt tmp_channels[max_tmp_fms_size]);
-void copy_channels_to_tmp_channels(fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-								   fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH]);
+void copy_channels_to_tmp_channels(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+								   fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH]);
 
 void fill_model_configs_list(const int model_configs_list_src[2 * max_conv_layers],
 							 int model_configs_list[2 * max_conv_layers]);

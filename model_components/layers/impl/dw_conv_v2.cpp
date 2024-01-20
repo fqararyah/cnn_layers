@@ -160,7 +160,7 @@ void dw_conv_copy_engine_result_tile(
     }
 }
 
-void dw_normalize_and_write_back_result_tile(fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void dw_normalize_and_write_back_result_tile(fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                                              dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                                              fms_dt ofm_zero_point,
                                              const fused_scales_dt fused_scales_tile[],
@@ -265,8 +265,8 @@ void dw_normalize_and_write_back_result_tile(fms_dt result[][MIN_FMS_HEIGHT][MIN
 }
 
 void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
-                               fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-                               fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+                               fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+                               fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                                const int layer,
                                const layer_specs layer_specs_struct,
                                const fused_scales_dt fused_scales[],

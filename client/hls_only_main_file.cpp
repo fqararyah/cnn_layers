@@ -50,10 +50,10 @@ void top_func(
 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif
 #elif FIBHA_VERSION == 2
-	fms_dt channels[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
-	fms_dt result[MAX_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	fms_dt channels[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
+	fms_dt result[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
 	// fms_dt result2[max_fms_size];
-	fms_dt tmp_channels[MAX_TMP_FMS_BUFFER_DEPTH][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+	fms_dt tmp_channels[MAX_TMP_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
 	// fms_dt tmp_channels2[max_tmp_fms_size];
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 2

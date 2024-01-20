@@ -83,10 +83,10 @@ void verify_fill_layer_input(string file_name, fms_dt ofms[max_fms_size],
 							 const layer_specs layer_specs_struct);
 
 // V2
-void fill_layer_input(string file_name, fms_dt layer_input[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void fill_layer_input(string file_name, fms_dt layer_input[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 					  const layer_specs layer_specs_struct);
 
-void verify_fill_layer_input(string file_name, fms_dt layer_input[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void verify_fill_layer_input(string file_name, fms_dt layer_input[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 							 const layer_specs layer_specs_struct);
 
 #if HW == CPU

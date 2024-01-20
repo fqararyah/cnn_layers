@@ -6,9 +6,9 @@
 
 void pw_write_results_tile(
 	fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
-	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 	int tile_indx,
-	fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+	fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 	int starting_d,
 	const int in_tile_h,
@@ -85,7 +85,7 @@ void pw_write_results_tile(
 	}
 }
 
-void scale_pss_tile(fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void scale_pss_tile(fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 					pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					layer_specs layer_specs_struct,
@@ -220,7 +220,7 @@ void scale_pss_tile(fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
 	}
 }
 
-void pw_fill_channels_tile(fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void pw_fill_channels_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 						   fms_dt channels_tile[pw_tile_h][pw_tile_w], const int starting_index,
 						   const int layer_conv_d)
 {
@@ -265,8 +265,8 @@ pw_conv_eng_loops:
 	}
 }
 
-void pw_conv_pipeline(fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					  fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void pw_conv_pipeline(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+					  fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 					  weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 					  pss_dt results_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					  layer_specs layer_specs_struct,
@@ -334,9 +334,9 @@ pw_conv_eng_loops:
 }
 
 void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
-			 fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+			 fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+			 fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+			 fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 			 const int layer, const layer_specs layer_specs_struct,
 			 const fused_scales_dt fused_scales_buffer[],
 			 relu_6_fused_scales_dt relu_6_fused_scale,
@@ -422,9 +422,9 @@ conv2_ith_loop:
 }
 
 void pw_conv(weights_grp_dt *weights,
-			 fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+			 fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+			 fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+			 fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 			 int layer, const layer_specs layer_specs_struct,
 			 const fused_scales_dt fused_scales[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],
@@ -480,15 +480,15 @@ conv2_ots_loop:
 												  layer_specs_struct.layer_depth,
 												  to_fill_weight_groups_in_a_pass);
 #endif
-//if(layer_specs_struct.layer_index == 8 && td_o == 0){
-//	printf("%d\n\n", to_fill_weight_groups_in_a_pass);
-//			for(int ii =0;ii<8;ii++){
-//				for(int jj=0;jj<144;jj++){
-//					printf("%d, ", (int)weights_tile[ii][jj]);
-//				}
-//				printf("\n");
-//			}
-//		}
+// if(layer_specs_struct.layer_index == 3 && td_o == 0){
+// 	printf("%d\n\n", to_fill_weight_groups_in_a_pass);
+// 			for(int ii =0;ii<8;ii++){
+// 				for(int jj=0;jj<16;jj++){
+// 					printf("%d, ", (int)weights_tile[ii][jj]);
+// 				}
+// 				printf("\n");
+// 			}
+// 		}
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
 				relu_6_fused_scale, fused_zero_points, td_o, model_configs_list);
 #if HW == _FPGA

@@ -32,7 +32,6 @@ int main(int argc, char **argv)
 {
 
 	int images_to_test = 10;
-
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
 	if (argc > 1)
@@ -119,10 +118,8 @@ int main(int argc, char **argv)
 	glue_weights(weights_file, weights);
 	validate_weights(weights_file, weights);
 #elif HW == CPU
-#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	glue_on_chip_weights_cpu(on_chip_weights_file,
 							 glued_on_chip_weights);
-#endif
 	load_weights(weights_file, weights);
 #endif
 	load_fused_scales(fused_scales_file, off_chip_fused_scales);

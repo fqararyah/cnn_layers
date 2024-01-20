@@ -12,9 +12,9 @@ void seml(weights_grp_dt off_chip_weights[all_off_chip_pw_s_weights],
           weights_dt off_chip_dw_weights[all_dw_off_chip_weights],
           fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps],
           biases_dt off_chip_fused_zero_points[all_off_chip_fused_scales_zps],
-          fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-          fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-          fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+          fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+          fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+          fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
           fms_dt fc_input[fc_layer_input_size],
           int model_configs_list[2 * max_conv_layers])
 {
@@ -73,14 +73,6 @@ seml_engines::fill_fused_zero_points(off_chip_fused_zero_points,
 seml_engines::dw_conv_3x3(seml_dw_weights_3x3, result, channels, 6,layer_6_dw_specs,
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
         model_configs_list);
-#if DEBUGGING
- fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_7.txt",
- channels, layer_7_pw_specs);
-#endif
-#if DEBUGGING
- verify_fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_7.txt",
- channels, layer_7_pw_specs);
-#endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
                                      layers_fused_parameters_offsets[7],
@@ -94,8 +86,16 @@ pw_conv(off_chip_weights, channels , result, tmp_channels, 7, layer_7_pw_specs,
     model_configs_list);
 
 #if DEBUGGING
- dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
- result, layer_7_pw_specs);
+ fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_8.txt",
+ tmp_channels, layer_8_pw_specs);
+#endif
+#if DEBUGGING
+ fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_8.txt",
+ result, layer_8_pw_specs);
+#endif
+#if DEBUGGING
+ verify_fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/verify_8.txt",
+ result, layer_8_pw_specs);
 #endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
@@ -175,6 +175,10 @@ seml_engines::fill_fused_zero_points(off_chip_fused_zero_points,
 seml_engines::dw_conv_3x3(seml_dw_weights_3x3, result, channels, 14,layer_14_dw_specs,
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
         model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
+ channels, layer_14_dw_specs);
+#endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
                                      layers_fused_parameters_offsets[15],
@@ -187,6 +191,10 @@ pw_conv(off_chip_weights, channels , result, tmp_channels, 15, layer_15_pw_specs
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
     model_configs_list);
 
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_15.txt",
+ result, layer_15_pw_specs);
+#endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
                                      layers_fused_parameters_offsets[16],
@@ -199,6 +207,10 @@ pw_conv(off_chip_weights, result , channels, tmp_channels, 16, layer_16_pw_specs
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
     model_configs_list);
 
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_16.txt",
+ channels, layer_16_pw_specs);
+#endif
 seml_engines::fill_layer_dw_weights_off_chip
     (off_chip_dw_weights, seml_dw_weights_3x3, dw_layers_weights_offsets[17], layer_17_dw_specs.layer_depth);
 seml_engines::fill_fused_scales(off_chip_fused_scales,
@@ -212,6 +224,10 @@ seml_engines::fill_fused_zero_points(off_chip_fused_zero_points,
 seml_engines::dw_conv_3x3(seml_dw_weights_3x3, channels, result, 17,layer_17_dw_specs,
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
         model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_17.txt",
+ result, layer_17_dw_specs);
+#endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
                                      layers_fused_parameters_offsets[18],
@@ -224,6 +240,10 @@ pw_conv(off_chip_weights, result , channels, tmp_channels, 18, layer_18_pw_specs
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
     model_configs_list);
 
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_18.txt",
+ channels, layer_18_pw_specs);
+#endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
                                      layers_fused_parameters_offsets[20],
@@ -421,6 +441,10 @@ pw_conv(off_chip_weights, result , channels, tmp_channels, 40, layer_40_pw_specs
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
     model_configs_list);
 
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_40.txt",
+ channels, layer_40_pw_specs);
+#endif
 seml_engines::fill_layer_dw_weights_off_chip
     (off_chip_dw_weights, seml_dw_weights_3x3, dw_layers_weights_offsets[41], layer_41_dw_specs.layer_depth);
 seml_engines::fill_fused_scales(off_chip_fused_scales,
@@ -434,6 +458,10 @@ seml_engines::fill_fused_zero_points(off_chip_fused_zero_points,
 seml_engines::dw_conv_3x3(seml_dw_weights_3x3, channels, result, 41,layer_41_dw_specs,
     seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
         model_configs_list);
+#if DEBUGGING
+ dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_41.txt",
+ result, layer_41_dw_specs);
+#endif
 seml_engines::fill_fused_scales(off_chip_fused_scales,
                                      seml_fused_scales_buffer,
                                      layers_fused_parameters_offsets[42],

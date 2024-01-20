@@ -171,7 +171,7 @@ void fill_channels_buffer_cpu(
 void layer_0_s_conv_engine(
 	const layer_0_weights_dt weights_1[first_conv_layer_num_fils][first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_filter_dim],
 	fms_dt channels_tile[input_image_depth][first_conv_layer_filter_dim][input_image_width],
-	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH], int starting_h,
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH], int starting_h,
 	const fused_scales_dt fused_scales[],
 	const relu_6_fused_scales_dt relu_6_fused_scales[],
 	const biases_dt fused_zero_points[])
@@ -261,7 +261,7 @@ void layer_0_s_conv_engine(
 
 void layer_0_s_3x3(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH])
 {
 	const int rows_filled_first_time = first_conv_layer_filter_dim - first_conv_layer_strides;
 	fms_dt channels_tile[first_conv_layer_depth][first_conv_layer_filter_dim][first_conv_layer_ifm_width];

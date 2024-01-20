@@ -595,7 +595,7 @@ void write_chain_seml_communication_buffer(
 
 void write_chain_seml_communication_buffer(
 	fms_dt chain_seml_communication_buffer[bottleneck_1_ofms_depth][bottleneck_1_ofms_width],
-	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH], const int starting_h)
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH], const int starting_h)
 {
 #pragma HLS INLINE off
 
@@ -624,7 +624,7 @@ void write_chain_seml_communication_buffer(
 
 void _0_1_bottlenecks_chain(
 	fms_grp_dt channels[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH])
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH])
 {
 #pragma HLS INLINE off
 

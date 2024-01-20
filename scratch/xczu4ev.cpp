@@ -98,10 +98,10 @@
 // 	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 // #endif
 // #elif FIBHA_VERSION == 2
-// 	fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
-// 	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+// 	fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
+// 	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
 // 	// fms_dt result2[max_fms_size];
-// 	fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH];
+// 	fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
 
 // #pragma HLS bind_storage variable=channels type=ram_2p impl=URAM
 // #pragma HLS bind_storage variable=result type=ram_2p impl=URAM

@@ -9,16 +9,16 @@ void copy_pss_tile(
 
 void pw_write_results_tile(
 	fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
-	fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 	int tile_indx,
-	fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+	fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 	int starting_d,
 	const int in_tile_h,
 	const int in_tile_w,
 	layer_specs layer_specs_struct);
 
-void scale_pss_tile(fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+void scale_pss_tile(fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 					pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					layer_specs layer_specs_struct,
@@ -37,9 +37,9 @@ void pw_conv(weights_grp_dt *weights, fms_dt channels[max_fms_size],
 			 const biases_dt fused_zero_points[]);
 
 void pw_conv(weights_grp_dt *weights,
-			 fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-			 fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+			 fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+			 fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+			 fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 			 int layer, const layer_specs layer_specs_struct,
 			 const fused_scales_dt fused_scales[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],

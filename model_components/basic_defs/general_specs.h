@@ -131,9 +131,13 @@ const int pw_tile_d = pw_conv_parallelism_in;
 #if FIBHA_VERSION == 1
 const int pw_tile_h = 8;
 const int pw_tile_w = 8;
+const int pooling_tile_h = pw_tile_h;
+const int pooling_tile_w = pw_tile_w;
 #elif FIBHA_VERSION == 2
 const int pw_tile_h = PW_PARALLELISM_H;
 const int pw_tile_w = PW_PARALLELISM_W;
+const int pooling_tile_h = 8;
+const int pooling_tile_w = 8;
 #endif
 const int pw_tile_hw = pw_tile_h * pw_tile_w;
 const int pw_tile_size = pw_tile_d * pw_tile_h * pw_tile_w;

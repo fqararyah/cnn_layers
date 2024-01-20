@@ -26,9 +26,9 @@ void seml(weights_grp_dt off_chip_weights[all_off_chip_pw_s_weights],
           weights_dt off_chip_dw_weights[all_dw_off_chip_weights],
           fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps],
           biases_dt off_chip_fused_zero_points[all_off_chip_fused_scales_zps],
-          fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-          fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-          fms_dt tmp_channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+          fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+          fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+          fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
           fms_dt fc_input[fc_layer_input_size],
           int model_configs_list[2 * max_conv_layers]);
 

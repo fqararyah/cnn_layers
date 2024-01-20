@@ -22,8 +22,8 @@ namespace seml_engines
 
 	// V2
 	void dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
-					 fms_dt channels[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
-					 fms_dt result[][MIN_FMS_HEIGHT][MIN_FMS_WIDTH],
+					 fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+					 fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 					 const int layer,
 					 const layer_specs layer_specs_struct,
 					 const fused_scales_dt fused_scales[],
