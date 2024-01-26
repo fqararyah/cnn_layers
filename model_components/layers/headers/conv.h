@@ -14,7 +14,8 @@ void layer_0_s_using_pw(
 
 void layer_0_s_3x3(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
-	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH]);
+	fms_dt result[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+	const int starting_row_in_ofms = 0, const int to_produce_rows_count = input_image_height);
 
 void layer_0_s_3x3(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
