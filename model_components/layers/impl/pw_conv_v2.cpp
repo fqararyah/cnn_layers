@@ -341,12 +341,14 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 			 const fused_scales_dt fused_scales_buffer[],
 			 relu_6_fused_scales_dt relu_6_fused_scale,
 			 const biases_dt fused_zero_points_buffer[], int td_o,
-			 const int model_configs_list[])
+			 const int model_configs_list[],
+			 const int to_produce_row_count,
+			 const int starting_row = 0)
 {
 
 #pragma HLS INLINE off
 
-	const int num_of_tiles_h = layer_specs_struct.layer_num_of_ifm_tiles_h;
+	const int num_of_tiles_h = (to_produce_row_count + pw_tile_h - 1) / pw_tile_h; //layer_specs_struct.layer_num_of_ifm_tiles_h;
 	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
 	const int num_of_ofm_tiles_h = layer_specs_struct.layer_num_of_ofm_tiles_h;
 	const int num_of_ofm_tiles_w = layer_specs_struct.layer_num_of_ofm_tiles_w;
@@ -429,7 +431,9 @@ void pw_conv(weights_grp_dt *weights,
 			 const fused_scales_dt fused_scales[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],
 			 const biases_dt fused_zero_points[],
-			 const int model_configs_list[2 * max_conv_layers])
+			 const int model_configs_list[2 * max_conv_layers],
+			 const int to_produce_row_count,
+			 const int starting_row)
 {
 #pragma HLS INLINE off
 
@@ -490,7 +494,7 @@ conv2_ots_loop:
 // 			}
 // 		}
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
-				relu_6_fused_scale, fused_zero_points, td_o, model_configs_list);
+				relu_6_fused_scale, fused_zero_points, td_o, model_configs_list, to_produce_row_count, starting_row);
 #if HW == _FPGA
 		fill_layer_weight_groups_tile_off_chip(weights, weight_groups_buffer,
 											   (td_o + 1) * pw_conv_parallelism_out,

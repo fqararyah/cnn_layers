@@ -78,6 +78,15 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                    const fms_dt current_layer_zero_point,
                    const layer_specs layer_specs_struct,
                    const int model_configs_list_limit);
+void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+                   fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
+                   const int tile_in_d,
+                   const int tile_in_h,
+                   const int tile_in_w,
+                   const fms_dt current_layer_zero_point,
+                   const layer_specs layer_specs_struct,
+                   const int model_configs_list_limit,
+                   const int starting_row);
 
 void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MAX_TILE_PADDING_TOP_LEFT][CHANNELS_TILE_WIDTH],
                            fms_dt padding_left_buffer[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][MAX_TILE_PADDING_TOP_LEFT],

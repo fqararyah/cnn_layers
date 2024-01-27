@@ -295,12 +295,12 @@ void layer_0_s_3x3(
 																rows_filled_first_time,
 																first_conv_layer_specs.layer_ifms_zero_point);
 #endif
-	printf("************\n");
+	//printf("************\n");
 	for (int h = starting_row_in_ofms; h < ending_row_in_ofms; h++)
 	{
 		const int start_reading_h = (h + 1) * first_conv_layer_strides + rows_filled_first_time;
-		printf("%d\n", h);
-		layer_0_s_conv_engine(first_layer_weights, channels_tile, result, h,
+		//printf("%d\n", h);
+		layer_0_s_conv_engine(first_layer_weights, channels_tile, result, h - starting_row_in_ofms,
 							  first_conv_layer_fused_scales, first_conv_layer_relu_6_fused_scales,
 							  first_conv_layer_fused_zero_points);
 #if HW == CPU

@@ -154,9 +154,11 @@ int main(int argc, char **argv)
 						  off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
 						  model_configs_list, &img_count);
 #elif HW == CPU
+			int layer_to_produce_row_counts[] = //{112, 0, 112, 112, 112, 0, 56, 56, 56};
+												{19, 0, 17, 17, 17, 0, 8, 8, 8};
 			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
 					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-					 model_configs_list);
+					 model_configs_list, layer_to_produce_row_counts);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
 			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "

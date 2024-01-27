@@ -5,7 +5,7 @@
 #include "../tests/test_utils.h"
 
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
-static 	weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
+static weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
 #endif
 
 void top_func(
@@ -16,7 +16,8 @@ void top_func(
 	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps],
 	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 	fms_dt fc_input[fc_layer_input_size],
-	const int model_configs_list_src[2 * max_conv_layers])
+	const int model_configs_list_src[2 * max_conv_layers],
+	const int layer_to_produce_row_counts[max_conv_layers])
 {
 
 #if FIBHA_VERSION == 1
@@ -28,9 +29,9 @@ void top_func(
 
 #pragma HLS ARRAY_PARTITION variable = channels type = cyclic factor = main_buffers_partitining_factor
 #pragma HLS ARRAY_PARTITION variable = tmp_channels type = cyclic factor = main_buffers_partitining_factor
-//#pragma HLS ARRAY_PARTITION variable = tmp_channels2 type = cyclic factor = main_buffers_partitining_factor
+// #pragma HLS ARRAY_PARTITION variable = tmp_channels2 type = cyclic factor = main_buffers_partitining_factor
 #pragma HLS ARRAY_PARTITION variable = result type = cyclic factor = main_buffers_partitining_factor
-	//#pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
+	// #pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
 #if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25)
 	_0_1_2_bottlenecks_chain(input_image,
@@ -64,7 +65,7 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
 	int model_configs_list[2 * max_conv_layers] = {0};
-	
+
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 
 #pragma HLS ARRAY_PARTITION variable = on_chip_weights type = complete dim = 2
@@ -109,14 +110,15 @@ void top_func(
 
 #endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
 #else
-layer_0_s_3x3(input_image, channels, 0, 29);
-layer_0_s_3x3(input_image, channels, 28, 29);
-layer_0_s_3x3(input_image, channels, 56, 29);
-layer_0_s_3x3(input_image, channels, 84, 28);
-dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_1.txt",
- channels, layer_1_s_specs);
+	// layer_0_s_3x3(input_image, channels, 0, 29);
+	// layer_0_s_3x3(input_image, channels, 28, 29);
+	// layer_0_s_3x3(input_image, channels, 56, 29);
+	// layer_0_s_3x3(input_image, channels, 84, 28);
+	// dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_1.txt",
+	// 				  channels, layer_1_s_specs);
 #endif // ONLY_SEML == 0
-	seml(off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints, channels, result, tmp_channels, fc_input, model_configs_list);
+	seml(input_image, off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints,
+		 channels, result, tmp_channels, fc_input, model_configs_list, layer_to_produce_row_counts);
 
 #endif
 }

@@ -44,7 +44,9 @@ void pw_conv(weights_grp_dt *weights,
 			 const fused_scales_dt fused_scales[],
 			 const relu_6_fused_scales_dt relu_6_fused_scales[],
 			 const biases_dt fused_zero_points[],
-			 const int model_configs_list[2 * max_conv_layers]);
+			 const int model_configs_list[2 * max_conv_layers],
+			 const int to_produce_row_count,
+			 const int starting_row = 0);
 
 void pw_conv_eng(fms_dt channels_tile[pw_tile_d][pw_tile_h][pw_tile_w],
 				 weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
