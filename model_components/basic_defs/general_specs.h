@@ -94,6 +94,12 @@ struct fc_layer_specs
 	const fms_dt ifm_zero_point;
 };
 
+struct soft_pipe_specs_struct{
+	int to_produce_row_count;
+	int redundant_rows;
+	int unused_first_time;
+};
+
 // switch point
 #if ONLY_SEML
 const int switch_point_fms_width = 112;

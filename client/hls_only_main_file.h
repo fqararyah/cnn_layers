@@ -20,7 +20,7 @@ void top_func(
 	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 	fms_dt fc_input[fc_layer_input_size],
 	const int model_configs_list_src[2 * max_conv_layers],
-	const int layer_to_produce_row_counts[max_conv_layers]);
+	const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers]);
 
 #endif
 

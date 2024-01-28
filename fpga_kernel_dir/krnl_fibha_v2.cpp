@@ -1,14 +1,14 @@
 #include "all_includes.h"
 
 #include "model_components/model/headers/model_glue.h"
-//###################################################
+// ###################################################
 
 #include "model_components/utils/utils.h"
 #include "model_components/utils/utils.cpp"
 
 #include "model_components/layers/headers/layers_glue.h"
 
-//#if ONLY_SESL == 0
+// #if ONLY_SESL == 0
 #include "model_components/layers/impl/norm_act.cpp"
 #include "model_components/layers/impl/conv_utils.cpp"
 #include "model_components/layers/impl/dw_conv_v1_6.cpp"
@@ -16,7 +16,7 @@
 #include "model_components/layers/impl/pw_conv_v1_2.cpp"
 #include "model_components/layers/impl/pw_conv_v2.cpp"
 #include "model_components/layers/impl/conv_v2.cpp"
-//#endif
+// #endif
 //
 #include "model_components/layers/impl/pooling.cpp"
 
@@ -41,7 +41,7 @@
 
 #if TESTING
 void krnl_local_dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
-					   const layer_specs layer_specs_struct)
+								  const layer_specs layer_specs_struct)
 {
 
 	ofstream myfile;
@@ -72,16 +72,15 @@ void krnl_local_dump_layer_output(string file_name, fms_dt ofms[MAX_FMS_BUFFER_D
 
 using namespace std;
 
-extern "C" {
+extern "C"
+{
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
-static weights_dt on_chip_weights[all_on_chip_pw_s_weights
-		/ ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
+	static weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
 #endif
-static int model_configs_list[2 * max_conv_layers];
+	static int model_configs_list[2 * max_conv_layers] = {0};
 
-void krnl_fibha_v2(
-		fms_grp_dt input_image[input_image_depth
-				* input_image_num_fms_groups_in_a_channel],
+	void krnl_fibha_v2(
+		fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 		weights_grp_dt off_chip_weights[all_off_chip_pw_s_weights],
 		weights_dt off_chip_dw_weights[all_dw_off_chip_weights],
 		fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps],
@@ -89,49 +88,46 @@ void krnl_fibha_v2(
 		weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 		fms_dt fc_input[fc_layer_input_size],
 		const int model_config_list_src[2 * max_conv_layers],
-		int *first_lunch) {
-
-//#pragma HLS INTERFACE m_axi port = input_image bundle = gmem0
-//#pragma HLS INTERFACE m_axi port = off_chip_weights bundle = gmem1
-//#pragma HLS INTERFACE m_axi port = fc_input bundle = gmem2
-//#pragma HLS INTERFACE ap_hs port = ready_to_receive_a_new_input_ptr
+		const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers],
+		int *first_lunch)
+	{
 
 #if FIBHA_VERSION == 1
-	fms_dt channels[max_fms_size];
-	fms_dt result[max_fms_size];
-	// fms_dt result2[max_fms_size];
-	fms_dt tmp_channels[max_tmp_fms_size];
-	// fms_dt tmp_channels2[max_tmp_fms_size];
+		fms_dt channels[max_fms_size];
+		fms_dt result[max_fms_size];
+		// fms_dt result2[max_fms_size];
+		fms_dt tmp_channels[max_tmp_fms_size];
+		// fms_dt tmp_channels2[max_tmp_fms_size];
 
 #pragma HLS ARRAY_PARTITION variable = channels type = cyclic factor = main_buffers_partitining_factor
 #pragma HLS ARRAY_PARTITION variable = tmp_channels type = cyclic factor = main_buffers_partitining_factor
-//#pragma HLS ARRAY_PARTITION variable = tmp_channels2 type = cyclic factor = main_buffers_partitining_factor
+// #pragma HLS ARRAY_PARTITION variable = tmp_channels2 type = cyclic factor = main_buffers_partitining_factor
 #pragma HLS ARRAY_PARTITION variable = result type = cyclic factor = main_buffers_partitining_factor
-	//#pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
+		// #pragma HLS ARRAY_PARTITION variable = result2 type = cyclic factor = main_buffers_partitining_factor
 
-#if CHAIN_LENGTH == 9 && MODEL_ID == 2
-	_0_1_2_bottlenecks_chain(input_image,
-			tmp_channels);
-	local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
-			tmp_channels, 56 * 56 * 24, 56, 56);
-#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && !ONLY_SEML
-	_0_1_bottlenecks_chain(input_image,
-			channels);
+#if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25)
+		_0_1_2_bottlenecks_chain(input_image,
+								 tmp_channels);
+		dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+						  tmp_channels, 56 * 56 * 24, 56, 56);
+#elif CHAIN_LENGTH == 6 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_75) && !ONLY_SEML
+		_0_1_bottlenecks_chain(input_image,
+							   channels);
 #if DEBUGGING
-	local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
-			channels, layer_7_pw_specs);
+		local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+								channels, layer_7_pw_specs);
 #endif
 #endif
-	copy_channels_to_tmp_channels(channels, tmp_channels);
+		copy_channels_to_tmp_channels(channels, tmp_channels);
 #if ONLY_SESL == 0
-	seml(off_chip_weights, channels, result, tmp_channels, fc_input);
+		seml(off_chip_weights, channels, result, tmp_channels, fc_input);
 #endif
 #elif FIBHA_VERSION == 2
-	fms_dt channels[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
-	fms_dt result[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
-	// fms_dt result2[max_fms_size];
-	fms_dt tmp_channels[MAX_TMP_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
-	// fms_dt tmp_channels2[max_tmp_fms_size];
+		fms_dt channels[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
+		fms_dt result[MAX_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
+		// fms_dt result2[max_fms_size];
+		fms_dt tmp_channels[MAX_TMP_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
+		// fms_dt tmp_channels2[max_tmp_fms_size];
 
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = channels type = complete dim = 3
@@ -142,63 +138,55 @@ void krnl_fibha_v2(
 
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 
-#pragma HLS ARRAY_PARTITION variable=on_chip_weights type=complete dim = 2
+#pragma HLS ARRAY_PARTITION variable = on_chip_weights type = complete dim = 2
 
-	if (*first_lunch != 0)
-	{
+		if (*first_lunch != 0)
+		{
+			fill_model_configs_list(model_config_list_src, model_configs_list);
 #if HW == CPU
-		fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
+			fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
 #elif HW == _FPGA
-		fill_model_configs_list(model_config_list_src, model_configs_list);
-		fill_on_chip_weights_fpga(on_chip_weights_src,
-				on_chip_weights, 0);
+			fill_on_chip_weights_fpga(on_chip_weights_src,
+									  on_chip_weights, 0);
 #endif // #if HW == CPU
-	}
-	for(int i=0;i<2 * max_conv_layers;i++) {
-		fc_input[i] = model_configs_list[i];
-		fc_input[i + 500] = model_config_list_src[i];
-	}
+		}
 #endif // #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 #if ONLY_SEML == 0
 
 #if FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
-
-#if CHAIN_LENGTH == 9 && MODEL_ID == 2
-
-	_0_1_2_bottlenecks_chain(input_image,
-			tmp_channels);
-	local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
-			tmp_channels, 56 * 56 * 24, 56, 56);
-#elif CHAIN_LENGTH == 6 && MODEL_ID == 2 && !ONLY_SEML
-	_0_1_bottlenecks_chain(input_image, channels);
+#if CHAIN_LENGTH == 9 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25)
+		_0_1_2_bottlenecks_chain(input_image,
+								 tmp_channels);
+		local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_8.txt",
+								tmp_channels, 56 * 56 * 24, 56, 56);
+#elif CHAIN_LENGTH == 6 && (MODEL_ID == MOB_V2 || MODEL_ID == MOB_V2_0_5 || MODEL_ID == MOB_V2_0_75 || MODEL_ID == MOB_V2_0_25) && !ONLY_SEML
+		_0_1_bottlenecks_chain(input_image,
+							   channels);
 #if DEBUGGING
-	local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
-			channels, layer_7_pw_specs);
-#endif //#if DEBUGGING
+		local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
+								channels, layer_7_pw_specs);
+#endif // #if DEBUGGING
 
 #endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
 
-	copy_channels_to_tmp_channels(channels, tmp_channels);
+		copy_channels_to_tmp_channels(channels, tmp_channels);
 
 #else // FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
 
-	pipelined_engines_caller(input_image,on_chip_weights, channels, model_configs_list);
+		pipelined_engines_caller(input_image, on_chip_weights, channels, model_configs_list);
 #if DEBUGGING
-	local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
-			channels, layer_14_dw_specs);
+		local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
+								channels, layer_14_dw_specs);
 #endif // ONLY_SEML == 0
 
 #endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
-	//avgpool(channels, fc_input, layer_67_avgpool_specs);
 #else
-	layer_0_s_3x3(input_image, channels);
-#if TESTING
-	krnl_local_dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_1.txt",
-	channels, layer_1_s_specs);
-#endif
-#endif // ONLY_SEML == 0
-	seml(off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zero_points, channels, result, tmp_channels, fc_input, model_configs_list);
-#endif
 
-}
+#endif // ONLY_SEML == 0
+		seml(input_image, off_chip_weights, off_chip_dw_weights, off_chip_fused_scales,
+			 off_chip_fused_zero_points,
+			 channels, result, tmp_channels, fc_input, model_configs_list, soft_pipe_specs);
+
+#endif
+	}
 }

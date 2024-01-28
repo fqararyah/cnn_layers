@@ -43,6 +43,7 @@ int main(int argc, char **argv)
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+
 #elif HW == _FPGA
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_fpga_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
@@ -93,6 +94,17 @@ int main(int argc, char **argv)
 	int biases[num_classes];
 	string predictions_file_content = "[";
 	int top5[5];
+
+	soft_pipe_specs_struct soft_pipe_specs[max_conv_layers]; //{112, 0, 112, 112, 112, 0, 56, 56, 56};
+	soft_pipe_specs[0] = {19, 3, 1};
+	soft_pipe_specs[1] = {0, 3, 1};
+	soft_pipe_specs[2] = {17, 1, 0};
+	soft_pipe_specs[3] = {17, 1, 0};
+	soft_pipe_specs[4] = {17, 1, 0};
+	soft_pipe_specs[5] = {0, 1, 0};
+	soft_pipe_specs[6] = {8, 0, 0};
+	soft_pipe_specs[7] = {8, 0, 0};
+	//{19, 0, 17, 17, 17, 0, 8, 8, 8};
 
 #if HW == _FPGA
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
@@ -152,13 +164,12 @@ int main(int argc, char **argv)
 #if HW == _FPGA
 			krnl_fibha_v2(input_image, weights, dw_weights, off_chip_fused_scales,
 						  off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-						  model_configs_list, &img_count);
+						  model_configs_list, soft_pipe_specs,
+						  &img_count);
 #elif HW == CPU
-			int layer_to_produce_row_counts[] = //{112, 0, 112, 112, 112, 0, 56, 56, 56};
-												{19, 0, 17, 17, 17, 0, 8, 8, 8};
 			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
 					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-					 model_configs_list, layer_to_produce_row_counts);
+					 model_configs_list, soft_pipe_specs);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
 			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "

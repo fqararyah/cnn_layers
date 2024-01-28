@@ -18,7 +18,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
           fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
           fms_dt fc_input[fc_layer_input_size],
           int model_configs_list[2 * max_conv_layers],
-          const int layer_to_produce_row_counts[max_conv_layers])
+          const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers])
 {
 #pragma HLS INLINE off
 
@@ -41,8 +41,28 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
     for (int starting_row = 0; starting_row < 7; starting_row++)
     {
         layer_0_s_3x3(input_image, channels,
-                      starting_row * (layer_to_produce_row_counts[0] - (starting_row > 0) * 3) - ((starting_row > 0)),
-                      layer_to_produce_row_counts[0]);
+                      starting_row *
+                              (soft_pipe_specs[0].to_produce_row_count -
+                               (starting_row > 0) * soft_pipe_specs[0].redundant_rows) -
+                          ((starting_row > 0) * soft_pipe_specs[0].unused_first_time),
+                      soft_pipe_specs[0].to_produce_row_count);
+
+        if (starting_row == 0)
+            for (int tile_in_h = 0; tile_in_h < 5; tile_in_h++)
+            {
+                for (int h = 0; h < dw_tile_h; h++)
+                {
+                    for (int tile_in_w = 0; tile_in_w < 4; tile_in_w++)
+                    {
+                        for (int w = 0; w < dw_tile_w; w++)
+                        {
+                            printf("%d ", channels[tile_in_h * first_conv_layer_specs.layer_num_of_ofm_tiles_w + tile_in_w][h][w]);
+                        }
+                    }
+                    printf("\n");
+                }
+            }
+        printf("******************\n");
 
         seml_engines::fill_layer_dw_weights_off_chip(off_chip_dw_weights, seml_dw_weights_3x3, dw_layers_weights_offsets[2], layer_2_dw_specs.layer_depth);
         seml_engines::fill_fused_scales(off_chip_fused_scales,
@@ -55,24 +75,12 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                                              layer_2_dw_specs.layer_num_fils);
         seml_engines::dw_conv_3x3(seml_dw_weights_3x3, channels, result, 2, layer_2_dw_specs,
                                   seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
-                                  model_configs_list, layer_to_produce_row_counts[2],
-                                  starting_row * (layer_to_produce_row_counts[2] - (starting_row > 0) * 1));
+                                  model_configs_list, soft_pipe_specs[2].to_produce_row_count,
+                                  starting_row *
+                                          (soft_pipe_specs[2].to_produce_row_count -
+                                           (starting_row > 0) * soft_pipe_specs[2].redundant_rows) -
+                                      (starting_row > 0) * soft_pipe_specs[2].unused_first_time);
 
-        for (int tile_in_h = 0; tile_in_h < 5; tile_in_h++)
-        {
-            for (int h = 0; h < dw_tile_h; h++)
-            {
-                for (int tile_in_w = 0; tile_in_w < 4; tile_in_w++)
-                {
-                    for (int w = 0; w < dw_tile_w; w++)
-                    {
-                        printf("%d ", result[tile_in_h * first_conv_layer_specs.layer_num_of_ofm_tiles_w + tile_in_w][h][w]);
-                    }
-                }
-                printf("\n");
-            }
-        }
-        printf("******************\n");
 #if DEBUGGING
         dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_2.txt",
                           result, layer_2_dw_specs);
@@ -87,7 +95,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                                              layer_3_pw_specs.layer_num_fils);
         pw_conv(off_chip_weights, result, channels, tmp_channels, 3, layer_3_pw_specs,
                 seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
-                model_configs_list, layer_to_produce_row_counts[3]);
+                model_configs_list, soft_pipe_specs[3].to_produce_row_count);
 
 #if DEBUGGING
         dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_3.txt",
@@ -103,7 +111,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                                              layer_4_pw_specs.layer_num_fils);
         pw_conv(off_chip_weights, channels, result, tmp_channels, 4, layer_4_pw_specs,
                 seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
-                model_configs_list, layer_to_produce_row_counts[4]);
+                model_configs_list, soft_pipe_specs[4].to_produce_row_count);
 
 #if DEBUGGING
         dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_4.txt",
@@ -120,7 +128,9 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                                              layer_6_dw_specs.layer_num_fils);
         seml_engines::dw_conv_3x3(seml_dw_weights_3x3, result, channels, 6, layer_6_dw_specs,
                                   seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
-                                  model_configs_list, layer_to_produce_row_counts[6]);
+                                  model_configs_list, soft_pipe_specs[6].to_produce_row_count,
+                                  starting_row * soft_pipe_specs[6].to_produce_row_count);
+
 #if DEBUGGING
         dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_6.txt",
                           channels, layer_6_dw_specs);
@@ -135,9 +145,9 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                                              layer_7_pw_specs.layer_num_fils);
         pw_conv(off_chip_weights, channels, result, tmp_channels, 7, layer_7_pw_specs,
                 seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
-                model_configs_list, layer_to_produce_row_counts[7]);
+                model_configs_list, soft_pipe_specs[7].to_produce_row_count);
 
-        const int num_produced_tiles_h = layer_to_produce_row_counts[7] / pw_tile_h;
+        const int num_produced_tiles_h = soft_pipe_specs[7].to_produce_row_count / pw_tile_h;
         const int num_of_ofm_tiles_h = layer_7_pw_specs.layer_num_of_ofm_tiles_h;
         const int num_of_ofm_tiles_w = layer_7_pw_specs.layer_num_of_ofm_tiles_w;
         const int num_of_tiles_hw = num_of_ofm_tiles_h * num_of_ofm_tiles_w;
@@ -175,7 +185,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                                          layer_8_pw_specs.layer_num_fils);
     pw_conv(off_chip_weights, result, channels, tmp_channels, 8, layer_8_pw_specs,
             seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,
-            model_configs_list, layer_to_produce_row_counts[8]);
+            model_configs_list, soft_pipe_specs[8].to_produce_row_count);
 
 // 	//end_code_generation
 #if MODEL_ID == RESNET50

@@ -7,17 +7,18 @@
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 static weights_dt on_chip_weights[all_on_chip_pw_s_weights / ON_CHIP_WEIGHTS_PORTS][ON_CHIP_WEIGHTS_PORTS];
 #endif
+static int model_configs_list[2 * max_conv_layers] = {0};
 
 void top_func(
 	fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_in_a_channel],
 	weights_grp_dt off_chip_weights[all_off_chip_pw_s_weights],
 	weights_dt off_chip_dw_weights[all_dw_off_chip_weights],
 	fused_scales_dt off_chip_fused_scales[all_off_chip_fused_scales_zps],
-	biases_dt off_chip_fused_zeropoints[all_off_chip_fused_scales_zps],
+	biases_dt off_chip_fused_zero_points[all_off_chip_fused_scales_zps],
 	weights_grp_dt on_chip_weights_src[all_on_chip_pw_s_weights_groups],
 	fms_dt fc_input[fc_layer_input_size],
-	const int model_configs_list_src[2 * max_conv_layers],
-	const int layer_to_produce_row_counts[max_conv_layers])
+	const int model_config_list_src[2 * max_conv_layers],
+	const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers])
 {
 
 #if FIBHA_VERSION == 1
@@ -64,8 +65,6 @@ void top_func(
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = result type = complete dim = 3
 
-	int model_configs_list[2 * max_conv_layers] = {0};
-
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 
 #pragma HLS ARRAY_PARTITION variable = on_chip_weights type = complete dim = 2
@@ -73,14 +72,13 @@ void top_func(
 	if (!on_chip_weights_filled)
 	{
 		on_chip_weights_filled = true;
-
-		fill_model_configs_list(model_configs_list_src, model_configs_list);
+		fill_model_configs_list(model_config_list_src, model_configs_list);
 #if HW == CPU
 		fill_on_chip_weights_cpu(on_chip_weights_src, on_chip_weights);
 #elif HW == _FPGA
 		fill_on_chip_weights_fpga(on_chip_weights_src,
 								  on_chip_weights, 0);
-#endif
+#endif // #if HW == CPU
 	}
 #endif // #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 
@@ -98,27 +96,27 @@ void top_func(
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_7.txt",
 					  channels, layer_7_pw_specs);
-#endif
+#endif // #if DEBUGGING
+
 #endif // #if CHAIN_LENGTH == 9 && MODEL_ID == 2
+
 	copy_channels_to_tmp_channels(channels, tmp_channels);
-#else
+
+#else // FIRST_PART_IMPLEMENTATION == BOTTLENECK_CHAIN_MODE
+
 	pipelined_engines_caller(input_image, on_chip_weights, channels, model_configs_list);
 #if DEBUGGING
 	dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_14.txt",
 					  channels, layer_14_dw_specs);
-#endif
+#endif // ONLY_SEML == 0
 
 #endif // PIPELINED_ENGINES_MODE == BOTTLENECK_CHAIN_MODE
 #else
-	// layer_0_s_3x3(input_image, channels, 0, 29);
-	// layer_0_s_3x3(input_image, channels, 28, 29);
-	// layer_0_s_3x3(input_image, channels, 56, 29);
-	// layer_0_s_3x3(input_image, channels, 84, 28);
-	// dump_layer_output("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/scratch_out/ofms_1.txt",
-	// 				  channels, layer_1_s_specs);
+
 #endif // ONLY_SEML == 0
-	seml(input_image, off_chip_weights, off_chip_dw_weights, off_chip_fused_scales, off_chip_fused_zeropoints,
-		 channels, result, tmp_channels, fc_input, model_configs_list, layer_to_produce_row_counts);
+	seml(input_image, off_chip_weights, off_chip_dw_weights, off_chip_fused_scales,
+	 off_chip_fused_zero_points,
+		 channels, result, tmp_channels, fc_input, model_configs_list, soft_pipe_specs);
 
 #endif
 }

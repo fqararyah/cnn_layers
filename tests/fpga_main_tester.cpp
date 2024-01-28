@@ -7,7 +7,7 @@
 
 #include "fpga_test_utils.cpp"
 #include "../../../fiba_v2_kernels/src/krnl_fibha_v2.h"
-//#include "/media/SSD2TB/fareed/wd/vitis_ide_projects/fiba_v2_kernels/src/krnl_fibha_v2.cpp"
+// #include "/media/SSD2TB/fareed/wd/vitis_ide_projects/fiba_v2_kernels/src/krnl_fibha_v2.cpp"
 
 #include <fstream>
 #include "ap_int.h"
@@ -23,8 +23,8 @@
 #include <dirent.h>
 #include "../client/fpga_cpp_fc.cpp"
 
-//#include "ap_int.h"
-//#include "ap_fixed.h"
+// #include "ap_int.h"
+// #include "ap_fixed.h"
 using namespace std;
 
 // typedef ap_uint<512> weights_grp_dt;
@@ -32,6 +32,7 @@ int main(int argc, char **argv)
 {
 
 	int images_to_test = 10;
+
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
 	if (argc > 1)
@@ -54,7 +55,7 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() +
 		"_fused_zps_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 	string on_chip_weights_file =
-			"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+		"/media/SSD2TB/fareed/wd/cnn_layers/on_chip_weights/" + get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 #if HW == CPU
 	string weights_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_off_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
@@ -110,6 +111,9 @@ int main(int argc, char **argv)
 	string predictions_file_content = "[";
 	int top5[5];
 
+int layer_to_produce_row_counts[] = //{112, 0, 112, 112, 112, 0, 56, 56, 56};
+				{19, 0, 17, 17, 17, 0, 8, 8, 8};
+
 #if HW == _FPGA
 #if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	glue_on_chip_weights_fpga(on_chip_weights_file,
@@ -118,8 +122,10 @@ int main(int argc, char **argv)
 	glue_weights(weights_file, weights);
 	validate_weights(weights_file, weights);
 #elif HW == CPU
+#if FIRST_PART_IMPLEMENTATION == PIPELINED_ENGINES_MODE
 	glue_on_chip_weights_cpu(on_chip_weights_file,
 							 glued_on_chip_weights);
+#endif
 	load_weights(weights_file, weights);
 #endif
 	load_fused_scales(fused_scales_file, off_chip_fused_scales);
@@ -145,7 +151,7 @@ int main(int argc, char **argv)
 			}
 			string formatted_file_name = ((string)ent->d_name).substr(0, ((string)ent->d_name).find(".", 0) + 1) + "JPEG";
 			cout << file_name << "\n";
-// glue_input_image(file_name, input_image);
+			// glue_input_image(file_name, input_image);
 			auto start = chrono::steady_clock::now();
 #if HW == _FPGA
 			glue_and_quantize_input_image(file_name, input_image, quantize_layer_specs);
@@ -156,21 +162,22 @@ int main(int argc, char **argv)
 #endif
 			auto end = chrono::steady_clock::now();
 
-						cout << "Elapsed time in milliseconds reading: "
-							 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
-							 << " ms" << endl;
+			cout << "Elapsed time in milliseconds reading: "
+				 << chrono::duration_cast<chrono::microseconds>(end - start).count() / 1000
+				 << " ms" << endl;
 			// verify_glued_image(file_name, input_image);
 			// validate_weights(weights_file, glued_weights);
 			int ready_to_receive_new_input = 0;
 			int *ready_to_receive_new_input_ptr = &ready_to_receive_new_input;
 #if HW == _FPGA
 			krnl_fibha_v2(input_image, weights, dw_weights, off_chip_fused_scales,
-					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-					 model_configs_list, &img_count);
+						  off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
+						  model_configs_list, layer_to_produce_row_counts,
+						  &img_count);
 #elif HW == CPU
-			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
+						top_func(input_image, weights, dw_weights, off_chip_fused_scales,
 					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-					 model_configs_list);
+					 model_configs_list, layer_to_produce_row_counts);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
 			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "
