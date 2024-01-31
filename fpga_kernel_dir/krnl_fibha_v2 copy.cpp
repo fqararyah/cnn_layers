@@ -89,7 +89,6 @@ extern "C"
 		fms_dt fc_input[fc_layer_input_size],
 		const int model_config_list_src[2 * max_conv_layers],
 		const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers],
-		int soft_pipeline_len,
 		int *first_lunch)
 	{
 
@@ -184,10 +183,9 @@ extern "C"
 #else
 
 #endif // ONLY_SEML == 0
-		int soft_pipeline_len_local = soft_pipeline_len;
 		seml(input_image, off_chip_weights, off_chip_dw_weights, off_chip_fused_scales,
-	 off_chip_fused_zero_points,
-		 channels, result, tmp_channels, fc_input, model_configs_list, soft_pipe_specs, soft_pipeline_len_local);
+			 off_chip_fused_zero_points,
+			 channels, result, tmp_channels, fc_input, model_configs_list, soft_pipe_specs);
 
 #endif
 	}

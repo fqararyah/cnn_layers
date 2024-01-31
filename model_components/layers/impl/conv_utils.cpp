@@ -932,3 +932,27 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
         }
     }
 }
+
+int get_layer_index_from_offset(const int anchor_layer, const int offset)
+{
+
+    int last_layer_index = -1;
+    int layer_index;
+    int conv_layers_so_far = 0;
+    layer_specs tmp;
+    for (int i = 0; i < max_conv_layers; i++)
+    {
+        layer_index = i;
+        get_layer_specs_from_index(layer_index, tmp);
+        if (layer_index != -1)
+        {
+            conv_layers_so_far++;
+        }
+        last_layer_index = i;
+        if (conv_layers_so_far == offset)
+        {
+            break;
+        }
+    }
+    return last_layer_index;
+}

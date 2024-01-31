@@ -104,7 +104,6 @@ void glue_on_chip_weights_cpu(string file_name,
 }
 
 #if HW == _FPGA
-
 void glue_on_chip_weights_fpga(string file_name,
 							   weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups])
 {
@@ -124,3 +123,38 @@ void glue_on_chip_weights_fpga(string file_name,
 	}
 }
 #endif
+
+void fill_soft_pipeline_configs(string file_name, soft_pipe_specs_struct *soft_pipe_specs, const int soft_pipeline_len)
+{
+	int conv_layers_so_far = 0;
+	int last_soft_pipeline_layer = 0;
+	int layer_index;
+	layer_specs l_specs;
+	if (SOFT_PIPELINE && soft_pipeline_len > 0)
+	{
+		for (int i = 0; i < max_conv_layers; i++)
+		{
+			layer_index = i;
+			get_layer_specs_from_index(layer_index, l_specs);
+			if (layer_index >= 0)
+			{
+				conv_layers_so_far++;
+				if (conv_layers_so_far >= soft_pipeline_len)
+				{
+					break;
+				}
+			}
+			last_soft_pipeline_layer++;
+		}
+	}
+
+	for (int i = last_soft_pipeline_layer + 1; i < max_conv_layers; i++)
+	{
+		layer_index = i;
+		get_layer_specs_from_index(layer_index, l_specs);
+		if (layer_index >= 0)
+		{
+			soft_pipe_specs[i] = {l_specs.layer_ofm_height, 0, 0};
+		}
+	}
+}

@@ -103,24 +103,52 @@ void glue_on_chip_weights_cpu(string file_name,
 	}
 }
 
-#if HW == _FPGA
-
-void glue_on_chip_weights_fpga(string file_name,
-							   weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups])
+void fill_soft_pipeline_configs(string file_name, soft_pipe_specs_struct *soft_pipe_specs, const int soft_pipeline_len)
 {
-	int a;
+	int conv_layers_so_far = 0;
+	int last_soft_pipeline_layer = 0;
+	int layer_index;
+	layer_specs l_specs;
+
+	int to_produce_row_count;
+	int redundant_rows;
+	int unused_first_time;
+
+	int line = 0;
 	std::ifstream infile(file_name);
 	assert(!infile.fail());
-	int line_num = 0;
-	while (infile >> a)
+
+	if (SOFT_PIPELINE && soft_pipeline_len > 0)
 	{
-		weights_dt weight = (weights_dt)a;
-		int external_index = line_num / weights_group_items;
-		int internal_index = line_num % weights_group_items;
-		glued_on_chip_weights[external_index](
-			internal_index * weights_dt_width + weights_dt_offset,
-			internal_index * weights_dt_width) = weight;
-		line_num++;
+		for (int i = 0; i < max_conv_layers; i++)
+		{
+			layer_index = i;
+			get_layer_specs_from_index(layer_index, l_specs);
+			if (layer_index >= 0)
+			{
+				infile >> to_produce_row_count;
+				infile >> redundant_rows;
+				infile >> unused_first_time;
+
+				soft_pipe_specs[layer_index] = {to_produce_row_count, redundant_rows, unused_first_time};
+				printf("%d, %d, %d, \n", to_produce_row_count, redundant_rows, unused_first_time);
+				conv_layers_so_far++;
+				if (conv_layers_so_far >= soft_pipeline_len)
+				{
+					break;
+				}
+			}
+			last_soft_pipeline_layer++;
+		}
+	}
+
+	for (int i = last_soft_pipeline_layer + 1; i < max_conv_layers; i++)
+	{
+		layer_index = i;
+		get_layer_specs_from_index(layer_index, l_specs);
+		if (layer_index >= 0)
+		{
+			soft_pipe_specs[layer_index] = {l_specs.layer_ofm_height, 0, 0};
+		}
 	}
 }
-#endif

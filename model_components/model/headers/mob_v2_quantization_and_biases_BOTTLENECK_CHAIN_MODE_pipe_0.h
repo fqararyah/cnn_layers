@@ -7,12 +7,12 @@ const static fused_scales_dt first_conv_layer_fused_scales[] = { 0.0031877710814
 const static fused_scales_log_2_shifts_dt first_conv_layer_fused_scales_log_2_shifts[] ={ 7, 5, 6, 23, 8, 8, 6, 22, 5, 7, 6, 25, 25, 23, 8, 7, 16, 7, 7, 23, 8, 8, 6, 7, 8, 7, 13, 5, 27, 9, 5, 9};
 const static layer_0_relu_6_fused_scales_dt first_conv_layer_relu_6_fused_scales[] ={ 255};
 const static int layers_fused_parameters_offsets[] = { 
-0, 0, 0, 32, 48, 144, 144, 240, 264, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+0, 0, 0, 32, 48, 144, 144, 240, 264, 408, 552, 576, 576, 720, 720, 864, 896, 1088, 1280, 1312, 1312, 1504, 1696, 1728, 1728, 1920, 1920, 2112, 2176, 2560, 2944, 3008, 3008, 3392, 3776, 3840, 3840, 4224, 4608, 4672, 4672, 5056, 5440, 5536, 6112, 6688, 6784, 6784, 7360, 7936, 8032, 8032, 8608, 8608, 9184, 9344, 10304, 11264, 11424, 11424, 12384, 13344, 13504, 13504, 14464, 15424, 15744, 17024, 17024, 17024, 17024, 17024};
 const static int pipe_layers_fused_parameters_offsets[] = { 
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
-static biases_dt seml_fused_zero_points_buffer[96];
-static fused_scales_dt seml_fused_scales_buffer[96];
+static biases_dt seml_fused_zero_points_buffer[1280];
+static fused_scales_dt seml_fused_scales_buffer[1280];
 const static fused_scales_log_2_shifts_dt fused_scales_log_2_shifts[] ={ };
-const static relu_6_fused_scales_dt relu_6_fused_scales[] ={ 0, 0, 255, 16, 255, 0, 255, 20, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0};
+const static relu_6_fused_scales_dt relu_6_fused_scales[] ={ 0, 0, 255, 16, 255, 0, 255, 20, 255, 255, 14, 0, 255, 0, 255, 27, 255, 255, 27, 0, 255, 255, 21, 0, 255, 0, 255, 29, 255, 255, 31, 0, 255, 255, 39, 0, 255, 255, 33, 0, 255, 255, 36, 255, 255, 42, 0, 255, 255, 32, 0, 255, 0, 255, 44, 255, 255, 59, 0, 255, 255, 27, 0, 255, 255, 41, 255, 0, 0, 0, 0};
 #endif
 #endif

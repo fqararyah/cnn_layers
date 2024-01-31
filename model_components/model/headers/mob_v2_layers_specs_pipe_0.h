@@ -2258,5 +2258,173 @@ const fc_layer_specs layer_68_fc_specs = {
                 -128,//const fms_dt ifm_zero_point
                 };
 const layer_specs layer_1_s_specs = first_conv_layer_specs;
+
+
+ static void get_layer_specs_from_index(int &layer_index, layer_specs &l_specs){
+ switch(layer_index) {
+case 1:
+l_specs = first_conv_layer_specs;
+break;
+case 2:
+l_specs = layer_2_dw_specs;
+break;
+case 3:
+l_specs = layer_3_pw_specs;
+break;
+case 4:
+l_specs = layer_4_pw_specs;
+break;
+case 6:
+l_specs = layer_6_dw_specs;
+break;
+case 7:
+l_specs = layer_7_pw_specs;
+break;
+case 8:
+l_specs = layer_8_pw_specs;
+break;
+case 9:
+l_specs = layer_9_dw_specs;
+break;
+case 10:
+l_specs = layer_10_pw_specs;
+break;
+case 12:
+l_specs = layer_12_pw_specs;
+break;
+case 14:
+l_specs = layer_14_dw_specs;
+break;
+case 15:
+l_specs = layer_15_pw_specs;
+break;
+case 16:
+l_specs = layer_16_pw_specs;
+break;
+case 17:
+l_specs = layer_17_dw_specs;
+break;
+case 18:
+l_specs = layer_18_pw_specs;
+break;
+case 20:
+l_specs = layer_20_pw_specs;
+break;
+case 21:
+l_specs = layer_21_dw_specs;
+break;
+case 22:
+l_specs = layer_22_pw_specs;
+break;
+case 24:
+l_specs = layer_24_pw_specs;
+break;
+case 26:
+l_specs = layer_26_dw_specs;
+break;
+case 27:
+l_specs = layer_27_pw_specs;
+break;
+case 28:
+l_specs = layer_28_pw_specs;
+break;
+case 29:
+l_specs = layer_29_dw_specs;
+break;
+case 30:
+l_specs = layer_30_pw_specs;
+break;
+case 32:
+l_specs = layer_32_pw_specs;
+break;
+case 33:
+l_specs = layer_33_dw_specs;
+break;
+case 34:
+l_specs = layer_34_pw_specs;
+break;
+case 36:
+l_specs = layer_36_pw_specs;
+break;
+case 37:
+l_specs = layer_37_dw_specs;
+break;
+case 38:
+l_specs = layer_38_pw_specs;
+break;
+case 40:
+l_specs = layer_40_pw_specs;
+break;
+case 41:
+l_specs = layer_41_dw_specs;
+break;
+case 42:
+l_specs = layer_42_pw_specs;
+break;
+case 43:
+l_specs = layer_43_pw_specs;
+break;
+case 44:
+l_specs = layer_44_dw_specs;
+break;
+case 45:
+l_specs = layer_45_pw_specs;
+break;
+case 47:
+l_specs = layer_47_pw_specs;
+break;
+case 48:
+l_specs = layer_48_dw_specs;
+break;
+case 49:
+l_specs = layer_49_pw_specs;
+break;
+case 51:
+l_specs = layer_51_pw_specs;
+break;
+case 53:
+l_specs = layer_53_dw_specs;
+break;
+case 54:
+l_specs = layer_54_pw_specs;
+break;
+case 55:
+l_specs = layer_55_pw_specs;
+break;
+case 56:
+l_specs = layer_56_dw_specs;
+break;
+case 57:
+l_specs = layer_57_pw_specs;
+break;
+case 59:
+l_specs = layer_59_pw_specs;
+break;
+case 60:
+l_specs = layer_60_dw_specs;
+break;
+case 61:
+l_specs = layer_61_pw_specs;
+break;
+case 63:
+l_specs = layer_63_pw_specs;
+break;
+case 64:
+l_specs = layer_64_dw_specs;
+break;
+case 65:
+l_specs = layer_65_pw_specs;
+break;
+case 66:
+l_specs = layer_66_pw_specs;
+break;
+default:
+ layer_index = -1; 
+}
+
+}
+
+#define LAYER_LIMIT 66
+
 #endif
 #endif

@@ -32,6 +32,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
           fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
           fms_dt fc_input[fc_layer_input_size],
           int model_configs_list[2 * max_conv_layers],
-          const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers]);
+          const soft_pipe_specs_struct soft_pipe_specs[max_conv_layers],
+          const int soft_pipeline_len);
 
 #endif

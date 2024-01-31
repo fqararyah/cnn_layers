@@ -12,6 +12,7 @@ if cgc.PIPELINE:
     pipeline_len = cgc.PIPELINE_LEN
 
 model_config_file = '../model_config/{}.txt'.format(cgc.MODEL_NAME)
+last_conv_layer_index = cgc.LAST_LAYER_TO_GENERATE
 
 specs_struct = 'const layer_specs {} = {}\n\
                 {},//layer_index;\n\
@@ -103,6 +104,9 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
     f.write("#ifndef LAYERS_SPECS\n")
     f.write("#define LAYERS_SPECS\n")
 
+    layer_specs_seq_str = '\n\n static void get_layer_specs_from_index(int &layer_index, layer_specs &l_specs){\n'
+    layer_specs_seq_str  += ' switch(layer_index) {\n'
+
     for layer_index in range(len(model_dag)):
         layer_specs = model_dag[layer_index]
         layer_type = ''
@@ -110,6 +114,7 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
         if 'type' in layer_specs:
             layer_type = layer_specs['type']
         if layer_type in cgc.CONV_LAYER_TYPES:
+            last_conv_layer_index = layer_index
             num_conv_layers_so_far += 1
             layer_weights_shape = layer_specs['weights_shape']
             layer_weights_size = 1
@@ -133,6 +138,11 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
             else:
                 replacement_list.append(
                     'layer_' + str(layer_index) + '_' + layer_type + '_specs')
+            
+            layer_specs_seq_str += 'case ' + str(layer_index) + ':\n'
+            layer_specs_seq_str += 'l_specs = ' + replacement_list[-1] + ';\n'
+            layer_specs_seq_str += 'break;\n'
+
             replacement_list.append('{')
             replacement_list.append(layer_index)
             if layer_type == 'pw':
@@ -326,9 +336,18 @@ with open(out_file.format(cgc.MODEL_NAME, pipeline_len), 'w') as f:
             replacement_list.append(layer_specs['ifms_zero_points'])
             replacement_list.append(layer_specs['ofms_zero_points'])
             replacement_list.append('}')
+            replacement_list.append('}')
             f.write(quantize_specs_struct.format(*replacement_list))
 
     f.write('const layer_specs layer_' + str(first_conv_layer_index) + '_s_specs = first_conv_layer_specs;\n')
+    layer_specs_seq_str += 'default:\n layer_index = -1; \n}\n\n'
+    layer_specs_seq_str += '}'
+    f.write(layer_specs_seq_str)
+    if cgc.LAST_LAYER_TO_GENERATE == -1:
+        f.write('\n\n#define LAYER_LIMIT {}\n\n'.format(last_conv_layer_index))
+    else:
+        f.write('\n\n#define LAYER_LIMIT {}\n\n'.format(cgc.LAST_LAYER_TO_GENERATE))
+
     f.write('#endif\n')
     f.write('#endif\n')
 

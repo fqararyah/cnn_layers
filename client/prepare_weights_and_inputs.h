@@ -98,4 +98,9 @@ void fill_pipe_layer_input_buffer(string file_name, fms_dt channels_buffer[MAX_P
 void glue_on_chip_weights_cpu(string file_name,
 							  weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
 
+void glue_on_chip_weights_fpga(string file_name,
+							   weights_grp_dt glued_on_chip_weights[all_on_chip_pw_s_weights_groups]);
+
+void fill_soft_pipeline_configs(string file_name, soft_pipe_specs_struct *soft_pipe_specs, const int soft_pipeline_len);
+
 #endif

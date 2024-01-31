@@ -16,6 +16,7 @@ int main(int argc, char **argv)
 {
 
 	int images_to_test = 10;
+	int soft_pipeline_len = 0;
 
 	int model_configs_list[2 * max_conv_layers] = {0}; // up to 100-conv layers
 
@@ -24,6 +25,10 @@ int main(int argc, char **argv)
 		images_to_test = stoi(argv[1]);
 	}
 	if (argc > 2)
+	{
+		soft_pipeline_len = stoi(argv[2]);
+	}
+	if (argc > 3)
 	{
 		read_model_configs(argv[2], model_configs_list);
 		cout << "model_configs list is read.\n*************\n";
@@ -62,6 +67,9 @@ int main(int argc, char **argv)
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_weight_sums.txt";
 	string biases_file =
 		"/media/SSD2TB/fareed/wd/cnn_layers/off_chip_weights/" + get_model_prefix() + "_fc_biases.txt";
+	
+	string soft_pipe_specs_file = "/media/SSD2TB/fareed/wd/cnn_layers/model_config/fusion_granualities/mob_v2_pipe_0.txt";
+
 #if HW == _FPGA
 	string predictions_file =
 		"/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/predictions/predictions_hls_" + to_string(images_to_test) + ".json";
@@ -96,14 +104,15 @@ int main(int argc, char **argv)
 	int top5[5];
 
 	soft_pipe_specs_struct soft_pipe_specs[max_conv_layers]; //{112, 0, 112, 112, 112, 0, 56, 56, 56};
-	soft_pipe_specs[0] = {19, 3, 1};
-	soft_pipe_specs[1] = {0, 3, 1};
-	soft_pipe_specs[2] = {17, 1, 0};
-	soft_pipe_specs[3] = {17, 1, 0};
-	soft_pipe_specs[4] = {17, 1, 0};
-	soft_pipe_specs[5] = {0, 1, 0};
-	soft_pipe_specs[6] = {8, 0, 0};
-	soft_pipe_specs[7] = {8, 0, 0};
+	fill_soft_pipeline_configs(soft_pipe_specs_file, soft_pipe_specs, soft_pipeline_len);
+	// soft_pipe_specs[0] = {19, 3, 1};
+	// soft_pipe_specs[1] = {0, 3, 1};
+	// soft_pipe_specs[2] = {17, 1, 0};
+	// soft_pipe_specs[3] = {17, 1, 0};
+	// soft_pipe_specs[4] = {17, 1, 0};
+	// soft_pipe_specs[5] = {0, 1, 0};
+	// soft_pipe_specs[6] = {8, 0, 0};
+	// soft_pipe_specs[7] = {8, 0, 0};
 	//{19, 0, 17, 17, 17, 0, 8, 8, 8};
 
 #if HW == _FPGA
@@ -165,11 +174,12 @@ int main(int argc, char **argv)
 			krnl_fibha_v2(input_image, weights, dw_weights, off_chip_fused_scales,
 						  off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
 						  model_configs_list, soft_pipe_specs,
+						  soft_pipeline_len,
 						  &img_count);
 #elif HW == CPU
 			top_func(input_image, weights, dw_weights, off_chip_fused_scales,
 					 off_chip_fused_zeropoints, glued_on_chip_weights, fc_input,
-					 model_configs_list, soft_pipe_specs);
+					 model_configs_list, soft_pipe_specs, soft_pipeline_len);
 #endif
 			// std::cout << (int)fc_input[999] << " " << (int)fc_input[710] << " "
 			// 		<< (int)fc_input[844] << " " << (int)fc_input[339] << " "

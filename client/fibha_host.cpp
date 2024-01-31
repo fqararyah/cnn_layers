@@ -71,6 +71,7 @@ using namespace std::chrono;
 int main(int argc, char* argv[]) {
 
 	int images_to_test = 1000;
+	int soft_pipeline_len = 0;
 
 	//TARGET_DEVICE macro needs to be passed from gcc command line
 	if (argc < 2) {
@@ -81,40 +82,42 @@ int main(int argc, char* argv[]) {
 	if (argc >= 3) {
 		images_to_test = atoi(argv[2]);
 	}
+	if (argc >= 4) {
+		soft_pipeline_len = atoi(argv[3]);
+	}
 
 	//*********************************************************************************************************************
 	string off_chip_weights_dir = "/media/sd-mmcblk0p2/off_chip_weights/";
 	string on_chip_weights_dir = "/media/sd-mmcblk0p2/on_chip_weights/";
 
-	string weights_file = off_chip_weights_dir
-			+ get_model_prefix() + "_off_chip_weights_fpga_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string weights_file = off_chip_weights_dir + get_model_prefix()
+			+ "_off_chip_weights_fpga_pipe_" + to_string(PIPELINE_LENGTH)
+			+ ".txt";
 
-	string dw_weights_file = off_chip_weights_dir
-			+ get_model_prefix() + "_off_chip_dw_weights_pipe_"
-			+ to_string(PIPELINE_LENGTH) + ".txt";
+	string dw_weights_file = off_chip_weights_dir + get_model_prefix()
+			+ "_off_chip_dw_weights_pipe_" + to_string(PIPELINE_LENGTH)
+			+ ".txt";
 
-	string on_chip_weights_file = on_chip_weights_dir
-			+ get_model_prefix() + "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string on_chip_weights_file = on_chip_weights_dir + get_model_prefix()
+			+ "_on_chip_weights_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 
-	string fused_scales_file = off_chip_weights_dir
-			+ get_model_prefix() + "_fused_scales_pipe_"
-			+ to_string(PIPELINE_LENGTH) + ".txt";
-	string fused_zps_file = off_chip_weights_dir
-			+ get_model_prefix() + "_fused_zps_pipe_"
-			+ to_string(PIPELINE_LENGTH) + ".txt";
+	string fused_scales_file = off_chip_weights_dir + get_model_prefix()
+			+ "_fused_scales_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
+	string fused_zps_file = off_chip_weights_dir + get_model_prefix()
+			+ "_fused_zps_pipe_" + to_string(PIPELINE_LENGTH) + ".txt";
 
-	string fc_weights_file = off_chip_weights_dir
-			+ get_model_prefix() + "_fc_weights.txt";
-	string weight_sums_file = off_chip_weights_dir
-			+ get_model_prefix() + "_fc_weight_sums.txt";
-	string biases_file = off_chip_weights_dir
-			+ get_model_prefix() + "_fc_biases.txt";
+	string fc_weights_file = off_chip_weights_dir + get_model_prefix()
+			+ "_fc_weights.txt";
+	string weight_sums_file = off_chip_weights_dir + get_model_prefix()
+			+ "_fc_weight_sums.txt";
+	string biases_file = off_chip_weights_dir + get_model_prefix()
+			+ "_fc_biases.txt";
 
 	string input_images_folder = "/media/sd-mmcblk0p2/resized_images/";
 	string output_folder = "/media/sd-mmcblk0p2/fpga_out/";
 
-	string predictions_file =
-			"/media/sd-mmcblk0p2/fpga_out/predictions_fpga_" + to_string(images_to_test) + ".json";
+	string predictions_file = "/media/sd-mmcblk0p2/fpga_out/predictions_fpga_"
+			+ to_string(images_to_test) + ".json";
 
 	//weights_grp_dt glued_weights[all_pw_weights];
 	//fms_dt fc_input[fc_layer_input_size];
@@ -213,6 +216,10 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			cl::Buffer buffer_model_config_list(context, CL_MEM_WRITE_ONLY, 2 * max_conv_layers * sizeof(int), NULL, &err));
 	OCL_CHECK(err,
+				cl::Buffer buffer_soft_pipe_specs(context, CL_MEM_WRITE_ONLY, max_conv_layers * sizeof(struct soft_pipe_specs_struct), NULL, &err));
+//	OCL_CHECK(err,
+//				cl::Buffer buffer_soft_pipeline_len(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &err));
+	OCL_CHECK(err,
 			cl::Buffer buffer_first_lunch(context, CL_MEM_WRITE_ONLY, sizeof(int*), NULL, &err));
 
 	//set the kernel Arguments
@@ -228,6 +235,8 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err, err = krnl_fibha_v2.setArg(narg++, buffer_on_chip_weights));
 	OCL_CHECK(err, err = krnl_fibha_v2.setArg(narg++, buffer_result));
 	OCL_CHECK(err, err = krnl_fibha_v2.setArg(narg++, buffer_model_config_list));
+	OCL_CHECK(err, err = krnl_fibha_v2.setArg(narg++, buffer_soft_pipe_specs));
+	OCL_CHECK(err, err = krnl_fibha_v2.setArg(narg++, soft_pipeline_len));
 	OCL_CHECK(err, err = krnl_fibha_v2.setArg(narg++, buffer_first_lunch));
 
 	weights_grp_dt *ptr_weights;
@@ -239,6 +248,8 @@ int main(int argc, char* argv[]) {
 	fms_grp_dt *ptr_input_image;
 	fms_dt *ptr_result;
 	int *ptr_model_config_list;
+	soft_pipe_specs_struct *ptr_soft_pipe_specs;
+//	int *ptr_soft_pipeline_len;
 	int *ptr_first_lunch;
 
 	OCL_CHECK(err,
@@ -258,13 +269,17 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			ptr_model_config_list = (int*)q.enqueueMapBuffer (buffer_model_config_list , CL_TRUE , CL_MAP_READ , 0, 2 * max_conv_layers * sizeof(int), NULL, NULL, &err));
 	OCL_CHECK(err,
+			ptr_soft_pipe_specs = (soft_pipe_specs_struct*)q.enqueueMapBuffer (buffer_soft_pipe_specs , CL_TRUE , CL_MAP_READ , 0, max_conv_layers * sizeof(struct soft_pipe_specs_struct), NULL, NULL, &err));
+//	OCL_CHECK(err,
+//			ptr_soft_pipeline_len = (int*)q.enqueueMapBuffer (buffer_soft_pipeline_len , CL_TRUE , CL_MAP_READ , 0, sizeof(int), NULL, NULL, &err));
+	OCL_CHECK(err,
 			ptr_first_lunch = (int*)q.enqueueMapBuffer (buffer_first_lunch , CL_TRUE , CL_MAP_READ , 0, sizeof(int*), NULL, NULL, &err));
 	//*********************************************************************************************************************8
 
 	DIR *dir;
 	int img_count = 0;
 
-	if (argc >= 4) {
+	if (argc >= 5) {
 		//read_model_configs(argv[3], ptr_model_config_list);
 		cout << "model_configs_list is filled *************\n";
 	} else {
@@ -273,7 +288,10 @@ int main(int argc, char* argv[]) {
 		}
 	}
 
+	fill_soft_pipeline_configs("", ptr_soft_pipe_specs, soft_pipeline_len);
+
 	*ptr_first_lunch = 1;
+	//*ptr_soft_pipeline_len = soft_pipeline_len;
 
 	struct dirent *ent;
 //	 Data will be migrated to kernel space
@@ -310,6 +328,13 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			err = q.enqueueMigrateMemObjects( { buffer_model_config_list },
 					0/* 0 means from host*/));
+	OCL_CHECK(err,
+				err = q.enqueueMigrateMemObjects( { buffer_soft_pipe_specs },
+						0/* 0 means from host*/));
+
+//	OCL_CHECK(err,
+//				err = q.enqueueMigrateMemObjects( { buffer_soft_pipeline_len },
+//						0/* 0 means from host*/));
 
 	OCL_CHECK(err,
 			err = q.enqueueMigrateMemObjects( { buffer_first_lunch },
@@ -400,7 +425,7 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	cout << "\n" << img_count <<"\n";
+	cout << "\n" << img_count << "\n";
 	predictions_file_content = predictions_file_content.substr(0,
 			predictions_file_content.length() - 1) + ']';
 	save_predictions(predictions_file, predictions_file_content);
@@ -423,6 +448,12 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			err = q.enqueueUnmapMemObject(buffer_model_config_list,
 					ptr_model_config_list));
+	OCL_CHECK(err,
+				err = q.enqueueUnmapMemObject(buffer_soft_pipe_specs,
+						ptr_soft_pipe_specs));
+//	OCL_CHECK(err,
+//				err = q.enqueueUnmapMemObject(buffer_soft_pipeline_len, ptr_soft_pipeline_len));
+		OCL_CHECK(err, err = q.finish());
 	OCL_CHECK(err,
 			err = q.enqueueUnmapMemObject(buffer_first_lunch, ptr_first_lunch));
 	OCL_CHECK(err, err = q.finish());

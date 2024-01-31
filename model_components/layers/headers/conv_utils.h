@@ -109,4 +109,6 @@ void copy_fms_tile_corners(fms_dt padding_top_buffer[CHANNELS_PIPELINE_DEPTH][MA
                            const int padding_top_left,
                            const int padding_bottom_right);
 
+int get_layer_index_from_offset(const int anchor_layer, const int offset);
+
 #endif
