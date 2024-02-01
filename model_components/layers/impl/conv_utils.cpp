@@ -8,7 +8,7 @@ void seml_engines::fill_fused_scales(const fused_scales_dt *off_chip_fused_scale
 {
 #pragma HLS INLINE off
 
-    for (int i = 0; i < max_conv_d; i++)
+    for (int i = 0; i < max_num_filters; i++)
     {
 #pragma HLS PIPELINE II = 1
         if (i >= layer_num_filters)
@@ -26,7 +26,7 @@ void seml_engines::fill_fused_zero_points(const biases_dt *off_chip_fused_zero_p
 {
 #pragma HLS INLINE off
 
-    for (int i = 0; i < max_conv_d; i++)
+    for (int i = 0; i < max_num_filters; i++)
     {
 #pragma HLS PIPELINE II = 1
 
@@ -520,27 +520,28 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
     const int layer_ifms_depth = layer_specs_struct.layer_depth;
 
     const int num_of_tiles_hw = num_of_ifm_tiles_h * num_of_ifm_tiles_w;
-    for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
+
+    if (layer_specs_struct.conv_layer_type != PW_CONV)
     {
+        for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
+        {
 #pragma HLS PIPELINE
 
-        if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit))
-        {
-            break;
-        }
+            if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit))
+            {
+                break;
+            }
 
-        const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
-        const int bottom_tile_index = main_tile_index + num_of_ifm_tiles_w;
-        const int right_tile_index = main_tile_index + 1;
-        const int bottom_right_tile_index = bottom_tile_index + 1;
-        const int top_tile_index = main_tile_index - num_of_ifm_tiles_w;
-        const int left_tile_index = main_tile_index - 1;
-        const int top_left_tile_index = top_tile_index - 1;
-        const int top_right_tile_index = top_tile_index + 1;
-        const int bottom_left_tile_index = main_tile_index + num_of_ifm_tiles_w - 1;
+            const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
+            const int bottom_tile_index = main_tile_index + num_of_ifm_tiles_w;
+            const int right_tile_index = main_tile_index + 1;
+            const int bottom_right_tile_index = bottom_tile_index + 1;
+            const int top_tile_index = main_tile_index - num_of_ifm_tiles_w;
+            const int left_tile_index = main_tile_index - 1;
+            const int top_left_tile_index = top_tile_index - 1;
+            const int top_right_tile_index = top_tile_index + 1;
+            const int bottom_left_tile_index = main_tile_index + num_of_ifm_tiles_w - 1;
 
-        if (layer_specs_struct.conv_layer_type != PW_CONV)
-        {
             // bottom right corner
             for (int h = 0; h < MAX_TILE_PADDING_BOTTOM_RIGHT; h++)
             {
@@ -611,6 +612,14 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                     }
                 }
             }
+        }
+
+        for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
+        {
+#pragma HLS PIPELINE
+            const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
+            const int bottom_tile_index = main_tile_index + num_of_ifm_tiles_w;
+            const int top_tile_index = main_tile_index - num_of_ifm_tiles_w;
             // top and bottom
             for (int h = 0; h < MAX_TILE_PADDING_TOP_LEFT; h++)
             {
@@ -655,7 +664,15 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                     }
                 }
             }
+        }
 
+        for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
+        {
+#pragma HLS PIPELINE
+
+            const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
+            const int right_tile_index = main_tile_index + 1;
+            const int left_tile_index = main_tile_index - 1;
             // left and right
             for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
             {
@@ -701,7 +718,13 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
                 }
             }
         }
+    }
+
+    for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
+    {
+#pragma HLS PIPELINE
         // fill body
+        const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
         for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)
         {
 #pragma HLS UNROLL

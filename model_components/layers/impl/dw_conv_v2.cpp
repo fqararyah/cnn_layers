@@ -25,7 +25,7 @@ void seml_engines::fill_layer_dw_weights_off_chip(const dw_weights_dt *dw_weight
     }
 }
 
-void dw_conv_engine(
+void dw_conv_engine_s1(
     const dw_weights_dt weights[][max_filter_hw_dim * max_filter_hw_dim],
     fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
     dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
@@ -52,10 +52,13 @@ dw_conv_engine:
             {
 #pragma HLS PIPELINE
                 if (starting_d + d_in_pipeline >= layer_d ||
-                    (model_configs_list_limit != 0 && starting_d + d_in_pipeline >= model_configs_list_limit))
+                    (model_configs_list_limit != 0 && starting_d + d_in_pipeline >= model_configs_list_limit) ||
+                    c_w >= filter_dim || c_h >= filter_dim)
                 {
                     break;
                 }
+                dw_weights_dt current_weight = weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w];
+                ;
                 for (int h = 0; h < DW_PARALLELISM_H; h++)
                 {
 #pragma HLS UNROLL
@@ -65,28 +68,132 @@ dw_conv_engine:
                         // if(layer_specs_struct.layer_index == 14 && h == 0 && w == 0 && starting_d + d_in_pipeline == 0 && tile_in_h == 0 && tile_in_w == 2){
                         //     printf("%d ", (int)weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w]);
                         // }
-                        if (c_w >= filter_dim || c_h >= filter_dim || h >= dw_tile_h / strides || w >= dw_tile_w / strides)
+                        if (c_h == 0 && c_w == 0)
                         {
-                            break;
+                            result_tile[d_in_pipeline][h][w] =
+                                channels_tile[d_in_pipeline][h + c_h]
+                                             [w + c_w] *
+                                current_weight;
                         }
+                        else
+                        {
+                            result_tile[d_in_pipeline][h][w] +=
+                                channels_tile[d_in_pipeline][h + c_h]
+                                             [w + c_w] *
+                                current_weight;
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+void dw_conv_engine_s2(
+    const dw_weights_dt weights[][max_filter_hw_dim * max_filter_hw_dim],
+    fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
+    dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+    const int starting_d,
+    const int tile_in_h,
+    const int tile_in_w,
+    const fms_dt current_layer_zero_point,
+    layer_specs layer_specs_struct,
+    const int model_configs_list_limit)
+{
+#pragma HLS INLINE off
+
+    const int layer_d = layer_specs_struct.layer_depth;
+    const int filter_dim = layer_specs_struct.filter_size;
+    const int strides = 2;
+
+dw_conv_engine:
+    for (int c_h = 0; c_h < max_filter_hw_dim; c_h++)
+    {
+        for (int c_w = 0; c_w < max_filter_hw_dim; c_w++)
+        {
+            for (int d_in_pipeline = 0; d_in_pipeline < CHANNELS_PIPELINE_DEPTH;
+                 d_in_pipeline++)
+            {
+#pragma HLS PIPELINE
+                if (starting_d + d_in_pipeline >= layer_d ||
+                    (model_configs_list_limit != 0 && starting_d + d_in_pipeline >= model_configs_list_limit) ||
+                    c_w >= filter_dim || c_h >= filter_dim)
+                {
+                    break;
+                }
+                dw_weights_dt current_weight = weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w];
+                ;
+                for (int h = 0; h < DW_PARALLELISM_H / strides; h++)
+                {
+#pragma HLS UNROLL
+                    for (int w = 0; w < DW_PARALLELISM_W / strides; w++)
+                    {
+#pragma HLS UNROLL
+                        // if(layer_specs_struct.layer_index == 14 && h == 0 && w == 0 && starting_d + d_in_pipeline == 0 && tile_in_h == 0 && tile_in_w == 2){
+                        //     printf("%d ", (int)weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w]);
+                        // }
+
                         if (c_h == 0 && c_w == 0)
                         {
                             result_tile[d_in_pipeline][h][w] =
                                 channels_tile[d_in_pipeline][h * strides + c_h]
                                              [w * strides + c_w] *
-                                weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w];
+                                current_weight;
                         }
                         else
                         {
                             result_tile[d_in_pipeline][h][w] +=
                                 channels_tile[d_in_pipeline][h * strides + c_h]
                                              [w * strides + c_w] *
-                                weights[starting_d + d_in_pipeline][c_h * max_filter_hw_dim + c_w];
+                                current_weight;
                         }
                     }
                 }
             }
         }
+    }
+}
+
+void dw_conv_engine(
+    const dw_weights_dt weights[][max_filter_hw_dim * max_filter_hw_dim],
+    fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],
+    dw_pss_dt result_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
+    const int starting_d,
+    const int tile_in_h,
+    const int tile_in_w,
+    const fms_dt current_layer_zero_point,
+    layer_specs layer_specs_struct,
+    const int model_configs_list_limit)
+{
+#pragma HLS INLINE off
+
+    const int strides = layer_specs_struct.strides;
+
+    if (strides == 1)
+    {
+        dw_conv_engine_s1(
+            weights,
+            channels_tile,
+            result_tile,
+            starting_d,
+            tile_in_h,
+            tile_in_w,
+            current_layer_zero_point,
+            layer_specs_struct,
+            model_configs_list_limit);
+    }
+    else if (strides == 2)
+    {
+        dw_conv_engine_s2(
+            weights,
+            channels_tile,
+            result_tile,
+            starting_d,
+            tile_in_h,
+            tile_in_w,
+            current_layer_zero_point,
+            layer_specs_struct,
+            model_configs_list_limit);
     }
 }
 

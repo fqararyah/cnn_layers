@@ -6,6 +6,7 @@
 #define MODEL_GENERAL_SPECS_HEADER
 
 const int max_conv_d = 960 / alpha;
+const int max_num_filters = 1280 / alpha;
 const int max_filter_hw_dim = 3;
 const int max_std_conv_filter_hw_dim = 3;
 const int max_padding_lr = 2;

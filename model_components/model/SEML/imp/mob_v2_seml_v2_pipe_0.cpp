@@ -23,6 +23,8 @@ void run_layers_in_range(weights_grp_dt off_chip_weights[all_off_chip_pw_s_weigh
 
 #pragma HLS INLINE off
 
+#pragma HLS ARRAY_PARTITION variable = seml_dw_weights_3x3 type = cyclic factor = 2 dim = 1
+
     int layer_index;
     layer_specs current_layer_specs;
     for (int i = starting_layer; i <= end_layer; i++)
@@ -33,9 +35,13 @@ void run_layers_in_range(weights_grp_dt off_chip_weights[all_off_chip_pw_s_weigh
         get_layer_specs_from_index(layer_index, current_layer_specs);
         if (layer_index != -1)
         {
-            seml_engines::fill_layer_dw_weights_off_chip(off_chip_dw_weights, seml_dw_weights_3x3,
-                                                         dw_layers_weights_offsets[layer_index],
-                                                         current_layer_specs.layer_depth);
+            //printf(">>>>> %d\n", layer_index);
+            if (current_layer_specs.conv_layer_type == DW_CONV)
+            {
+                seml_engines::fill_layer_dw_weights_off_chip(off_chip_dw_weights, seml_dw_weights_3x3,
+                                                             dw_layers_weights_offsets[layer_index],
+                                                             current_layer_specs.layer_depth);
+            }
             seml_engines::fill_fused_scales(off_chip_fused_scales,
                                             seml_fused_scales_buffer,
                                             layers_fused_parameters_offsets[layer_index],
@@ -106,11 +112,13 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
 {
 #pragma HLS INLINE off
 
+#if SOFT_PIPELINE
     fms_dt switching_buffer[MAX_TMP_FMS_BUFFER_DEPTH][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH];
     // fms_dt tmp_channels2[max_tmp_fms_size];
 
 #pragma HLS ARRAY_PARTITION variable = switching_buffer type = complete dim = 2
 #pragma HLS ARRAY_PARTITION variable = switching_buffer type = complete dim = 3
+#endif
 
     // #if DEBUGGING
     //     fill_layer_input("/media/SSD2TB/fareed/wd/my_repos/DL_Benchmarking/tflite_scripts_imgnt_accuracy_and_weight_extraction/mob_v2/fms/ifms_2.txt",
@@ -147,6 +155,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
 
     for (int starting_row = 0; starting_row < seml_num_iters; starting_row++)
     {
+#pragma HLS PIPELINE off
         if (last_layer_in_hard_pipe_index <= first_conv_layer_specs.layer_index)
         {
             const int first_layer_index = first_conv_layer_specs.layer_index;
@@ -176,7 +185,8 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
         // printf("******************\n");
 
         // printf("%d\n", last_layer_in_pipe_index);
-        if (SOFT_PIPELINE && soft_pipeline_len > 0)
+#if SOFT_PIPELINE
+        if (soft_pipeline_len > 0)
         {
             run_layers_in_range(off_chip_weights,
                                 off_chip_dw_weights,
@@ -221,6 +231,7 @@ void seml(fms_grp_dt input_image[input_image_depth * input_image_num_fms_groups_
                 }
             }
         }
+#endif
     }
 
 #if DEBUGGING
