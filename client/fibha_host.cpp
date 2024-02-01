@@ -48,11 +48,15 @@
 #include <chrono>
 #include <dirent.h>
 
+#include <unistd.h>
+
 #include "fibha_host.h"
 #include "../../fiba_v2_kernels/src/model_components/model/headers/mob_v2_layers_specs.h"
 #include "client/fpga_cpp_fc.h"
 #include "tests/fpga_test_utils.h"
 #include "client/fpga_prepare_weights_and_inputs.h"
+
+#include "power_measurement.h"
 
 #define OCL_CHECK(error, call)                                                                   \
     call;                                                                                        \
@@ -139,6 +143,9 @@ int main(int argc, char* argv[]) {
 	cl::Context context;
 	cl::CommandQueue q;
 	cl::Kernel krnl_fibha_v2;
+//	cl_event timing_event;
+//	cl_int fiba_kernel_status;
+//	cl::Event timing_event_wrapper(timing_event);
 	cl::Program program;
 	std::vector < cl::Platform > platforms;
 	bool found_device = false;
@@ -216,7 +223,7 @@ int main(int argc, char* argv[]) {
 	OCL_CHECK(err,
 			cl::Buffer buffer_model_config_list(context, CL_MEM_WRITE_ONLY, 2 * max_conv_layers * sizeof(int), NULL, &err));
 	OCL_CHECK(err,
-				cl::Buffer buffer_soft_pipe_specs(context, CL_MEM_WRITE_ONLY, max_conv_layers * sizeof(struct soft_pipe_specs_struct), NULL, &err));
+			cl::Buffer buffer_soft_pipe_specs(context, CL_MEM_WRITE_ONLY, max_conv_layers * sizeof(struct soft_pipe_specs_struct), NULL, &err));
 //	OCL_CHECK(err,
 //				cl::Buffer buffer_soft_pipeline_len(context, CL_MEM_WRITE_ONLY, sizeof(int), NULL, &err));
 	OCL_CHECK(err,
@@ -276,6 +283,10 @@ int main(int argc, char* argv[]) {
 			ptr_first_lunch = (int*)q.enqueueMapBuffer (buffer_first_lunch , CL_TRUE , CL_MAP_READ , 0, sizeof(int*), NULL, NULL, &err));
 	//*********************************************************************************************************************8
 
+	int verbose = 0;
+	ina inas[30];
+	populate_ina_array(inas);
+
 	DIR *dir;
 	int img_count = 0;
 
@@ -329,8 +340,8 @@ int main(int argc, char* argv[]) {
 			err = q.enqueueMigrateMemObjects( { buffer_model_config_list },
 					0/* 0 means from host*/));
 	OCL_CHECK(err,
-				err = q.enqueueMigrateMemObjects( { buffer_soft_pipe_specs },
-						0/* 0 means from host*/));
+			err = q.enqueueMigrateMemObjects( { buffer_soft_pipe_specs },
+					0/* 0 means from host*/));
 
 //	OCL_CHECK(err,
 //				err = q.enqueueMigrateMemObjects( { buffer_soft_pipeline_len },
@@ -365,7 +376,20 @@ int main(int argc, char* argv[]) {
 			auto start = high_resolution_clock::now();
 #endif
 			//Launch the Kernel
-			OCL_CHECK(err, err = q.enqueueTask(krnl_fibha_v2));
+			OCL_CHECK(err,
+					err = q.enqueueTask(krnl_fibha_v2));
+
+//			do {
+//				fiba_kernel_status = clGetEventInfo(timing_event, CL_EVENT_COMMAND_EXECUTION_STATUS,
+//						sizeof(cl_int), NULL, NULL);
+//				usleep(1000);
+//				cout << fiba_kernel_status << " " << CL_COMPLETE << "\n";
+//			} while (CL_COMPLETE != fiba_kernel_status);
+//
+			for (int jjj = 0; jjj < 3; jjj++) {
+				run_bm(verbose, inas);
+				usleep(1000);
+			}
 			OCL_CHECK(err, q.finish());
 #if PROFILING
 			auto stop = high_resolution_clock::now();
@@ -449,11 +473,11 @@ int main(int argc, char* argv[]) {
 			err = q.enqueueUnmapMemObject(buffer_model_config_list,
 					ptr_model_config_list));
 	OCL_CHECK(err,
-				err = q.enqueueUnmapMemObject(buffer_soft_pipe_specs,
-						ptr_soft_pipe_specs));
+			err = q.enqueueUnmapMemObject(buffer_soft_pipe_specs,
+					ptr_soft_pipe_specs));
 //	OCL_CHECK(err,
 //				err = q.enqueueUnmapMemObject(buffer_soft_pipeline_len, ptr_soft_pipeline_len));
-		OCL_CHECK(err, err = q.finish());
+	OCL_CHECK(err, err = q.finish());
 	OCL_CHECK(err,
 			err = q.enqueueUnmapMemObject(buffer_first_lunch, ptr_first_lunch));
 	OCL_CHECK(err, err = q.finish());
