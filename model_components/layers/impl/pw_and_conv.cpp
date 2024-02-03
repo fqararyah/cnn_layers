@@ -2,7 +2,7 @@
 #include "../headers/pw_conv.h"
 #include "../headers/conv_utils.h"
 
-#if FIBHA_VERSION == 2
+#if FIBHA_VERSION == 1
 
 void pw_and_conv_eng(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d][max_filter_area],
                      fms_dt channels_tile[CHANNELS_PIPELINE_DEPTH][CHANNELS_TILE_HEIGHT_PADDED][CHANNELS_TILE_WIDTH_PADDED],

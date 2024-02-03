@@ -11,7 +11,7 @@ void pw_write_results_tile(
 	fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
 	pss_f_dt tmp_channels_scaled_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 	int starting_d,
-	const int in_tile_h,
+	const int num_of_ofm_tiles_h,
 	const int in_tile_w,
 	layer_specs layer_specs_struct)
 {
@@ -22,9 +22,8 @@ void pw_write_results_tile(
 	if (tile_indx >= 0)
 	{
 		const int num_of_tiles_processed_in_parallel = pw_conv_parallelism_out / pw_tile_d;
-		const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ofm_tiles_h * layer_specs_struct.layer_num_of_ofm_tiles_w;
+		const int num_of_tiles_hw = num_of_ofm_tiles_h * layer_specs_struct.layer_num_of_ofm_tiles_w;
 		const int layer_num_filters = layer_specs_struct.layer_num_fils;
-		const int strides = layer_specs_struct.strides;
 
 	pw_write_results_tile_o_d:
 		for (int tile_offset = 0;
@@ -49,33 +48,15 @@ void pw_write_results_tile(
 							 t_w < pw_tile_w; t_w++)
 						{
 #pragma HLS UNROLL
-							if (t_h >= pw_tile_h / strides || t_w >= pw_tile_w / strides)
-							{
-								break;
-							}
 							fms_dt scaled_val = result_tile_scaled[tile_offset * pw_tile_d + t_d][t_h][t_w];
 
 							if (layer_specs_struct.write_to_result_or_channels)
 							{
-								if (strides == 1)
-								{
-									result[current_tile_indx][t_h][t_w] = scaled_val;
-								}
-								else
-								{
-									result[current_tile_indx][t_h + in_tile_h][t_w + in_tile_w] = scaled_val;
-								}
+								result[current_tile_indx][t_h][t_w] = scaled_val;
 							}
 							if (layer_specs_struct.write_to_tmp)
 							{ // 2: expansion
-								if (strides == 1)
-								{
-									tmp_channels[current_tile_indx][t_h][t_w] = scaled_val;
-								}
-								else
-								{
-									tmp_channels[current_tile_indx][t_h + in_tile_h][t_w + in_tile_w] = scaled_val;
-								}
+								tmp_channels[current_tile_indx][t_h][t_w] = scaled_val;
 							}
 						}
 					}
@@ -89,6 +70,7 @@ void scale_pss_tile(fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WI
 					pss_dt pss_tile[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					fms_dt result_tile_scaled[pw_conv_parallelism_out][pw_tile_h][pw_tile_w],
 					layer_specs layer_specs_struct,
+					const int num_of_ofm_tiles_h,
 					const fused_scales_dt fused_scales_buffer[],
 					const relu_6_fused_scales_dt relu_6_fused_scale,
 					const biases_dt fused_zero_points_buffer[],
@@ -118,8 +100,10 @@ void scale_pss_tile(fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WI
 		const fms_dt ofm_zero_point = layer_specs_struct.layer_ofms_zero_point;
 		const scales_dt ofm_scale = layer_specs_struct.layer_ofms_scale;
 
-		const int num_of_tiles_hw = layer_specs_struct.layer_num_of_ofm_tiles_h * layer_specs_struct.layer_num_of_ofm_tiles_w;
+		const int num_of_tiles_hw = num_of_ofm_tiles_h * layer_specs_struct.layer_num_of_ofm_tiles_w;
 		const int layer_relu = layer_specs_struct.layer_activation;
+
+		const bool fused_with_add = layer_specs_struct.fused_with_add;
 
 	pss_to_fms_tile_o_d:
 		for (int tile_offset = 0;
@@ -143,7 +127,7 @@ void scale_pss_tile(fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WI
 					{
 #pragma HLS UNROLL
 						fms_dt scaled_val;
-						if (layer_specs_struct.fused_with_add == 0)
+						if (fused_with_add == 0)
 						{
 #if MODEL_ACTIVATION == RELU6
 							scaled_val =
@@ -190,7 +174,8 @@ void scale_pss_tile(fms_dt tmp_channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WI
 							// 	pss_tile[tile_offset * pw_tile_d + t_d][t_h][t_w],
 							// 	normalization, layer_relu);
 #if ADD_LAYER_ACTIVATION == 0
-							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal + add_layer_zero_point;
+							pss_f_dt addition_result = (scaled_tmp + tmp_channels_scaled_val) * add_layer_scale_reciprocal +
+													   add_layer_zero_point;
 							// if(layer_specs_struct.layer_index == 10 && tile_offset * pw_tile_d + t_d == 0){
 							// 	printf("(%f + %f) * %f + %d \n",
 							// 			(float)fused_scale, (float)ofm_scale, (float)fused_scale*ofm_scale, (int)add_layer_zero_point);
@@ -255,11 +240,7 @@ pw_conv_eng_loops:
 			for (int t_w = 0; t_w < PW_PARALLELISM_W; t_w++)
 			{
 #pragma HLS UNROLL
-				if (t_h >= pw_tile_h / strides || t_w >= pw_tile_w / strides)
-				{
-					break;
-				}
-				results_tile[f_d][t_h][t_w] += channels_tile[t_h * strides][t_w * strides] * weights_tile[f_d][starting_conv_d];
+				results_tile[f_d][t_h][t_w] += channels_tile[t_h][t_w] * weights_tile[f_d][starting_conv_d];
 			}
 		}
 	}
@@ -348,11 +329,9 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 
 #pragma HLS INLINE off
 
-	const int num_of_tiles_h = (to_produce_row_count + pw_tile_h - 1) / pw_tile_h; //layer_specs_struct.layer_num_of_ifm_tiles_h;
+	const int num_of_ofm_tiles_h = (to_produce_row_count + pw_tile_h - 1) / pw_tile_h; // layer_specs_struct.layer_num_of_ifm_tiles_h;
 	const int num_of_tiles_w = layer_specs_struct.layer_num_of_ifm_tiles_w;
-	const int num_of_ofm_tiles_h = layer_specs_struct.layer_num_of_ofm_tiles_h;
 	const int num_of_ofm_tiles_w = layer_specs_struct.layer_num_of_ofm_tiles_w;
-	const int num_of_tiles_hw = num_of_tiles_h * num_of_tiles_w;
 	const int num_of_ofm_tiles_hw = num_of_ofm_tiles_h * num_of_ofm_tiles_w;
 	const int strides = layer_specs_struct.strides;
 
@@ -373,11 +352,9 @@ void do_conv(weights_dt weights_tile[pw_conv_parallelism_out][max_conv_d],
 	copy_pss_tile(results_tile, prev_results_tile); // just to initialize with zeros
 
 	int prev_tile_index = -1;
-	int in_tile_h = -1;
-	int in_tile_w = -1;
 
 conv2_ith_loop:
-	for (int t_in_h = 0; t_in_h < num_of_tiles_h; t_in_h++)
+	for (int t_in_h = 0; t_in_h < num_of_ofm_tiles_h; t_in_h++)
 	{
 		// ############width loop##############
 	conv2_itw_loop:
@@ -388,29 +365,25 @@ conv2_ith_loop:
 			int tile_index = td_o * (pw_conv_parallelism_out / pw_tile_d) * num_of_ofm_tiles_hw + (t_in_h / strides) * num_of_ofm_tiles_w +
 							 (t_in_w / strides);
 
-			scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
-						   layer_specs_struct, fused_scales_buffer,
-						   relu_6_fused_scale, fused_zero_points_buffer,
-						   prev_tile_index,
-						   td_o * pw_conv_parallelism_out);
-
 			pw_conv_pipeline(channels, result, weights_tile, results_tile,
 							 layer_specs_struct,
 							 td_o, t_in_h, t_in_w, model_configs_list);
+			scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
+						   layer_specs_struct, num_of_ofm_tiles_h, fused_scales_buffer,
+						   relu_6_fused_scale, fused_zero_points_buffer,
+						   prev_tile_index,
+						   td_o * pw_conv_parallelism_out);
 			copy_pss_tile(results_tile, prev_results_tile);
 			pw_write_results_tile(scaled_result_tile, result,
 								  prev_tile_index, tmp_channels, tmp_channels_scaled_tile,
 								  td_o * pw_conv_parallelism_out,
-								  in_tile_h, in_tile_w,
+								  num_of_ofm_tiles_h, 0,
 								  layer_specs_struct);
-
-			in_tile_w = (t_in_w % strides) * (CHANNELS_TILE_WIDTH / strides);
-			in_tile_h = (t_in_h % strides) * (CHANNELS_TILE_HEIGHT / strides);
 			prev_tile_index = tile_index;
 		}
 	}
 	scale_pss_tile(tmp_channels, prev_results_tile, scaled_result_tile,
-				   layer_specs_struct, fused_scales_buffer,
+				   layer_specs_struct, num_of_ofm_tiles_h, fused_scales_buffer,
 				   relu_6_fused_scale, fused_zero_points_buffer,
 				   prev_tile_index,
 				   td_o * pw_conv_parallelism_out);
@@ -418,8 +391,8 @@ conv2_ith_loop:
 	pw_write_results_tile(scaled_result_tile, result,
 						  prev_tile_index, tmp_channels, tmp_channels_scaled_tile,
 						  td_o * pw_conv_parallelism_out,
-						  strides == 1 ? 0 : (CHANNELS_TILE_HEIGHT / strides),
-						  strides == 1 ? 0 : (CHANNELS_TILE_WIDTH / strides),
+						  num_of_ofm_tiles_h,
+						  0,
 						  layer_specs_struct);
 }
 
@@ -484,15 +457,15 @@ conv2_ots_loop:
 												  layer_specs_struct.layer_depth,
 												  to_fill_weight_groups_in_a_pass);
 #endif
-// if(layer_specs_struct.layer_index == 3 && td_o == 0){
-// 	printf("%d\n\n", to_fill_weight_groups_in_a_pass);
-// 			for(int ii =0;ii<8;ii++){
-// 				for(int jj=0;jj<16;jj++){
-// 					printf("%d, ", (int)weights_tile[ii][jj]);
-// 				}
-// 				printf("\n");
-// 			}
-// 		}
+		// if(layer_specs_struct.layer_index == 3 && td_o == 0){
+		// 	printf("%d\n\n", to_fill_weight_groups_in_a_pass);
+		// 			for(int ii =0;ii<8;ii++){
+		// 				for(int jj=0;jj<16;jj++){
+		// 					printf("%d, ", (int)weights_tile[ii][jj]);
+		// 				}
+		// 				printf("\n");
+		// 			}
+		// 		}
 		do_conv(weights_tile, channels, result, tmp_channels, layer, layer_specs_struct, fused_scales,
 				relu_6_fused_scale, fused_zero_points, td_o, model_configs_list, to_produce_row_count, starting_row);
 #if HW == _FPGA

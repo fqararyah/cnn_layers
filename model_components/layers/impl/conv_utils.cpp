@@ -617,6 +617,12 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
         for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
         {
 #pragma HLS PIPELINE
+
+            if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit))
+            {
+                break;
+            }
+
             const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
             const int bottom_tile_index = main_tile_index + num_of_ifm_tiles_w;
             const int top_tile_index = main_tile_index - num_of_ifm_tiles_w;
@@ -669,6 +675,11 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
         for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
         {
 #pragma HLS PIPELINE
+
+            if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit))
+            {
+                break;
+            }
 
             const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
             const int right_tile_index = main_tile_index + 1;
@@ -723,6 +734,12 @@ void fill_fms_tile(fms_dt channels[][CHANNELS_TILE_HEIGHT][CHANNELS_TILE_WIDTH],
     for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
     {
 #pragma HLS PIPELINE
+
+        if (tile_in_d + d >= layer_ifms_depth || (model_configs_list_limit != 0 && tile_in_d + d >= model_configs_list_limit))
+        {
+            break;
+        }
+        
         // fill body
         const int main_tile_index = (tile_in_d + d) * num_of_tiles_hw + tile_in_h * num_of_ifm_tiles_w + tile_in_w;
         for (int h = 0; h < CHANNELS_TILE_HEIGHT; h++)

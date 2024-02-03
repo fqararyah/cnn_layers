@@ -227,7 +227,7 @@ void seml_engines::fill_dw_weights_tile(const dw_weights_dt weights[][3 * 3],
 
     const int absolute_current_layer_weights_offset =
         current_dw_layer_weights_offset + starting_d;
-    for (int d = 0; d < dw_pipeline_depth; d++)
+    for (int d = 0; d < CHANNELS_PIPELINE_DEPTH; d++)
     {
 #pragma HLS PIPELINE
         for (int i = 0; i < 3 * 3; i++)
@@ -448,11 +448,11 @@ void seml_engines::dw_conv_3x3(const dw_weights_dt weights[][3 * 3],
                  dw_pipeline_in_d < num_of_iterations_d;
                  dw_pipeline_in_d++)
             {
-                const int tile_in_d = dw_pipeline_in_d * (dw_pipeline_depth / dw_tile_d);
+                const int tile_in_d = dw_pipeline_in_d * (CHANNELS_PIPELINE_DEPTH / dw_tile_d);
                 const int prev_tile_in_d = (dw_pipeline_in_d - 1) >= 0
-                                               ? (dw_pipeline_in_d - 1) * (dw_pipeline_depth / dw_tile_d)
+                                               ? (dw_pipeline_in_d - 1) * (CHANNELS_PIPELINE_DEPTH / dw_tile_d)
                                                : 0;
-                const int next_tile_in_d = (dw_pipeline_in_d + 1) * (dw_pipeline_depth / dw_tile_d);
+                const int next_tile_in_d = (dw_pipeline_in_d + 1) * (CHANNELS_PIPELINE_DEPTH / dw_tile_d);
 
                 if (dw_pipeline_in_d % 2 == 0)
                 {
