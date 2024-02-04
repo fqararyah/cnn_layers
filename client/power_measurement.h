@@ -59,6 +59,6 @@ void populate_ina_array(ina *inas);
 
 void list_inas(ina *inas);
 
-void run_bm(int verbose, ina *inas);
+void run_bm(float &plpower, float &pspower, float &mgtpower, ina *inas);
 
 #endif

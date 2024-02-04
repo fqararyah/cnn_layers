@@ -142,15 +142,12 @@ void list_inas(ina *inas) {
 	return;
 }
 
-void run_bm(int verbose, ina *inas) {
+void run_bm(float &plpower, float &pspower, float &mgtpower, ina *inas) {
 	FILE *ina_ptr;
 
 	struct timespec time_s;
 
 	char buffer[20];
-	float plpower = 0;
-	float pspower = 0;
-	float mgtpower = 0;
 
 	int counter = 0;
 	while (1) {
@@ -161,14 +158,14 @@ void run_bm(int verbose, ina *inas) {
 
 		inas[counter].power = atoi(buffer);
 
-		if (verbose == 1) {
-			printf("Power # %d = %d \n", counter, atoi(buffer));
-		}
+//		if (verbose == 1) {
+//			printf("Power # %d = %d \n", counter, atoi(buffer));
+//		}
 
 		if (inas[counter].last) {
 
-			clock_gettime(CLOCK_REALTIME, &time_s);
-			printf("%ld,", GET_NS(time_s));
+//			clock_gettime(CLOCK_REALTIME, &time_s);
+//			printf("%ld,", GET_NS(time_s));
 
 			pspower = (float) (inas[VCCPSINTFP].power + inas[VCCINTLP].power
 					+ inas[VCCPSAUX].power + inas[VCCPSPLL].power

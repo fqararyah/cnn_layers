@@ -20,8 +20,8 @@ import layer_specs_gen
 print('layer_specs_gen done!')
 import general_specs_gen
 print('general_specs_gen done!')
-# import fibha_seml_engine_calls_gen
-# print('fibha_seml_engine_calls_gen done!')
+import fibha_seml_engine_calls_gen
+print('fibha_seml_engine_calls_gen done!')
 import dw_weights_gen
 print('dw_weights_gen done!')
 import biases_and_quantization_gen_v3

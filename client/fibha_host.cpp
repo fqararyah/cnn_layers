@@ -69,6 +69,7 @@ static const std::string error_message = "Error: Result mismatch:\n"
 		"i = %d CPU result = %d Device result = %d\n";
 
 #define PROFILING 1
+#define POWER_READS_PER_RUN 2
 
 using namespace std::chrono;
 
@@ -76,18 +77,27 @@ int main(int argc, char* argv[]) {
 
 	int images_to_test = 1000;
 	int soft_pipeline_len = 0;
+	int measure_power = 0;
+	int log_preditions_to_console = 0;
 
 	//TARGET_DEVICE macro needs to be passed from gcc command line
 	if (argc < 2) {
 		std::cout << "Usage: " << argv[0]
-				<< " <xclbin> number_of_images_to_test" << std::endl;
+				<< " <xclbin> measure_power number_of_images_to_test log_preditions_to_console"
+				<< std::endl;
 		return EXIT_FAILURE;
 	}
 	if (argc >= 3) {
-		images_to_test = atoi(argv[2]);
+		measure_power = atoi(argv[2]);
 	}
 	if (argc >= 4) {
-		soft_pipeline_len = atoi(argv[3]);
+		images_to_test = atoi(argv[3]);
+	}
+	if (argc >= 5) {
+		log_preditions_to_console = atoi(argv[4]);
+	}
+	if (argc >= 6) {
+		soft_pipeline_len = atoi(argv[5]);
 	}
 
 	//*********************************************************************************************************************
@@ -283,14 +293,15 @@ int main(int argc, char* argv[]) {
 			ptr_first_lunch = (int*)q.enqueueMapBuffer (buffer_first_lunch , CL_TRUE , CL_MAP_READ , 0, sizeof(int*), NULL, NULL, &err));
 	//*********************************************************************************************************************8
 
-	int verbose = 0;
 	ina inas[30];
 	populate_ina_array(inas);
+	float plpower, pspower, mgtpower;
+	float total_plpower = 0.0f , total_pspower = 0.0f, total_mgtpower = 0.0f;
 
 	DIR *dir;
 	int img_count = 0;
 
-	if (argc >= 5) {
+	if (argc >= 7) {
 		//read_model_configs(argv[3], ptr_model_config_list);
 		cout << "model_configs_list is filled *************\n";
 	} else {
@@ -351,6 +362,8 @@ int main(int argc, char* argv[]) {
 			err = q.enqueueMigrateMemObjects( { buffer_first_lunch },
 					0/* 0 means from host*/));
 
+	float total_fibha_time = 0.0, total_fc_time = 0.0;
+
 	if ((dir = opendir(input_images_folder.c_str())) != NULL) {
 		/* print all the files and directories within directory */
 		while ((ent = readdir(dir)) != NULL) {
@@ -376,8 +389,7 @@ int main(int argc, char* argv[]) {
 			auto start = high_resolution_clock::now();
 #endif
 			//Launch the Kernel
-			OCL_CHECK(err,
-					err = q.enqueueTask(krnl_fibha_v2));
+			OCL_CHECK(err, err = q.enqueueTask(krnl_fibha_v2));
 
 //			do {
 //				fiba_kernel_status = clGetEventInfo(timing_event, CL_EVENT_COMMAND_EXECUTION_STATUS,
@@ -386,15 +398,21 @@ int main(int argc, char* argv[]) {
 //				cout << fiba_kernel_status << " " << CL_COMPLETE << "\n";
 //			} while (CL_COMPLETE != fiba_kernel_status);
 //
-			for (int jjj = 0; jjj < 3; jjj++) {
-				run_bm(verbose, inas);
-				usleep(1000);
+			if (measure_power) {
+				for (int jjj = 0; jjj < POWER_READS_PER_RUN; jjj++) {
+					run_bm(plpower, pspower, mgtpower, inas);
+					total_plpower += plpower;
+					total_pspower += pspower;
+					total_mgtpower += mgtpower;
+					usleep(1000);
+				}
 			}
 			OCL_CHECK(err, q.finish());
 #if PROFILING
 			auto stop = high_resolution_clock::now();
-			auto duration = duration_cast<microseconds>(stop - start);
-			cout << "fibha duration" << duration.count() << endl;
+			auto duration = duration_cast<milliseconds>(stop - start);
+			//cout << "fibha duration" << duration.count() << endl;
+			total_fibha_time += duration.count();
 #endif
 			// The result of the previous kernel execution will need to be retrieved in
 			// order to view the results. This call will transfer the data from FPGA to
@@ -425,8 +443,9 @@ int main(int argc, char* argv[]) {
 					layer_68_fc_specs);
 #if PROFILING
 			stop = high_resolution_clock::now();
-			duration = duration_cast<microseconds>(stop - start);
-			cout << "fc_duration: " << duration.count() << endl;
+			duration = duration_cast<milliseconds>(stop - start);
+			total_fc_time += duration.count();
+			//cout << "fc_duration: " << duration.count() << endl;
 #endif
 //			while (*ready_to_receive_a_new_input_ptr != 1) {
 //				std::cout << "not ready yet!\n";
@@ -449,9 +468,22 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 
-	cout << "\n" << img_count << "\n";
+	cout << "num_of_tested_images::" << img_count << "::\n";
+	cout<< "fibha_average_time::" << total_fibha_time / img_count<<"::\n";
+	cout<< "fc_average_time::" << total_fc_time / img_count<<"::\n";
+	if(measure_power){
+		cout<<"pl_power_val::"<< total_plpower / (POWER_READS_PER_RUN * img_count)<<"::\n";
+		cout<<"ps_power_val::"<< total_pspower / (POWER_READS_PER_RUN * img_count)<<"::\n";
+		cout<<"mgt_power_val::"<< total_mgtpower / (POWER_READS_PER_RUN * img_count)<<"::\n";
+	}
+
 	predictions_file_content = predictions_file_content.substr(0,
 			predictions_file_content.length() - 1) + ']';
+	if (log_preditions_to_console) {
+		cout << "predictions_json::" << predictions_file_content <<"::\n";
+	}
+	cout<< "EOF::";
+
 	save_predictions(predictions_file, predictions_file_content);
 
 	OCL_CHECK(err, err = q.enqueueUnmapMemObject(buffer_weights, ptr_weights));

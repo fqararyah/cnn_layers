@@ -1,5 +1,6 @@
 class general_model_specs:
     def __init__(self, max_conv_d = 0,
+                 max_num_filters = 0,
                 max_filter_hw_dim = 3,
                 max_std_conv_filter_hw_dim = 3,
                 max_padding_lr = 0, 
@@ -13,7 +14,9 @@ class general_model_specs:
                 all_dw_off_chip_weights = 0,
                 all_off_chip_fused_scales_zps = 0,
                 all_off_chip_pw_s_weights = 0):
+        
         self.max_conv_d = max_conv_d
+        self.max_num_filters = max_num_filters
         self.max_filter_hw_dim = max_filter_hw_dim
         self.max_std_conv_filter_hw_dim = max_std_conv_filter_hw_dim
         self.max_padding_lr = max_padding_lr
@@ -35,6 +38,7 @@ class general_model_specs:
             f.write('#ifndef MODEL_GENERAL_SPECS_HEADER\n')
             f.write('#define MODEL_GENERAL_SPECS_HEADER\n\n')
             f.write('const int max_conv_d = {} / alpha;\n'.format(self.max_conv_d)),
+            f.write('const int max_num_filters = {} / alpha;\n'.format(self.max_num_filters)),
             f.write('const int max_filter_hw_dim = {};\n'.format(self.max_filter_hw_dim))
             f.write('const int max_std_conv_filter_hw_dim = {};\n'.format(self.max_std_conv_filter_hw_dim))
             f.write('const int max_padding_lr = {};\n'.format(self.max_padding_lr))

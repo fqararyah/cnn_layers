@@ -160,6 +160,7 @@ while layer_index < len(model_dag):
             )
             
         general_model_specs_inst.max_conv_d = max(general_model_specs_inst.max_conv_d, ifms_depth)
+        general_model_specs_inst.max_num_filters = max(general_model_specs_inst.max_num_filters, num_filters)
         general_model_specs_inst.max_padding_lr = max(
             general_model_specs_inst.max_padding_lr, padding_left + padding_right
         )
