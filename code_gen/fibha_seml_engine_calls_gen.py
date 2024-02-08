@@ -45,7 +45,8 @@ fill_zps_block = 'seml_engines::fill_fused_zero_points(off_chip_fused_zero_point
 
 pw_block = 'pw_conv(off_chip_weights, {}, {}, tmp_channels, *i*, layer_*i*_pw_specs,\n\
                             seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,\n\
-                            model_configs_list, layer_*i*_pw_specs.layer_ofm_height);\n'
+                            model_configs_list, layer_*i*_pw_specs.layer_ofm_height);\n\
+                            even_odd = 1 - even_odd;\n'
 
 # 'fill_dw_layer_weights(seml_dw_weights_3x3, dw_weights_buffer, layer_*i*_dw_depth, layer_*i*_dw_filter_size, layer_*i*_dw_filter_size);\n\
 fill_dw_weights_block = 'seml_engines::fill_layer_dw_weights_off_chip\n\
@@ -54,7 +55,8 @@ dw_block = \
     'seml_engines::dw_conv_3x3(seml_dw_weights_3x3, {}, {}, *i*, layer_*i*_dw_specs,\n\
                                               seml_fused_scales_buffer, relu_6_fused_scales, seml_fused_zero_points_buffer,\n\
                                               model_configs_list,\n\
-                                            layer_*i*_dw_specs.layer_ofm_height, 0);\n'
+                                            layer_*i*_dw_specs.layer_ofm_height, 0);\n\
+                                            even_odd = 1 - even_odd;\n'
 
 debugging_dump_ofms_block = '#if DEBUGGING\n dump_layer_output("{}",\n {}, {});\n#endif\n'
 debugging_fill_layer_input_block = '#if DEBUGGING\n fill_layer_input("{}",\n {}, {});\n#endif\n'

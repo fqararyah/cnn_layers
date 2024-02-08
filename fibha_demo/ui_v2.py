@@ -68,10 +68,10 @@ layout = [
     [sg.Button('Run Accelerator', font=font2, expand_x=True), sg.Button('Close', font=font2)],
     [
         sg.Frame('Outputs',[
-         [sg.Text('Latency (ms):', font= font, expand_x=True), sg.Text('', font= font, key='out_latenct', background_color='#777777', size=9)],
-         [sg.Text('Energy (J / inference):', font= font, expand_x=True), sg.Text('', font= font, key='out_energy', background_color='#777777', size=9)],
-         [sg.Text('Top1 accuracy:', font= font, expand_x=True), sg.Text('', font= font, key='out_top1_accuracy', background_color='#777777', size=9)],
-         [sg.Text('Top5 accuracy:', font= font, expand_x=True), sg.Text('', font= font, key='out_top5_accuracy', background_color='#777777', size=9)],
+         [sg.Text('Latency (ms):', font= font, expand_x=True), sg.Text('', font= font, key='out_latenct', background_color='#eeeeee', size=9)],
+         [sg.Text('Energy (J / inference):', font= font, expand_x=True), sg.Text('', font= font, key='out_energy', background_color='#eeeeee', size=9)],
+         [sg.Text('Top1 accuracy:', font= font, expand_x=True), sg.Text('', font= font, key='out_top1_accuracy', background_color='#eeeeee', size=9)],
+         [sg.Text('Top5 accuracy:', font= font, expand_x=True), sg.Text('', font= font, key='out_top5_accuracy', background_color='#eeeeee', size=9)],
          ], font=font2, expand_x=True)
     ] 
 ]
