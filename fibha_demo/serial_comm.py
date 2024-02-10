@@ -7,7 +7,7 @@
 
 # cmd = "cd /media/sd-mmcblk0p1\r"
 # ser.write(cmd.encode())
-# cmd="./fiba_v2 ./binary_container_1.xclbin 1 10 1\r"
+# cmd="./fiba_v2 ./binary_container_1.xclbin 1 100 1\r"
 # ser.write(cmd.encode())
 
 # response = ''
@@ -27,6 +27,8 @@
 #         with open(predictions_dir + 'out.json', 'w') as f:
 #             f.write(splits[i + 1])
 #         break
+#     else:
+#         print(splits[i])
 
 # os.system("python3 ./evaluate_accuracy.py ./out/predictions/out.json")
 
@@ -51,29 +53,36 @@ def evaluate_accuracy():
 
     return out_dict
 
-font = ("Arial", 15)
+font = ("Arial", 12)
 font2 = ("Arial", 15, 'bold')
 sg.theme('Dark2')   # Add a touch of color
 # All the stuff inside your window.
-layout = [ 
-    [
-        sg.Frame('Inputs',[
+
+toprow = ['Accelerator', 'Latency (ms)', 'Energy (J / inference)', 'Top1 accuracy', 'Top5 accuracy']
+rows = []
+results_table = sg.Table(values=rows, headings=toprow,
+   justification='center',
+   key='results_table',
+   expand_x=True,
+   expand_y=True,
+   font=font)
+
+input_frame = sg.Frame('Inputs',[
             [sg.Text('Accelerator:', font= font), sg.Combo(['FiBHA', 'FiBHA small', 'Baseline', 'Baseline small'], font=font,
-                        expand_x=True, readonly=False, key='fibha_combo')],
-            [sg.Text('Number of Images:', font= font), sg.InputText(font=font, size=15)],
-            [sg.Checkbox('Report Energy', True, font= font, key='check1'),
+                        readonly=False, key='fibha_combo'),
+            sg.Text('Number of Images:', font= font), sg.InputText(font=font, size=4),
+            sg.Checkbox('Report Energy', True, font= font, key='check1'),
              sg.Checkbox('Report accuracy', True, font= font, key='check2')] 
-        ], font=font2)
-    ],
-    [sg.Button('Run Accelerator', font=font2, expand_x=True), sg.Button('Close', font=font2)],
-    [
-        sg.Frame('Outputs',[
-         [sg.Text('Latency (ms):', font= font, expand_x=True), sg.Text('', font= font, key='out_latenct', background_color='#777777', size=9)],
-         [sg.Text('Energy (J / inference):', font= font, expand_x=True), sg.Text('', font= font, key='out_energy', background_color='#777777', size=9)],
-         [sg.Text('Top1 accuracy:', font= font, expand_x=True), sg.Text('', font= font, key='out_top1_accuracy', background_color='#777777', size=9)],
-         [sg.Text('Top5 accuracy:', font= font, expand_x=True), sg.Text('', font= font, key='out_top5_accuracy', background_color='#777777', size=9)],
-         ], font=font2, expand_x=True)
-    ] 
+        ], font=font2, expand_x=True)
+
+buttons_frame = sg.Button('Run Accelerator', font=font2, expand_x=True), sg.Button('Close', font=font2)
+
+output_frame = sg.Frame('Outputs',[[results_table]], font=font2, expand_x=True)
+
+layout = [ 
+    [input_frame],
+    [buttons_frame],
+    [output_frame]
 ]
 
 # Create the Window
@@ -83,8 +92,8 @@ while True:
     event, values = window.read()
     if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
         break
-    window['out_top1_accuracy'].update(evaluate_accuracy()['top1'])
-    window['out_top5_accuracy'].update(evaluate_accuracy()['top5'])
+    rows.append([values['fibha_combo'],0, 0, evaluate_accuracy()['top1'], evaluate_accuracy()['top5']])
+    results_table.update(rows)
 
 window.close()
 
