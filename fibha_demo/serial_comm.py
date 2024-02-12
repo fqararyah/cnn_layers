@@ -1,6 +1,7 @@
 import subprocess
 import PySimpleGUI as sg
 import serial
+import sys
 
 dump_dir = './out/raw/'
 predictions_dir = './out/predictions/'
@@ -10,41 +11,55 @@ response_keys = {'predictions': ['predictions_json'],
                  'power': ['pl_power_val', 'ps_power_val', 'mgt_power_val'],
                 }
 
-def run_command(report_energy, num_of_images, report_accuracy):
-    ser = serial.Serial('/dev/ttyUSB0', 115200)
+accelerator_binaries = {'FiBHA': 'fibha_full', 'FiBHA small': 'fibha_quarter',
+                         'Baseline': 'seml_full', 'Baseline small': 'seml_quarter'}
 
-    cmd = "cd /media/sd-mmcblk0p1\r"
-    ser.write(cmd.encode())
-    cmd = "./fiba_v2 ./binary_container_1.xclbin {} {} {}\r".format(report_energy, num_of_images, report_accuracy)
-    print(cmd)
-    # ser.write(cmd.encode())
-
-    # response = ''
-    # while True:
-    #     response_line = str(ser.readline())
-    #     if '::EOF::' in str(response_line):
-    #         break
+def run_command(accelerator_instance, report_energy, num_of_images, report_accuracy):
+    
+    connected_to_board = False
+    if len(sys.argv) == 2:
+        connected_to_board = bool(sys.argv[1])
         
-    #     response += response_line
+    if connected_to_board:
+        ser = serial.Serial('/dev/ttyUSB0', 115200)
 
-    # with open(dump_dir + 'out.txt', 'w') as f:
-    #     f.write(response)
+        cmd = "cd /media/sd-mmcblk0p1\r"
+        ser.write(cmd.encode())
 
-def read_response():
+        # cmd = "./{} ./binary_container_{}.xclbin {} {} {}\r".format(accelerator_instance, accelerator_instance,
+        #                                                             str(report_energy), str(num_of_images), str(report_accuracy))
+        #cmd = './' + accelerator_instance + ' ./binary_container_' + accelerator_instance + '.xclbin ' + str(report_energy) + ' ' + str(num_of_images) + ' ' + str(report_accuracy) +'\r'
+        cmd = './fibha_full ./binary_container_fibha_full.xclbin 1 100 1\r'
+        print(cmd)
+        ser.write(cmd.encode())
+
+        response = ''
+        while True:
+            response_line = str(ser.readline())
+            print(response)
+            if '::EOF::' in str(response_line):
+                break
+            
+            response += response_line
+
+        with open(dump_dir + accelerator_instance + '_out.txt', 'w') as f:
+            f.write(response)
+
+def read_response(accelerator_instance):
     response = ''
-    with open(dump_dir + 'out.txt', 'r') as f:
+    with open(dump_dir + accelerator_instance + '_out.txt', 'r') as f:
         for line in f:
             response += line
 
     return response
 
-def extract_data(response):
+def extract_data(response, accelerator_instance):
     running_time = 0
     energy = 0
     splits = response.split(delimiter)
     for i in range(len(splits) - 1):
         if splits[i] in response_keys['predictions']:
-            with open(predictions_dir + 'predictions.json', 'w') as f:
+            with open(predictions_dir + accelerator_instance + '_predictions.json', 'w') as f:
                 f.write(splits[i + 1])
             break
         elif splits[i] in response_keys['time']:
@@ -57,9 +72,9 @@ def extract_data(response):
     return [running_time, energy]
 
 
-def evaluate_accuracy():
+def evaluate_accuracy(accelerator_instance):
     out_dict = {'top1': '', 'top5': ''}
-    proc = subprocess.Popen(['python3', 'evaluate_accuracy.py',  './out/predictions/predictions.json'], 
+    proc = subprocess.Popen(['python3', 'evaluate_accuracy.py',  './out/predictions/' + accelerator_instance + '_predictions.json'], 
                             stdout=subprocess.PIPE, stderr=subprocess.STDOUT)
 
     script_output = str(proc.communicate()[0]).lower().replace(' ', '')
@@ -119,20 +134,21 @@ while True:
         break
     
     accelerator_instance = values['fibha_combo']
+    accelerator_instance_binary = accelerator_binaries[accelerator_instance]
     report_energy = values['energy_check']
     report_accuracy = values['accuracy_check']
     num_of_images = values['num_images_combo']
 
-    run_command(int(report_energy), num_of_images, int(report_accuracy))
+    run_command(accelerator_instance_binary, int(report_energy), num_of_images, int(report_accuracy))
 
     accuracy_vals = {}
     experiment_row = []
     experiment_row.append(accelerator_instance)
 
-    response = read_response()
-    running_time, energy = extract_data(response)
+    response = read_response(accelerator_instance_binary)
+    running_time, energy = extract_data(response, accelerator_instance_binary)
     
-    experiment_row.append(running_time)
+    experiment_row.append(int(running_time))
     
     if report_energy:
         experiment_row.append(energy)
@@ -140,7 +156,7 @@ while True:
         experiment_row.append('_')
 
     if report_accuracy:
-        accuracy_vals = evaluate_accuracy()
+        accuracy_vals = evaluate_accuracy(accelerator_instance_binary)
         experiment_row.append(accuracy_vals['top1'])
         experiment_row.append(accuracy_vals['top5'])
     else:
