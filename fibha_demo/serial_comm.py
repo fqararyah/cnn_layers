@@ -14,7 +14,33 @@ response_keys = {'predictions': ['predictions_json'],
 accelerator_binaries = {'FiBHA': 'fibha_full', 'FiBHA small': 'fibha_quarter',
                          'Baseline': 'seml_full', 'Baseline small': 'seml_quarter'}
 
-def run_command(accelerator_instance, report_energy, num_of_images, report_accuracy):
+loading_is_done = 'PetaLinux 2021.2 zcu102_base_sw ttyPS0'
+
+def load_accelerator(accelerator_instance):
+    connected_to_board = False
+    if len(sys.argv) == 2:
+        connected_to_board = bool(sys.argv[1])
+    if connected_to_board:
+        ser = serial.Serial('/dev/ttyUSB0', 115200)
+
+        cmd = "cd /media/sd-mmcblk0p1\r"
+        ser.write(cmd.encode())
+        cmd = "ls\r"
+        ser.write(cmd.encode())
+        while True:
+            response_line = str(ser.readline())
+            print(str(response_line))
+            if 'is_loaded.txt' in str(response_line): 
+                if accelerator_instance + '_is_loaded.txt' not in str(response_line):
+                    cmd = "./replace_bin.sh " + accelerator_instance + '\r'
+                    #print('YES')
+                    ser.write(cmd.encode())
+                break
+            if loading_is_done in str(response_line):
+                print("GGGGGGGGG")
+                break
+
+def run_accelerator(accelerator_instance, report_energy, num_of_images, report_accuracy):
     
     connected_to_board = False
     if len(sys.argv) == 2:
@@ -25,18 +51,18 @@ def run_command(accelerator_instance, report_energy, num_of_images, report_accur
 
         cmd = "cd /media/sd-mmcblk0p1\r"
         ser.write(cmd.encode())
-
+                    
         # cmd = "./{} ./binary_container_{}.xclbin {} {} {}\r".format(accelerator_instance, accelerator_instance,
         #                                                             str(report_energy), str(num_of_images), str(report_accuracy))
         #cmd = './' + accelerator_instance + ' ./binary_container_' + accelerator_instance + '.xclbin ' + str(report_energy) + ' ' + str(num_of_images) + ' ' + str(report_accuracy) +'\r'
-        cmd = './fibha_full ./binary_container_fibha_full.xclbin 1 100 1\r'
+        cmd = './fiba_v2 ./binary_container_1.xclbin 1 {} 1\r'.format(num_of_images)
         print(cmd)
         ser.write(cmd.encode())
 
         response = ''
         while True:
             response_line = str(ser.readline())
-            print(response)
+            print(response_line)
             if '::EOF::' in str(response_line):
                 break
             
@@ -109,13 +135,15 @@ input_frame = sg.Frame('Inputs',[
              sg.Combo(['FiBHA', 'FiBHA small', 'Baseline', 'Baseline small'], font=font,
                         readonly=False, key='fibha_combo', default_value='FiBHA'),
             sg.Text('Number of Images:', font= font), 
-            sg.Combo([100, 200, 400, 800, 1000], font=font,
+            sg.Combo([100, 200, 300, 400], font=font,
                         readonly=False, key='num_images_combo', default_value=100),
             sg.Checkbox('Report Energy', True, font= font, key='energy_check'),
              sg.Checkbox('Report accuracy', True, font= font, key='accuracy_check')] 
         ], font=font2, expand_x=True)
 
-buttons_frame = [sg.Button('Run Accelerator', font=font2, expand_x=True), sg.Button('Close', font=font2)]
+buttons_frame = [sg.Button('Load_Accelerator', font=font2),
+                 sg.Button('Run_Accelerator', font=font2, expand_x=True), 
+                 sg.Button('Close', font=font2)]
 
 output_frame = sg.Frame('Outputs',[[results_table]], font=font2, expand_x=True)
 
@@ -130,41 +158,42 @@ window = sg.Window('Window Title', layout)
 # Event Loop to process "events" and get the "values" of the inputs
 while True:
     event, values = window.read()
-    if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
-        break
-    
     accelerator_instance = values['fibha_combo']
     accelerator_instance_binary = accelerator_binaries[accelerator_instance]
     report_energy = values['energy_check']
     report_accuracy = values['accuracy_check']
     num_of_images = values['num_images_combo']
+    if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
+        break
+    elif event == 'Load_Accelerator':
+        load_accelerator(accelerator_instance_binary)
+    elif event == 'Run_Accelerator':
+        run_accelerator(accelerator_instance_binary, int(report_energy), num_of_images, int(report_accuracy))
 
-    run_command(accelerator_instance_binary, int(report_energy), num_of_images, int(report_accuracy))
+        accuracy_vals = {}
+        experiment_row = []
+        experiment_row.append(accelerator_instance)
 
-    accuracy_vals = {}
-    experiment_row = []
-    experiment_row.append(accelerator_instance)
+        response = read_response(accelerator_instance_binary)
+        running_time, energy = extract_data(response, accelerator_instance_binary)
+        
+        experiment_row.append(int(running_time))
+        
+        if report_energy:
+            experiment_row.append(energy)
+        else:
+            experiment_row.append('_')
 
-    response = read_response(accelerator_instance_binary)
-    running_time, energy = extract_data(response, accelerator_instance_binary)
-    
-    experiment_row.append(int(running_time))
-    
-    if report_energy:
-        experiment_row.append(energy)
-    else:
-        experiment_row.append('_')
+        if report_accuracy:
+            accuracy_vals = evaluate_accuracy(accelerator_instance_binary)
+            experiment_row.append(accuracy_vals['top1'])
+            experiment_row.append(accuracy_vals['top5'])
+        else:
+            experiment_row.append('_')
+            experiment_row.append('_')
 
-    if report_accuracy:
-        accuracy_vals = evaluate_accuracy(accelerator_instance_binary)
-        experiment_row.append(accuracy_vals['top1'])
-        experiment_row.append(accuracy_vals['top5'])
-    else:
-        experiment_row.append('_')
-        experiment_row.append('_')
-
-    rows.append(experiment_row)
-    results_table.update(rows)
+        rows.append(experiment_row)
+        results_table.update(rows)
 
 window.close()
 
