@@ -14,10 +14,10 @@ response_keys = {'predictions': ['predictions_json'],
 accelerator_binaries = {'FiBHA': 'fibha_full', 'FiBHA small': 'fibha_quarter',
                          'Baseline': 'seml_full', 'Baseline small': 'seml_quarter'}
 
-loading_is_done = 'PetaLinux 2021.2 zcu102_base_sw ttyPS0'
-
 def load_accelerator(accelerator_instance):
     connected_to_board = False
+    booting_started_str = 'the system is going down for reboot now'
+    loading_is_done_str = 'PetaLinux 2021.2 zcu102_base_sw ttyPS0'
     if len(sys.argv) == 2:
         connected_to_board = bool(sys.argv[1])
     if connected_to_board:
@@ -27,6 +27,9 @@ def load_accelerator(accelerator_instance):
         ser.write(cmd.encode())
         cmd = "ls\r"
         ser.write(cmd.encode())
+        loading_executed = False
+        booting_started = False
+        booting_done = False
         while True:
             response_line = str(ser.readline())
             print(str(response_line))
@@ -34,10 +37,14 @@ def load_accelerator(accelerator_instance):
                 if accelerator_instance + '_is_loaded.txt' not in str(response_line):
                     cmd = "./replace_bin.sh " + accelerator_instance + '\r'
                     #print('YES')
-                    ser.write(cmd.encode())
-                break
-            if loading_is_done in str(response_line):
-                print("GGGGGGGGG")
+                    if not loading_executed:
+                        loading_executed = True
+                        ser.write(cmd.encode()) 
+                else:
+                    break
+            if booting_started_str in response_line.lower():
+                booting_started = True
+            if booting_started and (loading_is_done_str.lower() in response_line.lower()):
                 break
 
 def run_accelerator(accelerator_instance, report_energy, num_of_images, report_accuracy):
