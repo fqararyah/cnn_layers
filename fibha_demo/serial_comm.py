@@ -62,7 +62,7 @@ def run_accelerator(accelerator_instance, report_energy, num_of_images, report_a
         # cmd = "./{} ./binary_container_{}.xclbin {} {} {}\r".format(accelerator_instance, accelerator_instance,
         #                                                             str(report_energy), str(num_of_images), str(report_accuracy))
         #cmd = './' + accelerator_instance + ' ./binary_container_' + accelerator_instance + '.xclbin ' + str(report_energy) + ' ' + str(num_of_images) + ' ' + str(report_accuracy) +'\r'
-        cmd = './fiba_v2 ./binary_container_1.xclbin 1 {} 1\r'.format(num_of_images)
+        cmd = './run_acc.sh {} {} {}\r'.format(report_energy, num_of_images, report_accuracy)
         print(cmd)
         ser.write(cmd.encode())
 
