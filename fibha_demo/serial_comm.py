@@ -2,6 +2,7 @@ import subprocess
 import PySimpleGUI as sg
 import serial
 import sys
+import time
 
 dump_dir = './out/raw/'
 predictions_dir = './out/predictions/'
@@ -20,6 +21,7 @@ def load_accelerator(accelerator_instance):
     loading_is_done_str = 'PetaLinux 2021.2 zcu102_base_sw ttyPS0'
     if len(sys.argv) == 2:
         connected_to_board = bool(sys.argv[1])
+    print('>>>>>', connected_to_board)
     if connected_to_board:
         ser = serial.Serial('/dev/ttyUSB0', 115200)
 
@@ -46,6 +48,8 @@ def load_accelerator(accelerator_instance):
                 booting_started = True
             if booting_started and (loading_is_done_str.lower() in response_line.lower()):
                 break
+    else:
+        time.sleep(5)
 
 def run_accelerator(accelerator_instance, report_energy, num_of_images, report_accuracy):
     
@@ -128,7 +132,7 @@ font2 = ("Arial", 15, 'bold')
 sg.theme('Dark2')   # Add a touch of color
 # All the stuff inside your window.
 
-toprow = ['Accelerator', 'Latency (ms)', 'Energy (J / inference)', 'Top1 accuracy', 'Top5 accuracy']
+toprow = ['Accelerator', '# Images', 'Latency (ms)', 'Energy (J / inference)', 'Top1 accuracy', 'Top5 accuracy']
 rows = []
 results_table = sg.Table(values=rows, headings=toprow,
    justification='center',
@@ -148,8 +152,8 @@ input_frame = sg.Frame('Inputs',[
              sg.Checkbox('Report accuracy', True, font= font, key='accuracy_check')] 
         ], font=font2, expand_x=True)
 
-buttons_frame = [sg.Button('Load_Accelerator', font=font2),
-                 sg.Button('Run_Accelerator', font=font2, expand_x=True), 
+buttons_frame = [sg.Button('Load Accelerator', font=font2),
+                 sg.Button('Run Accelerator', font=font2, expand_x=True), 
                  sg.Button('Close', font=font2)]
 
 output_frame = sg.Frame('Outputs',[[results_table]], font=font2, expand_x=True)
@@ -172,14 +176,17 @@ while True:
     num_of_images = values['num_images_combo']
     if event == sg.WIN_CLOSED or event == 'Close': # if user closes window or clicks cancel
         break
-    elif event == 'Load_Accelerator':
+    elif event == 'Load Accelerator':
+        sg.popup_auto_close('Rebooting the System!\nThis will take one minute.', title='Rebooting', font=font2)
         load_accelerator(accelerator_instance_binary)
-    elif event == 'Run_Accelerator':
+        sg.popup_auto_close('Done Rebooting!', title='Done', font=font2)
+    elif event == 'Run Accelerator':
         run_accelerator(accelerator_instance_binary, int(report_energy), num_of_images, int(report_accuracy))
 
         accuracy_vals = {}
         experiment_row = []
         experiment_row.append(accelerator_instance)
+        experiment_row.append(num_of_images)
 
         response = read_response(accelerator_instance_binary)
         running_time, energy = extract_data(response, accelerator_instance_binary)
